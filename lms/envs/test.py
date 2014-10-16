@@ -587,3 +587,15 @@ COURSE_CATALOG_API_URL = 'https://catalog.example.com/api/v1'
 COMPREHENSIVE_THEME_DIRS = [REPO_ROOT / "themes", REPO_ROOT / "common/test"]
 
 LMS_ROOT_URL = "http://localhost:8000"
+
+
+############# Performance Profiler #################
+# Note: We've added profiler support to this configuration in order
+# to enable analysis when running unit tests.  (outputs to console)
+FEATURES['PROFILER'] = False
+if FEATURES.get('PROFILER'):
+    INSTALLED_APPS += ('profiler',)
+    MIDDLEWARE_CLASSES += (
+        'profiler.middleware.HotshotProfilerMiddleware',
+        'profiler.middleware.CProfileProfilerMiddleware',
+    )
