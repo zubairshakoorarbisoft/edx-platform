@@ -65,6 +65,10 @@ git+https://github.com/hmarr/django-debug-toolbar-mongo.git@b0686a76f1ce3532088c
 # NOTE (CCB): This must remain. There is one commit on the upstream repo that has not been released to PyPI.
 git+https://github.com/edx/rfc6266.git@v0.0.5-edx#egg=rfc6266==0.0.5-edx
 
+# For swagger docs for APIs
+git+https://github.com/marcgibbons/django-rest-swagger.git@0.3.5
+git+https://github.com/yaml/pyyaml.git@3.10
+
 # Used for testing
 git+https://github.com/edx/lettuce.git@0.2.20.002#egg=lettuce==0.2.20.002
 git+https://github.com/edx/pa11ycrawler.git@a963bbb7c4f861b24b5f66bfc5259d3fa207cca8#egg=pa11ycrawler
