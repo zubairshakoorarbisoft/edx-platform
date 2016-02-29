@@ -886,6 +886,56 @@ def handle_xblock_callback_noauth(request, course_id, usage_id, handler, suffix=
         return _invoke_xblock_handler(request, course_id, usage_id, handler, suffix, course=course)
 
 
+
+
+PRIVATE_KEY = """-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAxqesAvT5WBq/qXWKebztD5XmJqUZM4EIo85tvl8v40qPY1q7
+y2uRG4J1qkaByowtzL5V2Q0BT1zD7iOsMfIK1yY2kDnkAMRNStuETbsYtR9sxEqP
+lIBbi177VNdp+Xq1sMJKahVHMC+WLY9IV+pAt+DXElgPv3xLwSAHzD74AgdVFfH1
+SFgHpEtdKLataxfuo150cEu1lE8q7o32pzMclalOnJhtaxOuTaJaKoE6AmVq91tm
+csPvcs6KnjpYEz10ksS+8ng61rxOsE68QlXmU+ypt8KPG/dyeH/QGUc/jGUd0RRm
+WNSezXMvEcfvOSLrj2M5j51lzyDQEVeERQOiSQIDAQABAoIBACjhsq19Gp8+Cflm
+vhOlhKezcoS7bz9BK7UCM2V9E07UNkP9FS6cuWUO6QYcsnMre/VpqiMb4QwjDBNC
+9hnlNMPoEkyGDVz3CO0B1e1lNoV3rRuMOJYYAD7jUhe4qQ91aFSy9ztzm43YDTDd
+DsdA5wawV7Jnuv3uJ2zcGZ63yrQnz1CoofAwZd8aG8I7xuJ34eQ2MB/EZcevaypy
+aFdId2ygghvXz0Nof8ZVD2NSoXcPRL/BynCzvrISRfrrnTmeZsMd/UfrC6L63n7u
+86/bRi9U4/WsoLbLDROS22wt9PfExLnzWeIBP/LnLP+h9takoLwo6E2pmq3huWhj
+uG/3Gy0CgYEA5CHjtjS59+d1s0mQdJ+Gwwq7W6+QUW0kgrJoJLsWU/Pyjpe+HGYG
+nlSXSp0+0cU6C1LA6/v5GPj058DxVOu4JZhp2fC3873KfqS5K1Y5vhmMC8Sce17q
+ltXvhCry7tYRLXJ6d7zXle1LZixUoEb+rFzJkJAhIVhtjxURtGRdsPcCgYEA3uv4
+e4kHbNmhKgHuh1W8ZxnD1TzIkqLwhTxwx+zRgnmqK6eoDVjz3u2yECIItU8EUFf3
+Rh+WyJ+HS2oFE2EAxjVQxR6/i8CKEje1BnUxeOfiLWsUfjv2mG33yEudbaA4QUEC
+EPpEBoADV7b8LFTfhxCN/zMxK9EZpvNUgbzbtr8CgYAOl5xZK0Y59TQyI6J50zpr
+f2Q8mR5CFxkewwqmTtE+zXvWYx5l8qC5v+9tdmFuSY9M6h4s+hEU59fCezT0mZ9N
+yFH8/sjFbn5lW2P8wacv4bJzjj/0JD4dJ9IKQjUH0emHXqs2vX2MuYD5KBzBo8jm
+fYjnFlEIMP/RByf6wfC8QQKBgE1c5yc4LvN/s4a4lOcyweel8WiXZ6Q8F+ylRR6c
++TimsH/l91RqgnfjVeBzb0I84epgHNihLdsCQhnR+WD4USR4bEd8nE0LzN71pkVP
+dpPXJY9NkhcdCD9uKofAdioNaHh87xKlR+ZZls9iGbHo4oolHKJsSaxDLPvbhoBf
+4oBRAoGAU3qOKBKzGXmolVe4MvOySpB8hGXVclJxiTcmd2ceMNPcFFVJLFZkoEB9
+hoMr2QXhi6qWs3wOltM0qCtkWaVXf6hLIIbzH39DJAURawWU+jBVBigKpKNZDNg3
+bcpGqkph8suIl0uV6IAo1NitfpOcMfHR2+4dLUvVZg+zrF8eyoI=
+-----END RSA PRIVATE KEY-----"""
+
+PUBLIC_KEY = (
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDGp6wC9PlYGr+pdYp5vO0PleYmpRkzgQ"
+    "ijzm2+Xy/jSo9jWrvLa5EbgnWqRoHKjC3MvlXZDQFPXMPuI6wx8grXJjaQOeQAxE1K24RN"
+    "uxi1H2zESo+UgFuLXvtU12n5erWwwkpqFUcwL5Ytj0hX6kC34NcSWA+/fEvBIAfMPvgCB1"
+    "UV8fVIWAekS10otq1rF+6jXnRwS7WUTyrujfanMxyVqU6cmG1rE65NoloqgToCZWr3W2Zy"
+    "w+9yzoqeOlgTPXSSxL7yeDrWvE6wTrxCVeZT7Km3wo8b93J4f9AZRz+MZR3RFGZY1J7Ncy"
+    "8Rx+85IuuPYzmPnWXPINARV4RFA6JJ dormsbee@Daves-MBP"
+)
+
+import jwt
+
+class AuthService(object):
+
+    def encode_token(self, data):
+        return jwt.encode(data, PRIVATE_KEY, algorithm='RS512')
+
+    def decode_token(self, token):
+        return jwt.decode(token, PUBLIC_KEY, algorithms=['RS512', 'RS384', 'RS256'])
+
+
 def handle_xblock_callback(request, course_id, usage_id, handler, suffix=None):
     """
     Generic view for extensions. This is where AJAX calls go.
@@ -901,13 +951,25 @@ def handle_xblock_callback(request, course_id, usage_id, handler, suffix=None):
     not accessible by the user, or the module raises NotFoundError. If the
     module raises any other error, it will escape this function.
     """
-    if not request.user.is_authenticated():
+    # Many things wrong here -- should check JWT, should pass in header, should
+    # have better name
+    xblock_auth_token = request.GET.get('auth_token')
+
+    print "TOKEN: {}".format(xblock_auth_token)
+    print "Whole Request GET: {}".format(request.GET)
+
+    if not request.user.is_authenticated() and not xblock_auth_token:
         return HttpResponse('Unauthenticated', status=403)
 
     try:
         course_key = CourseKey.from_string(course_id)
     except InvalidKeyError:
         raise Http404("Invalid location")
+
+    if xblock_auth_token:
+        auth_svc = AuthService()
+        auth_info = auth_svc.decode_token(xblock_auth_token)
+        request.user = User.objects.get(username=auth_info['u'])
 
     with modulestore().bulk_operations(course_key):
         try:

@@ -323,6 +323,9 @@ class HtmlDescriptor(HtmlBlock, XmlDescriptor, EditingDescriptor):  # pylint: di
         else:
             xblock_body["content"] = html_body
         xblock_body["content_type"] = "Text"
+
+        print xblock_body
+
         return xblock_body
 
 
