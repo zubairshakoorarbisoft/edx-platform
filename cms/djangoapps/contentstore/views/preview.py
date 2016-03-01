@@ -40,12 +40,14 @@ from .helpers import render_from_lms
 from contentstore.views.access import get_user_role
 from xblock_config.models import StudioConfig
 
+from django.contrib.auth.models import User
+from xb_auth.service import AuthTokenService
+
 __all__ = ['preview_handler']
 
 log = logging.getLogger(__name__)
 
 
-@login_required
 def preview_handler(request, usage_key_string, handler, suffix=''):
     """
     Dispatch an AJAX action to an xblock
@@ -54,6 +56,16 @@ def preview_handler(request, usage_key_string, handler, suffix=''):
     handler: The handler to execute
     suffix: The remainder of the url to be passed to the handler
     """
+    xblock_auth_token = request.GET.get('auth_token')
+
+    if not request.user.is_authenticated() and not xblock_auth_token:
+        return HttpResponse('Unauthenticated', status=403)
+
+    if xblock_auth_token:
+        auth_svc = AuthTokenService()
+        auth_info = auth_svc.decode_token(xblock_auth_token)
+        request.user = User.objects.get(username=auth_info['u'])
+
     usage_key = UsageKey.from_string(usage_key_string)
 
     descriptor = modulestore().get_item(usage_key)
@@ -218,6 +230,7 @@ def _preview_module_system(request, descriptor, field_data):
             "library_tools": LibraryToolsService(modulestore()),
             "settings": SettingsService(),
             "user": DjangoXBlockUserService(request.user),
+            "auth_token": AuthTokenService(),
         },
     )
 
