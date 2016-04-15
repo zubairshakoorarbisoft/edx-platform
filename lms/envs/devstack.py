@@ -60,33 +60,36 @@ DJFS = {
 
 ################################ DEBUG TOOLBAR ################################
 
-INSTALLED_APPS += ('debug_toolbar', 'debug_toolbar_mongo')
-MIDDLEWARE_CLASSES += (
-    'django_comment_client.utils.QueryCountDebugMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
-INTERNAL_IPS = ('127.0.0.1',)
+# INSTALLED_APPS += ('debug_toolbar', 'debug_toolbar_mongo')
+# MIDDLEWARE_CLASSES += (
+#     'django_comment_client.utils.QueryCountDebugMiddleware',
+#     'debug_toolbar.middleware.DebugToolbarMiddleware',
+# )
+# INTERNAL_IPS = ('127.0.0.1',)
+#
+# DEBUG_TOOLBAR_PANELS = (
+#     'debug_toolbar.panels.versions.VersionsPanel',
+#     'debug_toolbar.panels.timer.TimerPanel',
+#     'debug_toolbar.panels.settings.SettingsPanel',
+#     'debug_toolbar.panels.headers.HeadersPanel',
+#     'debug_toolbar.panels.request.RequestPanel',
+#     'debug_toolbar.panels.sql.SQLPanel',
+#     'debug_toolbar.panels.signals.SignalsPanel',
+#     'debug_toolbar.panels.logging.LoggingPanel',
+#     'debug_toolbar_mongo.panel.MongoDebugPanel',
+#     # ProfilingPanel has been intentionally removed for default devstack.py
+#     # runtimes for performance reasons. If you wish to re-enable it in your
+#     # local development environment, please create a new settings file
+#     # that imports and extends devstack.py.
+# )
+#
+# DEBUG_TOOLBAR_CONFIG = {
+#     'SHOW_TOOLBAR_CALLBACK': 'lms.envs.devstack.should_show_debug_toolbar'
+# }
 
-DEBUG_TOOLBAR_PANELS = (
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar_mongo.panel.MongoDebugPanel',
-    # ProfilingPanel has been intentionally removed for default devstack.py
-    # runtimes for performance reasons. If you wish to re-enable it in your
-    # local development environment, please create a new settings file
-    # that imports and extends devstack.py.
-)
-
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': 'lms.envs.devstack.should_show_debug_toolbar'
-}
-
+MIDDLEWARE_CLASSES += ('pyinstrument.middleware.ProfilerMiddleware',)
+PYINSTRUMENT_PROFILE_DIR = 'profiles'
+PYINSTRUMENT_USE_SIGNAL = False
 
 def should_show_debug_toolbar(_):
     return True  # We always want the toolbar on devstack regardless of IP, auth, etc.

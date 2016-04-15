@@ -203,8 +203,9 @@ class CacheService(object):
     def __init__(self, request_cache=None):
         self._request_cache = request_cache or {}
 
-    def get_cache(name):
+    def get_cache(self, name):
         return LocalCache(self._request_cache)
+
 
 class LocalCache(object):
 

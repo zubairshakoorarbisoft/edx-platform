@@ -71,9 +71,9 @@ class DiscussionModule(DiscussionFields, XModule):
 
         if user:
             course_key = self.course_id
-            can_create_comment = has_permission(user, "create_comment", course_key)
-            can_create_subcomment = has_permission(user, "create_sub_comment", course_key)
-            can_create_thread = has_permission(user, "create_thread", course_key)
+            can_create_comment = self.has_permission(user, "create_comment", course_key)
+            can_create_subcomment = self.has_permission(user, "create_sub_comment", course_key)
+            can_create_thread = self.has_permission(user, "create_thread", course_key)
         else:
             can_create_comment = False
             can_create_subcomment = False
@@ -97,13 +97,13 @@ class DiscussionModule(DiscussionFields, XModule):
         """
         cache = self.runtime.service(self, 'cache').get_cache("DiscussionModule")
         cache_key = (user, course_id, permission)
-        if cache_key in cache:
-            return cache[cache_key]
+        cached_answer = cache.get(cache_key)
+        if cached_answer is not None:
+            return cached_answer
 
-        cache[cache_key] = any(
-            role.has_permission(permission) for role in user.roles.filter(course_id=course_id)
-        )
-        return cache[cache_key]
+        has_perm = any(role.has_permission(permission) for role in user.roles.filter(course_id=course_id))
+        cache.set(cache_key, has_perm)
+        return has_perm
 
 
 class DiscussionDescriptor(DiscussionFields, MetadataOnlyEditingDescriptor, RawDescriptor):
