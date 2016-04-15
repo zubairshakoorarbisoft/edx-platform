@@ -6,6 +6,8 @@ import re
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
+import request_cache
+
 from badges.service import BadgingService
 from badges.utils import badges_enabled
 from openedx.core.djangoapps.user_api.course_tag import api as user_course_tag_api
@@ -196,13 +198,32 @@ class UserTagsService(object):
             self.runtime.course_id, key, value
         )
 
+class CacheService(object):
+
+    def __init__(self, request_cache=None):
+        self._request_cache = request_cache or {}
+
+    def get_cache(name):
+        return LocalCache(self._request_cache)
+
+class LocalCache(object):
+
+    def __init__(self, cache_dict):
+        self._cache_dict = cache_dict
+
+    def get(self, key):
+        return self._cache_dict.get(key)
+
+    def set(self, key, value):
+        self._cache_dict[key] = value
+
 
 class LmsModuleSystem(ModuleSystem):  # pylint: disable=abstract-method
     """
     ModuleSystem specialized to the LMS
     """
     def __init__(self, **kwargs):
-        request_cache_dict = RequestCache.get_request_cache().data
+        request_cache_dict = request_cache.get_cache('lms_module_system_partitions')
         services = kwargs.setdefault('services', {})
         services['fs'] = xblock.reference.plugins.FSService()
         services['i18n'] = ModuleI18nService
@@ -218,6 +239,8 @@ class LmsModuleSystem(ModuleSystem):  # pylint: disable=abstract-method
         services['user_tags'] = UserTagsService(self)
         if badges_enabled():
             services['badging'] = BadgingService(course_id=kwargs.get('course_id'), modulestore=store)
+        services['cache'] = CacheService(request_cache.get_cache("xblock_cache_service"))
+
         self.request_token = kwargs.pop('request_token', None)
         super(LmsModuleSystem, self).__init__(**kwargs)
 

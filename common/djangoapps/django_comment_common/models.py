@@ -7,6 +7,8 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.utils.translation import ugettext_noop
 
+import request_cache
+
 from student.models import CourseEnrollment
 
 from xmodule.modulestore.django import modulestore
@@ -86,13 +88,21 @@ class Role(models.Model):
 
     def has_permission(self, permission):
         """Returns True if this role has the given permission, False otherwise."""
+        has_perm_cache = request_cache.get_cache("forum_permissions")
+        cache_key = (self.course_id, self.name, permission)
+        if cache_key in has_perm_cache:
+            return has_perm_cache[cache_key]
+
         course = modulestore().get_course(self.course_id)
         if course is None:
             raise ItemNotFoundError(self.course_id)
+
         if permission_blacked_out(course, {self.name}, permission):
+            has_perm_cache[cache_key] = False
             return False
 
-        return self.permissions.filter(name=permission).exists()
+        has_perm_cache[cache_key] = self.permissions.filter(name=permission).exists()
+        return has_perm_cache[cache_key]
 
 
 class Permission(models.Model):

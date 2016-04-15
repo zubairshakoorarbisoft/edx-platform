@@ -47,16 +47,8 @@ class DiscussionFields(object):
     sort_key = String(scope=Scope.settings)
 
 
-def has_permission(user, permission, course_id):
-    """
-    Copied from django_comment_client/permissions.py because I can't import
-    that file from here. It causes the xmodule_assets command to fail.
-    """
-    return any(role.has_permission(permission)
-               for role in user.roles.filter(course_id=course_id))
-
-
 @XBlock.wants('user')
+@XBlock.wants('cache')
 class DiscussionModule(DiscussionFields, XModule):
     """
     XModule for discussion forums.
@@ -72,13 +64,13 @@ class DiscussionModule(DiscussionFields, XModule):
     js_module_name = "InlineDiscussion"
 
     def get_html(self):
-        course = self.get_course()
         user = None
         user_service = self.runtime.service(self, 'user')
         if user_service:
             user = user_service._django_user  # pylint: disable=protected-access
+
         if user:
-            course_key = course.id
+            course_key = self.course_id
             can_create_comment = has_permission(user, "create_comment", course_key)
             can_create_subcomment = has_permission(user, "create_sub_comment", course_key)
             can_create_thread = has_permission(user, "create_thread", course_key)
@@ -88,7 +80,6 @@ class DiscussionModule(DiscussionFields, XModule):
             can_create_thread = False
         context = {
             'discussion_id': self.discussion_id,
-            'course': course,
             'can_create_comment': json.dumps(can_create_comment),
             'can_create_subcomment': json.dumps(can_create_subcomment),
             'can_create_thread': can_create_thread,
@@ -99,12 +90,20 @@ class DiscussionModule(DiscussionFields, XModule):
             template = 'discussion/_discussion_module.html'
         return self.system.render_template(template, context)
 
-    def get_course(self):
+    def has_permission(self, user, permission, course_id):
         """
-        Return CourseDescriptor by course id.
+        Copied from django_comment_client/permissions.py because I can't import
+        that file from here. It causes the xmodule_assets command to fail.
         """
-        course = self.runtime.modulestore.get_course(self.course_id)
-        return course
+        cache = self.runtime.service(self, 'cache').get_cache("DiscussionModule")
+        cache_key = (user, course_id, permission)
+        if cache_key in cache:
+            return cache[cache_key]
+
+        cache[cache_key] = any(
+            role.has_permission(permission) for role in user.roles.filter(course_id=course_id)
+        )
+        return cache[cache_key]
 
 
 class DiscussionDescriptor(DiscussionFields, MetadataOnlyEditingDescriptor, RawDescriptor):
