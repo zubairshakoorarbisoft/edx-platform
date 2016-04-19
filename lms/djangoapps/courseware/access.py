@@ -18,6 +18,8 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.utils.timezone import UTC
 
+import request_cache
+
 from opaque_keys.edx.keys import CourseKey, UsageKey
 
 from xblock.core import XBlock
@@ -98,8 +100,16 @@ def has_ccx_coach_role(user, course_key):
                                             "user is a coach on CCX, you must provide key to CCX")
     return False
 
-
 def has_access(user, action, obj, course_key=None):
+    cache = request_cache.get_cache("courseware.access.has_access")
+    cache_key = (user, action, obj, course_key)
+    if cache_key in cache:
+        return cache_key
+
+    cache[cache_key] = _has_access(user, action, obj, course_key)
+    return cache[cache_key]
+
+def _has_access(user, action, obj, course_key):
     """
     Check whether a user has the access to do action on obj.  Handles any magic
     switching based on various settings.
@@ -129,6 +139,8 @@ def has_access(user, action, obj, course_key=None):
     Returns an AccessResponse object.  It is up to the caller to actually
     deny access in a way that makes sense in context.
     """
+    # print "uncached has_access"
+
     # Just in case user is passed in as None, make them anonymous
     if not user:
         user = AnonymousUser()
