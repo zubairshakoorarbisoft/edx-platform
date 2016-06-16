@@ -16,7 +16,7 @@ class _MediaSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
     Nested serializer to represent a media object.
     """
 
-    def __init__(self, uri_attribute, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.uri_attribute = kwargs.pop("uri_attribute", None)
         super(_MediaSerializer, self).__init__(*args, **kwargs)
 
