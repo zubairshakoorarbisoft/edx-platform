@@ -2074,6 +2074,10 @@ INSTALLED_APPS = (
 
     # Email marketing integration
     'email_marketing',
+
+    # Django-rest-swagger
+    'rest_framework_swagger',
+
 )
 
 # Migrations which are not in the standard module "migrations"
