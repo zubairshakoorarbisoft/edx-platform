@@ -17,8 +17,8 @@ class _MediaSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
     """
 
     def __init__(self, uri_attribute, *args, **kwargs):
+        self.uri_attribute = kwargs.pop("uri_attribute", None)
         super(_MediaSerializer, self).__init__(*args, **kwargs)
-        self.uri_attribute = uri_attribute
 
     uri = serializers.SerializerMethodField(source='*')
 
