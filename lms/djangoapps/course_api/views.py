@@ -188,35 +188,6 @@ class CourseListView(DeveloperErrorViewMixin, ListAPIView):
               }
             ]
 
-    ---
-
-    # YAML
-
-    omit_serializer: true
-
-    parameters:
-        - name: mobile
-          description: If specified, only visible `CourseOverview`
-            objects that are designated as mobile_available are returned.
-          required: false
-          type: string
-          paramType: query
-        - name: org
-          description: If specified, visible `CourseOverview` objects are filtered
-            such that only those belonging to the organization with the
-            provided org code (e.g., "HarvardX") are returned.
-            Case-insensitive.
-          required: false
-          type: string
-          paramType: query
-        - name: username
-          description: The username of the specified user whose visible courses we
-            want to see. The username is not required only if the API is
-            requested by an Anonymous user.
-          required: false
-          type: string
-          paramType: query
-
     """
 
     pagination_class = NamespacedPageNumberPagination
@@ -225,6 +196,36 @@ class CourseListView(DeveloperErrorViewMixin, ListAPIView):
     def get_queryset(self):
         """
         Return a list of courses visible to the user.
+        
+        ---
+
+        # YAML
+
+        omit_serializer: true
+
+        parameters:
+            - name: mobile
+              description: If specified, only visible `CourseOverview`
+                objects that are designated as mobile_available are returned.
+              required: false
+              type: string
+              paramType: query
+            - name: org
+              description: If specified, visible `CourseOverview` objects are filtered
+                such that only those belonging to the organization with the
+                provided org code (e.g., "HarvardX") are returned.
+                Case-insensitive.
+              required: false
+              type: string
+              paramType: query
+            - name: username
+              description: The username of the specified user whose visible courses we
+                want to see. The username is not required only if the API is
+                requested by an Anonymous user.
+              required: false
+              type: string
+              paramType: query
+        
         """
         form = CourseListGetForm(self.request.query_params, initial={'requesting_user': self.request.user})
         if not form.is_valid():
