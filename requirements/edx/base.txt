@@ -43,7 +43,9 @@ edx-drf-extensions==0.5.1
 edx-lint==0.4.3
 edx-django-oauth2-provider==1.1.1
 edx-django-sites-extensions==2.0.1
-edx-oauth2-provider==1.1.1
+#edx-oauth2-provider==1.1.1
+-e git+https://github.com/edx/edx-oauth2-provider.git@8c5a8e618350055d2ab0c624ca550ffb517f3913#egg=edx-oauth2-provider
+#-e ~/edx/app/edxapp/venvs/edxapp/src/edx-oauth2-provider#egg=edx-oauth2-provider
 edx-opaque-keys==0.2.1
 edx-organizations==0.4.1
 edx-rest-api-client==1.2.1
