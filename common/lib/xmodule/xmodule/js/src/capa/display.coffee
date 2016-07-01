@@ -65,6 +65,7 @@ class @Problem
   renderProgressState: =>
     detail = @el.data('progress_detail')
     status = @el.data('progress_status')
+    graded = @el.data('graded')
 
     # Render 'x/y point(s)' if student has attempted question
     if status != 'none' and detail? and detail.indexOf('/') > 0
@@ -84,6 +85,7 @@ class @Problem
         progress_template = ngettext("(%(num_points)s point possible)", "(%(num_points)s points possible)", possible)
         progress = interpolate(progress_template, {'num_points': possible}, true)
 
+    progress = progress + interpolate("; Graded=%(graded)s", {"graded": graded}, true)
     @$('.problem-progress').html(progress)
 
   updateProgress: (response) =>
