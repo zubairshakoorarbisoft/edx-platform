@@ -605,27 +605,33 @@ class CapaMixin(CapaFields):
         hint_index = hint_index % len(demand_hints)
 
         _ = self.runtime.service(self, "i18n").ugettext
-        hint_element = demand_hints[hint_index]
-        hint_text = get_inner_html_from_xpath(hint_element)
-        if len(demand_hints) == 1:
-            prefix = _('Hint: ')
-        else:
-            # Translators: e.g. "Hint 1 of 3" meaning we are showing the first of three hints.
-            prefix = _('Hint ({hint_num} of {hints_count}): ').format(hint_num=hint_index + 1,
-                                                                      hints_count=len(demand_hints))
+
+        counter = hint_index
+        total_text = ''
+        while counter >= 0:
+            if counter < hint_index:
+                total_text = total_text + "<br>"
+            if len(demand_hints) == 1:
+                prefix = _('Hint: ')
+            else:
+                # Translators: e.g. "Hint 1 of 3" meaning we are showing the first of three hints.
+                prefix = _('Hint ({hint_num} of {hints_count}): ').format(hint_num=counter + 1,
+                                                                              hints_count=len(demand_hints))
+            total_text = total_text + prefix + get_inner_html_from_xpath(demand_hints[counter])
+            counter = counter-1
 
         # Log this demand-hint request
         event_info = dict()
         event_info['module_id'] = self.location.to_deprecated_string()
         event_info['hint_index'] = hint_index
         event_info['hint_len'] = len(demand_hints)
-        event_info['hint_text'] = hint_text
+        event_info['hint_text'] = get_inner_html_from_xpath(demand_hints[hint_index])
         self.runtime.publish(self, 'edx.problem.hint.demandhint_displayed', event_info)
 
         # We report the index of this hint, the client works out what index to use to get the next hint
         return {
             'success': True,
-            'contents': prefix + hint_text,
+            'contents': total_text,
             'hint_index': hint_index
         }
 
