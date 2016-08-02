@@ -41,6 +41,12 @@ class WordCloudFields(object):
         scope=Scope.settings,
         default="Word cloud"
     )
+    instructions = String(
+        display_name=_("Instructions"),
+        help=_("Add instructions for this word cloud"),
+        scope=Scope.settings,
+        default="List your five favorite foods."
+    )
     num_inputs = Integer(
         display_name=_("Inputs"),
         help=_("Number of text boxes available for students to input words/sentences."),
@@ -239,7 +245,8 @@ class WordCloudModule(WordCloudFields, XModule):
             'element_class': self.location.category,
             'ajax_url': self.system.ajax_url,
             'num_inputs': self.num_inputs,
-            'submitted': self.submitted
+            'submitted': self.submitted,
+            'instructions': self.instructions
         }
         self.content = self.system.render_template('word_cloud.html', context)
         return self.content
