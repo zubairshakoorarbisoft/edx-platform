@@ -273,7 +273,6 @@
 
       .course-item {
         margin-bottom: $baseline;
-        padding-bottom: $baseline;
 
         .course-container {
           border: 2px solid $border-color-l4;
@@ -304,10 +303,10 @@
     @include transition(all 0.15s linear 0s);
     @include clearfix();
     @extend %ui-depth2;
-    margin: ($baseline/2);
 
     .details {
       @include clearfix();
+      padding: ($baseline/2);
 
       .wrapper-course-image {
         @include float(left);
@@ -372,7 +371,7 @@
       .course-title {
 
         a, span {
-          @extend %t-title3;
+          @extend %t-title4;
           @extend %t-light;
           display: inline-block;
           margin-bottom: ($baseline/2);
@@ -384,29 +383,29 @@
       }
 
       .course-info {
-        display: block;
         @include float(left);
-        width: flex-grid(4);
+        display: block;
+        width: flex-grid(6);
         padding: 0;
         margin-top: ($baseline/2);
 
         [class*="info-"] {
-          color: $gray-d1;
-          @extend %t-title6;
+          @extend %t-title7;
           display: inline-block;
+          color: $gray-d1;
         }
 
         .info-date-block {
-          @extend %t-title7;
-          color: $gray; // WCAG 2.0 AA compliant
+          @include margin-right($baseline/2);
           display: block;
+          color: $gray; // WCAG 2.0 AA compliant
         }
       }
 
       .wrapper-course-actions {
-        display: block;
         @include float(right);
-        width: flex-grid(8);
+        display: block;
+        width: flex-grid(6);
         padding: 0;
         margin-top: ($baseline/2);
       }
@@ -593,9 +592,9 @@
 
       .message {
         @extend %ui-depth1;
-        border-radius: 3px;
+        @include margin($baseline, 0, ($baseline/2), 0);
+        border-radius: 0;
         display: none;
-        margin: $baseline 0 ($baseline/2) 0;
         padding: ($baseline/2) $baseline;
         border-top: 1px solid $gray-l4;
         color: $base-font-color; // Overrides the normal white color in this one case
@@ -636,7 +635,7 @@
         .message-copy,
         .message-copy .copy {
           @extend %t-copy-sub1;
-          margin: 2px 0 0 0;
+          @include margin(($baseline/2), 0, 0, 0);
         }
 
         // CASE: expandable
@@ -729,7 +728,6 @@
           .action-upgrade-container{
             @include float(right);
             display: inline-block;
-            margin-top: ($baseline/2);
           }
           .action-upgrade {
             @extend %btn-primary-green;

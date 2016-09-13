@@ -27,12 +27,12 @@
 
   .course-details {
     @include float(right);
-    width: 100%;
     @include susy-media($bp-screen-sm) { width: calc(100% - 191px); }
-    padding-left: $baseline*1.5;
+    @include padding-left($baseline*1.5);
+    width: 100%;
 
     .course-title {
-      font-size: font-size(x-large);
+      font-size: font-size(large);
       font-weight: font-weight(normal);
       margin-bottom: $baseline/4;
     }

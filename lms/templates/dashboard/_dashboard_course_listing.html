@@ -98,7 +98,7 @@ from student.helpers import (
         <div class="course-info">
           <span class="info-university">${course_overview.display_org_with_default} - </span>
           <span class="info-course-id">${course_overview.display_number_with_default}</span>
-          <span class="info-date-block" data-tooltip="Hi">
+          <span class="info-date-block">
           <% time_zone = get_user_time_zone(user) %>
           % if course_overview.has_ended():
             ${_("Ended - {end_date}").format(end_date=course_overview.end_datetime_text("SHORT_DATE", time_zone))}
@@ -346,20 +346,9 @@ from student.helpers import (
 
             <div class="wrapper-extended">
                 <p class="message-copy" align="justify">
-                  <b class="message-copy-bold">
-                    ${_("Pursue a {cert_name_long} to highlight the knowledge and skills you gain in this course.").format(cert_name_long=cert_name_long)}
-                  </b><br>
-                    ${Text(_("It's official. It's easily shareable. "
-                        "It's a proven motivator to complete the course. {line_break}"
-                        "{link_start}Learn more about the verified {cert_name_long}{link_end}.")).format(
-                          line_break=HTML('<br>'),
-                          link_start=HTML('<a href="{}" class="verified-info" data-course-key="{}">').format(
-                            marketing_link('WHAT_IS_VERIFIED_CERT'),
-                            enrollment.course_id
-                          ),
-                          link_end=HTML('</a>'),
-                          cert_name_long=cert_name_long
-                        )}
+                    <span class="certificate-icon green-icon" aria-hidden="true">
+                    </span>
+                    <span class="card-msg">${_("Upgrade to {cert_name_short} and remain eligible for a course certificate.").format(cert_name_short=cert_name_short)}</span>  
                 </p>
                 <div class="action-upgrade-container">
                   % if use_ecommerce_payment_flow and course_mode_info['verified_sku']:
