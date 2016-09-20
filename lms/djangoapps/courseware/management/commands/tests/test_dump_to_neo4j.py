@@ -97,7 +97,9 @@ class TestModuleStoreSerializer(TestDumpToNeo4jCommandBase):
         """
         Tests the serialize_item method.
         """
-        fields, label = ModuleStoreSerializer().serialize_item(self.course)
+        mss = ModuleStoreSerializer()
+        mss.load_courses()
+        fields, label = mss.serialize_item(self.course)
         self.assertEqual(label, "course")
         self.assertIn("edited_on", fields.keys())
         self.assertIn("display_name", fields.keys())
@@ -111,7 +113,9 @@ class TestModuleStoreSerializer(TestDumpToNeo4jCommandBase):
         """
         Tests the serialize_course method.
         """
-        nodes, relationships = ModuleStoreSerializer().serialize_course(
+        mss = ModuleStoreSerializer()
+        mss.load_courses()
+        nodes, relationships = mss.serialize_course(
             self.course.id
         )
         self.assertEqual(len(nodes), 9)
@@ -158,7 +162,9 @@ class TestModuleStoreSerializer(TestDumpToNeo4jCommandBase):
         mock_transaction = mock.Mock()
         mock_graph.begin.return_value = mock_transaction
 
-        successful, unsuccessful = ModuleStoreSerializer().dump_courses_to_neo4j(mock_graph)
+        mss = ModuleStoreSerializer()
+        mss.load_courses()
+        successful, unsuccessful = mss.dump_courses_to_neo4j(mock_graph)
 
         self.assertEqual(mock_graph.begin.call_count, 2)
         self.assertEqual(mock_transaction.commit.call_count, 2)
@@ -182,7 +188,9 @@ class TestModuleStoreSerializer(TestDumpToNeo4jCommandBase):
         mock_graph.begin.return_value = mock_transaction
         mock_transaction.run.side_effect = ValueError('Something went wrong!')
 
-        successful, unsuccessful = ModuleStoreSerializer().dump_courses_to_neo4j(mock_graph)
+        mss = ModuleStoreSerializer()
+        mss.load_courses()
+        successful, unsuccessful = mss.dump_courses_to_neo4j(mock_graph)
 
         self.assertEqual(mock_graph.begin.call_count, 2)
         self.assertEqual(mock_transaction.commit.call_count, 0)

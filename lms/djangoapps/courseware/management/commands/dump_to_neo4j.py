@@ -31,7 +31,7 @@ class ModuleStoreSerializer(object):
     Class with functionality to serialize a modulestore into subgraphs,
     one graph per course.
     """
-    def __init__(self, courses=None):
+    def load_courses(self, courses=None):
         if courses:
             course_keys = [CourseKey.from_string(course.strip()) for course in courses]
         else:
@@ -239,7 +239,8 @@ class Command(BaseCommand):
 
         graph = Graph(**settings.NEO4J_CONFIG)
 
-        mss = ModuleStoreSerializer(options['courses'])
+        mss = ModuleStoreSerializer()
+        mss.load_courses(options['courses'])
 
         successful_courses, unsuccessful_courses = mss.dump_courses_to_neo4j(graph)
 
