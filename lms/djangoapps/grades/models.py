@@ -6,7 +6,7 @@ of any changes that may occur to the course after the score is achieved.
 """
 
 from base64 import b64encode
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from hashlib import sha1
 import json
 from lazy import lazy
@@ -14,6 +14,7 @@ import logging
 
 from django.db import models
 from model_utils.models import TimeStampedModel
+import msgpack
 
 from coursewarehistoryextended.fields import UnsignedBigIntAutoField
 from opaque_keys.edx.keys import CourseKey, UsageKey
@@ -61,7 +62,7 @@ class BlockRecordList(tuple):
         supported by adding a label indicated which algorithm was used, e.g.,
         "sha256$j0NDRmSPa5bfid2pAcUXaxCm2Dlh3TwayItZstwyeqQ=".
         """
-        return b64encode(sha1(self.json_value).digest())
+        return b64encode(sha1(self.msgpack_value).digest())
 
     @lazy
     def json_value(self):
@@ -82,6 +83,25 @@ class BlockRecordList(tuple):
             sort_keys=True,
         )
 
+    @lazy
+    def msgpack_value(self):
+        """
+        Return a msgpack-serialized version of the lsit of block records using
+        a stable ordering.
+        """
+        list_of_block_dicts = [
+            OrderedDict([
+                (u'locator', unicode(br.locator)),
+                (u'weight', br.weight),
+                (u'max_score', br.max_score)
+            ]) for br in self
+        ]
+        data = OrderedDict([
+            (u'blocks', list_of_block_dicts),
+            (u'course_key', unicode(self.course_key)),
+        ])
+        return msgpack.dumps(data, use_bin_type=True)
+
     @classmethod
     def from_json(cls, blockrecord_json):
         """
@@ -95,6 +115,24 @@ class BlockRecordList(tuple):
                 locator=UsageKey.from_string(block["locator"]).replace(course_key=course_key),
                 weight=block["weight"],
                 max_score=block["max_score"],
+            )
+            for block in block_dicts
+        )
+        return cls(record_generator, course_key)
+
+    @classmethod
+    def from_msgpack(cls, blockrecord_msgpack):
+        """
+        Return a BlockRecordList from previously serialized json.
+        """
+        data = msgpack.loads(blockrecord_msgpack)
+        course_key = CourseKey.from_string(data[u'course_key'])
+        block_dicts = data[u'blocks']
+        record_generator = (
+            BlockRecord(
+                locator=UsageKey.from_string(block[u"locator"]).replace(course_key=course_key),
+                weight=block[u"weight"],
+                max_score=block[u"max_score"],
             )
             for block in block_dicts
         )
@@ -121,7 +159,7 @@ class VisibleBlocksQuerySet(models.QuerySet):
         """
         model, _ = self.get_or_create(
             hashed=blocks.hash_value,
-            defaults={'blocks_json': blocks.json_value, 'course_id': blocks.course_key},
+            defaults={'blocks_json': blocks.msgpack_value, 'course_id': blocks.course_key},
         )
         return model
 
@@ -135,7 +173,7 @@ class VisibleBlocks(models.Model):
     in the blocks_json field. A hash of this json array is used for lookup
     purposes.
     """
-    blocks_json = models.TextField()
+    blocks_json = models.BinaryField()
     hashed = models.CharField(max_length=100, unique=True)
     course_id = CourseKeyField(blank=False, max_length=255, db_index=True)
 
@@ -153,7 +191,8 @@ class VisibleBlocks(models.Model):
         Returns the blocks_json data stored on this model as a list of
         BlockRecords in the order they were provided.
         """
-        return BlockRecordList.from_json(self.blocks_json)
+        from django.conf import settings
+        return BlockRecordList.from_msgpack(self.blocks_json)
 
     @classmethod
     def bulk_read(cls, course_key):
@@ -173,7 +212,7 @@ class VisibleBlocks(models.Model):
         """
         return cls.objects.bulk_create([
             VisibleBlocks(
-                blocks_json=brl.json_value,
+                blocks_json=brl.msgpack_value,
                 hashed=brl.hash_value,
                 course_id=brl.course_key,
             )

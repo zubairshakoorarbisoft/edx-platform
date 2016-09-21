@@ -5,7 +5,7 @@ from base64 import b64encode
 from collections import OrderedDict
 import ddt
 from hashlib import sha1
-import json
+import msgpack
 
 from django.db.utils import IntegrityError
 from django.test import TestCase
@@ -33,15 +33,16 @@ class BlockRecordListTestCase(TestCase):
 
     def test_empty_block_record_set(self):
         empty_json = '{0}"blocks":[],"course_key":"{1}"{2}'.format('{', unicode(self.course_key), '}')
+        empty_msgpack = '\x82\xa6blocks\x90\xaacourse_key\xd9\'{}'.format(unicode(self.course_key).encode('utf-8'))
 
         brs = BlockRecordList((), self.course_key)
         self.assertFalse(brs)
         self.assertEqual(
-            brs.json_value,
-            empty_json
+            brs.msgpack_value,
+            empty_msgpack
         )
         self.assertEqual(
-            BlockRecordList.from_json(empty_json),
+            BlockRecordList.from_msgpack(empty_msgpack),
             brs
         )
 
@@ -129,16 +130,20 @@ class VisibleBlocksTest(GradesModelTestCase):
         list_of_block_dicts = [self.record_a._asdict()]
         for block_dict in list_of_block_dicts:
             block_dict['locator'] = unicode(block_dict['locator'])  # BlockUsageLocator is not json-serializable
-        expected_data = {
-            'course_key': unicode(self.record_a.locator.course_key),
-            'blocks': [
-                {'locator': unicode(self.record_a.locator), 'max_score': 10, 'weight': 1},
-            ],
-        }
-        expected_json = json.dumps(expected_data, separators=(',', ':'), sort_keys=True)
-        expected_hash = b64encode(sha1(expected_json).digest())
-        self.assertEqual(expected_data, json.loads(vblocks.blocks_json))
-        self.assertEqual(expected_json, vblocks.blocks_json)
+        expected_data = OrderedDict([
+            (u'blocks', [
+                OrderedDict([
+                    (u'locator', unicode(self.record_a.locator)),
+                    (u'weight', 1),
+                    (u'max_score', 10), 
+                ]),
+            ]),
+            (u'course_key', unicode(self.record_a.locator.course_key)),
+        ])
+        expected_msgpack = msgpack.dumps(expected_data, use_bin_type=True)
+        expected_hash = b64encode(sha1(expected_msgpack).digest())
+        self.assertEqual(expected_data, msgpack.loads(vblocks.blocks_json))
+        self.assertEqual(expected_msgpack, vblocks.blocks_json)
         self.assertEqual(expected_hash, vblocks.hashed)
 
     def test_ordering_matters(self):

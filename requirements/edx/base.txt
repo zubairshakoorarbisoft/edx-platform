@@ -62,6 +62,7 @@ Markdown==2.2.1
 --allow-unverified meliae
 meliae==0.4.0
 mongoengine==0.10.0
+msgpack-python==0.4.8
 MySQL-python==1.2.5
 networkx==1.7
 nose-xunitmp==0.3.2
