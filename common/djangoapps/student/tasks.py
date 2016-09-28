@@ -19,6 +19,7 @@ def send_activation_email(self, user, subject, message, from_address):
     max_retries = settings.RETRY_ACTIVATION_EMAIL_MAX_ATTEMPTS
     retries = self.request.retries + 1
     dest_addr = user.email
+    log.info("Send_activation_email task is started with the user %s", dest_addr)
     try:
         if settings.FEATURES.get('REROUTE_ACTIVATION_EMAIL'):
             dest_addr = settings.FEATURES['REROUTE_ACTIVATION_EMAIL']
