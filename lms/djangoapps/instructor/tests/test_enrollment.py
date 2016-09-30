@@ -548,7 +548,7 @@ class TestStudentModuleGrading(SharedModuleStoreTestCase):
             self.course,
             get_course_blocks(self.user, self.course.location)
         )
-        grade = subsection_grade_factory.update(self.sequence)
+        grade = subsection_grade_factory.create(self.sequence)
         self.assertEqual(grade.all_total.earned, all_earned)
         self.assertEqual(grade.graded_total.earned, graded_earned)
         self.assertEqual(grade.all_total.possible, all_possible)
