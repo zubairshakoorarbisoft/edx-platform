@@ -152,9 +152,10 @@ def prepare_bokchoy_run(options):
 
         print colorize('green', "Generating optimized static assets...")
         if options.get('log_dir') is None:
-            call_task('update_assets', args=['--settings', 'test_static_optimized'])
+            call_task('update_assets', args=['--debug', '--settings', 'test_static_optimized'])
         else:
             call_task('update_assets', args=[
+                '--debug',
                 '--settings', 'test_static_optimized',
                 '--collect-log', options.log_dir
             ])

@@ -585,6 +585,7 @@ def _compile_sass(system, theme, debug, force, timing_info):
                 include_paths=COMMON_LOOKUP_PATHS + lookup_paths,
                 source_comments=source_comments,
                 output_style=output_style,
+                source_map_filename=Env.BOK_CHOY_LOG_DIR + "/sass_source",
             )
             duration = datetime.now() - start
             timing_info.append((sass_source_dir, css_dir, duration))
