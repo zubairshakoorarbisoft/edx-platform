@@ -189,9 +189,11 @@ class CourseMetadata(object):
         for key, model in filtered_dict.iteritems():
             try:
                 val = model['value']
+                if key == 'days_early_for_beta' and len(repr(val).split('.')[0]) > 9:
+                    raise AssertionError('Too long value: {}'.format(val))
                 if hasattr(descriptor, key) and getattr(descriptor, key) != val:
                     key_values[key] = descriptor.fields[key].from_json(val)
-            except (TypeError, ValueError) as err:
+            except (TypeError, ValueError, AssertionError) as err:
                 did_validate = False
                 errors.append({'message': err.message, 'model': model})
 
