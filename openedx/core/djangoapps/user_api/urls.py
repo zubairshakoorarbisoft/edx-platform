@@ -11,7 +11,7 @@ from .preferences.views import PreferencesView, PreferencesDetailView
 from .verification_api.views import PhotoVerificationStatusView
 
 ME = AccountViewSet.as_view({
-    'get': 'me',
+    'get': 'get',
 })
 
 ACCOUNT_LIST = AccountViewSet.as_view({
