@@ -10,8 +10,8 @@ from .accounts.views import AccountViewSet
 from .preferences.views import PreferencesView, PreferencesDetailView
 from .verification_api.views import PhotoVerificationStatusView
 
-MY_ACCOUNT = AccountViewSet.as_view({
-    'get': 'get',
+ME = AccountViewSet.as_view({
+    'get': 'me',
 })
 
 ACCOUNT_LIST = AccountViewSet.as_view({
@@ -25,7 +25,7 @@ ACCOUNT_DETAIL = AccountViewSet.as_view({
 
 urlpatterns = patterns(
     '',
-    url(r'^v1/account$', MY_ACCOUNT, name='account_api'),
+    url(r'^v1/me$', ME, name='account_api'),
     url(r'^v1/accounts/{}$'.format(settings.USERNAME_PATTERN), ACCOUNT_DETAIL, name='accounts_api'),
     url(r'^v1/accounts$', ACCOUNT_LIST, name='accounts_detail_api'),
     url(
