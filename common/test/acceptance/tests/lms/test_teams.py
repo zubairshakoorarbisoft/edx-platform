@@ -7,6 +7,7 @@ import time
 
 from dateutil.parser import parse
 import ddt
+from flaky import flaky
 from nose.plugins.attrib import attr
 from selenium.common.exceptions import TimeoutException
 from uuid import uuid4
@@ -1032,6 +1033,7 @@ class CreateTeamTest(TeamFormActions):
         self.verify_and_navigate_to_create_team_page()
         self.verify_all_fields_exist()
 
+    @flaky(min_passes=20, max_runs=20)
     def test_user_can_see_error_message_for_missing_data(self):
         """
         Scenario: The user should be able to see error message in case of missing required field.
@@ -1910,6 +1912,7 @@ class TeamPageTest(TeamsTabBase):
         self.assertEqual(self.team_page.join_team_message, 'This team is full.')
         self.assert_team_details(num_members=1, is_member=False, max_size=1)
 
+    @flaky(min_passes=20, max_runs=20)
     def test_leave_team(self):
         """
         Scenario: User can leave a team.
