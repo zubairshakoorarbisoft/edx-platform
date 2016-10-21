@@ -1956,6 +1956,12 @@ class TeamPageTest(TeamsTabBase):
             }
         ]
         with self.assert_events_match_during(event_filter=self.only_team_events, expected_events=expected_events):
+            # I think we're seeing the same problem that we're seeing in
+            # CreateTeamTest.test_user_can_see_error_message_for_missing_data.
+            # We click on the "leave team" link after it's loaded, but before
+            # its JavaScript event handler is added. Adding this sleep gives
+            # enough time for that event handler to bind to the link. Sorry!
+            time.sleep(0.5)
             self.team_page.click_leave_team_link()
         self.assert_team_details(num_members=0, is_member=False)
         self.assertTrue(self.team_page.join_team_button_present)
