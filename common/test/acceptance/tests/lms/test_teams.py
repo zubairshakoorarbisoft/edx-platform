@@ -1033,7 +1033,7 @@ class CreateTeamTest(TeamFormActions):
         self.verify_and_navigate_to_create_team_page()
         self.verify_all_fields_exist()
 
-    @flaky(min_passes=20, max_runs=20)
+    @flaky(max_runs=20, min_passes=20)
     def test_user_can_see_error_message_for_missing_data(self):
         """
         Scenario: The user should be able to see error message in case of missing required field.
@@ -1044,8 +1044,20 @@ class CreateTeamTest(TeamFormActions):
         Then I should see the error message and highlighted fields.
         """
         self.verify_and_navigate_to_create_team_page()
-        self.team_management_page.submit_form()
 
+        # `submit_form` clicks on a button, but that button doesn't always
+        # have the click event handler registered on it in time. That's why
+        # this test is flaky. Unfortunately, I don't know of a straightforward
+        # way to write something that waits for that event handler to be bound
+        # to the button element.
+        # So I know. I broke rule 3:
+        # http://bok-choy.readthedocs.io/en/latest/guidelines.html
+        time.sleep(0.5)
+        self.team_management_page.submit_form()
+        self.team_management_page.wait_for(
+            lambda: self.team_management_page.validation_message_text,
+            "Validation message text never loaded."
+        )
         self.assertEqual(
             self.team_management_page.validation_message_text,
             'Check the highlighted fields below and try again.'
