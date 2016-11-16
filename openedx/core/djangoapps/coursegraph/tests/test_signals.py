@@ -3,25 +3,24 @@ Tests for coursegraph's signal handler on course publish
 """
 from __future__ import unicode_literals
 
+import mock
+
 from opaque_keys.edx.keys import CourseKey
 
 from openedx.core.djangoapps.coursegraph.signals import _listen_for_course_publish
-from openedx.core.djangoapps.coursegraph.utils import CourseLastPublishedCache
-from openedx.core.djangolib.testing.utils import CacheIsolationTestCase
+from django.test import TestCase
 
 
-class TestCourseGraphSignalHandler(CacheIsolationTestCase):
+class TestCourseGraphSignalHandler(TestCase):
     """
-    Tests for the course publish course handler
+    Tests for the course publish signal handler
     """
-    ENABLED_CACHES = ['default']
-
-    def test_cache_set_on_course_publish(self):
+    @mock.patch("openedx.core.djangoapps.coursegraph.signals.ModuleStoreSerializer")
+    def test_neo4j_updated_on_course_publish(self, mock_mss_class):
         """
-        Tests that the last published cache is set on course publish
+        Tests that neo4j is updated on course publish
         """
         course_key = CourseKey.from_string('course-v1:org+course+run')
-        last_published_cache = CourseLastPublishedCache()
-        self.assertIsNone(last_published_cache.get(course_key))
+        mock_mss = mock_mss_class.return_value
         _listen_for_course_publish(None, course_key)
-        self.assertIsNotNone(last_published_cache.get(course_key))
+        mock_mss.dump_course_to_neo4j.assertCalled_once_with(course_key)
