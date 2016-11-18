@@ -338,6 +338,7 @@ class TestCourseImport(ImportTestMixin, StudioCourseTest):
     def page_args(self):
         return [self.browser, self.course_info['org'], self.course_info['number'], self.course_info['run']]
 
+    @flaky(max_runs=20, min_passes=20)
     def test_course_updated(self):
         """
         Given that I visit an empty course before import

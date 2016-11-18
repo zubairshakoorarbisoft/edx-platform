@@ -166,10 +166,20 @@ class ImportMixin(object):
         Wait for the upload button to appear.
         """
         return EmptyPromise(
-            lambda: self.q(css='#replace-courselike-button')[0],
+            lambda: self.q(css='#replace-courselike-button').visible,
             "Upload button appears",
             timeout=30
         ).fulfill()
+
+    def _wait_for_input(self):
+        """
+        Wait for the file input to appear.
+        """
+        return EmptyPromise(
+            lambda: self.q(css=".file-input").visible and self.q(css=".file-name-block").visible,
+            "file input appears",
+            timeout=10,
+        )
 
     def upload_tarball(self, tarball_filename):
         """
@@ -179,16 +189,19 @@ class ImportMixin(object):
         # Make the upload elements visible to the WebDriver.
         self.browser.execute_script('$(".file-name-block").show();$(".file-input").show()')
         # Upload the file.
+        self._wait_for_input()
         self.q(css='input[type="file"]')[0].send_keys(asset_file_path)
+        # time.sleep(1)
         # Upload the same file again. Reason behind this is to decrease the
         # probability or fraction of times the failure occur. Please be
         # noted this doesn't eradicate the root cause of the error, it
         # just decreases to failure rate to minimal.
         # Jira ticket reference: TNL-4191.
-        self.q(css='input[type="file"]')[0].send_keys(asset_file_path)
+        # self.q(css='input[type="file"]')[0].send_keys(asset_file_path)
         # Some of the tests need these lines to pass so don't remove them.
+        # from nose.tools import set_trace; set_trace()
         self._wait_for_button()
-        click_css(self, '.submit-button', require_notification=False)
+        click_css(self, '#replace-courselike-button', require_notification=False)
 
     def is_upload_finished(self):
         """
