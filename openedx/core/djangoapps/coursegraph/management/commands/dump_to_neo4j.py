@@ -31,29 +31,6 @@ class ModuleStoreSerializer(object):
     Class with functionality to serialize a modulestore into subgraphs,
     one graph per course.
     """
-
-    def __init__(self, courses=None, skip=None):
-        """
-        Sets the object's course_keys attribute from the `courses` parameter.
-        If that parameter isn't furnished, loads all course_keys from the
-        modulestore.
-        Filters out course_keys in the `skip` parameter, if provided.
-        Args:
-            courses: A list of string serializations of course keys.
-                For example, ["course-v1:org+course+run"].
-            skip: Also a list of string serializations of course keys.
-        """
-        if courses:
-            course_keys = [CourseKey.from_string(course.strip()) for course in courses]
-        else:
-            course_keys = [
-                course.id for course in modulestore().get_course_summaries()
-            ]
-        if skip is not None:
-            skip_keys = [CourseKey.from_string(course.strip()) for course in skip]
-            course_keys = [course_key for course_key in course_keys if course_key not in skip_keys]
-        self.course_keys = course_keys
-
     @staticmethod
     def serialize_item(item):
         """
@@ -238,7 +215,7 @@ class ModuleStoreSerializer(object):
         # before the course's last published event
         return last_this_command_was_run < course_last_published_date
 
-    def dump_courses_to_neo4j(self, graph, override_cache=False):
+    def dump_courses_to_neo4j(self, graph, courses=None, skip=None, override_cache=False):
         """
         Method that iterates through a list of courses in a modulestore,
         serializes them, then writes them to neo4j
@@ -246,17 +223,35 @@ class ModuleStoreSerializer(object):
             graph: py2neo graph object
             override_cache: serialize the courses even if they'be been recently
                 serialized
-
+            courses: A list of string serializations of course keys.
+                For example, ["course-v1:org+course+run"]. If not funished,
+                dumps all courses from the modulestore.
+            skip: Also a list of string serializations of course keys. Will
+                not dump these courses, even if specified in the `courses`
+                kwarg.
         Returns: two lists--one of the courses that were successfully written
             to neo4j and one of courses that were not.
         """
 
-        total_number_of_courses = len(self.course_keys)
+        if courses is None:
+            course_keys = [course.id for course in modulestore().get_course_summaries()]
+        else:
+            course_keys = [CourseKey.from_string(course) for course in courses]
+
+        if skip is None:
+            skip_course_keys = set()
+        else:
+            skip_course_keys = set([CourseKey.from_string(course) for course in skip])
+
+        course_keys = [course_key for course_key in course_keys if course_key not in skip_course_keys]
+
+
+        total_number_of_courses = len(course_keys)
 
         successful_courses = []
         unsuccessful_courses = []
 
-        for index, course_key in enumerate(self.course_keys):
+        for index, course_key in enumerate(course_keys):
             # first, clear the request cache to prevent memory leaks
             RequestCache.clear_request_cache()
 
@@ -372,10 +367,13 @@ class Command(BaseCommand):
             secure=secure,
         )
 
-        mss = ModuleStoreSerializer(options['courses'], options['skip'])
+        mss = ModuleStoreSerializer()
 
         successful_courses, unsuccessful_courses = mss.dump_courses_to_neo4j(
-            graph, override_cache=options['override']
+            graph,
+            courses=options['courses'],
+            skip=options['skip'],
+            override_cache=options['override']
         )
 
         if not successful_courses and not unsuccessful_courses:
