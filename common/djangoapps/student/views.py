@@ -126,6 +126,7 @@ from openedx.core.djangoapps.programs.models import ProgramsApiConfig
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
+from openedx.core.djangoapps.catalog.utils import get_programs
 
 
 log = logging.getLogger("edx.student")
@@ -172,6 +173,7 @@ def index(request, extra_context=None, user=AnonymousUser()):
     if extra_context is None:
         extra_context = {}
 
+    programs_list = []
     courses = get_courses(user)
 
     if configuration_helpers.get_value(
@@ -204,6 +206,15 @@ def index(request, extra_context=None, user=AnonymousUser()):
 
     # Insert additional context for use in the template
     context.update(extra_context)
+
+    # getting all the programs from catalog
+    if configuration_helpers.get_value(
+            "DISPLAY_PROGRAMS_ON_MARKETING_PAGES",
+            settings.FEATURES["DISPLAY_PROGRAMS_ON_MARKETING_PAGES"]
+    ):
+        programs_list = get_programs(user)
+
+    context["programs_list"] = programs_list
 
     return render_to_response('index.html', context)
 
