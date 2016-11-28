@@ -1,4 +1,4 @@
-/* globals DiscussionTopicMenuView, DiscussionUtil, Thread */
+/* globals _, Backbone, DiscussionTopicMenuView, DiscussionUtil, Thread */
 (function() {
     'use strict';
     var __hasProp = {}.hasOwnProperty,
@@ -53,7 +53,7 @@
                     mode: this.mode,
                     form_id: this.mode + (this.topicId ? '-' + this.topicId : '')
                 });
-                this.$el.html(_.template($('#new-post-template').html())(context));
+                this.$el.html(_.template($('#new-post-template').text())(context));
                 threadTypeTemplate = _.template($('#thread-type-template').html());
                 if ($('.js-group-select').prop('disabled')) {
                     $('.group-selector-wrapper').addClass('disabled');
@@ -73,7 +73,7 @@
             };
 
             NewPostView.prototype.addField = function(fieldView) {
-                return this.$('.forum-new-post-form-wrapper').append(fieldView);
+                return edx.HtmlUtils.append(this.$('.forum-new-post-form-wrapper'), edx.HtmlUtils.HTML(fieldView));
             };
 
             NewPostView.prototype.isTabMode = function() {

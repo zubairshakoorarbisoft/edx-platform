@@ -377,3 +377,18 @@
 .forum-nav-loading {
     @extend %forum-nav-load-more-content;
 }
+
+.empty-state-wrapper {
+    display: flex;
+    align-items: center;
+
+    .empty-state {
+        @extend %forum-nav-thread-wrapper;
+        margin: $baseline auto;
+
+        span {
+            color: $black;
+            font-size: $forum-base-font-size;
+        }
+    }
+}

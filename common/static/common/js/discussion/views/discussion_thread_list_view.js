@@ -213,11 +213,18 @@
             DiscussionThreadListView.prototype.renderThreads = function() {
                 var $content, thread, i, len;
                 this.$('.forum-nav-thread-list').empty();
-                for (i = 0, len = this.displayedCollection.models.length; i < len; i++) {
-                    thread = this.displayedCollection.models[i];
-                    $content = this.renderThread(thread);
-                    this.$('.forum-nav-thread-list').append($content);
+
+                if (this.displayedCollection.models.length === 0) {
+                    // display an empty state when no posts exist
+                    edx.HtmlUtils.append(this.$('.forum-nav-thread-list'), edx.HtmlUtils.HTML(this.renderThread()));
+                } else {
+                    for (i = 0, len = this.displayedCollection.models.length; i < len; i++) {
+                        thread = this.displayedCollection.models[i];
+                        $content = this.renderThread(thread);
+                        this.$('.forum-nav-thread-list').append($content);
+                    }
                 }
+
                 this.showMetadataAccordingToSort();
                 this.renderMorePages();
                 this.trigger('threads:rendered');
@@ -327,10 +334,16 @@
             };
 
             DiscussionThreadListView.prototype.renderThread = function(thread) {
-                var threadCommentCount = thread.get('comments_count'),
-                    threadUnreadCommentCount = thread.get('unread_comments_count'),
-                    neverRead = !thread.get('read') && threadUnreadCommentCount === threadCommentCount,
-                    threadPreview = this.containsMarkup(thread.get('body')) ? '' : thread.get('body'),
+                var threadCommentCount, threadUnreadCommentCount, neverRead, threadPreview, context;
+
+                if (!thread) {
+                    // Return a placeholder / empty state that asks you to create a new thread
+                    return $(this.threadListItemTemplate({}).toString());
+                } else {
+                    threadCommentCount = thread.get('comments_count');
+                    threadUnreadCommentCount = thread.get('unread_comments_count');
+                    neverRead = !thread.get('read') && threadUnreadCommentCount === threadCommentCount;
+                    threadPreview = this.containsMarkup(thread.get('body')) ? '' : thread.get('body');
                     context = _.extend(
                         {
                             neverRead: neverRead,
@@ -340,7 +353,9 @@
                         },
                         thread.toJSON()
                     );
-                return $(this.threadListItemTemplate(context).toString());
+
+                    return $(this.threadListItemTemplate(context).toString());
+                }
             };
 
             DiscussionThreadListView.prototype.threadSelected = function(e) {
