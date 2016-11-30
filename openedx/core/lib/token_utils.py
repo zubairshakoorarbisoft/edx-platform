@@ -73,19 +73,15 @@ class JwtBuilder(object):
 
     def attach_email_claim(self, payload):
         """Add the email claim details to the JWT payload."""
-        if not self.user.is_anonymous():
-            payload['email'] = self.user.email
+        payload['email'] = self.user.email
 
     def attach_profile_claim(self, payload):
         """Add the profile claim details to the JWT payload."""
-        if self.user.is_anonymous():
+        try:
+            # Some users (e.g., service users) may not have user profiles.
+            name = UserProfile.objects.get(user=self.user).name
+        except UserProfile.DoesNotExist:
             name = None
-        else:
-            try:
-                # Some users (e.g., service users) may not have user profiles.
-                name = UserProfile.objects.get(user=self.user).name
-            except UserProfile.DoesNotExist:
-                name = None
 
         payload.update({
             'name': name,

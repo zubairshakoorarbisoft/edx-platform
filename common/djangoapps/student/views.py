@@ -212,7 +212,10 @@ def index(request, extra_context=None, user=AnonymousUser()):
             "DISPLAY_PROGRAMS_ON_MARKETING_PAGES",
             settings.FEATURES["DISPLAY_PROGRAMS_ON_MARKETING_PAGES"]
     ):
-        programs_list = get_programs(user)
+        if request.user.is_anonymous():
+            programs_list = get_programs(User.objects.filter(is_active=True).first())  #TODO Need *any* user here.
+        else:
+            programs_list = get_programs(request.user)
 
     context["programs_list"] = programs_list
 
