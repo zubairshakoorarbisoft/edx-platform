@@ -158,6 +158,16 @@ def courses(request):
             programs_list = get_programs(User.objects.filter(is_active=True).first())  #TODO Need *any* user here.
         else:
             programs_list = get_programs(request.user)
+
+    for program in programs_list:
+        program['display_name_with_default'] = 'name'
+        program['id'] = 'course-v1:mitx+cs101+2014'
+        program['course_image_url'] = 'http://google.com'
+        program['display_name_with_default'] = 'name'
+        program['display_number_with_default'] = 5
+        program['display_org_with_default'] = 'org'
+        program['start'] = None
+
     return render_to_response(
         "courseware/courses.html",
         {
