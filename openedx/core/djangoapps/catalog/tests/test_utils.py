@@ -2,6 +2,7 @@
 import uuid
 import copy
 
+import ddt
 from django.test import TestCase
 import mock
 from opaque_keys.edx.keys import CourseKey
