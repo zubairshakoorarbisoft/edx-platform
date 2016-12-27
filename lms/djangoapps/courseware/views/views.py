@@ -88,7 +88,7 @@ from util.date_utils import strftime_localized
 from util.db import outer_atomic
 from util.milestones_helpers import get_prerequisite_courses_display
 from util.views import _record_feedback_in_zendesk
-from util.views import ensure_valid_course_key
+from util.views import ensure_valid_course_key, ensure_valid_usage_key
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import ItemNotFoundError, NoPathToItem
 from xmodule.tabs import CourseTabList
@@ -1259,12 +1259,14 @@ def _track_successful_certificate_generation(user_id, course_id):  # pylint: dis
 
 
 @require_http_methods(["GET", "POST"])
+@ensure_valid_usage_key
 def render_xblock(request, usage_key_string, check_if_enrolled=True):
     """
     Returns an HttpResponse with HTML content for the xBlock with the given usage_key.
     The returned HTML is a chromeless rendering of the xBlock (excluding content of the containing courseware).
     """
     usage_key = UsageKey.from_string(usage_key_string)
+
     usage_key = usage_key.replace(course_key=modulestore().fill_in_run(usage_key.course_key))
     course_key = usage_key.course_key
 
@@ -1284,8 +1286,11 @@ def render_xblock(request, usage_key_string, check_if_enrolled=True):
             request, unicode(course_key), unicode(usage_key), disable_staff_debug_info=True, course=course
         )
 
+        student_view_context = request.GET.dict()
+        student_view_context['show_bookmark_button'] = False
+
         context = {
-            'fragment': block.render('student_view', context=request.GET),
+            'fragment': block.render('student_view', context=student_view_context),
             'course': course,
             'disable_accordion': True,
             'allow_iframing': True,
