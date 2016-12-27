@@ -679,6 +679,18 @@ def program_detail(request, program_id):
 
     Assumes the program_id is in a valid format.
     """
+
+    # Fetch the program based on the program_id uuid
+    # Based on the check if the program is active or unpublished, show the details page or return a 404.
+    #
+    # Build out the entire context required for the program_details page
+    #     Program type logo by calling get_program_types passing the program_type_name
+    #     List of all courses in the program by calling utils/get_course_runs()
+    #     List of instructors is in the course's insturctors list. These lists can be extended to get the combined list of all instructors in the program.
+
+    context = {}
+    
+
     return render_to_response('courseware/program_details.html')
 
 

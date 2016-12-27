@@ -83,7 +83,7 @@ def get_programs(user=None, uuid=None, type=None):  # pylint: disable=redefined-
         return []
 
 
-def get_program_types(user=None):  # pylint: disable=redefined-builtin
+def get_program_types(user=None, program_type_name=None):  # pylint: disable=redefined-builtin
     """Retrieve all program types from the catalog service.
 
     Returns:
@@ -98,13 +98,19 @@ def get_program_types(user=None):  # pylint: disable=redefined-builtin
         api = create_catalog_api_client(user, catalog_integration)
         cache_key = '{base}.program_types'.format(base=catalog_integration.CACHE_KEY)
 
-        return get_edx_api_data(
+        response = get_edx_api_data(
             catalog_integration,
             user,
             'program_types',
             cache_key=cache_key if catalog_integration.is_cache_enabled else None,
             api=api
         )
+        # Because program type name is not url friendly, we don't have a program_types endpoint
+        # to retrieve a single program_type based on program_type_name.
+        if program_type_name:
+            response = [program_type for program_type in response if program_type.name==program_type_name]
+
+        return response
     else:
         return []
 
