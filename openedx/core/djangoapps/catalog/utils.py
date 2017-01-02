@@ -108,7 +108,7 @@ def get_program_types(user=None, program_type_name=None):  # pylint: disable=red
         return []
 
 
-def get_programs_data(user=None):
+def get_programs_data(user=None, program_id=None):
     """Return the list of Programs after adding the ProgramType Logo Image
        This is of programs is to be displayed on the courseware and home page
        Filter out all programs with status not in the allowed_statuses list.
@@ -117,14 +117,21 @@ def get_programs_data(user=None):
     allowed_statuses = ['active']
     filtered_programs_list = []
 
-    programs_list = get_programs(user)
-    program_types = get_program_types(user)
-    program_types_lookup_dict = {program_type["name"]: program_type for program_type in program_types}
+    programs_list = get_programs(user, program_id)
 
-    for program in programs_list:
-        if program["status"] in allowed_statuses:
-            program["logo_image"] = program_types_lookup_dict[program["type"]]["logo_image"]
-            filtered_programs_list.append (program)
+    if programs_list:
+        program_types = get_program_types(user)
+        program_types_lookup_dict = {program_type["name"]: program_type for program_type in program_types}
+
+        # The get_programs returns a dict in case of a single program lookup.
+        if isinstance(programs_list, dict):
+            programs_list = [programs_list]
+
+
+        for program in programs_list:
+            if program["status"] in allowed_statuses:
+                program["logo_image"] = program_types_lookup_dict[program["type"]]["logo_image"]
+                filtered_programs_list.append(program)
 
     return filtered_programs_list
 
