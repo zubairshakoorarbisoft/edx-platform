@@ -287,7 +287,7 @@ class PersistentSubsectionGrade(DeleteGradesMixin, TimeStampedModel):
     # timestamp for the learner's first attempt at content in
     # this subsection. If null, indicates no attempt
     # has yet been made.
-    first_attempted = models.DateTimeField(null=True, blank=True)
+    first_attempted = models.DateTimeField(null=True, blank=True, db_index=True)
 
     # track which blocks were visible at the time of grade calculation
     visible_blocks = models.ForeignKey(VisibleBlocks, db_column='visible_blocks_hash', to_field='hashed')
