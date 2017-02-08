@@ -1,7 +1,6 @@
 """
 Courseware views functions
 """
-
 import json
 import logging
 import urllib
@@ -40,7 +39,6 @@ from lms.djangoapps.instructor.enrollment import uses_shib
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification
 from lms.djangoapps.ccx.custom_exception import CCXLocatorValidationException
 
-from openedx.core.djangoapps.catalog.utils import get_programs_with_type_logo
 import shoppingcart
 import survey.utils
 import survey.views
@@ -72,6 +70,7 @@ from courseware.models import StudentModule, BaseStudentModuleHistory
 from courseware.url_helpers import get_redirect_url, get_redirect_url_for_global_staff
 from courseware.user_state_client import DjangoXBlockUserStateClient
 from edxmako.shortcuts import render_to_response, render_to_string, marketing_link
+from openedx.core.djangoapps.catalog.utils import get_programs, get_programs_with_type
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.coursetalk.helpers import inject_coursetalk_keys_into_context
 from openedx.core.djangoapps.credit.api import (
@@ -79,6 +78,7 @@ from openedx.core.djangoapps.credit.api import (
     is_user_eligible_for_credit,
     is_credit_course
 )
+from openedx.core.djangoapps.programs.utils import ProgramDataExtender
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from shoppingcart.utils import is_shopping_cart_enabled
 from openedx.core.djangoapps.self_paced.models import SelfPacedConfiguration
@@ -149,13 +149,15 @@ def courses(request):
         else:
             courses_list = sort_by_announcement(courses_list)
 
-    # Getting all the programs from course-catalog service. The programs_list is being added to the context but it's
-    # not being used currently in courseware/courses.html. To use this list, you need to create a custom theme that
-    # overrides courses.html. The modifications to courses.html to display the programs will be done after the support
-    # for edx-pattern-library is added.
-    if configuration_helpers.get_value("DISPLAY_PROGRAMS_ON_MARKETING_PAGES",
-                                       settings.FEATURES.get("DISPLAY_PROGRAMS_ON_MARKETING_PAGES")):
-        programs_list = get_programs_with_type_logo()
+    # Get the active programs of the type configured for the current site from the catalog service. The programs_list
+    # is being added to the context but it's not being used currently in courseware/courses.html. To use this list,
+    # you need to create a custom theme that overrides courses.html. The modifications to courses.html to display the
+    # programs will be done after the support for edx-pattern-library is added.
+    program_types = configuration_helpers.get_value('ENABLED_PROGRAM_TYPES')
+
+    # Do not add programs to the context if there are no program types enabled for the site.
+    if program_types:
+        programs_list = get_programs_with_type(program_types)
 
     return render_to_response(
         "courseware/courses.html",
@@ -703,6 +705,42 @@ def course_about(request, course_id):
         inject_coursetalk_keys_into_context(context, course_key)
 
         return render_to_response('courseware/course_about.html', context)
+
+
+@ensure_csrf_cookie
+@cache_if_anonymous()
+def program_marketing(request, program_uuid):
+    """
+    Display the program marketing page.
+    """
+    program_data = get_programs(uuid=program_uuid)
+
+    if not program_data:
+        raise Http404
+
+    program_data = ProgramDataExtender(program_data, request.user).extend(include_instructors=True)
+
+    context = {
+        'faq': program_data['faq'],
+        'type': program_data['type'],
+        'title': program_data['title'],
+        'status': program_data['status'],
+        'courses': program_data['courses'],
+        'subtitle': program_data['subtitle'],
+        'overview': program_data['overview'],
+        'instructors': program_data['instructors'],
+        'job_outlook_items': program_data['job_outlook_items'],
+        'weeks_to_complete': program_data['weeks_to_complete'],
+        'individual_endorsements': program_data['individual_endorsements'],
+        'expected_learning_items': program_data['expected_learning_items'],
+        'authoring_organizations': program_data['authoring_organizations'],
+        'min_hours_effort_per_week': program_data['min_hours_effort_per_week'],
+        'max_hours_effort_per_week': program_data['max_hours_effort_per_week'],
+        'video_url': program_data.get('video', {}).get('src'),
+        'banner_image': program_data.get('banner_image', {}).get('large', {}).get('url', '')
+    }
+
+    return render_to_response('courseware/program_detail.html', context)
 
 
 @transaction.non_atomic_requests
