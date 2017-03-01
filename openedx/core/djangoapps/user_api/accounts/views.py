@@ -158,7 +158,7 @@ class AccountViewSet(ViewSet):
         except UserNotFound:
             return Response(status=status.HTTP_403_FORBIDDEN if request.user.is_staff else status.HTTP_404_NOT_FOUND)
 
-        return Response(account_settings[0])
+        return Response(request.user.username)
 
     def list(self, request):
         """
