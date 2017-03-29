@@ -15,8 +15,8 @@
              return Backbone.View.extend({
                  breakpoints: {
                      min: {
-                         'medium': '768px',
-                         'large': '1180px'
+                         medium: '768px',
+                         large: '1180px'
                      }
                  },
 
@@ -29,16 +29,16 @@
                  },
 
                  getLogo: function() {
-                    var logo,
+                     var logo,
                         type = this.model.get('programData').type;
 
-                    if (type === 'MicroMasters') {
-                        logo = MicroMastersLogo;
-                    } else if (type === 'XSeries') {
-                        logo = XSeriesLogo;
-                    } else if (type === 'Professional Certificate') {
-                        logo = ProfessionalCertificateLogo;
-                    }
+                     if (type === 'MicroMasters') {
+                         logo = MicroMastersLogo;
+                     } else if (type === 'XSeries') {
+                         logo = XSeriesLogo;
+                     } else if (type === 'Professional Certificate') {
+                         logo = ProfessionalCertificateLogo;
+                     }
                      return logo;
                  },
 

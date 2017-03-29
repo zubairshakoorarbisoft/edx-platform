@@ -7,7 +7,7 @@
         'edx-ui-toolkit/js/utils/html-utils',
         'text!../../../templates/learner_dashboard/certificate_status_2017.underscore',
         'text!../../../templates/learner_dashboard/certificate_icon.underscore'
-       ],
+    ],
          function(
              Backbone,
              $,

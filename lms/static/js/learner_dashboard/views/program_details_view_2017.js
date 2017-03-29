@@ -81,15 +81,15 @@
 
                     // This is last because the context is modified below
                      new CollectionListView({
-                        el: '.js-course-list-in-progress',
-                        childView: CourseCardView,
-                        collection: this.inProgressCourseCollection,
-                        context: $.extend(this.options, {enrolled: gettext('Enrolled')})
+                         el: '.js-course-list-in-progress',
+                         childView: CourseCardView,
+                         collection: this.inProgressCourseCollection,
+                         context: $.extend(this.options, {enrolled: gettext('Enrolled')})
                      }).render();
 
                      new SidebarView({
-                        el: '.sidebar',
-                        context: this.options
+                         el: '.sidebar',
+                         context: this.options
                      }).render();
                  }
              });
