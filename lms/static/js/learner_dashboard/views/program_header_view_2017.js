@@ -29,8 +29,8 @@
                  },
 
                  getLogo: function() {
-                     var logo,
-                        type = this.model.get('programData').type;
+                     var logo = false,
+                         type = this.model.get('programData').type;
 
                      if (type === 'MicroMasters') {
                          logo = MicroMastersLogo;

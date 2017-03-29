@@ -41,8 +41,8 @@
                  },
 
                  render: function() {
-                     var data = $.extend(this.model.toJSON(), {enrolled: this.context.enrolled || ''});
-                     var filledTemplate = this.tpl(data);
+                     var data = $.extend(this.model.toJSON(), {enrolled: this.context.enrolled || ''}),
+                         filledTemplate = this.tpl(data);
                      HtmlUtils.setHtml(this.$el, filledTemplate);
                      this.postRender();
                  },

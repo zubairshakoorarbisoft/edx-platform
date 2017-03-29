@@ -1,6 +1,8 @@
 <div class="program-details-header">
     <div class="meta-info grid-container">
-        <span aria-label="<%- gettext(programData.type) %>" class="<%- programData.type.toLowerCase() %> program-details-icon"><%= logo %></span>
+        <% if (logo) { %>
+            <span aria-label="<%- gettext(programData.type) %>" class="<%- programData.type.toLowerCase() %> program-details-icon"><%= logo %></span>
+        <% } %>
         <h2 class="hd-1 row"><%- programData.title %></h2>
     </div>
     <div class='authoring-organizations'>

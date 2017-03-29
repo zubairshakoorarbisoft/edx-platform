@@ -127,7 +127,7 @@
                         if (currency === 'USD'){
                             return '$' + verifiedSeat.price;
                         } else {
-                            return verifiedSeat.price + " " + currency;
+                            return verifiedSeat.price + ' ' + currency;
                         }
                     }
                     return null;

@@ -224,6 +224,11 @@ $success-color: rgb(0, 155, 0) !default;
 // #COLORS- EDX-SPECIFIC
 // ----------------------------
 
+// logo colors
+$micromasters-logo-blue: #005585;
+$xseries-logo-gray: #424242;
+$professional-certificate-logo-red: #9a1f60;
+
 // old color variables
 // DEPRECATED: Do not continue to use these colors, instead use pattern libary and base colors above.
 $dark-gray1: rgb(74,74,74) !default;
@@ -324,6 +329,7 @@ $credit-color-base: rgb(244,195,0) !default; // accessible with black text
 
 // edx-specific: Studio/Staff actions
 $staff-color: $uxpl-pink-base !default;
+
 
 
 // ----------------------------

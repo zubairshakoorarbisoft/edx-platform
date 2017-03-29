@@ -226,12 +226,11 @@ class ProgramProgressMeter(object):
             list of dicts, each representing a course run certificate
         """
         course_run_certificates = certificate_api.get_certificates_for_user(self.user.username)
-        completed_course_runs = [
+        return [
             {'course_run_id': unicode(certificate['course_key']), 'type': certificate['type']}
             for certificate in course_run_certificates
             if certificate_api.is_passing_status(certificate['status'])
         ]
-        return completed_course_runs
 
     def _is_course_in_progress(self, course):
         """Check if a user is in the process of completing a course.

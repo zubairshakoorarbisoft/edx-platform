@@ -81,13 +81,13 @@
 
 .program-details {
     .window-wrap {
-        background-color: rgb(255,255,255);
+        background-color: $white;
     }
 }
 .program-details-wrapper {
 
     .program-details-header {
-        background-color: rgb(252,252,252);
+        background-color: $light-gray4;
         @media(min-width: $bp-screen-md) {
             margin-left: 30px;
             margin-right: 80px;
@@ -121,7 +121,7 @@
         }
 
         .micromasters {
-            fill: #065784;
+            fill: $micromasters-logo-blue;
             width: 200px;
             @media(min-width: $bp-screen-md) {            
                 width: 250px;
@@ -129,7 +129,7 @@
         }
 
         .xseries {
-            fill: #065784;
+            fill: xseries-logo-gray;
             width: 150px;
             @media(min-width: $bp-screen-md) {            
                 width: 200px;
@@ -137,7 +137,7 @@
         }
 
         .professional.certificate {
-            fill: #065784;
+            fill: $professional-certificate-logo-red;
             width: 250px;
             @media(min-width: $bp-screen-md) {            
                 width: 300px;
