@@ -118,13 +118,14 @@
                 getCertificatePriceString: function(run) {
                     var verifiedSeat, currency;
                     if ('seats' in run && run.seats.length) {
-                        verifiedSeat = _.filter(run.seats, function(seat){
-                            if (seat.type === 'verified' || seat.type === 'professional' || seat.type === 'credit'){
+                        // eslint-disable-next-line consistent-return
+                        verifiedSeat = _.filter(run.seats, function(seat) {
+                            if (['verified', 'professional', 'credit'].indexOf(seat.type) >= 0) {
                                 return seat;
                             }
-                        })[0]
+                        })[0];
                         currency = verifiedSeat.currency;
-                        if (currency === 'USD'){
+                        if (currency === 'USD') {
                             return '$' + verifiedSeat.price;
                         } else {
                             return verifiedSeat.price + ' ' + currency;
@@ -138,7 +139,8 @@
                         courseImageUrl;
 
                     if (courseRun) {
-                        if (courseRun.advertised_start !== undefined && courseRun.advertised_start !== 'None' && courseRun.advertised_start !== null) {
+
+                        if (!([undefined, 'None', null].indexOf(courseRun.advertised_start) >= 0)) {
                             startDateString = courseRun.advertised_start;
                         } else {
                             startDateString = this.formatDate(courseRun.start, userPreferences);
