@@ -409,8 +409,8 @@ class ComputeGradesForCourseTest(HasCourseWithProblemsMixin, ModuleStoreTestCase
 
     @ddt.data(*xrange(1, 12, 3))
     def test_database_calls(self, batch_size):
-        per_user_queries = 16 * min(batch_size, 6)  # No more than 6 due to offset
-        with self.assertNumQueries(3 + 16 * min(batch_size, 6)):
+        per_user_queries = 18 * min(batch_size, 6)  # No more than 6 due to offset
+        with self.assertNumQueries(3 + per_user_queries):
             with check_mongo_calls(1):
                 compute_grades_for_course.delay(
                     course_key=six.text_type(self.course.id),
