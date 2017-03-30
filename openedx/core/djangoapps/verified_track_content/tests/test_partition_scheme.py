@@ -13,6 +13,7 @@ from student.tests.factories import UserFactory
 from xmodule.modulestore.tests.django_utils import SharedModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.partitions.partitions import UserPartition
+from xmodule.partitions.partitions_service import MINIMUM_STATIC_PARTITION_ID
 
 
 class EnrollmentTrackUserPartitionTest(SharedModuleStoreTestCase):
@@ -64,11 +65,11 @@ class EnrollmentTrackUserPartitionTest(SharedModuleStoreTestCase):
 
     def test_group_ids(self):
         """
-        Test that group IDs are all less than 100 (to avoid overlapping with group IDs
-        associated with cohort and random user partitions).
+        Test that group IDs are all less than MINIMUM_STATIC_PARTITION_ID (to avoid overlapping
+        with group IDs associated with cohort and random user partitions).
         """
         for mode in ENROLLMENT_GROUP_IDS:
-            self.assertLess(ENROLLMENT_GROUP_IDS[mode], 100)
+            self.assertLess(ENROLLMENT_GROUP_IDS[mode], MINIMUM_STATIC_PARTITION_ID)
 
     @staticmethod
     def get_group_by_name(partition, name):

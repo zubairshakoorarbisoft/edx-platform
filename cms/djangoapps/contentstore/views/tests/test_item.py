@@ -45,7 +45,7 @@ from xblock_django.user_service import DjangoXBlockUserService
 from opaque_keys.edx.keys import UsageKey, CourseKey
 from opaque_keys.edx.locations import Location
 from xmodule.partitions.partitions import Group, UserPartition
-from xmodule.partitions.partitions_service import ENROLLMENT_TRACK_PARTITION_ID
+from xmodule.partitions.partitions_service import ENROLLMENT_TRACK_PARTITION_ID, MINIMUM_STATIC_PARTITION_ID
 
 
 class AsideTest(XBlockAside):
@@ -343,18 +343,17 @@ class GetItemTest(ItemTest):
         )
 
     def test_get_user_partitions_and_groups(self):
-        # Note about UserPartition and UserPartition Group IDs: these should be >= 100 to match
-        # the fact that Studio assigns unused ideas in the range of [100, MAX_INT]. The IDs
-        # should not conflict with dynamic partition IDs, which are < 100.
+        # Note about UserPartition and UserPartition Group IDs: these must not conflict with IDs used
+        # by dynamic user partitions.
         self.course.user_partitions = [
             UserPartition(
-                id=100,  # See note above.
+                id=MINIMUM_STATIC_PARTITION_ID,
                 name="Verification user partition",
                 scheme=UserPartition.get_scheme("verification"),
                 description="Verification user partition",
                 groups=[
-                    Group(id=101, name="Group A"),  # See note above.
-                    Group(id=102, name="Group B"),  # See note above.
+                    Group(id=MINIMUM_STATIC_PARTITION_ID + 1, name="Group A"),  # See note above.
+                    Group(id=MINIMUM_STATIC_PARTITION_ID + 2, name="Group B"),  # See note above.
                 ],
             ),
         ]
@@ -383,18 +382,18 @@ class GetItemTest(ItemTest):
                 ]
             },
             {
-                "id": 100,
+                "id": MINIMUM_STATIC_PARTITION_ID,
                 "name": "Verification user partition",
                 "scheme": "verification",
                 "groups": [
                     {
-                        "id": 101,
+                        "id": MINIMUM_STATIC_PARTITION_ID + 1,
                         "name": "Group A",
                         "selected": False,
                         "deleted": False,
                     },
                     {
-                        "id": 102,
+                        "id": MINIMUM_STATIC_PARTITION_ID + 2,
                         "name": "Group B",
                         "selected": False,
                         "deleted": False,
@@ -1723,20 +1722,20 @@ class TestEditSplitModule(ItemTest):
         super(TestEditSplitModule, self).setUp()
         self.user = UserFactory()
 
-        self.first_user_partition_group_1 = Group("101", 'alpha')
-        self.first_user_partition_group_2 = Group("102", 'beta')
+        self.first_user_partition_group_1 = Group(unicode(MINIMUM_STATIC_PARTITION_ID + 1), 'alpha')
+        self.first_user_partition_group_2 = Group(unicode(MINIMUM_STATIC_PARTITION_ID + 2), 'beta')
         self.first_user_partition = UserPartition(
-            100, 'first_partition', 'First Partition',
+            MINIMUM_STATIC_PARTITION_ID, 'first_partition', 'First Partition',
             [self.first_user_partition_group_1, self.first_user_partition_group_2]
         )
 
         # There is a test point below (test_create_groups) that purposefully wants the group IDs
         # of the 2 partitions to overlap (which is not something that normally happens).
-        self.second_user_partition_group_1 = Group("101", 'Group 1')
-        self.second_user_partition_group_2 = Group("102", 'Group 2')
-        self.second_user_partition_group_3 = Group("103", 'Group 3')
+        self.second_user_partition_group_1 = Group(unicode(MINIMUM_STATIC_PARTITION_ID + 1), 'Group 1')
+        self.second_user_partition_group_2 = Group(unicode(MINIMUM_STATIC_PARTITION_ID + 2), 'Group 2')
+        self.second_user_partition_group_3 = Group(unicode(MINIMUM_STATIC_PARTITION_ID + 3), 'Group 3')
         self.second_user_partition = UserPartition(
-            101, 'second_partition', 'Second Partition',
+            MINIMUM_STATIC_PARTITION_ID + 10, 'second_partition', 'Second Partition',
             [
                 self.second_user_partition_group_1,
                 self.second_user_partition_group_2,
@@ -1802,8 +1801,8 @@ class TestEditSplitModule(ItemTest):
         vertical_1 = self.get_item_from_modulestore(split_test.children[1], verify_is_draft=True)
         self.assertEqual("vertical", vertical_0.category)
         self.assertEqual("vertical", vertical_1.category)
-        self.assertEqual("Group ID 101", vertical_0.display_name)
-        self.assertEqual("Group ID 102", vertical_1.display_name)
+        self.assertEqual("Group ID " + unicode(MINIMUM_STATIC_PARTITION_ID + 1), vertical_0.display_name)
+        self.assertEqual("Group ID " + unicode(MINIMUM_STATIC_PARTITION_ID + 2), vertical_1.display_name)
 
         # Verify that the group_id_to_child mapping is correct.
         self.assertEqual(2, len(split_test.group_id_to_child))

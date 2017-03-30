@@ -45,6 +45,7 @@ from xmodule.course_module import (
 )
 from xmodule.error_module import ErrorDescriptor
 from xmodule.partitions.partitions import Group, UserPartition
+from xmodule.partitions.partitions_service import MINIMUM_STATIC_PARTITION_ID
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
@@ -301,9 +302,11 @@ class AccessTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase, MilestonesTes
         """
         Test that a user masquerading as a member of a group sees appropriate content in preview mode.
         """
-        partition_id = 100
-        group_0_id = 101
-        group_1_id = 102
+        # Note about UserPartition and UserPartition Group IDs: these must not conflict with IDs used
+        # by dynamic user partitions.
+        partition_id = MINIMUM_STATIC_PARTITION_ID
+        group_0_id = MINIMUM_STATIC_PARTITION_ID + 1
+        group_1_id = MINIMUM_STATIC_PARTITION_ID + 2
         user_partition = UserPartition(
             partition_id, 'Test User Partition', '',
             [Group(group_0_id, 'Group 1'), Group(group_1_id, 'Group 2')],

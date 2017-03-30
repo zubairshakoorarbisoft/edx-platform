@@ -15,11 +15,13 @@ log = logging.getLogger(__name__)
 
 
 # UserPartition IDs must be unique. The Cohort and Random UserPartitions (when they are
-# created via Studio) choose an unused ID in the range of 100 to MAX_INT. Therefore the
+# created via Studio) choose an unused ID in the range of 100 (historical) to MAX_INT. Therefore the
 # dynamic UserPartitionIDs must be under 100, and they have to be hard-coded to ensure
 # they are always the same whenever the dynamic partition is added (since the UserPartition
 # ID is stored in the xblock group_access dict).
 ENROLLMENT_TRACK_PARTITION_ID = 50
+
+MINIMUM_STATIC_PARTITION_ID = 100
 
 
 # settings will not be available when running nosetests.
@@ -70,6 +72,7 @@ def _create_enrollment_track_partition(course):
 
     used_ids = set(p.id for p in course.user_partitions)
     if ENROLLMENT_TRACK_PARTITION_ID in used_ids:
+        # TODO: change to Exception after this has been in production for awhile, see TNL-6796.
         log.warning(
             "Can't add 'enrollment_track' partition, as ID {id} is assigned to {partition} in course {course}.".format(
                 id=ENROLLMENT_TRACK_PARTITION_ID,

@@ -9,11 +9,11 @@ from util.db import generate_int_id, MYSQL_MAX_INT
 from django.utils.translation import ugettext as _
 from contentstore.utils import reverse_usage_url
 from xmodule.partitions.partitions import UserPartition
-from xmodule.partitions.partitions_service import get_all_partitions_for_course
+from xmodule.partitions.partitions_service import get_all_partitions_for_course, MINIMUM_STATIC_PARTITION_ID
 from xmodule.split_test_module import get_split_user_partitions
 from openedx.core.djangoapps.course_groups.partition_scheme import get_cohorted_user_partition
 
-MINIMUM_GROUP_ID = 100
+MINIMUM_GROUP_ID = MINIMUM_STATIC_PARTITION_ID
 
 RANDOM_SCHEME = "random"
 COHORT_SCHEME = "cohort"

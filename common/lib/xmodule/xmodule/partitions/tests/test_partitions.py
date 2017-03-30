@@ -594,7 +594,6 @@ class TestGetCourseUserPartitions(PartitionServiceBaseClass):
         self.assertEqual(1, len(all_partitions))
         self.assertEqual(self.TEST_SCHEME_NAME, all_partitions[0].scheme.name)
 
-
     def test_filter_inactive_user_partitions(self):
         """
         Tests supplying the `active_only` parameter.

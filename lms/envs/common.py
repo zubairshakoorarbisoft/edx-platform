@@ -3079,5 +3079,5 @@ COURSE_ENROLLMENT_MODES = {
     "professional": 3,
     "no-id-professional": 4,
     "credit": 5,
-    "honor": 6
+    "honor": 6,
 }

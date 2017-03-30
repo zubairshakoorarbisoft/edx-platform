@@ -14,6 +14,7 @@ from xmodule.x_module import AUTHOR_VIEW, STUDENT_VIEW
 from xmodule.validation import StudioValidationMessage
 from xmodule.split_test_module import SplitTestDescriptor, SplitTestFields, get_split_user_partitions
 from xmodule.partitions.partitions import Group, UserPartition
+from xmodule.partitions.partitions_service import MINIMUM_STATIC_PARTITION_ID
 
 
 class SplitTestModuleFactory(xml.XmlImportFactory):
@@ -85,8 +86,11 @@ class SplitTestModuleTest(XModuleXmlImportTest, PartitionTestCase):
         self.course.user_partitions = [
             self.user_partition,
             UserPartition(
-                100, 'second_partition', 'Second Partition',
-                [Group("101", 'abel'), Group("102", 'baker'), Group("103", 'charlie')],
+                MINIMUM_STATIC_PARTITION_ID, 'second_partition', 'Second Partition',
+                [
+                    Group(unicode(MINIMUM_STATIC_PARTITION_ID + 1), 'abel'),
+                    Group(unicode(MINIMUM_STATIC_PARTITION_ID + 2), 'baker'), Group("103", 'charlie')
+                ],
                 MockUserPartitionScheme()
             )
         ]
