@@ -103,7 +103,7 @@ class EnrollmentTrackPartitionScheme(object):
             course_mode = CourseMode.mode_for_course(
                 course_key,
                 mode_slug,
-                modes=CourseMode.modes_for_course(course_key, include_expired=True, only_selectable=False)
+                modes=CourseMode.modes_for_course(course_key, include_expired=True, only_selectable=False),
             )
             if not course_mode:
                 course_mode = CourseMode.DEFAULT_MODE
