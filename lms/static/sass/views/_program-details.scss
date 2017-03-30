@@ -215,7 +215,7 @@
     }
 
     .course-list > div:nth-of-type(even) {
-        background-color: #f9fafc;
+        background-color: $zebra-stripe-color;
     }
 
     .course-list-headings {
@@ -224,7 +224,7 @@
         .divider {
             margin-left: 0;
             margin-bottom: 20px;
-            background-color: #BBC7D2;
+            background-color: $divider-color;
             height: 2px;
             width: 320px;
             @media(min-width: $bp-screen-sm) {
@@ -250,7 +250,7 @@
             font-family: "Open Sans";
             font-weight: 600;
             font-size: 1.3em;
-            color: #373737;
+            color: palette(grayscale, base);
             margin-bottom: 5px;
             line-height: normal;
         }
@@ -270,7 +270,7 @@
             }
 
             button {
-                background-color: #3C5E7E;
+                background-color: palette(primary, dark);
                 height: 37px;
                 width: 128px;
                 border-radius: 0;
@@ -289,7 +289,7 @@
             font-family: "Open Sans";
             font-weight: bold;
             font-size: 0.9375em;
-            color: #2c3e50;
+            color: palette(grayscale, base);
             margin-top: 6px;
             margin-right: 2px;
             display: block;
@@ -353,8 +353,12 @@
             }
 
             .run-period {
-                color: #292929;
+                color: palette(grayscale, base);
                 font-size: 0.9375em;
+            }
+
+            .course-text .enrolled {
+                color: palette(grayscale, base);
             }
         }
 
@@ -414,7 +418,7 @@
                     font-family: "Open Sans";
                     font-weight: bold;
                     font-size: 0.9375em;
-                    color: #2c3e50;
+                    color: palette(grayscale, base);
                     display: block;
                     @media(min-width: $bp-screen-sm) {
                         display: inline;
@@ -438,11 +442,11 @@
                 font-family: "Open Sans";
                 font-weight: bold;
                 font-size: 0.9375em;
-                color: #2c3e50;
+                color: palette(grayscale, base);
             }
 
             .certificate-status-msg {
-                color: #292929;
+                color: palette(grayscale, base);
                 font-size: 0.9375em;
             }
         }

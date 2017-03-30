@@ -48,7 +48,7 @@
                  handleEnroll: function() {
                     // Enrollment click event handled here
                      if (!this.model.get('course_run_key')) {
-                         this.$('.select-error').css('visibility', 'visible');
+                         this.$('.select-error').addClass('visible');
                      } else if (!this.model.get('is_enrolled')) {
                          // Create the enrollment.
                          this.enrollModel.save({

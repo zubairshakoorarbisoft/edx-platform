@@ -46,6 +46,7 @@
                         this.courseData.get('not_started') || [],
                         this.options.userPreferences
                      );
+
                      this.render();
                  },
 
@@ -54,7 +55,12 @@
                          inProgressCount = this.inProgressCourseCollection.length,
                          remainingCount = this.remainingCourseCollection.length,
                          totalCount = completedCount + inProgressCount + remainingCount,
-                         data = {totalCount: totalCount, inProgressCount: inProgressCount};
+                         data = {
+                            totalCount: totalCount,
+                            inProgressCount: inProgressCount,
+                            remainingCount: remainingCount,
+                            completedCount: completedCount
+                         };
                      data = $.extend(data, this.options.programData);
                      HtmlUtils.setHtml(this.$el, this.tpl(data));
                      this.postRender();
