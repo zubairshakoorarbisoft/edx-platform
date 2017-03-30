@@ -31,9 +31,6 @@
                      this.enrollModel = options.enrollModel;
                      this.urlModel = options.urlModel;
                      this.render();
-                     if (this.urlModel) {
-                         this.trackSelectionUrl = this.urlModel.get('track_selection_url');
-                     }
                  },
 
                  render: function() {
@@ -42,6 +39,13 @@
                          filledTemplate = this.tpl(this.model.toJSON());
                          HtmlUtils.setHtml(this.$el, filledTemplate);
                          HtmlUtils.setHtml(this.$parentEl, HtmlUtils.HTML(this.$el));
+                     }
+                     this.postRender();
+                 },
+
+                 postRender: function() {
+                     if (this.urlModel) {
+                         this.trackSelectionUrl = this.urlModel.get('track_selection_url');
                      }
                  },
 

@@ -71,27 +71,33 @@
                          model: new Backbone.Model(this.options)
                      });
 
-                     new CollectionListView({
-                         el: '.js-course-list-remaining',
-                         childView: CourseCardView,
-                         collection: this.remainingCourseCollection,
-                         context: this.options
-                     }).render();
+                     if (this.remainingCourseCollection.length > 0) {
+                         new CollectionListView({
+                             el: '.js-course-list-remaining',
+                             childView: CourseCardView,
+                             collection: this.remainingCourseCollection,
+                             context: this.options
+                         }).render();
+                     }
 
-                     new CollectionListView({
-                         el: '.js-course-list-completed',
-                         childView: CourseCardView,
-                         collection: this.completedCourseCollection,
-                         context: this.options
-                     }).render();
+                     if (this.completedCourseCollection.length > 0) {
+                         new CollectionListView({
+                             el: '.js-course-list-completed',
+                             childView: CourseCardView,
+                             collection: this.completedCourseCollection,
+                             context: this.options
+                         }).render();
+                     }
 
-                    // This is last because the context is modified below
-                     new CollectionListView({
-                         el: '.js-course-list-in-progress',
-                         childView: CourseCardView,
-                         collection: this.inProgressCourseCollection,
-                         context: $.extend(this.options, {enrolled: gettext('Enrolled')})
-                     }).render();
+                     if (this.inProgressCourseCollection.length > 0) {
+                         // This is last because the context is modified below
+                         new CollectionListView({
+                             el: '.js-course-list-in-progress',
+                             childView: CourseCardView,
+                             collection: this.inProgressCourseCollection,
+                             context: $.extend(this.options, {enrolled: gettext('Enrolled')})
+                         }).render();
+                     }
 
                      new SidebarView({
                          el: '.sidebar',
