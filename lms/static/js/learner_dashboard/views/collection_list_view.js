@@ -25,7 +25,7 @@
                 },
 
                 render: function() {
-                    var childList, count;
+                    var childList;
 
                     if (!this.collection.length) {
                         if (this.context.marketingUrl) {

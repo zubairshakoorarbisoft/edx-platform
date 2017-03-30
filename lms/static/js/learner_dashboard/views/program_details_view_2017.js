@@ -56,10 +56,10 @@
                          remainingCount = this.remainingCourseCollection.length,
                          totalCount = completedCount + inProgressCount + remainingCount,
                          data = {
-                            totalCount: totalCount,
-                            inProgressCount: inProgressCount,
-                            remainingCount: remainingCount,
-                            completedCount: completedCount
+                             totalCount: totalCount,
+                             inProgressCount: inProgressCount,
+                             remainingCount: remainingCount,
+                             completedCount: completedCount
                          };
                      data = $.extend(data, this.options.programData);
                      HtmlUtils.setHtml(this.$el, this.tpl(data));
