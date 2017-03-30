@@ -374,11 +374,11 @@ def get_user_partition_info(xblock, schemes=None, course=None):
         schemes = set(schemes)
 
     partitions = []
-    for p in sorted(get_all_partitions_for_course(course), key=lambda p: p.name):
+    for p in sorted(get_all_partitions_for_course(course, active_only=True), key=lambda p: p.name):
 
         # Exclude disabled partitions, partitions with no groups defined
         # Also filter by scheme name if there's a filter defined.
-        if p.active and p.groups and (schemes is None or p.scheme.name in schemes):
+        if p.groups and (schemes is None or p.scheme.name in schemes):
 
             # First, add groups defined by the partition
             groups = []

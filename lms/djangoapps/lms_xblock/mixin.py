@@ -130,8 +130,8 @@ class LmsBlockMixin(XBlockMixin):
 
     def _get_user_partition(self, user_partition_id):
         """
-        Returns the user partition with the specified id.  Raises
-        `NoSuchUserPartitionError` if the lookup fails.
+        Returns the user partition with the specified id. Note that this method can return
+        an inactive user partition. Raises `NoSuchUserPartitionError` if the lookup fails.
         """
         for user_partition in self.runtime.service(self, 'partitions').course_partitions:
             if user_partition.id == user_partition_id:

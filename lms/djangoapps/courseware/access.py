@@ -30,7 +30,6 @@ from xmodule.course_module import (
 )
 from xmodule.error_module import ErrorDescriptor
 from xmodule.x_module import XModule
-from xmodule.split_test_module import get_split_user_partitions
 from xmodule.partitions.partitions import NoSuchUserPartitionError, NoSuchUserPartitionGroupError
 
 from courseware.access_response import (

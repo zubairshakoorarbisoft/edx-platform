@@ -593,3 +593,28 @@ class TestGetCourseUserPartitions(PartitionServiceBaseClass):
         all_partitions = get_all_partitions_for_course(self.course)
         self.assertEqual(1, len(all_partitions))
         self.assertEqual(self.TEST_SCHEME_NAME, all_partitions[0].scheme.name)
+
+
+    def test_filter_inactive_user_partitions(self):
+        """
+        Tests supplying the `active_only` parameter.
+        """
+        self.user_partition = UserPartition(
+            self.TEST_ID,
+            self.TEST_NAME,
+            self.TEST_DESCRIPTION,
+            self.TEST_GROUPS,
+            self.non_random_scheme,
+            self.TEST_PARAMETERS,
+            active=False
+        )
+        self.course.user_partitions = [self.user_partition]
+
+        all_partitions = get_all_partitions_for_course(self.course, active_only=True)
+        self.assertEqual(1, len(all_partitions))
+        self.assertEqual(self.ENROLLMENT_TRACK_SCHEME_NAME, all_partitions[0].scheme.name)
+
+        all_partitions = get_all_partitions_for_course(self.course, active_only=False)
+        self.assertEqual(2, len(all_partitions))
+        self.assertEqual(self.TEST_SCHEME_NAME, all_partitions[0].scheme.name)
+        self.assertEqual(self.ENROLLMENT_TRACK_SCHEME_NAME, all_partitions[1].scheme.name)

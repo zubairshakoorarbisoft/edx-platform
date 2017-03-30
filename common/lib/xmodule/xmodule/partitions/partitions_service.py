@@ -26,13 +26,23 @@ ENROLLMENT_TRACK_PARTITION_ID = 50
 FEATURES = getattr(settings, 'FEATURES', {})
 
 
-def get_all_partitions_for_course(course):
+def get_all_partitions_for_course(course, active_only=False):
     """
     A method that returns all `UserPartitions` associated with a course, as a List.
     This will include the ones defined in course.user_partitions, but it may also
     include dynamically included partitions (such as the `EnrollmentTrackUserPartition`).
+
+    Args:
+        course: the course for which user partitions should be returned.
+        active_only: if `True`, only partitions with `active` set to True will be returned.
+
+        Returns:
+            A List of UserPartitions associated with the course.
     """
-    return course.user_partitions + _get_dynamic_partitions(course)
+    all_partitions = course.user_partitions + _get_dynamic_partitions(course)
+    if active_only:
+        all_partitions = [partition for partition in all_partitions if partition.active]
+    return all_partitions
 
 
 def _get_dynamic_partitions(course):
@@ -99,7 +109,9 @@ class PartitionService(object):
     @property
     def course_partitions(self):
         """
-        Return the set of partitions assigned to self._course_id
+        Return the set of partitions assigned to self._course_id (both those set directly on the course
+        through course.user_partitions, and any dynamic partitions that exist). Note: this returns
+        both active and inactive partitions.
         """
         return get_all_partitions_for_course(self.get_course())
 
@@ -146,6 +158,7 @@ class PartitionService(object):
     def _get_user_partition(self, user_partition_id):
         """
         Look for a user partition with a matching id in the course's partitions.
+        Note that this method can return an inactive user partition.
 
         Returns:
             A UserPartition, or None if not found.
