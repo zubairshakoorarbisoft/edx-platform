@@ -87,9 +87,11 @@
                     _.each(enrollableCourseRuns, (function(courseRun) {
                         // eslint-disable-next-line no-param-reassign
                         courseRun.start_date = this.formatDate(courseRun.start);
+                        // eslint-disable-next-line no-param-reassign
                         courseRun.end_date = this.formatDate(courseRun.end);
 
                         // This is used to render the date when selecting a course run to enroll in
+                        // eslint-disable-next-line no-param-reassign
                         courseRun.dateString = this.formatDateString(courseRun);
                     }).bind(this));
 
@@ -140,35 +142,35 @@
                     return null;
                 },
 
-                 formatDateString: function(run) {
-                    var pacing_type = run.pacing_type,
-                        dateString = '',
-                        start = run.start_date || this.get('start_date'),
-                        end = run.end_date || this.get('end_date'),
-                        now = new Date(),
-                        start_date = new Date(start),
-                        end_date = new Date(end);
+                formatDateString: function(run) {
+                   var pacingType = run.pacing_type,
+                       dateString = '',
+                       start = run.start_date || this.get('start_date'),
+                       end = run.end_date || this.get('end_date'),
+                       now = new Date(),
+                       startDate = new Date(start),
+                       endDate = new Date(end);
 
-                    if (pacing_type === 'self_paced'){
-                        dateString = 'Self-paced';
-                        if (start && start_date > now) {
-                            dateString += ' - Starts ' + start;
-                        } else if (end && end_date > now) {
-                            dateString += ' - Ends ' + end;
-                        } else if (end && end_date < now) {
-                            dateString += ' - Ended ' + end;
-                        }
-                    } else if (pacing_type === 'instructor_paced') {
-                        if (start && end){
-                            dateString = start + ' - ' + end;
-                        } else if (start) {
-                            dateString = 'Starts ' + start;
-                        } else if (end) {
-                            dateString = 'Ends ' + end;
-                        }
-                    }
-                    return dateString;
-                 },
+                   if (pacingType === 'self_paced') {
+                       dateString = 'Self-paced';
+                       if (start && startDate > now) {
+                           dateString += ' - Starts ' + start;
+                       } else if (end && endDate > now) {
+                           dateString += ' - Ends ' + end;
+                       } else if (end && endDate < now) {
+                           dateString += ' - Ended ' + end;
+                       }
+                   } else if (pacingType === 'instructor_paced') {
+                       if (start && end){
+                           dateString = start + ' - ' + end;
+                       } else if (start) {
+                           dateString = 'Starts ' + start;
+                       } else if (end) {
+                           dateString = 'Ends ' + end;
+                       }
+                   }
+                   return dateString;
+                },
 
                 setActiveCourseRun: function(courseRun, userPreferences) {
                     var startDateString,
@@ -210,7 +212,7 @@
                         });
 
                         // This is used to render the date for completed and in progress courses
-                        this.set({'dateString': this.formatDateString(courseRun)});
+                        this.set({dateString: this.formatDateString(courseRun)});
                     }
                 },
 
