@@ -13,15 +13,7 @@
                                 selected="selected"
                             <% }%>
                         >
-                            <%= interpolate(
-                                gettext('Starts %(start)s'),
-                                { start: courseRun.start_date },
-                                true)
-                            %> - <%= interpolate(
-                                gettext('Ends %(end)s'),
-                                { end: courseRun.end_date },
-                                true)
-                            %>
+                            <%- courseRun.dateString %>
                         </option>
                     <% }); %>
                 </select>

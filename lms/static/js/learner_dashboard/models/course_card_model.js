@@ -59,7 +59,9 @@
                         $.extend(unselectedRun, {
                             course_image_url: courseImageUrl,
                             marketing_url: courseRun.marketing_url,
-                            is_enrollment_open: courseRun.is_enrollment_open
+                            is_enrollment_open: courseRun.is_enrollment_open,
+                            start: courseRun.start,
+                            end: courseRun.end
                         });
                     }
 
@@ -85,6 +87,10 @@
                     _.each(enrollableCourseRuns, (function(courseRun) {
                         // eslint-disable-next-line no-param-reassign
                         courseRun.start_date = this.formatDate(courseRun.start);
+                        courseRun.end_date = this.formatDate(courseRun.end);
+
+                        // This is used to render the date when selecting a course run to enroll in
+                        courseRun.dateString = this.formatDateString(courseRun);
                     }).bind(this));
 
                     return enrollableCourseRuns;
@@ -134,6 +140,36 @@
                     return null;
                 },
 
+                 formatDateString: function(run) {
+                    var pacing_type = run.pacing_type,
+                        dateString = '',
+                        start = run.start_date || this.get('start_date'),
+                        end = run.end_date || this.get('end_date'),
+                        now = new Date(),
+                        start_date = new Date(start),
+                        end_date = new Date(end);
+
+                    if (pacing_type === 'self_paced'){
+                        dateString = 'Self-paced';
+                        if (start && start_date > now) {
+                            dateString += ' - Starts ' + start;
+                        } else if (end && end_date > now) {
+                            dateString += ' - Ends ' + end;
+                        } else if (end && end_date < now) {
+                            dateString += ' - Ended ' + end;
+                        }
+                    } else if (pacing_type === 'instructor_paced') {
+                        if (start && end){
+                            dateString = start + ' - ' + end;
+                        } else if (start) {
+                            dateString = 'Starts ' + start;
+                        } else if (end) {
+                            dateString = 'Ends ' + end;
+                        }
+                    }
+                    return dateString;
+                 },
+
                 setActiveCourseRun: function(courseRun, userPreferences) {
                     var startDateString,
                         courseImageUrl;
@@ -151,6 +187,7 @@
                         } else {
                             courseImageUrl = courseRun.course_image_url;
                         }
+
 
                         this.set({
                             certificate_url: courseRun.certificate_url,
@@ -171,6 +208,9 @@
                             upgrade_url: courseRun.upgrade_url,
                             price: this.getCertificatePriceString(courseRun)
                         });
+
+                        // This is used to render the date for completed and in progress courses
+                        this.set({'dateString': this.formatDateString(courseRun)});
                     }
                 },
 

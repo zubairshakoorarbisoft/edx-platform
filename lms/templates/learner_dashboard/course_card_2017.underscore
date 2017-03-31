@@ -14,8 +14,8 @@
                 <% if (enrolled) { %>
                     <span class='enrolled'><%- enrolled %>: </span>
                 <% } %>
-                <% if (start_date && end_date) { %>
-                    <span class="run-period"><%- start_date %> - <%- end_date %></span>
+                <% if (dateString) { %>
+                    <span class="run-period"><%- dateString %></span>
                 <% } %>
             </div>
         </div>

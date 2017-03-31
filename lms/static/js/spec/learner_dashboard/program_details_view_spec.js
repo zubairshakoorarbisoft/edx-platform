@@ -31,7 +31,7 @@ define([
                         {
                             family_name: 'Tester',
                             uuid: '11ee1afb-5750-4185-8434-c9ae8297f0f1',
-                            bio: 'Dr. Tester, PhD, RD, is an Associate Professor of Nutrition at the School of Nutrition.',
+                            bio: 'Dr. Tester, PhD, RD, is an Associate Professor at the School of Nutrition.',
                             profile_image: {},
                             profile_image_url: 'some image',
                             given_name: 'Bob',
@@ -95,7 +95,7 @@ define([
                             key: 'LearnX',
                             certificate_logo_image_url: null,
                             marketing_url: 'someurl',
-                            logo_image_url: 'https://stage.edx.org/sites/default/files/school/image/logo/learnx-logo.png',
+                            logo_image_url: 'https://stage.edx.org/sites/default/files/school/image/logo/learnx.png',
                             uuid: 'de3e9ff0-477d-4496-8cfa-a98f902e5830'
                         },
                         {
@@ -109,7 +109,7 @@ define([
                             key: 'TestX',
                             certificate_logo_image_url: null,
                             marketing_url: 'someurl',
-                            logo_image_url: 'https://stage.edx.org/sites/default/files/school/image/logo/ritx-logo.png',
+                            logo_image_url: 'https://stage.edx.org/sites/default/files/school/image/logo/ritx.png',
                             uuid: '54bc81cb-b736-4505-aa51-dd2b18c61d84'
                         }
                     ],
@@ -330,7 +330,7 @@ define([
                                         {
                                             family_name: 'Tester',
                                             uuid: '11ee1afb-5750-4185-8434-c9ae8297f0f1',
-                                            bio: 'Dr. Tester, PhD, RD, is an Associate Professor at the School of Nutrition.',
+                                            bio: 'Dr. Tester, PhD, RD, is a Professor at the School of Nutrition.',
                                             profile_image: {},
                                             profile_image_url: 'someimage.jpg',
                                             given_name: 'Bob',
@@ -478,20 +478,26 @@ define([
 
         it('should render the header', function() {
             expect(view.$('.js-program-header h2').html()).toEqual(data.title);
-            expect(view.$('.js-program-header .org-logo')[0].src).toEqual(data.authoring_organizations[0].logo_image_url);
-            expect(view.$('.js-program-header .org-logo')[1].src).toEqual(data.authoring_organizations[1].logo_image_url);
+            expect(view.$('.js-program-header .org-logo')[0].src).toEqual(
+              data.authoring_organizations[0].logo_image_url
+            );
+            expect(view.$('.js-program-header .org-logo')[1].src).toEqual(
+              data.authoring_organizations[1].logo_image_url
+            );
         });
 
         it('should render the program heading', function() {
             expect(view.$('.program-heading-title').text()).toEqual('Your Program Journey');
-            expect(view.$('.program-heading-message').text().replace(/\s+/g, ' ').trim()).toEqual(
+            expect(view.$('.program-heading-message').text().trim().replace(/\s+/g, ' ')).toEqual(
               'Track and plan your progress through the 3 courses in this program. ' +
               'To complete the program, you must earn a verified certificate for each course.'
             );
         });
 
         it('should render the course list headings', function() {
-            expect(view.$('.course-list-heading .status').text()).toEqual('COURSES IN PROGRESSREMAINING COURSESCOMPLETED COURSES');
+            expect(view.$('.course-list-heading .status').text()).toEqual(
+              'COURSES IN PROGRESSREMAINING COURSESCOMPLETED COURSES'
+            );
             expect(view.$('.course-list-heading .count').text()).toEqual('111');
         });
 
