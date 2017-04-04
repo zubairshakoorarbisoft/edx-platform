@@ -2,7 +2,7 @@
 <div class="program-details-content">
     <div class="js-program-progress-view"></div>
     <div class="program-heading">
-            <% if (inProgressCount == totalCount) { %>
+            <% if (inProgressCount === totalCount) { %>
                 <h3 class="program-heading-title"><%- gettext('Congratulations!') %></h3>
                 <div class="program-heading-message">
                     <div><%- interpolate(gettext(
@@ -54,7 +54,7 @@
         </div>  
         <% } else { %>
             <div class="completed-group">
-                <h5 class='motivating-heading'><%- gettext('You haven't completed any courses yet.') %></h5>
+                <h5 class='motivating-heading'><%- gettext("You haven't completed any courses yet.") %></h5>
                 <span class='motivating-message'><%- gettext('Message to keep the learner engaged and optimistic about completing the program.') %></span>
             </div>
         <% } %>
