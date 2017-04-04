@@ -337,7 +337,6 @@ class ProgramDataExtender(object):
             required_mode = CourseMode.mode_for_course(self.course_run_key, required_mode_slug)
             ecommerce = EcommerceService()
             sku = getattr(required_mode, 'sku', None)
-
             if ecommerce.is_enabled(self.user) and sku:
                 run_mode['upgrade_url'] = ecommerce.checkout_page_url(required_mode.sku)
             else:
