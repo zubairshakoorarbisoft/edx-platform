@@ -67,9 +67,6 @@ def program_details(request, program_uuid):
         'commerce_api_url': reverse('commerce_api:v0:baskets:create'),
     }
 
-    progress = meter.progress(programs=meter.programs, count_only=False)[0]
-    program_data.pop('courses')
-
     context = {
         'urls': urls,
         'show_program_listing': programs_config.enabled,
