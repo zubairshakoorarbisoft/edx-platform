@@ -55,12 +55,11 @@
                      if (!this.model.get('is_enrolled')) {
                          // Create the enrollment.
                          this.enrollModel.save({
-                            course_id: courseRunKey
+                             course_id: courseRunKey
                          }, {
-                            success: _.bind(this.enrollSuccess, this),
-                            error: _.bind(this.enrollError, this)
+                             success: _.bind(this.enrollSuccess, this),
+                             error: _.bind(this.enrollError, this)
                          });
-
                      }
                  },
 
