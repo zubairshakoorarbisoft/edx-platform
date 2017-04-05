@@ -451,5 +451,24 @@
             }
         }
 
+        .expired-notification {
+            margin-top: 5px;
+
+            width: 310px;
+            @media(min-width: $bp-screen-sm) {
+                width: 450px;
+                margin-bottom: 5px;
+            }
+            @media(min-width: $bp-screen-md) {
+                width: 650px;
+                margin-bottom: 5px;
+            }
+
+            .fa-info-circle {
+                color: palette(primary, dark);
+                margin-right: 5px;
+            }
+        }
+
     }
 }

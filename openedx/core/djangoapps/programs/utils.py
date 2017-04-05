@@ -4,6 +4,8 @@ from collections import defaultdict
 import datetime
 from urlparse import urljoin
 
+from dateutil.parser import parse
+from dateutil.tz import tzlocal
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -126,7 +128,7 @@ class ProgramProgressMeter(object):
 
         return programs
 
-    def progress(self, programs=None, count_only=True):
+    def progress(self, programs=None, count_only=True, show_expired_runs_as_remaining=False):
         """Gauge a user's progress towards program completion.
 
         Keyword Arguments:
@@ -137,19 +139,31 @@ class ProgramProgressMeter(object):
                 progress, and unstarted courses instead of serialized representations
                 of the courses.
 
+            show_expired_runs_as_remaining (bool): Whether in progress runs whose upgrade
+                deadline has expired should be counted as remaining rather than in progress.
+
         Returns:
             list of dict, each containing information about a user's progress
                 towards completing a program.
         """
+        now = datetime.datetime.now(tzlocal())
         progress = []
         programs = programs or self.engaged_programs
         for program in programs:
-            completed, in_progress, not_started = [], [], []
+            completed, in_progress, not_started, expired = [], [], [], []
 
             for course in program['courses']:
                 if self._is_course_complete(course):
                     completed.append(course)
                 elif self._is_course_in_progress(course):
+                    if show_expired_runs_as_remaining:
+                        enrolled_run = [run for run in course['course_runs'] if run['is_enrolled']][0]
+                        enrolled_run_seats = [seat['upgrade_deadline'] for seat in enrolled_run['seats']]
+                        run_expired = any((x is not None) and (parse(x) < now) for x in enrolled_run_seats)
+                        course['expired'] = run_expired
+                        if run_expired:
+                            not_started.append(course)
+                            continue
                     in_progress.append(course)
                 else:
                     not_started.append(course)
@@ -158,7 +172,7 @@ class ProgramProgressMeter(object):
                 'uuid': program['uuid'],
                 'completed': len(completed) if count_only else completed,
                 'in_progress': len(in_progress) if count_only else in_progress,
-                'not_started': len(not_started) if count_only else not_started,
+                'not_started': len(not_started) if count_only else not_started
             })
 
         return progress

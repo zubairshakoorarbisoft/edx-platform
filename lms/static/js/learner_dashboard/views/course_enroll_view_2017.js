@@ -22,8 +22,7 @@
                  tpl: HtmlUtils.template(pageTpl),
 
                  events: {
-                     'click .enroll-button': 'handleEnroll',
-                     'change .run-select': 'handleCourseRunSelect'
+                     'click .enroll-button': 'handleEnroll'
                  },
 
                  initialize: function(options) {
@@ -50,33 +49,26 @@
                  },
 
                  handleEnroll: function() {
-                    // Enrollment click event handled here
-                     if (!this.model.get('course_run_key')) {
-                         this.$('.select-error').addClass('visible');
-                     } else if (!this.model.get('is_enrolled')) {
+                     // Enrollment click event handled here
+                     var courseRunKey = $('.run-select').val();
+                     this.model.updateCourseRun(courseRunKey);
+                     if (!this.model.get('is_enrolled')) {
                          // Create the enrollment.
                          this.enrollModel.save({
-                             course_id: this.model.get('course_run_key')
+                            course_id: courseRunKey
                          }, {
-                             success: _.bind(this.enrollSuccess, this),
-                             error: _.bind(this.enrollError, this)
+                            success: _.bind(this.enrollSuccess, this),
+                            error: _.bind(this.enrollError, this)
                          });
-                     }
-                 },
 
-                 handleCourseRunSelect: function(event) {
-                     var courseRunKey = $(event.target).val();
-
-                     if (courseRunKey) {
-                         this.model.updateCourseRun(courseRunKey);
-                     } else {
-                         // Set back the unselected states
-                         this.model.setUnselected();
                      }
                  },
 
                  enrollSuccess: function() {
                      var courseRunKey = this.model.get('course_run_key');
+                     window.analytics.track('Program Details Enrollment', {
+                         courseRun: courseRunKey
+                     });
                      if (this.trackSelectionUrl) {
                          // Go to track selection page
                          this.redirect(this.trackSelectionUrl + courseRunKey);
