@@ -153,6 +153,11 @@
             @media(min-width: $bp-screen-lg) {
                 width: 75%;
             }
+
+            .program-title {
+                font-weight: normal;
+                font-size: 2em;
+            }
         }
 
         .authoring-organizations {
@@ -207,7 +212,8 @@
         color: palette(primary, dark);
         font-size: 0.9375em;
         line-height: normal;
-        margin: 0;
+        margin-top: 10px;
+        margin-bottom: 0;
 
         .status {
             margin-right: 7px;
@@ -225,22 +231,41 @@
             margin-left: 0;
             margin-bottom: 20px;
             background-color: $divider-color;
-            height: 2px;
-            width: 320px;
+            margin-top: 5px;
+            height: 3px;
+            width: 315px;
             @media(min-width: $bp-screen-sm) {
-                width: 500px;
+                width: 550px;
             }
             @media(min-width: $bp-screen-md) {
                 width: 700px;
             }
             border: none;
         }
+
+        .motivating-section {
+            font-size: 0.9375em;
+            margin-left: 15px;
+            width: 310px;
+            @media(min-width: $bp-screen-sm) {
+                width: auto;
+            }
+
+            .motivating-heading {
+                margin-bottom: 0px;
+                font-weight: 600;
+            }
+
+            .motivating-message {
+                color: #414141;
+            }
+
+        }
     }
 
     .program-heading {
         @media(min-width: $bp-screen-md) {
             width: 70%;
-            margin-top: 65px;
         }
         width: 90%;
         margin-top: 40px;
@@ -264,9 +289,16 @@
         .enroll-button {
             width: 100%;
 
+            @media(min-width: $bp-screen-sm) {
+                width: initial;
+                margin-bottom: 0;
+                margin-top: 17px;
+            }
+
             @media(min-width: $bp-screen-md) {
                 width: initial;
-                margin-bottom: 10px;
+                margin-top: 0px;
+                margin-bottom: 0;
             }
 
             button {
@@ -332,9 +364,12 @@
             display: flex;
             justify-content: space-between;
             margin-right: 40px;
-            @media(min-width: $bp-screen-sm) {
+            margin-left: 15px;
+
+            @media(min-width: $bp-screen-md) {
                 margin-left: 20px;
             }
+
             @media(min-width: $bp-screen-md) {
                 flex-wrap: wrap;
             }
@@ -405,14 +440,24 @@
                 width: 100%;
                 margin: 5px 0;
 
-                @media(min-width: $bp-screen-md) {
+                @media(min-width: $bp-screen-sm) {
                     width: initial;
+                }
+                @media(min-width: $bp-screen-md) {
                     margin-top: -25px;
                 }
             }
 
             .certificate-status{
-                padding-top: 8px;
+                padding-top: 0px;
+
+                width: initial;
+                @media(min-width: $bp-screen-sm) {
+                    width: 300px;
+                }
+                @media(min-width: $bp-screen-md) {
+                    width: initial;
+                }
 
                 .card-msg {
                     font-family: "Open Sans";
