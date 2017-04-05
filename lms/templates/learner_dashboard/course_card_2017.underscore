@@ -11,17 +11,16 @@
                 <% } %>
             </h5>
             <div class="course-text">
-                <% if (enrolled && (typeof expired === "undefined" || !expired)) { %>
+                <% if (enrolled) { %>
                     <span class='enrolled'><%- enrolled %>: </span>
                 <% } %>
-                <% if (dateString && (typeof expired === "undefined" || !expired)) { %>
+                <% if (dateString) { %>
                     <span class="run-period"><%- dateString %></span>
                 <% } %>
             </div>
         </div>
         <div class="course-actions col-12 md-col-4 sm-col-12"></div>
         <div class="certificate-status"></div>
-        <div class="expired-notification"></div>
     </div>
 </div>
 <div class="section action-msg-view"></div>
