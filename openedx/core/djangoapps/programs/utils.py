@@ -127,6 +127,31 @@ class ProgramProgressMeter(object):
 
         return programs
 
+    def does_course_still_qualify_as_in_progress(self, now, enrolled_run_modes, course):
+        # Part 1: Check if any of the seats you are enrolled in qualify this course as in progress
+        enrolled_runs = [run for run in course['course_runs'] if run in self.course_run_ids]
+        # Check if you are enrolled in the required mode for the run
+        runs_with_required_mode = [
+            run for run in enrolled_runs
+            if run['type'] in enrolled_run_modes[run['key']]
+        ]
+        if runs_with_required_mode:
+            # Check if the runs you are enrolled in with the right mode are not failed
+            not_failed_runs = [run for run in runs_with_required_mode if run not in self.failed_course_runs]
+            if not_failed_runs:
+                return True
+        # Part 2: Check if any of the seats you are not enrolled in
+        # in the runs you are enrolled in qualify this course as in progress
+        upgrade_deadlines = [
+            seat['upgrade_deadline'] for run in enrolled_runs for seat in run['seats']
+            if seat['type'] == run['type'] and run['type'] not in enrolled_run_modes[run['key']]]
+        course_still_upgradeable = any(
+            (deadline is not None) and (parse(deadline) > now) for deadline in upgrade_deadlines
+        )
+        if course_still_upgradeable:
+            return True
+        return False
+
     def progress(self, programs=None, count_only=True):
         """Gauge a user's progress towards program completion.
 
@@ -142,6 +167,11 @@ class ProgramProgressMeter(object):
             list of dict, each containing information about a user's progress
                 towards completing a program.
         """
+        now = datetime.datetime.now(utc)
+        enrolled_run_modes = {}
+        for enrollment in self.enrollments:
+            enrolled_run_modes[unicode(enrollment.course_id)] = enrollment.mode
+
         progress = []
         programs = programs or self.engaged_programs
         for program in programs:
@@ -151,7 +181,12 @@ class ProgramProgressMeter(object):
                 if self._is_course_complete(course):
                     completed.append(course)
                 elif self._is_course_in_progress(course):
-                    in_progress.append(course)
+                    course_in_progress = self.does_course_still_qualify_as_in_progress(now, enrolled_run_modes, course)
+                    course['expired'] = course_in_progress
+                    if course_in_progress:
+                        in_progress.append(course)
+                    else:
+                        not_started.append(course)
                 else:
                     not_started.append(course)
 
@@ -226,12 +261,38 @@ class ProgramProgressMeter(object):
         Returns:
             list of dicts, each representing a course run certificate
         """
+        return self.course_runs_with_state['completed_runs']
+
+    @cached_property
+    def failed_course_runs(self):
+        """
+        Determine which course runs have been failed by the user.
+
+        Returns:
+            list of dicts, each a course run ID
+        """
+        return [run['course_run_id'] for run in self.course_runs_with_state['failed_runs']]
+
+    @cached_property
+    def course_runs_with_state(self):
+        """
+        Determine which course runs have been completed and failed by the user.
+
+        Returns:
+            dict with a list of completed and failed runs
+        """
         course_run_certificates = certificate_api.get_certificates_for_user(self.user.username)
-        return [
-            {'course_run_id': unicode(certificate['course_key']), 'type': certificate['type']}
-            for certificate in course_run_certificates
-            if certificate_api.is_passing_status(certificate['status'])
-        ]
+        completed_runs, failed_runs = [], []
+        for certificate in course_run_certificates:
+            course_data = {
+                'course_run_id': unicode(certificate['course_key']),
+                'type': certificate['type']
+            }
+            if certificate_api.is_passing_status(certificate['status']):
+                completed_runs.append(course_data)
+            else:
+                failed_runs.append(course_data)
+        return {'completed_runs': completed_runs, 'failed_runs': failed_runs}
 
     def _is_course_in_progress(self, course):
         """Check if a user is in the process of completing a course.
