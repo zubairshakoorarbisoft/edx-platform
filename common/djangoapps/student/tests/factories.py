@@ -136,6 +136,7 @@ class CourseEnrollmentFactory(DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     course_id = SlashSeparatedCourseKey('edX', 'toy', '2012_Fall')
+    mode = 'verified'
 
 
 class CourseAccessRoleFactory(DjangoModelFactory):

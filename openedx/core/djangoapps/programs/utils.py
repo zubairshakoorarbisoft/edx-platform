@@ -129,7 +129,7 @@ class ProgramProgressMeter(object):
 
     def does_course_still_qualify_as_in_progress(self, now, enrolled_run_modes, course):
         # Part 1: Check if any of the seats you are enrolled in qualify this course as in progress
-        enrolled_runs = [run for run in course['course_runs'] if run in self.course_run_ids]
+        enrolled_runs = [run for run in course['course_runs'] if run['key'] in self.course_run_ids]
         # Check if you are enrolled in the required mode for the run
         runs_with_required_mode = [
             run for run in enrolled_runs
