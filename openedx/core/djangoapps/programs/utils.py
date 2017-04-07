@@ -142,9 +142,12 @@ class ProgramProgressMeter(object):
                 return True
         # Part 2: Check if any of the seats you are not enrolled in
         # in the runs you are enrolled in qualify this course as in progress
-        upgrade_deadlines = [
-            seat['upgrade_deadline'] for run in enrolled_runs for seat in run['seats']
-            if seat['type'] == run['type'] and run['type'] not in enrolled_run_modes[run['key']]]
+        upgrade_deadlines = []
+        for run in enrolled_runs:
+            for seat in run['seats']:
+                if seat['type'] == run['type'] and run['type'] not in enrolled_run_modes[run['key']]:
+                    upgrade_deadlines.append(seat['upgrade_deadline'])
+
         course_still_upgradeable = any(
             (deadline is not None) and (parse(deadline) > now) for deadline in upgrade_deadlines
         )
