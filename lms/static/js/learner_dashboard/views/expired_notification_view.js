@@ -13,8 +13,7 @@
              _,
              gettext,
              HtmlUtils,
-             expiredNotificationTpl,
-             certificateIconTpl
+             expiredNotificationTpl
          ) {
              return Backbone.View.extend({
                  expiredNotificationTpl: HtmlUtils.template(expiredNotificationTpl),
