@@ -48,6 +48,11 @@ class TestProgramProgressMeter(TestCase):
     def setUp(self):
         super(TestProgramProgressMeter, self).setUp()
 
+        self.program = ProgramFactory(courses=[
+            CourseFactory(course_runs=[
+                CourseRunFactory(type='verified')
+            ])
+        ])
         self.user = UserFactory()
 
     def _create_enrollments(self, *course_run_ids):
@@ -66,7 +71,7 @@ class TestProgramProgressMeter(TestCase):
 
     def test_no_enrollments(self, mock_get_programs):
         """Verify behavior when programs exist, but no relevant enrollments do."""
-        data = [ProgramFactory()]
+        data = [self.program]
         mock_get_programs.return_value = data
 
         meter = ProgramProgressMeter(self.user)
@@ -97,11 +102,11 @@ class TestProgramProgressMeter(TestCase):
             ProgramFactory(
                 courses=[
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=course_run_key),
+                        CourseRunFactory(type='verified', key=course_run_key),
                     ]),
                 ]
             ),
-            ProgramFactory(),
+            self.program,
         ]
         mock_get_programs.return_value = data
 
@@ -127,7 +132,7 @@ class TestProgramProgressMeter(TestCase):
             ProgramFactory(
                 courses=[
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=course_run_key),
+                        CourseRunFactory(type='verified', key=course_run_key),
                     ]),
                 ]
             )
@@ -160,18 +165,18 @@ class TestProgramProgressMeter(TestCase):
             ProgramFactory(
                 courses=[
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=newer_course_run_key),
+                        CourseRunFactory(type='verified', key=newer_course_run_key),
                     ]),
                 ]
             ),
             ProgramFactory(
                 courses=[
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=older_course_run_key),
+                        CourseRunFactory(type='verified', key=older_course_run_key),
                     ]),
                 ]
             ),
-            ProgramFactory(),
+            self.program,
         ]
         mock_get_programs.return_value = data
 
@@ -200,7 +205,7 @@ class TestProgramProgressMeter(TestCase):
             ProgramFactory(
                 courses=[
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=shared_course_run_key),
+                        CourseRunFactory(type='verified', key=shared_course_run_key),
                     ]),
                 ]
             )
@@ -212,11 +217,11 @@ class TestProgramProgressMeter(TestCase):
             ProgramFactory(
                 courses=[
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=solo_course_run_key),
+                        CourseRunFactory(type='verified', key=solo_course_run_key),
                     ]),
                 ]
             ),
-            ProgramFactory(),
+            self.program,
         ]
 
         mock_get_programs.return_value = data
@@ -242,14 +247,14 @@ class TestProgramProgressMeter(TestCase):
             ProgramFactory(
                 courses=[
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=first_course_run_key),
+                        CourseRunFactory(type='verified', key=first_course_run_key),
                     ]),
                     CourseFactory(course_runs=[
-                        CourseRunFactory(key=second_course_run_key),
+                        CourseRunFactory(type='verified', key=second_course_run_key),
                     ]),
                 ]
             ),
-            ProgramFactory(),
+            self.program,
         ]
         mock_get_programs.return_value = data
 
@@ -324,11 +329,11 @@ class TestProgramProgressMeter(TestCase):
                 courses=[
                     CourseFactory(course_runs=[
                         CourseRunFactory(key=course_run_key, type='honor'),
-                        CourseRunFactory(),
+                        CourseRunFactory(type='honor'),
                     ]),
                 ]
             ),
-            ProgramFactory(),
+            self.program,
         ]
         mock_get_programs.return_value = data
 
@@ -348,7 +353,13 @@ class TestProgramProgressMeter(TestCase):
     @mock.patch(UTILS_MODULE + '.ProgramProgressMeter.completed_course_runs', new_callable=mock.PropertyMock)
     def test_completed_programs(self, mock_completed_course_runs, mock_get_programs):
         """Verify that completed programs are correctly identified."""
-        data = ProgramFactory.create_batch(3)
+        data = [ProgramFactory(
+            courses=[
+                CourseFactory(course_runs=[
+                    CourseRunFactory(type='verified')
+                ])
+            ]
+        ) for _ in range(3)]
         mock_get_programs.return_value = data
 
         program_uuids = []
@@ -429,7 +440,7 @@ class TestProgramDataExtender(ModuleStoreTestCase):
         self.course.end = datetime.datetime.now(utc) + datetime.timedelta(days=1)
         self.course = self.update_course(self.course, self.user.id)
 
-        self.course_run = CourseRunFactory(key=unicode(self.course.id))
+        self.course_run = CourseRunFactory(type='verified', key=unicode(self.course.id))
         self.catalog_course = CourseFactory(course_runs=[self.course_run])
         self.program = ProgramFactory(courses=[self.catalog_course])
 
@@ -716,6 +727,7 @@ class TestProgramMarketingDataExtender(ModuleStoreTestCase):
         course = self.update_course(course, self.user.id)
 
         course_run = CourseRunFactory(
+            type='verified',
             key=unicode(course.id),
             seats=[SeatFactory(price=course_price)]
         )
