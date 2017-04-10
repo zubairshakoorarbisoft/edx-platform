@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper functions for working with Programs."""
 from collections import defaultdict
+from copy import deepcopy
 import datetime
 from urlparse import urljoin
 
@@ -196,11 +197,12 @@ class ProgramProgressMeter(object):
                     completed.append(course)
                 elif self._is_course_enrolled(course):
                     course_in_progress = self._is_course_in_progress(now, enrolled_run_modes, course)
-                    course['expired'] = not course_in_progress
+                    course_copy = deepcopy(course)
+                    course_copy['expired'] = not course_in_progress
                     if course_in_progress:
-                        in_progress.append(course)
+                        in_progress.append(course_copy)
                     else:
-                        not_started.append(course)
+                        not_started.append(course_copy)
                 else:
                     not_started.append(course)
 
@@ -275,7 +277,7 @@ class ProgramProgressMeter(object):
         Returns:
             list of dicts, each representing a course run certificate
         """
-        return self.course_runs_with_state['completed_runs']
+        return self.course_runs_with_state['completed']
 
     @cached_property
     def failed_course_runs(self):
@@ -285,7 +287,7 @@ class ProgramProgressMeter(object):
         Returns:
             list of dicts, each a course run ID
         """
-        return [run['course_run_id'] for run in self.course_runs_with_state['failed_runs']]
+        return [run['course_run_id'] for run in self.course_runs_with_state['failed']]
 
     @cached_property
     def course_runs_with_state(self):
