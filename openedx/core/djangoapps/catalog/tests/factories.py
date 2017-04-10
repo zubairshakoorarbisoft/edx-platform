@@ -94,6 +94,7 @@ class CourseRunFactory(DictFactoryBase):
     short_description = factory.Faker('sentence')
     start = factory.LazyFunction(generate_zulu_datetime)
     title = factory.Faker('catch_phrase')
+    type = 'verified'
     uuid = factory.Faker('uuid4')
 
 

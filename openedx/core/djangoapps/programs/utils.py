@@ -127,13 +127,24 @@ class ProgramProgressMeter(object):
 
         return programs
 
-    def does_course_still_qualify_as_in_progress(self, now, enrolled_run_modes, course):
+    def _is_course_in_progress(self, now, enrolled_run_modes, course):
+        """Check if course qualifies as in progress as part of the program.
+
+        A course is considered to be in progress if a user is enrolled in a run
+        of the correct mode or a run of the correct mode is still available for enrollment.
+
+        Arguments:
+            course (dict): Containing nested course runs.
+
+        Returns:
+            bool, indicating whether the course is in progress.
+        """
         # Part 1: Check if any of the seats you are enrolled in qualify this course as in progress
         enrolled_runs = [run for run in course['course_runs'] if run['key'] in self.course_run_ids]
-        # Check if you are enrolled in the required mode for the run
+        # Check if the user is enrolled in the required mode for the run
         runs_with_required_mode = [
             run for run in enrolled_runs
-            if run['type'] in enrolled_run_modes[run['key']]
+            if run['type'] == enrolled_run_modes[run['key']]
         ]
         if runs_with_required_mode:
             # Check if the runs you are enrolled in with the right mode are not failed
@@ -145,15 +156,13 @@ class ProgramProgressMeter(object):
         upgrade_deadlines = []
         for run in enrolled_runs:
             for seat in run['seats']:
-                if seat['type'] == run['type'] and run['type'] not in enrolled_run_modes[run['key']]:
+                if seat['type'] == run['type'] and run['type'] != enrolled_run_modes[run['key']]:
                     upgrade_deadlines.append(seat['upgrade_deadline'])
 
         course_still_upgradeable = any(
             (deadline is not None) and (parse(deadline) > now) for deadline in upgrade_deadlines
         )
-        if course_still_upgradeable:
-            return True
-        return False
+        return course_still_upgradeable
 
     def progress(self, programs=None, count_only=True):
         """Gauge a user's progress towards program completion.
@@ -183,9 +192,9 @@ class ProgramProgressMeter(object):
             for course in program['courses']:
                 if self._is_course_complete(course):
                     completed.append(course)
-                elif self._is_course_in_progress(course):
-                    course_in_progress = self.does_course_still_qualify_as_in_progress(now, enrolled_run_modes, course)
-                    course['expired'] = course_in_progress
+                elif self._is_course_enrolled(course):
+                    course_in_progress = self._is_course_in_progress(now, enrolled_run_modes, course)
+                    course['expired'] = not course_in_progress
                     if course_in_progress:
                         in_progress.append(course)
                     else:
@@ -295,10 +304,10 @@ class ProgramProgressMeter(object):
                 completed_runs.append(course_data)
             else:
                 failed_runs.append(course_data)
-        return {'completed_runs': completed_runs, 'failed_runs': failed_runs}
+        return {'completed': completed_runs, 'failed': failed_runs}
 
-    def _is_course_in_progress(self, course):
-        """Check if a user is in the process of completing a course.
+    def _is_course_enrolled(self, course):
+        """Check if a user is enrolled in a course.
 
         A user is considered to be in the process of completing a course if
         they're enrolled in any of the nested course runs.
