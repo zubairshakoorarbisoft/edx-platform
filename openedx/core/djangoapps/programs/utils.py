@@ -134,6 +134,8 @@ class ProgramProgressMeter(object):
         of the correct mode or a run of the correct mode is still available for enrollment.
 
         Arguments:
+            now (datetime): datetime for now
+            enrolled_run_modes (dict): Dict showing what mode is enrolled for each run.
             course (dict): Containing nested course runs.
 
         Returns:
