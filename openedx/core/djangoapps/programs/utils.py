@@ -197,11 +197,11 @@ class ProgramProgressMeter(object):
                     completed.append(course)
                 elif self._is_course_enrolled(course):
                     course_in_progress = self._is_course_in_progress(now, enrolled_run_modes, course)
-                    course_copy = deepcopy(course)
-                    course_copy['expired'] = not course_in_progress
                     if course_in_progress:
-                        in_progress.append(course_copy)
+                        in_progress.append(course)
                     else:
+                        course_copy = deepcopy(course)
+                        course_copy['expired'] = not course_in_progress
                         not_started.append(course_copy)
                 else:
                     not_started.append(course)

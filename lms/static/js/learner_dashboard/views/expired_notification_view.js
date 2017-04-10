@@ -5,8 +5,7 @@
         'underscore',
         'gettext',
         'edx-ui-toolkit/js/utils/html-utils',
-        'text!../../../templates/learner_dashboard/expired_notification.underscore',
-        'text!../../../templates/learner_dashboard/certificate_icon.underscore'
+        'text!../../../templates/learner_dashboard/expired_notification.underscore'
     ],
          function(
              Backbone,
@@ -18,8 +17,7 @@
              certificateIconTpl
          ) {
              return Backbone.View.extend({
-                 statusTpl: HtmlUtils.template(expiredNotificationTpl),
-                 iconTpl: HtmlUtils.template(certificateIconTpl),
+                 expiredNotificationTpl: HtmlUtils.template(expiredNotificationTpl),
 
                  initialize: function(options) {
                      this.$el = options.$el;
@@ -28,9 +26,7 @@
 
                  render: function() {
                      var data = this.model.toJSON();
-
-                     data = $.extend(data, {certificateSvg: this.iconTpl()});
-                     HtmlUtils.setHtml(this.$el, this.statusTpl(data));
+                     HtmlUtils.setHtml(this.$el, this.expiredNotificationTpl(data));
                  }
              });
          }
