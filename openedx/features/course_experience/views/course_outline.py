@@ -49,7 +49,7 @@ class CourseOutlineFragmentView(EdxFragmentView):
             course_usage_key,
             user=request.user,
             nav_depth=3,
-            requested_fields=['children', 'display_name', 'type', 'due', 'graded', 'special_exam'],
+            requested_fields=['children', 'display_name', 'type', 'due', 'graded', 'special_exam', 'format'],
             block_types_filter=['course', 'chapter', 'sequential']
         )
 
