@@ -147,7 +147,7 @@ class ProgramProgressMeter(object):
         # Check if the user is enrolled in the required mode for the run
         runs_with_required_mode = [
             run for run in enrolled_runs
-            if run['type'] == enrolled_run_modes[run['key']]
+            if run.get('type') == enrolled_run_modes[run['key']]
         ]
         if runs_with_required_mode:
             # Check if the runs you are enrolled in with the right mode are not failed
@@ -159,7 +159,7 @@ class ProgramProgressMeter(object):
         upgrade_deadlines = []
         for run in enrolled_runs:
             for seat in run['seats']:
-                if seat['type'] == run['type'] and run['type'] != enrolled_run_modes[run['key']]:
+                if seat['type'] == run.get('type') and run.get('type') != enrolled_run_modes[run['key']]:
                     upgrade_deadlines.append(seat['upgrade_deadline'])
 
         course_still_upgradeable = any(
