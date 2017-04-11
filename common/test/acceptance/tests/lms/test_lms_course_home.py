@@ -142,7 +142,7 @@ class CourseHomeA11yTest(CourseHomeBaseTest):
         )
 
         # adds graded assignments to course home for testing course outline a11y
-        self._set_policy_for_subsection("Homework", 0)
+        # self._set_policy_for_subsection("Homework", 0)
 
     def test_course_home_a11y(self):
         """
