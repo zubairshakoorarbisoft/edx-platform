@@ -1,7 +1,7 @@
 define(
     [
         'underscore',
-        'edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers'
+        'edx-ui-toolkit/src/js/utils/spec-helpers/ajax-helpers'
     ],
     function(_, AjaxHelpers) {
         'use strict';

@@ -37,7 +37,8 @@ var options = {
 
     specFiles: [
         {pattern: '../**/*spec.js'},
-        {pattern: 'course_experience/js/**/*_spec.js', webpack: true}
+        {pattern: 'course_experience/js/**/*_spec.js', webpack: true},
+        {pattern: 'course_bookmarks/js/**/*_spec.js', webpack: true}
     ],
 
     fixtureFiles: [

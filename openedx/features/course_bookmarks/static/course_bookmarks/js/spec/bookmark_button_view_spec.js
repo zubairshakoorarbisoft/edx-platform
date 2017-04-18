@@ -1,6 +1,10 @@
 define([
-    'backbone', 'jquery', 'underscore', 'edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers',
-    'common/js/spec_helpers/template_helpers', 'course_bookmarks/js/views/bookmark_button'
+    'backbone',
+    'jquery',
+    'underscore',
+    'edx-ui-toolkit/src/js/utils/spec-helpers/ajax-helpers',
+    '../../../../../../../common/static/common/js/spec_helpers/template_helpers',
+    '../views/bookmark_button'
 ],
     function(Backbone, $, _, AjaxHelpers, TemplateHelpers, BookmarkButtonView) {
         'use strict';

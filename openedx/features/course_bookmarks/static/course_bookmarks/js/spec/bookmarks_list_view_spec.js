@@ -4,12 +4,12 @@ define([
     'underscore',
     'logger',
     'URI',
-    'edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers',
-    'common/js/spec_helpers/template_helpers',
-    'js/views/message_banner',
-    'course_bookmarks/js/spec_helpers/bookmark_helpers',
-    'course_bookmarks/js/views/bookmarks_list',
-    'course_bookmarks/js/collections/bookmarks'
+    'edx-ui-toolkit/src/js/utils/spec-helpers/ajax-helpers',
+    '../../../../../../../common/static/common/js/spec_helpers/template_helpers',
+    '../../../../../../../lms/static/js/views/message_banner',
+    '../spec_helpers/bookmark_helpers',
+    '../views/bookmarks_list',
+    '../collections/bookmarks'
 ],
     function(Backbone, $, _, Logger, URI, AjaxHelpers, TemplateHelpers, MessageBannerView,
              BookmarkHelpers, BookmarksListView, BookmarksCollection) {

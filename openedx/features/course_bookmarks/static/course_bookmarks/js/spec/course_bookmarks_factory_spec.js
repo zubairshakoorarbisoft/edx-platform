@@ -1,8 +1,8 @@
 define([
     'jquery',
-    'edx-ui-toolkit/js/utils/spec-helpers/ajax-helpers',
-    'course_bookmarks/js/spec_helpers/bookmark_helpers',
-    'course_bookmarks/js/course_bookmarks_factory'
+    'edx-ui-toolkit/src/js/utils/spec-helpers/ajax-helpers',
+    '../spec_helpers/bookmark_helpers',
+    '../course_bookmarks_factory'
 ],
     function($, AjaxHelpers, BookmarkHelpers, CourseBookmarksFactory) {
         'use strict';

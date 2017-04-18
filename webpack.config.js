@@ -12,7 +12,8 @@ var wpconfig = {
     context: __dirname,
 
     entry: {
-        CourseOutline: './openedx/features/course_experience/static/course_experience/js/CourseOutline.js'
+        CourseOutline: './openedx/features/course_experience/static/course_experience/js/CourseOutline.js',
+        CourseBookmarks: './openedx/features/course_bookmarks/static/course_bookmarks/js/course_bookmarks_factory.js'
     },
 
     output: {
@@ -49,7 +50,14 @@ var wpconfig = {
     },
 
     resolve: {
-        extensions: ['.js', '.json']
+        extensions: ['.js', '.json'],
+        alias: {
+            logger: path.resolve(__dirname, 'common/static/js/src/logger'),
+            URI: path.resolve(__dirname, 'common/static/js/vendor/URI.min'),
+            './punycode': path.resolve(__dirname, 'common/static/js/vendor/URI.min'),
+            './IPv6': path.resolve(__dirname, 'common/static/js/vendor/URI.min'),
+            './SecondLevelDomains': path.resolve(__dirname, 'common/static/js/vendor/URI.min')
+        }
     },
 
     watchOptions: {

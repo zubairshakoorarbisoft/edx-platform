@@ -5,8 +5,8 @@
         [
             'jquery',
             'js/views/message_banner',
-            'course_bookmarks/js/collections/bookmarks',
-            'course_bookmarks/js/views/bookmarks_list'
+            '../collections/bookmarks',
+            '../views/bookmarks_list'
         ],
         function($, MessageBannerView, BookmarksCollection, BookmarksListView) {
             return function(options) {
