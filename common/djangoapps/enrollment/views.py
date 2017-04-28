@@ -20,7 +20,13 @@ from openedx.core.djangoapps.cors_csrf.authentication import SessionAuthenticati
 from openedx.core.djangoapps.cors_csrf.decorators import ensure_csrf_cookie_cross_domain
 from openedx.core.djangoapps.embargo import api as embargo_api
 from openedx.core.djangoapps.user_api.preferences.api import update_email_opt_in
-from openedx.features.enterprise_support.api import enterprise_enabled, EnterpriseApiClient, EnterpriseApiException
+from openedx.features.enterprise_support.api import (
+    enterprise_enabled,
+    EnterpriseApiClient,
+    EnterpriseApiException,
+    get_enterprise_learner_data,
+    is_course_in_enterprise_catalog,
+)
 from openedx.core.lib.api.authentication import (
     SessionAuthenticationAllowInactiveUser, OAuth2AuthenticationAllowInactiveUser,
 )
@@ -584,9 +590,26 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
                 )
 
             enterprise_course_consent = request.data.get('enterprise_course_consent')
-            # Check if the enterprise_course_enrollment is a boolean
-            if has_api_key_permissions and enterprise_enabled() and enterprise_course_consent is not None:
-                if not isinstance(enterprise_course_consent, bool):
+            post_enterprise_enrollment = False
+
+            if has_api_key_permissions and enterprise_enabled():
+                if enterprise_course_consent is None:
+                    # If we aren't getting this parameter sent to us, check if the user is linked to an Enterprise,
+                    # and check if the course is part of the Enterprise's catalog.
+                    enterprise_user_data = get_enterprise_learner_data(request.site, request.user)
+                    if (enterprise_user_data and enterprise_user_data[0]
+                            and 'enterprise_customer' in enterprise_user_data[0]):
+                        enterprise_customer_data = enterprise_user_data[0]['enterprise_customer']
+
+                        # If this is an enterprise enrollment, determine what the value for
+                        # enterprise_course_consent should be
+                        if is_course_in_enterprise_catalog(
+                                request.site,
+                                course_id,
+                                enterprise_customer_data['catalog']
+                        ):
+                            post_enterprise_enrollment = True
+                elif not isinstance(enterprise_course_consent, bool):
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data={
@@ -595,6 +618,10 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
                             )
                         }
                     )
+                else:
+                    post_enterprise_enrollment = True
+
+            if post_enterprise_enrollment:
                 try:
                     EnterpriseApiClient().post_enterprise_course_enrollment(
                         username,
