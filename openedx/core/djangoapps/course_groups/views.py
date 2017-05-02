@@ -124,18 +124,17 @@ def get_divided_discussions(course, discussion_settings):
 @ensure_csrf_cookie
 @expect_json
 @login_required
-def course_cohort_settings_handler(request, course_key_string):
+def course_discussions_settings_handler(request, course_key_string):
     """
-    The restful handler for cohort setting requests. Requires JSON.
+    The restful handler for divided discussion setting requests. Requires JSON.
     This will raise 404 if user is not staff.
     GET
-        Returns the JSON representation of cohort settings for the course.
+        Returns the JSON representation of divided discussion settings for the course.
     PATCH
-        Updates the cohort settings for the course. Returns the JSON representation of updated settings.
+        Updates the divided discussion settings for the course. Returns the JSON representation of updated settings.
     """
     course_key = CourseKey.from_string(course_key_string)
     course = get_course_with_access(request.user, 'staff', course_key)
-    is_cohorted = cohorts.is_course_cohorted(course_key)
     discussion_settings = get_course_discussion_settings(course_key)
 
     if request.method == 'PATCH':
@@ -148,14 +147,56 @@ def course_cohort_settings_handler(request, course_key_string):
         if 'is_cohorted' in request.json:
             settings_to_change['is_cohorted'] = request.json.get('is_cohorted')
 
-        if 'cohorted_course_wide_discussions' in request.json or 'cohorted_inline_discussions' in request.json:
+        if 'divided_course_wide_discussions' in request.json or 'divided_inline_discussions' in request.json:
             divided_course_wide_discussions = request.json.get(
                 'cohorted_course_wide_discussions', divided_course_wide_discussions
             )
             divided_inline_discussions = request.json.get(
-                'cohorted_inline_discussions', divided_inline_discussions
+                'divided_inline_discussions', divided_inline_discussions
             )
             settings_to_change['divided_discussions'] = divided_course_wide_discussions + divided_inline_discussions
+
+        if 'always_divide_inline_discussions' in request.json:
+            settings_to_change['always_divide_inline_discussions'] = request.json.get(
+                'always_divide_inline_discussions'
+            )
+
+        if not settings_to_change:
+            return JsonResponse({"error": unicode("Bad Request")}, 400)
+
+        try:
+            if settings_to_change:
+                discussion_settings = set_course_discussion_settings(course_key, **settings_to_change)
+
+        except ValueError as err:
+            # Note: error message not translated because it is not exposed to the user (UI prevents this state).
+            return JsonResponse({"error": unicode(err)}, 400)
+
+    return JsonResponse(_get_course_cohort_settings_representation(course, discussion_settings))
+
+
+@require_http_methods(("GET", "PATCH"))
+@ensure_csrf_cookie
+@expect_json
+@login_required
+def course_cohort_settings_handler(request, course_key_string):
+    """
+    The restful handler for cohort setting requests. Requires JSON.
+    This will raise 404 if user is not staff.
+    GET
+        Returns the JSON representation of cohort settings for the course.
+    PATCH
+        Updates the cohort settings for the course. Returns the JSON representation of updated settings.
+    """
+    course_key = CourseKey.from_string(course_key_string)
+    course = get_course_with_access(request.user, 'staff', course_key)
+    cohort_settings = cohorts.get_course_cohort_settings(course_key)
+
+    if request.method == 'PATCH':
+        settings_to_change = {}
+
+        if 'is_cohorted' in request.json:
+            settings_to_change['is_cohorted'] = request.json.get('is_cohorted')
 
         if 'always_cohort_inline_discussions' in request.json:
             settings_to_change['always_divide_inline_discussions'] = request.json.get(
@@ -178,7 +219,7 @@ def course_cohort_settings_handler(request, course_key_string):
             # Note: error message not translated because it is not exposed to the user (UI prevents this state).
             return JsonResponse({"error": unicode(err)}, 400)
 
-    return JsonResponse(_get_course_cohort_settings_representation(course, is_cohorted, discussion_settings))
+    return JsonResponse(_get_course_cohort_settings_representation(course, is_cohorted))
 
 
 @require_http_methods(("GET", "PUT", "POST", "PATCH"))

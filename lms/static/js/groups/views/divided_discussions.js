@@ -2,7 +2,7 @@
     'use strict';
     define(['jquery', 'underscore', 'backbone', 'gettext', 'js/models/notification', 'js/views/notification'],
         function($, _, Backbone) {
-            var CohortDiscussionConfigurationView = Backbone.View.extend({
+            var DividedDiscussionConfigurationView = Backbone.View.extend({
 
                 /**
                 * Add/Remove the disabled attribute on given element.
@@ -14,29 +14,29 @@
                 },
 
                 /**
-                * Returns the cohorted discussions list.
+                * Returns the divided discussions list.
                 * @param {string} selector - To select the discussion elements whose ids to return.
-                * @returns {Array} - Cohorted discussions.
+                * @returns {Array} - Divided discussions.
                 */
-                getCohortedDiscussions: function(selector) {
+                getDividedDiscussions: function(selector) {
                     var self = this,
-                        cohortedDiscussions = [];
+                        dividedDiscussions = [];
 
                     _.each(self.$(selector), function(topic) {
-                        cohortedDiscussions.push($(topic).data('id'));
+                        dividedDiscussions.push($(topic).data('id'));
                     });
-                    return cohortedDiscussions;
+                    return dividedDiscussions;
                 },
 
                 /**
-                * Save the cohortSettings' changed attributes to the server via PATCH method.
+                * Save the discussionSettings' changed attributes to the server via PATCH method.
                 * It shows the error message(s) if any.
                 * @param {object} $element - Messages would be shown before this element.
                 * @param {object} fieldData - Data to update on the server.
                 */
                 saveForm: function($element, fieldData) {
                     var self = this,
-                        cohortSettingsModel = this.cohortSettings,
+                        discussionSettingsModel = this.discussionSettings,
                         saveOperation = $.Deferred(),
                         showErrorMessage;
 
@@ -45,7 +45,7 @@
                     };
                     this.removeNotification();
 
-                    cohortSettingsModel.save(
+                    discussionSettingsModel.save(
                         fieldData, {patch: true, wait: true}
                     ).done(function() {
                         saveOperation.resolve();
@@ -92,6 +92,6 @@
                 }
 
             });
-            return CohortDiscussionConfigurationView;
+            return DividedDiscussionConfigurationView;
         });
 }).call(this, define || RequireJS.define);

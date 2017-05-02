@@ -1,9 +1,9 @@
 (function(define) {
     'use strict';
-    define(['jquery', 'underscore', 'backbone', 'gettext', 'js/groups/views/cohort_discussions',
+    define(['jquery', 'underscore', 'backbone', 'gettext', 'js/groups/views/divided_discussions',
         'edx-ui-toolkit/js/utils/html-utils'],
-            function($, _, Backbone, gettext, CohortDiscussionConfigurationView, HtmlUtils) {
-                var CourseWideDiscussionsView = CohortDiscussionConfigurationView.extend({
+            function($, _, Backbone, gettext, DividedDiscussionConfigurationView, HtmlUtils) {
+                var CourseWideDiscussionsView = DividedDiscussionConfigurationView.extend({
                     events: {
                         'change .check-discussion-subcategory-course-wide': 'discussionCategoryStateChanged',
                         'click .cohort-course-wide-discussions-form .action-save': 'saveCourseWideDiscussionsForm'
@@ -11,7 +11,7 @@
 
                     initialize: function(options) {
                         this.template = HtmlUtils.template($('#cohort-discussions-course-wide-tpl').text());
-                        this.cohortSettings = options.cohortSettings;
+                        this.discussionSettings = options.discussionSettings;
                     },
 
                     render: function() {
@@ -62,10 +62,10 @@
                         event.preventDefault();
 
                         var self = this,
-                            courseWideCohortedDiscussions = self.getCohortedDiscussions(
+                            courseWideCohortedDiscussions = self.getDividedDiscussions(
                                 '.check-discussion-subcategory-course-wide:checked'
                             ),
-                            fieldData = {cohorted_course_wide_discussions: courseWideCohortedDiscussions};
+                            fieldData = {divided_course_wide_discussions: courseWideCohortedDiscussions};
 
                         self.saveForm(self.$('.course-wide-discussion-topics'), fieldData)
                         .done(function() {

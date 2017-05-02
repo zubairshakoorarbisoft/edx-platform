@@ -1,9 +1,9 @@
 (function(define) {
     'use strict';
-    define(['jquery', 'underscore', 'backbone', 'gettext', 'js/groups/views/cohort_discussions',
+    define(['jquery', 'underscore', 'backbone', 'gettext', 'js/groups/views/divided_discussions',
         'edx-ui-toolkit/js/utils/html-utils', 'js/vendor/jquery.qubit'],
-            function($, _, Backbone, gettext, CohortDiscussionConfigurationView, HtmlUtils) {
-                var InlineDiscussionsView = CohortDiscussionConfigurationView.extend({
+            function($, _, Backbone, gettext, DividedDiscussionConfigurationView, HtmlUtils) {
+                var InlineDiscussionsView = DividedDiscussionConfigurationView.extend({
                     events: {
                         'change .check-discussion-category': 'setSaveButton',
                         'change .check-discussion-subcategory-inline': 'setSaveButton',
@@ -14,11 +14,11 @@
 
                     initialize: function(options) {
                         this.template = HtmlUtils.template($('#cohort-discussions-inline-tpl').text());
-                        this.cohortSettings = options.cohortSettings;
+                        this.discussionSettings = options.discussionSettings;
                     },
 
                     render: function() {
-                        var alwaysCohortInlineDiscussions = this.cohortSettings.get('always_cohort_inline_discussions'),
+                        var alwaysCohortInlineDiscussions = this.discussionSettings.get('always_cohort_inline_discussions'),
                             inline_discussions = this.model.get('inline_discussions');
 
                         HtmlUtils.setHtml(this.$('.cohort-inline-discussions-nav'), this.template({
@@ -116,18 +116,18 @@
                     },
 
                     /**
-                    * Sends the cohorted_inline_discussions to the server and renders the view.
+                    * Sends the divided_inline_discussions to the server and renders the view.
                     */
                     saveInlineDiscussionsForm: function(event) {
                         event.preventDefault();
 
                         var self = this,
-                            cohortedInlineDiscussions = self.getCohortedDiscussions(
+                            dividedInlineDiscussions = self.getDividedDiscussions(
                                 '.check-discussion-subcategory-inline:checked'
                             ),
                             fieldData = {
-                                cohorted_inline_discussions: cohortedInlineDiscussions,
-                                always_cohort_inline_discussions: self.$('.check-all-inline-discussions').prop('checked')
+                                divided_inline_discussions: dividedInlineDiscussions,
+                                always_divide_inline_discussions: self.$('.check-all-inline-discussions').prop('checked')
                             };
 
                         self.saveForm(self.$('.inline-discussion-topics'), fieldData)
