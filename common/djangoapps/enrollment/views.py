@@ -599,6 +599,7 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
                     enterprise_user_data = get_enterprise_learner_data(request.site, request.user)
                     if (enterprise_user_data and enterprise_user_data[0]
                             and 'enterprise_customer' in enterprise_user_data[0]):
+                        log.info('Received enterprise customer data during enrollment check: '+str(enterprise_user_data))
                         enterprise_customer_data = enterprise_user_data[0]['enterprise_customer']
 
                         # If this is an enterprise enrollment, determine what the value for
@@ -608,6 +609,7 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
                                 course_id,
                                 enterprise_customer_data['catalog']
                         ):
+                            log.info('Course is in enterprise catalog!')
                             post_enterprise_enrollment = True
                 elif not isinstance(enterprise_course_consent, bool):
                     return Response(
@@ -623,6 +625,7 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
 
             if post_enterprise_enrollment:
                 try:
+                    log.info('Attempting to post enterprise enrollment')
                     EnterpriseApiClient().post_enterprise_course_enrollment(
                         username,
                         unicode(course_id),
