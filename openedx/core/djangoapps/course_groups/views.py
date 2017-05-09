@@ -172,7 +172,11 @@ def course_discussions_settings_handler(request, course_key_string):
             # Note: error message not translated because it is not exposed to the user (UI prevents this state).
             return JsonResponse({"error": unicode(err)}, 400)
 
-    return JsonResponse(_get_course_cohort_settings_representation(course, discussion_settings))
+    return JsonResponse(_get_course_cohort_settings_representation(
+        course,
+        cohorts.is_course_cohorted(course_key),
+        discussion_settings
+    ))
 
 
 @require_http_methods(("GET", "PATCH"))
@@ -190,7 +194,7 @@ def course_cohort_settings_handler(request, course_key_string):
     """
     course_key = CourseKey.from_string(course_key_string)
     course = get_course_with_access(request.user, 'staff', course_key)
-    cohort_settings = cohorts.get_course_cohort_settings(course_key)
+    is_cohorted = cohorts.is_course_cohorted(course_key)
 
     if request.method == 'PATCH':
         settings_to_change = {}
@@ -219,7 +223,11 @@ def course_cohort_settings_handler(request, course_key_string):
             # Note: error message not translated because it is not exposed to the user (UI prevents this state).
             return JsonResponse({"error": unicode(err)}, 400)
 
-    return JsonResponse(_get_course_cohort_settings_representation(course, is_cohorted))
+    return JsonResponse(_get_course_cohort_settings_representation(
+        course,
+        is_cohorted,
+        get_course_discussion_settings(course_key)
+    ))
 
 
 @require_http_methods(("GET", "PUT", "POST", "PATCH"))
