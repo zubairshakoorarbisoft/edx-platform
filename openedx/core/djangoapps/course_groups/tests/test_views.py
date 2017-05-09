@@ -176,6 +176,12 @@ class CohortViewsTestCase(ModuleStoreTestCase):
         self.assertEqual(response.status_code, expected_response_code)
         return json.loads(response.content)
 
+#
+# @attr(shard=2)
+# class CourseDiscussionsHandlerTestCase(CohortViewsTestCase):
+#     """
+#     Tests the course_discussion_settings_handler
+#     """
 
 @attr(shard=2)
 class CourseCohortSettingsHandlerTestCase(CohortViewsTestCase):

@@ -18,12 +18,12 @@
                     },
 
                     render: function() {
-                        var alwaysCohortInlineDiscussions = this.discussionSettings.get('always_cohort_inline_discussions'),
+                        var alwaysDivideInlineDiscussions = this.discussionSettings.get('always_divide_inline_discussions'),
                             inline_discussions = this.model.get('inline_discussions');
 
                         HtmlUtils.setHtml(this.$('.cohort-inline-discussions-nav'), this.template({
                             inlineDiscussionTopicsHtml: this.getInlineDiscussionsHtml(inline_discussions),
-                            alwaysCohortInlineDiscussions: alwaysCohortInlineDiscussions
+                            alwaysDivideInlineDiscussions: alwaysDivideInlineDiscussions
                         }));
 
                         // Provides the semantics for a nested list of tri-state checkboxes.
@@ -32,7 +32,7 @@
                         // based on the checked values of any checkboxes in child elements of the DOM.
                         this.$('ul.inline-topics').qubit();
 
-                        this.setElementsEnabled(alwaysCohortInlineDiscussions, true);
+                        this.setElementsEnabled(alwaysDivideInlineDiscussions, true);
                     },
 
                     /**

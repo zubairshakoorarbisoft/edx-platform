@@ -67,9 +67,19 @@ def unlink_cohort_partition_group(cohort):
 
 
 # pylint: disable=invalid-name
-def _get_course_cohort_settings_representation(course, is_cohorted, course_discussion_settings):
+def _get_course_cohort_settings_representation(course, cohort_settings):
     """
     Returns a JSON representation of a course cohort settings.
+    """
+    return {
+        'id': cohort_settings.id,
+        'is_cohorted': cohort_settings.is_cohorted,
+    }
+
+
+def _get_course_discussion_settings_representation(course, course_discussion_settings):
+    """
+    Returns a JSON representation of a course discussion settings.
     """
     divided_course_wide_discussions, divided_inline_discussions = get_divided_discussions(
         course, course_discussion_settings
@@ -77,7 +87,6 @@ def _get_course_cohort_settings_representation(course, is_cohorted, course_discu
 
     return {
         'id': course_discussion_settings.id,
-        'is_cohorted': is_cohorted,
         'cohorted_inline_discussions': divided_inline_discussions,
         'cohorted_course_wide_discussions': divided_course_wide_discussions,
         'always_cohort_inline_discussions': course_discussion_settings.always_divide_inline_discussions,
@@ -144,9 +153,6 @@ def course_discussions_settings_handler(request, course_key_string):
 
         settings_to_change = {}
 
-        if 'is_cohorted' in request.json:
-            settings_to_change['is_cohorted'] = request.json.get('is_cohorted')
-
         if 'divided_course_wide_discussions' in request.json or 'divided_inline_discussions' in request.json:
             divided_course_wide_discussions = request.json.get(
                 'cohorted_course_wide_discussions', divided_course_wide_discussions
@@ -172,9 +178,8 @@ def course_discussions_settings_handler(request, course_key_string):
             # Note: error message not translated because it is not exposed to the user (UI prevents this state).
             return JsonResponse({"error": unicode(err)}, 400)
 
-    return JsonResponse(_get_course_cohort_settings_representation(
+    return JsonResponse(_get_course_discussion_settings_representation(
         course,
-        cohorts.is_course_cohorted(course_key),
         discussion_settings
     ))
 
@@ -194,7 +199,6 @@ def course_cohort_settings_handler(request, course_key_string):
     """
     course_key = CourseKey.from_string(course_key_string)
     course = get_course_with_access(request.user, 'staff', course_key)
-    is_cohorted = cohorts.is_course_cohorted(course_key)
 
     if request.method == 'PATCH':
         settings_to_change = {}
@@ -225,8 +229,7 @@ def course_cohort_settings_handler(request, course_key_string):
 
     return JsonResponse(_get_course_cohort_settings_representation(
         course,
-        is_cohorted,
-        get_course_discussion_settings(course_key)
+        cohorts.get_course_cohort_settings(course_key)
     ))
 
 

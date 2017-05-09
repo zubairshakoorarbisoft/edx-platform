@@ -1,11 +1,10 @@
 (function(define, undefined) {
     'use strict';
     define(['jquery', 'js/groups/views/discussions', 'js/groups/models/cohort_discussions',
-            'js/groups/models/course_cohort_settings'],
-        function($, DiscussionsView, DiscussionTopicsSettingsModel, CourseCohortSettingsModel) {
+            'js/groups/models/course_discussions_settings'],
+        function($, DiscussionsView, DiscussionTopicsSettingsModel, CourseDiscussionsSettingsModel) {
             return function() {
-                // var cohorts = new CohortCollection(),
-                var courseDiscussionSettings = new CourseCohortSettingsModel();
+                var courseDiscussionSettings = new CourseDiscussionsSettingsModel();
                 var discussionTopicsSettings = new DiscussionTopicsSettingsModel();
 
                 var discussionsManagementElement = $('.discussions-management');
