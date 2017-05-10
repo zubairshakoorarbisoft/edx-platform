@@ -87,9 +87,9 @@ def _get_course_discussion_settings_representation(course, course_discussion_set
 
     return {
         'id': course_discussion_settings.id,
-        'cohorted_inline_discussions': divided_inline_discussions,
-        'cohorted_course_wide_discussions': divided_course_wide_discussions,
-        'always_cohort_inline_discussions': course_discussion_settings.always_divide_inline_discussions,
+        'divided_inline_discussions': divided_inline_discussions,
+        'divided_course_wide_discussions': divided_course_wide_discussions,
+        'always_divide_inline_discussions': course_discussion_settings.always_divide_inline_discussions,
     }
 
 
@@ -155,7 +155,7 @@ def course_discussions_settings_handler(request, course_key_string):
 
         if 'divided_course_wide_discussions' in request.json or 'divided_inline_discussions' in request.json:
             divided_course_wide_discussions = request.json.get(
-                'cohorted_course_wide_discussions', divided_course_wide_discussions
+                'divided_course_wide_discussions', divided_course_wide_discussions
             )
             divided_inline_discussions = request.json.get(
                 'divided_inline_discussions', divided_inline_discussions
