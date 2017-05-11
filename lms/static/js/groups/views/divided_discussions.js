@@ -59,8 +59,8 @@
                             // Ignore the exception and show the default error message instead.
                         }
                         if (!errorMessage) {
-                            errorMessage = gettext("We've encountered an error. " +
-                                "Refresh your browser and then try again.");
+                            errorMessage = gettext('We\'ve encountered an error. ' +
+                                'Refresh your browser and then try again.');
                         }
                         showErrorMessage(errorMessage);
                         saveOperation.reject();

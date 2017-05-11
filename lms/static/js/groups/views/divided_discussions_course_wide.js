@@ -75,8 +75,8 @@
                                     self.showMessage(gettext('Your changes have been saved.'),
                                         self.$('.course-wide-discussion-topics'));
                                 }).fail(function() {
-                                    var errorMessage = gettext("We've encountered an error. " +
-                                        "Refresh your browser and then try again.");
+                                    var errorMessage = gettext('We\'ve encountered an error. ' +
+                                        'Refresh your browser and then try again.');
                                     self.showMessage(errorMessage, self.$('.course-wide-discussion-topics'), 'error');
                                 });
                         });
