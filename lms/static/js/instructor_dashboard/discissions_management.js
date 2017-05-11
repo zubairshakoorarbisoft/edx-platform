@@ -1,16 +1,12 @@
 (function() {
-    var DiscussionsManagement;
+    'use strict';
 
-    DiscussionsManagement = (function() {
-        function DiscussionsManagement($section) {
-            this.$section = $section;
-            this.$section.data('wrapper', this);
-        }
+    function DiscussionsManagement($section) {
+        this.$section = $section;
+        this.$section.data('wrapper', this);
+    }
 
-        DiscussionsManagement.prototype.onClickTitle = function() {};
-
-        return DiscussionsManagement;
-    })();
+    DiscussionsManagement.prototype.onClickTitle = function() {};
 
     window.InstructorDashboard.sections.DiscussionsManagement = DiscussionsManagement;
 }).call(this);

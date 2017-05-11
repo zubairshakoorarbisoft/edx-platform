@@ -59,22 +59,24 @@
                      * Sends the cohorted_course_wide_discussions to the server and renders the view.
                      */
                     saveCourseWideDiscussionsForm: function(event) {
-                        event.preventDefault();
-
                         var self = this,
                             courseWideCohortedDiscussions = self.getDividedDiscussions(
                                 '.check-discussion-subcategory-course-wide:checked'
                             ),
                             fieldData = {divided_course_wide_discussions: courseWideCohortedDiscussions};
 
+                        event.preventDefault();
+
                         self.saveForm(self.$('.course-wide-discussion-topics'), fieldData)
                         .done(function() {
                             self.model.fetch()
                                 .done(function() {
                                     self.render();
-                                    self.showMessage(gettext('Your changes have been saved.'), self.$('.course-wide-discussion-topics'));
+                                    self.showMessage(gettext('Your changes have been saved.'),
+                                        self.$('.course-wide-discussion-topics'));
                                 }).fail(function() {
-                                    var errorMessage = gettext("We've encountered an error. Refresh your browser and then try again.");
+                                    var errorMessage = gettext("We've encountered an error. " +
+                                        "Refresh your browser and then try again.");
                                     self.showMessage(errorMessage, self.$('.course-wide-discussion-topics'), 'error');
                                 });
                         });

@@ -149,7 +149,7 @@
                 onCohortsEnabledChanged: function(event) {
                     event.preventDefault();
                     this.saveCohortSettings();
-                    if (this.getCohortsEnabled()){
+                    if (this.getCohortsEnabled()) {
                         this.showDiscussionsManagement();
                     } else {
                         this.hideDiscussionsManagement();

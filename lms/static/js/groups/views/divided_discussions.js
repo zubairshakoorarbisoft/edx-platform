@@ -1,7 +1,7 @@
 (function(define) {
     'use strict';
     define(['jquery', 'underscore', 'backbone', 'gettext', 'js/models/notification', 'js/views/notification'],
-        function($, _, Backbone) {
+        function($, _, Backbone, gettext) {
             var DividedDiscussionConfigurationView = Backbone.View.extend({
 
                 /**
@@ -40,7 +40,7 @@
                         saveOperation = $.Deferred(),
                         showErrorMessage;
 
-                    showErrorMessage = function(message, $element) {
+                    showErrorMessage = function(message) {
                         self.showMessage(message, $element, 'error');
                     };
                     this.removeNotification();
@@ -50,17 +50,19 @@
                     ).done(function() {
                         saveOperation.resolve();
                     }).fail(function(result) {
-                        var errorMessage = null;
+                        var errorMessage = null,
+                            jsonResponse;
                         try {
-                            var jsonResponse = JSON.parse(result.responseText);
+                            jsonResponse = JSON.parse(result.responseText);
                             errorMessage = jsonResponse.error;
                         } catch (e) {
                             // Ignore the exception and show the default error message instead.
                         }
                         if (!errorMessage) {
-                            errorMessage = gettext("We've encountered an error. Refresh your browser and then try again.");
+                            errorMessage = gettext("We've encountered an error. " +
+                                "Refresh your browser and then try again.");
                         }
-                        showErrorMessage(errorMessage, $element);
+                        showErrorMessage(errorMessage);
                         saveOperation.reject();
                     });
                     return saveOperation.promise();

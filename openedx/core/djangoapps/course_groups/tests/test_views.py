@@ -333,7 +333,6 @@ class CourseCohortSettingsHandlerTestCase(CohortViewsTestCase):
 
         self.assertEqual(response, expected_response)
 
-
     def test_update_settings_with_missing_field(self):
         """
         Verify that course_cohort_settings_handler return HTTP 400 if required data field is missing from post data.

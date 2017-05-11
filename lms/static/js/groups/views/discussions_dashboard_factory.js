@@ -1,23 +1,24 @@
-(function(define, undefined) {
+(function(define) {
     'use strict';
     define(['jquery', 'js/groups/views/discussions', 'js/groups/models/cohort_discussions',
-            'js/groups/models/course_discussions_settings'],
+        'js/groups/models/course_discussions_settings'],
+
         function($, DiscussionsView, DiscussionTopicsSettingsModel, CourseDiscussionsSettingsModel) {
             return function() {
-                var courseDiscussionSettings = new CourseDiscussionsSettingsModel();
-                var discussionTopicsSettings = new DiscussionTopicsSettingsModel();
+                var courseDiscussionSettings = new CourseDiscussionsSettingsModel(),
+                    discussionTopicsSettings = new DiscussionTopicsSettingsModel(),
+                    $discussionsManagementElement = $('.discussions-management'),
+                    discussionsView;
 
-                var discussionsManagementElement = $('.discussions-management');
+                courseDiscussionSettings.url = $discussionsManagementElement.data('course-discussion-settings-url');
+                discussionTopicsSettings.url = $discussionsManagementElement.data('discussion-topics-url');
 
-                courseDiscussionSettings.url = discussionsManagementElement.data('course-discussion-settings-url');
-                discussionTopicsSettings.url = discussionsManagementElement.data('discussion-topics-url');
-
-                var discussionsView = new DiscussionsView({
-                    el: discussionsManagementElement,
+                discussionsView = new DiscussionsView({
+                    el: $discussionsManagementElement,
                     discussionSettings: courseDiscussionSettings,
                     context: {
                         discussionTopicsSettingsModel: discussionTopicsSettings,
-                        isCcxEnabled: discussionsManagementElement.data('is_ccx_enabled')
+                        isCcxEnabled: $discussionsManagementElement.data('is_ccx_enabled')
                     }
                 });
 
@@ -26,7 +27,6 @@
                         discussionsView.render();
                     });
                 });
-
             };
         });
 }).call(this, define || RequireJS.define);

@@ -1,12 +1,12 @@
 (function(define) {
     'use strict';
     define(['jquery', 'underscore', 'backbone', 'gettext',
-            'js/groups/views/divided_discussions_inline', 'js/groups/views/divided_discussions_course_wide',
-            'edx-ui-toolkit/js/utils/html-utils',
-            'string_utils'],
+        'js/groups/views/divided_discussions_inline', 'js/groups/views/divided_discussions_course_wide',
+        'edx-ui-toolkit/js/utils/html-utils',
+        'string_utils'],
+
         function($, _, Backbone, gettext, InlineDiscussionsView, CourseWideDiscussionsView, HtmlUtils) {
-            var hiddenClass = 'is-hidden',
-                disabledClass = 'is-disabled';
+            var hiddenClass = 'is-hidden';
 
             var DiscussionsView = Backbone.View.extend({
 
