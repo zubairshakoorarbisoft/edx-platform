@@ -273,7 +273,29 @@ class EnrollmentCourseDetailView(APIView):
 
         """
         try:
-            return Response(api.get_course_enrollment_details(course_id, bool(request.GET.get('include_expired', ''))))
+            return Response({
+                "course_id": course_id,
+                "course_name": "Dummy course data",
+                "enrollment_end": "2017-09-10T00:00:00Z",
+                "enrollment_start": "2017-05-10T00:00:00Z",
+                "course_start": "2017-05-10T00:00:00Z",
+                "course_end": "2017-06-09T00:00:00Z",
+                "course_modes": [
+                    {
+                        "slug": "honor",
+                        "name": "Honor Code Certificate",
+                        "min_price": 0,
+                        "suggested_prices": "",
+                        "currency": "usd",
+                        "expiration_datetime": None,
+                        "description": None,
+                        "sku": None,
+                        "bulk_sku": None
+                    }
+                ],
+                "invite_only": False
+            })
+            # return Response(api.get_course_enrollment_details(course_id, bool(request.GET.get('include_expired', ''))))
         except CourseNotFoundError:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
