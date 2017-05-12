@@ -273,26 +273,35 @@ class EnrollmentCourseDetailView(APIView):
 
         """
         try:
+
             return Response({
-                "course_id": course_id,
-                "course_name": "Dummy course data",
-                "enrollment_end": "2017-09-10T00:00:00Z",
-                "enrollment_start": "2017-05-10T00:00:00Z",
-                "course_start": "2017-05-10T00:00:00Z",
-                "course_end": "2017-06-09T00:00:00Z",
+                "course_id": "MITx/15.390.1x/3T2014",
+                "enrollment_end": "2018-03-31T00:00:00Z",
                 "course_modes": [
                     {
                         "slug": "honor",
                         "name": "Honor Code Certificate",
                         "min_price": 0,
-                        "suggested_prices": "",
+                        "suggested_prices": [],
                         "currency": "usd",
                         "expiration_datetime": None,
-                        "description": None,
-                        "sku": None,
-                        "bulk_sku": None
+                        "description": ""
+                    },
+                    {
+                        "slug": "verified",
+                        "name": "Verified Certificate",
+                        "min_price": 50,
+                        "suggested_prices": [
+                            50,
+                            100,
+                            200
+                        ],
+                        "currency": "usd",
+                        "expiration_datetime": "2015-02-15T05:00:00Z",
+                        "description": ""
                     }
                 ],
+                "enrollment_start": "2014-10-31T04:00:00Z",
                 "invite_only": False
             })
             # return Response(api.get_course_enrollment_details(course_id, bool(request.GET.get('include_expired', ''))))
