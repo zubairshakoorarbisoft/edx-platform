@@ -1,5 +1,26 @@
 <!-- Discussion Topics. -->
-<div class="discussions-nav is-hidden" id="discussions-management" tabindex="-1">
-    <div class="cohort-course-wide-discussions-nav"></div>
-    <div class="cohort-inline-discussions-nav"></div>
+<div class="discussions-nav" id="discussions-management" tabindex="-1">
+    <div class="division-scheme-container">
+        <fieldset>
+            <legend><%- gettext('Discussion Division Scheme') %></legend>
+
+            <% for (var i = 0; i < availableSchemes.length; i++) { %>
+            <label>
+                <input class="division-scheme" type="radio" name="division-scheme" id="<%- availableSchemes[i].key %>"
+                       value="<%- availableSchemes[i].key %>"
+                <% if (availableSchemes[i].selected) { %>
+                checked
+                <% } %>
+                >
+                <%- availableSchemes[i].displayName %></label>
+            <% } %>
+        </fieldset>
+    </div>
+
+    <div class="topic-division-nav">
+        <!-- this was an h3, but that is the wrong header level -->
+        <div class="hd hd-3 subsection-title"><%- gettext('Specify which discussion topics are divided') %></div>
+        <div class="cohort-course-wide-discussions-nav"></div>
+        <div class="cohort-inline-discussions-nav"></div>
+    </div>
 </div>
