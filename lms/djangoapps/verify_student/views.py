@@ -57,11 +57,6 @@ from xmodule.modulestore.django import modulestore
 
 log = logging.getLogger(__name__)
 
-DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH = configuration_helpers.get_value(
-    'DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH',
-    settings.DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH
-)
-
 
 class PayAndVerifyView(View):
     """
@@ -208,7 +203,11 @@ class PayAndVerifyView(View):
         Arguments:
             user (User): Current user involved in the onboarding/verification flow
         """
-        return user.is_active or waffle.switch_is_active(DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH)
+        disable_account_activation_requirement_switch = configuration_helpers.get_value(
+            'DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH',
+            settings.DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH
+        )
+        return user.is_active or waffle.switch_is_active(disable_account_activation_requirement_switch)
 
     @method_decorator(login_required)
     def get(
@@ -614,7 +613,11 @@ class PayAndVerifyView(View):
         }
 
         # Remove the account activation requirement if disabled via waffle
-        if waffle.switch_is_active(DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH):
+        disable_account_activation_requirement_switch = configuration_helpers.get_value(
+            'DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH',
+            settings.DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH
+        )
+        if waffle.switch_is_active(disable_account_activation_requirement_switch):
             all_requirements.pop(self.ACCOUNT_ACTIVATION_REQ)
 
         display_steps = set(step['name'] for step in display_steps)

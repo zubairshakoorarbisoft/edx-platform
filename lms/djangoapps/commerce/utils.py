@@ -7,11 +7,6 @@ import waffle
 from commerce.models import CommerceConfiguration
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 
-DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH = configuration_helpers.get_value(
-    'DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH',
-    settings.DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH
-)
-
 
 class EcommerceService(object):
     """ Helper class for ecommerce service integration. """
@@ -55,7 +50,11 @@ class EcommerceService(object):
         Returns:
             Boolean
         """
-        user_is_active = user.is_active or waffle.switch_is_active(DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH)
+        disable_account_activation_requirement_switch = configuration_helpers.get_value(
+            'DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH',
+            settings.DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH
+        )
+        user_is_active = user.is_active or waffle.switch_is_active(disable_account_activation_requirement_switch)
         allow_user = user_is_active or user.is_anonymous()
         return allow_user and self.config.checkout_on_ecommerce_service
 

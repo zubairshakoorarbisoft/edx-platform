@@ -23,11 +23,6 @@ from util.json_request import JsonResponse
 
 log = logging.getLogger(__name__)
 
-DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH = configuration_helpers.get_value(
-    'DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH',
-    settings.DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH
-)
-
 
 class CourseListView(ListAPIView):
     """ List courses and modes. """
@@ -79,10 +74,14 @@ class OrderView(APIView):
         """ HTTP handler. """
         # If the account activation requirement is disabled for this installation, override the
         # anonymous user object attached to the request with the actual user object (if it exists)
-        if not request.user.is_authenticated() and waffle.switch_is_active(DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH):
+        disable_account_activation_requirement_switch = configuration_helpers.get_value(
+            'DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH',
+            settings.DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH
+        )
+        if not request.user.is_authenticated() and waffle.switch_is_active(disable_account_activation_requirement_switch):
             try:
                 request.user = User.objects.get(id=request.session._session_cache['_auth_user_id'])
-            except DoesNotExist:
+            except User.DoesNotExist:
                 return JsonResponse(status=403)
         try:
             order = ecommerce_api_client(request.user).orders(number).get()
