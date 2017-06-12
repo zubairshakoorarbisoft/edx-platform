@@ -37,6 +37,8 @@
                     this.errorMessage = data.thirdPartyAuth.errorMessage || '';
                     this.platformName = data.platformName;
                     this.autoSubmit = data.thirdPartyAuth.autoSubmitRegForm;
+                    this.fields = data.fields;
+                    // console.log(JSON.stringify(data.fields));
 
                     this.listenTo(this.model, 'sync', this.saveSuccess);
                 },
@@ -74,6 +76,29 @@
                     }
 
                     return this;
+                },
+
+                postRender: function() {
+                    FormView.prototype.postRender.apply(this, arguments);
+
+                    var $form = this.$form,
+                        elements = $form[0].elements,
+                        i,
+                        len = elements.length,
+                        $el,
+                        $label,
+                        key = '',
+                        errors = [],
+                        test = {};
+
+                    for (i = 0; i < len; i++) {
+                        $el = $(elements[i]);
+                        $label = $form.find('label[for=' + $el.attr('id') + ']');
+
+                        $label.focus(function() {
+                            $(this).append('<span class="label-required">(required)</span>');
+                        });
+                    }
                 },
 
                 thirdPartyAuth: function(event) {
