@@ -150,8 +150,9 @@ description_max_length = 250
                     htmlEnd=HTML('</span>')
                   )}
                 <span class="savings green-highlight">
-                  ${Text(_('You save ${discount_value} USD')).format(
-                    discount_value=full_program_price_format.format(program['discount_data']['discount_value'])
+                  ${Text(_('You save ${discount_value} {currency}')).format(
+                    discount_value=full_program_price_format.format(program['discount_data']['discount_value']),
+                    currency=program['discount_data']['currency']
                   )}
                 </span>
               </span>
