@@ -872,6 +872,19 @@ class TestProgramMarketingDataExtender(ModuleStoreTestCase):
         self.program['applicable_seat_types'] = [seat['type']]
         return seat
 
+    def _update_discount_data(self, mock_discount_data):
+        """
+        Helper method that updates mocked discount data with
+            - a flag indicating whether the program price is discounted
+            - the amount of the discount (0 in case there's no discount)
+        """
+        program_discounted_price = mock_discount_data['total_incl_tax']
+        program_full_price = mock_discount_data['total_incl_tax_excl_discounts']
+        mock_discount_data.update({
+            'is_discounted': program_discounted_price < program_full_price,
+            'discount_value': program_full_price - program_discounted_price
+        })
+
     def test_instructors(self):
         data = ProgramMarketingDataExtender(self.program, self.user).extend()
 
@@ -988,7 +1001,7 @@ class TestProgramMarketingDataExtender(ModuleStoreTestCase):
         self._prepare_program_for_discounted_price_calculation_endpoint()
         mock_discount_data = {
             'total_incl_tax_excl_discounts': 200.0,
-            'currency': "USD",
+            'currency': 'USD',
             'total_incl_tax': 50.0
         }
         httpretty.register_uri(
@@ -999,6 +1012,7 @@ class TestProgramMarketingDataExtender(ModuleStoreTestCase):
         )
 
         data = ProgramMarketingDataExtender(self.program, self.user).extend()
+        self._update_discount_data(mock_discount_data)
 
         self.assertEqual(
             data['skus'],
@@ -1015,7 +1029,7 @@ class TestProgramMarketingDataExtender(ModuleStoreTestCase):
         self._prepare_program_for_discounted_price_calculation_endpoint()
         mock_discount_data = {
             'total_incl_tax_excl_discounts': 200.0,
-            'currency': "USD",
+            'currency': 'USD',
             'total_incl_tax': 50.0
         }
         httpretty.register_uri(
@@ -1026,6 +1040,7 @@ class TestProgramMarketingDataExtender(ModuleStoreTestCase):
         )
 
         data = ProgramMarketingDataExtender(self.program, AnonymousUserFactory()).extend()
+        self._update_discount_data(mock_discount_data)
 
         self.assertEqual(
             data['skus'],
