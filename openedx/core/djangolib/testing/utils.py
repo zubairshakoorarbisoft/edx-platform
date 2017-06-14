@@ -20,6 +20,7 @@ from django.core.cache import caches
 from django.test import RequestFactory, TestCase, override_settings
 from nose.plugins import Plugin
 
+from edxmako import startup
 from request_cache.middleware import RequestCache
 
 
@@ -160,6 +161,22 @@ class NoseDatabaseIsolation(Plugin):
         """
         for db_ in db.connections.all():
             db_.close()
+
+
+class NoseMakoPathLoading(Plugin):
+    """
+    nosetest plugin that resets django databases before any tests begin.
+
+    Used to make sure that tests running in multi processes aren't sharing
+    a database connection.
+    """
+    name = "mako-path"
+
+    def begin(self):
+        """
+        Before any tests start, reset all django database connections.
+        """
+        startup.run()
 
 
 def get_mock_request(user=None):

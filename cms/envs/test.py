@@ -59,7 +59,8 @@ NOSE_ARGS = [
 ]
 
 NOSE_PLUGINS = [
-    'openedx.core.djangolib.testing.utils.NoseDatabaseIsolation'
+    'openedx.core.djangolib.testing.utils.NoseDatabaseIsolation',
+    'openedx.core.djangolib.testing.utils.NoseMakoPathLoading'
 ]
 
 TEST_ROOT = path('test_root')
