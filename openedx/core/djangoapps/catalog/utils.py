@@ -153,7 +153,7 @@ def get_programs_with_type(include_hidden=True):
             # deepcopy the program dict here so we are not adding
             # the type to the cached object
             program_with_type = copy.deepcopy(program)
-            program_with_type['type'] = program_types.get(program['type'])
+            program_with_type['type'] = program_types[program['type']]
             programs_with_type.append(program_with_type)
 
     return programs_with_type
