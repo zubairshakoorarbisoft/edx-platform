@@ -65,6 +65,16 @@
           </ul>
         </div>
 
+         <div class="courses${'' if course_discovery_enabled else ' no-course-discovery'}" role="region" aria-label="${_('List of Courses')}">
+          <ul class="courses-listing">
+            %for program in programs_list:
+            <li class="courses-listing-item">
+                <%include file="../program.html" args="course=program" />
+            </li>
+            %endfor
+          </ul>
+        </div>
+
 
         % if course_discovery_enabled:
         <aside aria-label="${_('Refine Your Search')}" class="search-facets phone-menu">
