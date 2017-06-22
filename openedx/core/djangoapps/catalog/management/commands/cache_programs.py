@@ -10,7 +10,7 @@ from django.core.management import BaseCommand
 from openedx.core.djangoapps.catalog.cache import (
     PROGRAM_CACHE_KEY_TPL,
     PROGRAM_UUIDS_CACHE_KEY,
-    SITE_PROGRAM_UUIDS_CACHE_KEY
+    SITE_PROGRAM_UUIDS_CACHE_KEY_TPL
 )
 from openedx.core.djangoapps.catalog.models import CatalogIntegration
 from openedx.core.djangoapps.catalog.utils import create_catalog_api_client
@@ -30,7 +30,7 @@ class Command(BaseCommand):
     help = "Rebuild the LMS' cache of program data."
 
     def handle(self, *args, **options):
-        if not waffle.switch_is_active("populate-multitenant-programs"):
+        if not waffle.switch_is_active('populate-multitenant-programs'):
             catalog_integration = CatalogIntegration.current()
             username = catalog_integration.service_username
 
@@ -103,22 +103,25 @@ class Command(BaseCommand):
 
             programs = {}
             for site in Site.objects.all():
-                if not hasattr(site, "configuration") or not site.configuration.get_value("COURSE_CATALOG_API_URL"):
-                    logger.info('Skipping site {sitename}. No configuration.'.format(sitename=site.domain))
+                site_config = getattr(site, 'configuration', None)
+                if site_config is None or not site_config.get_value('COURSE_CATALOG_API_URL'):
+                    logger.info('Skipping site {domain}. No configuration.'.format(domain=site.domain))
                     continue
 
-                logger.info('trying site {sitename}'.format(sitename=site.domain))
                 client = create_catalog_api_client(user, site=site)
-                uuids = self.get_site_program_uuids(client, site)
+                uuids, program_uuids_failed = self.get_site_program_uuids(client, site)
+                new_programs, program_details_failed = self.fetch_program_details(client, uuids)
 
-                failure = self.fetch_program_details(client, site, uuids, programs)
+                if program_uuids_failed or program_details_failed:
+                    failure = True
 
-                logger.info('Caching UUIDs for {total} programs for site {site_name}. key = {cache_key}'.format(
+                programs.update(new_programs)
+
+                logger.info('Caching UUIDs for {total} programs for site {site_name}.'.format(
                     total=len(uuids),
                     site_name=site.domain,
-                    cache_key=SITE_PROGRAM_UUIDS_CACHE_KEY.format(site_name=site.domain)
                 ))
-                cache.set(SITE_PROGRAM_UUIDS_CACHE_KEY.format(site_name=site.domain), uuids, None)
+                cache.set(SITE_PROGRAM_UUIDS_CACHE_KEY_TPL.format(domain=site.domain), uuids, None)
 
             successful = len(programs)
             logger.info('Caching details for {successful} programs.'.format(successful=successful))
@@ -130,6 +133,7 @@ class Command(BaseCommand):
                 sys.exit(1)
 
     def get_site_program_uuids(self, client, site):
+        failure = False
         uuids = []
         try:
             querystring = {
@@ -138,32 +142,29 @@ class Command(BaseCommand):
                 'uuids_only': 1,
             }
 
-            logger.info('Requesting program UUIDs.')
+            logger.info('Requesting program UUIDs for {domain}.'.format(domain=site.domain))
             uuids = client.programs.get(**querystring)
         except:  # pylint: disable=bare-except
-            logger.error('Failed to retrieve program UUIDs.')
-            raise
-        logger.info('Received {total} UUIDs for site {sitename}'.format(
-            total=len(uuids),
-            sitename=site.domain
-        ))
-        logger.info(str(uuids))
-        return uuids
+            logger.error('Failed to retrieve program UUIDs for site: {domain}.'.format(domain=site.domain))
+            failure = True
 
-    def fetch_program_details(self, client, site, uuids, programs):
+        logger.info('Received {total} UUIDs for site {domain}'.format(
+            total=len(uuids),
+            domain=site.domain
+        ))
+        return uuids, failure
+
+    def fetch_program_details(self, client, uuids):
+        programs = {}
         failure = False
         for uuid in uuids:
             try:
                 cache_key = PROGRAM_CACHE_KEY_TPL.format(uuid=uuid)
-                if cache_key not in programs:
-                    logger.info('Requesting details for program {uuid}.'.format(uuid=uuid))
-                    program = client.programs(uuid).get(exclude_utm=1)
-                    programs[cache_key] = program
+                logger.info('Requesting details for program {uuid}.'.format(uuid=uuid))
+                program = client.programs(uuid).get(exclude_utm=1)
+                programs[cache_key] = program
             except:  # pylint: disable=bare-except
-                logger.exception('Failed to retrieve details for program {uuid} for site {site_name}.'.format(
-                    uuid=uuid,
-                    site_name=site.domain
-                ))
+                logger.exception('Failed to retrieve details for program {uuid}.'.format(uuid=uuid))
                 failure = True
                 continue
-        return failure
+        return programs, failure
