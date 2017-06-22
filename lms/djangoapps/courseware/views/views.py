@@ -163,7 +163,7 @@ def courses(request):
 
     # Do not add programs to the context if there are no program types enabled for the site.
     if program_types:
-        programs_list = get_programs_with_type(program_types, include_hidden=False)
+        programs_list = get_programs_with_type(include_hidden=False)
 
     return render_to_response(
         "courseware/courses.html",
