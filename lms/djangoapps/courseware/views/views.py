@@ -156,7 +156,6 @@ def courses(request):
         else:
             courses_list = sort_by_announcement(courses_list)
 
-    # Do not add programs to the context if there are no program types enabled for the site.
     programs_list = get_programs_with_type(include_hidden=False)
 
     return render_to_response(
