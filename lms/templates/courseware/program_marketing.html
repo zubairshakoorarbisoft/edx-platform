@@ -66,7 +66,7 @@ description_max_length = 250
           <h1 class="banner-title">${title}</h1>
           <p class="banner-description">${subtitle}</p>
           % if program.get('is_learner_eligible_for_one_click_purchase'):
-            <a href="${buy_button_href}" class="btn-brand btn-large hidden-sm btn-start">
+            <a href="${buy_button_href}" class="btn-brand btn-large btn-start">
               ${_('Purchase the Program')}
             </a>
           % else:
