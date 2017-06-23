@@ -825,6 +825,7 @@ def program_marketing(request, program_uuid):
         raise Http404
 
     program = ProgramMarketingDataExtender(program_data, request.user).extend()
+    program['type_slug'] = slugify(program['type'])
     skus = program.get('skus')
     ecommerce_service = EcommerceService()
 
