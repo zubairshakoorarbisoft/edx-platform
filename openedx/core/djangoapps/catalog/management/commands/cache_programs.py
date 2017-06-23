@@ -30,7 +30,53 @@ class Command(BaseCommand):
     help = "Rebuild the LMS' cache of program data."
 
     def handle(self, *args, **options):
-        if not waffle.switch_is_active('populate-multitenant-programs'):
+        if waffle.switch_is_active('populate-multitenant-programs'):
+            failure = False
+            logger.info('populate-multitenant-programs switch is ON')
+
+            catalog_integration = CatalogIntegration.current()
+            username = catalog_integration.service_username
+
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                logger.error(
+                    'Failed to create API client. Service user {username} does not exist.'.format(username)
+                )
+                raise
+
+            programs = {}
+            for site in Site.objects.all():
+                site_config = getattr(site, 'configuration', None)
+                if site_config is None or not site_config.get_value('COURSE_CATALOG_API_URL'):
+                    logger.info('Skipping site {domain}. No configuration.'.format(domain=site.domain))
+                    continue
+
+                client = create_catalog_api_client(user, site=site)
+                uuids, program_uuids_failed = self.get_site_program_uuids(client, site)
+                new_programs, program_details_failed = self.fetch_program_details(client, uuids)
+
+                if program_uuids_failed or program_details_failed:
+                    failure = True
+
+                programs.update(new_programs)
+
+                logger.info('Caching UUIDs for {total} programs for site {site_name}.'.format(
+                    total=len(uuids),
+                    site_name=site.domain,
+                ))
+                cache.set(SITE_PROGRAM_UUIDS_CACHE_KEY_TPL.format(domain=site.domain), uuids, None)
+
+            successful = len(programs)
+            logger.info('Caching details for {successful} programs.'.format(successful=successful))
+            cache.set_many(programs, None)
+
+            if failure:
+                # This will fail a Jenkins job running this command, letting site
+                # operators know that there was a problem.
+                sys.exit(1)
+
+        else:
             catalog_integration = CatalogIntegration.current()
             username = catalog_integration.service_username
 
@@ -80,52 +126,6 @@ class Command(BaseCommand):
 
             logger.info('Caching UUIDs for {total} programs.'.format(total=total))
             cache.set(PROGRAM_UUIDS_CACHE_KEY, uuids, None)
-
-            if failure:
-                # This will fail a Jenkins job running this command, letting site
-                # operators know that there was a problem.
-                sys.exit(1)
-
-        else:
-            failure = False
-            logger.info('populate-multitenant-programs switch is ON')
-
-            catalog_integration = CatalogIntegration.current()
-            username = catalog_integration.service_username
-
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                logger.error(
-                    'Failed to create API client. Service user {username} does not exist.'.format(username)
-                )
-                raise
-
-            programs = {}
-            for site in Site.objects.all():
-                site_config = getattr(site, 'configuration', None)
-                if site_config is None or not site_config.get_value('COURSE_CATALOG_API_URL'):
-                    logger.info('Skipping site {domain}. No configuration.'.format(domain=site.domain))
-                    continue
-
-                client = create_catalog_api_client(user, site=site)
-                uuids, program_uuids_failed = self.get_site_program_uuids(client, site)
-                new_programs, program_details_failed = self.fetch_program_details(client, uuids)
-
-                if program_uuids_failed or program_details_failed:
-                    failure = True
-
-                programs.update(new_programs)
-
-                logger.info('Caching UUIDs for {total} programs for site {site_name}.'.format(
-                    total=len(uuids),
-                    site_name=site.domain,
-                ))
-                cache.set(SITE_PROGRAM_UUIDS_CACHE_KEY_TPL.format(domain=site.domain), uuids, None)
-
-            successful = len(programs)
-            logger.info('Caching details for {successful} programs.'.format(successful=successful))
-            cache.set_many(programs, None)
 
             if failure:
                 # This will fail a Jenkins job running this command, letting site

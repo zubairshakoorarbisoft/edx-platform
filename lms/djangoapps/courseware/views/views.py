@@ -826,16 +826,13 @@ def program_marketing(request, program_uuid):
         raise Http404
 
     program = ProgramMarketingDataExtender(program_data, request.user).extend()
-    program['type_slug'] = slugify(program['type'])
     skus = program.get('skus')
     ecommerce_service = EcommerceService()
 
-    context = {'program': program}
-
-    if program.get('is_learner_eligible_for_one_click_purchase') and skus:
-        context['buy_button_href'] = ecommerce_service.get_checkout_page_url(*skus)
-
-    return render_to_response('courseware/program_marketing.html', context)
+    return render_to_response('courseware/program_marketing.html', {
+        'buy_button_href': ecommerce_service.get_checkout_page_url(*skus) if skus else '#courses',
+        'program': program,
+    })
 
 
 @transaction.non_atomic_requests
