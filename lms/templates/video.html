@@ -17,7 +17,7 @@ from openedx.core.djangolib.js_utils import js_escaped_string
     tabindex="-1"
 >
     <div class="focus_grabber first"></div>
-
+<button is="google-cast-button"></button>
     <div class="tc-wrapper">
       <div class="video-wrapper">
           <span tabindex="0" class="spinner" aria-hidden="false" aria-label="${_('Loading video player')}"></span>
@@ -86,6 +86,48 @@ from openedx.core.djangolib.js_utils import js_escaped_string
     </div>
     % endif
 </div>
+
+<!-- BEGIN Chromecast -->
+<script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+<script>
+    window['__onGCastApiAvailable'] = function (isAvailable) {
+        initializeCastApi = function () {
+            cast.framework.CastContext.getInstance().setOptions({
+                receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+                autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+            });
+        };
+        if (isAvailable) {
+            initializeCastApi();
+
+            $('button.video_control.play').on('click', function () {
+                var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+                var mediaInfo = new chrome.cast.media.MediaInfo('https://d2f1egay8yehza.cloudfront.net/BERGG101/BERGG101T314-V011300_DTH.mp4', 'video/mp4t');
+                var request = new chrome.cast.media.LoadRequest(mediaInfo);
+                castSession.loadMedia(request).then(
+                    function () {
+                        console.log('Load succeed');
+                    },
+                    function (errorCode) {
+                        console.log('Error code: ' + errorCode);
+                    });
+            });
+            /*var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+            var mediaInfo = new chrome.cast.media.MediaInfo('CCxmtcICYNc', 'yt');
+            var request = new chrome.cast.media.LoadRequest(mediaInfo);
+            castSession.loadMedia(request).then(
+                function () {
+                    console.log('Load succeed');
+                },
+                function (errorCode) {
+                    console.log('Error code: ' + errorCode);
+                });*/
+        }
+    };
+</script>
+<!-- END Chromecast -->
+
+
 % if cdn_eval:
 <script>
   //TODO: refactor this js into a separate file.
