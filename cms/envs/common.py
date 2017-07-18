@@ -960,9 +960,6 @@ INSTALLED_APPS = (
     # Country embargo support
     'openedx.core.djangoapps.embargo',
 
-    # Signals
-    'openedx.core.djangoapps.signals.apps.SignalConfig',
-
     # Monitoring signals
     'openedx.core.djangoapps.monitoring',
 

@@ -2032,7 +2032,7 @@ INSTALLED_APPS = (
     'branding',
     'lms.djangoapps.grades.apps.GradesConfig',
 
-    # Signals
+    # Signal
     'openedx.core.djangoapps.signals.apps.SignalConfig',
 
     # Student support tools
