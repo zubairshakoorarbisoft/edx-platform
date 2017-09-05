@@ -1,6 +1,6 @@
 define([
-    'jquery', 'js/collections/asset', 'js/views/assets', 'jquery.fileupload'
-], function($, AssetCollection, AssetsView) {
+    'jquery', 'js/collections/asset', 'js/views/assets', 'studio-frontend', 'jquery.fileupload'
+], function($, AssetCollection, AssetsView, Assets) {
     'use strict';
     return function(config) {
         var assets = new AssetCollection(),

@@ -128,6 +128,7 @@
             'tooltip_manager': 'js/src/tooltip_manager',
             'draggabilly': 'js/vendor/draggabilly',
             'hls': 'common/js/vendor/hls',
+            'studio-frontend': 'common/js/vendor/assets.min',
 
             // Files needed for Annotations feature
             'annotator': 'js/vendor/ova/annotator-full',
