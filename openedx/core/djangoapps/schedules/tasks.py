@@ -1,12 +1,18 @@
 import datetime
+<<<<<<< HEAD
 from subprocess import check_output, CalledProcessError
 from urlparse import urlparse
+=======
+from itertools import groupby
+>>>>>>> Only send one email even if there are multiple enrollments by the same user on the same day
 
 from celery.task import task
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.db.models import Min
 from django.utils.http import urlquote
+from django.contrib.auth.models import User
 
 from edx_ace import ace
 from edx_ace.message import MessageType, Message
@@ -56,14 +62,33 @@ def _recurring_nudge_schedule_send(site_id, msg_str):
 
 
 def _recurring_nudge_schedules_for_hour(target_hour, org_list, exclude_orgs=False):
+    beginning_of_day = target_hour.replace(hour=0, minute=0, second=0)
+    users = User.objects.filter(
+        courseenrollment__schedule__start__gte=beginning_of_day,
+        courseenrollment__schedule__start__lt=beginning_of_day + datetime.timedelta(days=1),
+        courseenrollment__is_active=True,
+    ).annotate(
+        first_schedule=Min('courseenrollment__schedule__start')
+    ).filter(
+        first_schedule__gte=target_hour,
+        first_schedule__lt=target_hour + datetime.timedelta(minutes=60)
+    )
+
+    if org_list is not None:
+        if exclude_orgs:
+            users = users.exclude(courseenrollment__course__org__in=org_list)
+        else:
+            users = users.filter(courseenrollment__course__org__in=org_list)
+
     schedules = Schedule.objects.select_related(
         'enrollment__user__profile',
         'enrollment__course',
     ).filter(
-        start__gte=target_hour,
-        start__lt=target_hour + datetime.timedelta(minutes=60),
+        enrollment__user__id__in=users,
+        start__gte=beginning_of_day,
+        start__lt=beginning_of_day + datetime.timedelta(days=1),
         enrollment__is_active=True,
-    )
+    ).order_by('enrollment__user__id')
 
     if org_list is not None:
         if exclude_orgs:
@@ -74,20 +99,28 @@ def _recurring_nudge_schedules_for_hour(target_hour, org_list, exclude_orgs=Fals
     if "read_replica" in settings.DATABASES:
         schedules = schedules.using("read_replica")
 
-    for schedule in schedules:
-        enrollment = schedule.enrollment
-        user = enrollment.user
+    dashboard_relative_url = reverse('dashboard')
 
-        course_id_str = str(enrollment.course_id)
-        course = enrollment.course
+    for (user, user_schedules) in groupby(schedules, lambda s: s.enrollment.user):
+        user_schedules = list(user_schedules)
+        course_id_strs = [str(schedule.enrollment.course_id) for schedule in user_schedules]
 
-        course_root_relative_url = reverse('course_root', args=[course_id_str])
-        dashboard_relative_url = reverse('dashboard')
+        def absolute_url(relative_path):
+            return u'{}{}'.format(settings.LMS_ROOT_URL, urlquote(relative_path))
 
         template_context = {
             'student_name': user.profile.name,
-            'course_name': course.display_name,
-            'course_url': absolute_url(course_root_relative_url),
+
+            'courses': [
+                {
+                    'name': schedule.enrollment.course.display_name,
+                    'url': absolute_url(reverse('course_root', args=[str(schedule.enrollment.course_id)])),
+                }
+                for schedule in user_schedules
+            ],
+
+            # This is used by the bulk email optout policy
+            'course_ids': course_id_strs,
 
             # Platform information
             'homepage_url': encode_url(marketing_link('ROOT')),
@@ -97,12 +130,8 @@ def _recurring_nudge_schedules_for_hour(target_hour, org_list, exclude_orgs=Fals
             'contact_mailing_address': settings.CONTACT_MAILING_ADDRESS,
             'social_media_urls': encode_urls_in_dict(getattr(settings, 'SOCIAL_MEDIA_FOOTER_URLS', {})),
             'mobile_store_urls': encode_urls_in_dict(getattr(settings, 'MOBILE_STORE_URLS', {})),
-
-            # This is used by the bulk email optout policy
-            'course_id': course_id_str,
         }
-
-        yield (user, course.language, template_context)
+        yield (user, user_schedules[0].enrollment.course.language, template_context)
 
 
 def encode_url(url):
