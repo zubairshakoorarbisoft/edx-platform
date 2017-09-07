@@ -1,12 +1,16 @@
 import datetime
+import itertools
 from mock import patch, Mock
 from unittest import skipUnless
 import pytz
 
+import attr
 import ddt
 from django.conf import settings
 
+from edx_ace.channel import ChannelType
 from edx_ace.utils.date import serialize
+from edx_ace.test_utils import StubPolicy, patch_channels, patch_policies
 
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import CourseLocator
@@ -76,7 +80,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         test_time_str = serialize(datetime.datetime(2017, 8, 1, 18, tzinfo=pytz.UTC))
         with self.assertNumQueries(1):
             tasks.recurring_nudge_schedule_hour(
-                self.site_config.site, 3, test_time_str, [schedules[0].enrollment.course.org],
+                self.site_config.site.id, 3, test_time_str, [schedules[0].enrollment.course.org],
             )
         self.assertEqual(mock_schedule_send.apply_async.call_count, schedule_count)
         self.assertFalse(mock_ace.send.called)
@@ -93,7 +97,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         test_time_str = serialize(datetime.datetime(2017, 8, 1, 20, tzinfo=pytz.UTC))
         with self.assertNumQueries(1):
             tasks.recurring_nudge_schedule_hour(
-                self.site_config.site, 3, test_time_str, [schedule.enrollment.course.org],
+                self.site_config.site.id, 3, test_time_str, [schedule.enrollment.course.org],
             )
 
         # There is no database constraint that enforces that enrollment.course_id points
@@ -182,7 +186,51 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         test_time_str = serialize(datetime.datetime(2017, 8, 1, test_hour, tzinfo=pytz.UTC))
         with self.assertNumQueries(1):
             tasks.recurring_nudge_schedule_hour(
-                self.site_config.site, 3, test_time_str, [schedules[0].enrollment.course.org],
+                self.site_config.site.id, 3, test_time_str, [schedules[0].enrollment.course.org],
             )
         self.assertEqual(mock_schedule_send.apply_async.call_count, messages_sent)
         self.assertFalse(mock_ace.send.called)
+
+    @ddt.data(*itertools.product((1, 10, 100), (3, 10)))
+    @ddt.unpack
+    def test_templates(self, message_count, day):
+        user = UserFactory.create()
+        schedules = [
+            ScheduleFactory.create(
+                start=datetime.datetime(2017, 8, 1, 19, 44, 30, tzinfo=pytz.UTC),
+                enrollment__user=user,
+                enrollment__course__id=CourseLocator('edX', 'toy', 'Hour{}'.format(idx))
+            )
+            for idx in range(message_count)
+        ]
+
+        test_time_str = serialize(datetime.datetime(2017, 8, 1, 19, tzinfo=pytz.UTC))
+
+        patch_policies(self, [StubPolicy([ChannelType.PUSH])])
+        mock_channel = Mock(
+            name='test_channel',
+            channel_type=ChannelType.EMAIL
+        )
+        patch_channels(self, [mock_channel])
+
+        sent_messages = []
+
+        with patch.object(tasks, '_recurring_nudge_schedule_send') as mock_schedule_send:
+            mock_schedule_send.apply_async = lambda args, *_a, **_kw: sent_messages.append(args)
+
+            with self.assertNumQueries(1):
+                tasks.recurring_nudge_schedule_hour(
+                    self.site_config.site.id, day, test_time_str, [schedules[0].enrollment.course.org],
+                )
+
+        self.assertEqual(len(sent_messages), 1)
+
+        for args in sent_messages:
+            tasks._recurring_nudge_schedule_send(*args)
+
+        self.assertEqual(mock_channel.deliver.call_count, 1)
+        for (_name, (_msg, email), _kwargs) in mock_channel.deliver.mock_calls:
+            for template in attr.astuple(email):
+                self.assertNotIn("TEMPLATE WARNING", template)
+
+        self.assertFalse(True)
