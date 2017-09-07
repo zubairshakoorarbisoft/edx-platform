@@ -108,13 +108,8 @@ def _recurring_nudge_schedules_for_hour(target_hour, org_list, exclude_orgs=Fals
         template_context = {
             'student_name': user.profile.name,
 
-            'courses': [
-                {
-                    'name': schedule.enrollment.course.display_name,
-                    'url': absolute_url(reverse('course_root', args=[str(schedule.enrollment.course_id)])),
-                }
-                for schedule in user_schedules
-            ],
+            'course_name': user_schedules[0].enrollment.course.display_name,
+            'course_url': absolute_url(reverse('course_root', args=[str(user_schedules[0].enrollment.course_id)])),
 
             # This is used by the bulk email optout policy
             'course_ids': course_id_strs,

@@ -232,5 +232,3 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         for (_name, (_msg, email), _kwargs) in mock_channel.deliver.mock_calls:
             for template in attr.astuple(email):
                 self.assertNotIn("TEMPLATE WARNING", template)
-
-        self.assertFalse(True)

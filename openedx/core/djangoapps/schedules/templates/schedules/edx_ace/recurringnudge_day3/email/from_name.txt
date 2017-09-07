@@ -1,1 +1,5 @@
+{% if courses|length > 1 %}
+edX
+{% else %}
 {{ course_name }}
+{% endif %}
