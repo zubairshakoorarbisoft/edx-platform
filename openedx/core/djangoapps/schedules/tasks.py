@@ -1,10 +1,7 @@
 import datetime
-<<<<<<< HEAD
 from subprocess import check_output, CalledProcessError
 from urlparse import urlparse
-=======
 from itertools import groupby
->>>>>>> Only send one email even if there are multiple enrollments by the same user on the same day
 
 from celery.task import task
 from django.conf import settings
