@@ -5,11 +5,11 @@ from itertools import groupby
 
 from celery.task import task
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.db.models import Min
 from django.utils.http import urlquote
-from django.contrib.auth.models import User
 
 from edx_ace import ace
 from edx_ace.message import MessageType, Message
