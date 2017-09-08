@@ -7,6 +7,7 @@ import pytz
 import attr
 import ddt
 from django.conf import settings
+from django.test import override_settings
 
 from edx_ace.channel import ChannelType
 from edx_ace.utils.date import serialize
@@ -21,9 +22,6 @@ from openedx.core.djangolib.testing.utils import CacheIsolationTestCase, skip_un
 from openedx.core.djangoapps.schedules.tests.factories import ScheduleFactory, ScheduleConfigFactory
 from openedx.core.djangoapps.site_configuration.tests.factories import SiteConfigurationFactory
 from student.tests.factories import UserFactory
-
-
-from openedx.core.djangoapps.schedules.models import Schedule
 
 
 @ddt.ddt
@@ -193,7 +191,10 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
 
     @ddt.data(*itertools.product((1, 10, 100), (3, 10)))
     @ddt.unpack
+    @override_settings()
     def test_templates(self, message_count, day):
+
+        settings.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = "TEMPLATE WARNING - MISSING VARIABLE [%s]"
         user = UserFactory.create()
         schedules = [
             ScheduleFactory.create(
