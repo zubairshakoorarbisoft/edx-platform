@@ -81,7 +81,7 @@ def _recurring_nudge_schedules_for_hour(target_hour, org_list, exclude_orgs=Fals
         'enrollment__user__profile',
         'enrollment__course',
     ).filter(
-        enrollment__user__id__in=users,
+        enrollment__user__in=users,
         start__gte=beginning_of_day,
         start__lt=beginning_of_day + datetime.timedelta(days=1),
         enrollment__is_active=True,
@@ -105,11 +105,12 @@ def _recurring_nudge_schedules_for_hour(target_hour, org_list, exclude_orgs=Fals
         def absolute_url(relative_path):
             return u'{}{}'.format(settings.LMS_ROOT_URL, urlquote(relative_path))
 
+        first_schedule = user_schedules[0]
         template_context = {
             'student_name': user.profile.name,
 
-            'course_name': user_schedules[0].enrollment.course.display_name,
-            'course_url': absolute_url(reverse('course_root', args=[str(user_schedules[0].enrollment.course_id)])),
+            'course_name': first_schedule.enrollment.course.display_name,
+            'course_url': absolute_url(reverse('course_root', args=[str(first_schedule.enrollment.course_id)])),
 
             # This is used by the bulk email optout policy
             'course_ids': course_id_strs,
@@ -123,7 +124,7 @@ def _recurring_nudge_schedules_for_hour(target_hour, org_list, exclude_orgs=Fals
             'social_media_urls': encode_urls_in_dict(getattr(settings, 'SOCIAL_MEDIA_FOOTER_URLS', {})),
             'mobile_store_urls': encode_urls_in_dict(getattr(settings, 'MOBILE_STORE_URLS', {})),
         }
-        yield (user, user_schedules[0].enrollment.course.language, template_context)
+        yield (user, first_schedule.enrollment.course.language, template_context)
 
 
 def encode_url(url):
