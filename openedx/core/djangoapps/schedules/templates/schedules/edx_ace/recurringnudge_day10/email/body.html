@@ -1,17 +1,19 @@
 {% extends 'schedules/edx_ace/common/base_body.html' %}
 {% load i18n %}
 
-{% if courses|length > 1 %}
-    {% blocktrans trimmed %}
-        Many edX learners are completing more problems every week, and
-        participating in the discussion forums. What do you want to do to keep learning?
-    {% endblocktrans %}
-{% else %}
-    {% blocktrans trimmed %}
-        Many edX learners in {{course_name}} are completing more problems every week, and
-        participating in the discussion forums. What do you want to do to keep learning?
-    {% endblocktrans %}
-{% endif %}
+{% block preview_text %}
+    {% if courses|length > 1 %}
+        {% blocktrans trimmed %}
+            Many {{ platform_name }} learners are completing more problems every week, and
+            participating in the discussion forums. What do you want to do to keep learning?
+        {% endblocktrans %}
+    {% else %}
+        {% blocktrans trimmed %}
+            Many {{ platform_name }} learners in {{course_name}} are completing more problems every week, and
+            participating in the discussion forums. What do you want to do to keep learning?
+        {% endblocktrans %}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <table width="100%" align="left" border="0" cellpadding="0" cellspacing="0" role="presentation">
