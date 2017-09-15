@@ -4,21 +4,9 @@ from student.models import CourseEnrollment
 from course_modes.models import CourseMode
 
 
-
 class CourseEntitlement(models.Model):
     """
     Represents a Student's Entitlement to a Course Run for a given Course.
-    """
-
-    """
-    TODO Members/Columns
-    id (id Integer)
-    user_id (integer)
-    root_course_id (string)
-    enroll_end_date (date or string?)
-    mode (string)
-    enrollment_course_id (FK, from the course_enrollment table, Nullable, Integer)
-    is_active (boolean)
     """
 
     user_id = models.ForeignKey(User)
@@ -33,5 +21,10 @@ class CourseEntitlement(models.Model):
 
     enrollment_course_id = models.ForeignKey(CourseEnrollment, null=True)
 
-    is_active = models.BooleanField(default=0)
+    is_active = models.BooleanField(default=1)
 
+    @classmethod
+    def entitlements_for_user(self, username):
+        # TODO: Update to use the user provided
+        user = User.objects.get(username=username)
+        return self.objects.filter(user_id=user)
