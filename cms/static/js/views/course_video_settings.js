@@ -521,22 +521,14 @@ function($, Backbone, _, gettext, moment, HtmlUtils, StringUtils, TranscriptSett
         },
 
         setFixedCourseVideoSettingsPane: function() {
-            var $courseVideoSettingsButton = $('.course-video-settings-button'),
-                $courseVideoSettingsContainer = this.$el.find('.course-video-settings-container'),
-                initialPositionTop = $courseVideoSettingsContainer.offset().top,
-                // Button right position =  width of window - button left position - button width - paddings - border.
-                $courseVideoSettingsButtonRight = $(window).width() -
-                    $courseVideoSettingsButton.offset().left -
-                    $courseVideoSettingsButton.width() -
-                    $courseVideoSettingsButton.css('padding-left').replace('px', '') -
-                    $courseVideoSettingsButton.css('padding-right').replace('px', '') -
-                    $courseVideoSettingsButton.css('border-width').replace('px', '') - 5;   // Extra pixles for slack;
+            var $courseVideoSettingsContainer = this.$el.find('.course-video-settings-container'),
+                initialPositionTop = $courseVideoSettingsContainer.offset().top;
 
             // Set to windows total height
             $courseVideoSettingsContainer.css('height', $(window).height());
 
-            // Start settings pane adjascent to 'course video settings' button.
-            $courseVideoSettingsContainer.css('right', $courseVideoSettingsButtonRight);
+            // Start settings pane adjascent to 'course video settings' button
+            this.$el.find('.course-video-settings-container').css('right', this.calculateRightPosition());
 
             // Make sticky when scroll reaches top.
             $(window).scroll(function() {
@@ -548,18 +540,35 @@ function($, Backbone, _, gettext, moment, HtmlUtils, StringUtils, TranscriptSett
             });
         },
 
+        calculateRightPosition: function () {
+            var $courseVideoSettingsButton = $('.course-video-settings-button'),
+            // Button right position =  width of window - button left position - button width - paddings - border.
+                courseVideoSettingsButtonRight = $(window).width() -
+                    $courseVideoSettingsButton.offset().left -
+                    $courseVideoSettingsButton.width() -
+                    $courseVideoSettingsButton.css('padding-left').replace('px', '') -
+                    $courseVideoSettingsButton.css('padding-right').replace('px', '') -
+                    $courseVideoSettingsButton.css('border-width').replace('px', '') - 5;   // Extra pixles for slack;
+
+            return courseVideoSettingsButtonRight;
+        },
+
+        showCourseVideoSettings: function() {
+            // Start settings pane adjascent to 'course video settings' button
+            this.$el.find('.course-video-settings-container').css('right', this.calculateRightPosition());
+        },
+
         closeCourseVideoSettings: function() {
             // TODO: Slide out when closing settings pane. We may need to hide the view instead of destroying it.
 
-            // Trigger destroy transcript event.
-            Backbone.trigger('coursevideosettings:destroyCourseVideoSettingsView');
+            this.$el.find('.course-video-settings-container').css('right', '-100%');
 
             // Unbind any events associated
-            this.undelegateEvents();
-            this.stopListening();
+            //this.undelegateEvents();
+            //this.stopListening();
 
             // Empty this.$el content from DOM
-            this.$el.empty();
+            this.$el.hide();
 
             // Reset everything.
             this.resetPlanData();

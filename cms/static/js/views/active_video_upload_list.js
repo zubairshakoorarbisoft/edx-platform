@@ -69,11 +69,6 @@ define([
                         'coursevideosettings:syncActiveTranscriptPreferences',
                         this.syncActiveTranscriptPreferences
                     );
-                    this.listenTo(
-                        Backbone,
-                        'coursevideosettings:destroyCourseVideoSettingsView',
-                        this.destroyCourseVideoSettingsView
-                    );
                 }
             },
 
@@ -83,17 +78,18 @@ define([
 
             showCourseVideoSettingsView: function(event) {
                 if (this.isVideoTranscriptEnabled) {
-                    this.courseVideoSettingsView = new CourseVideoSettingsView({
-                        activeTranscriptPreferences: this.activeTranscriptPreferences,
-                        videoTranscriptSettings: this.videoTranscriptSettings
-                    });
-                    this.courseVideoSettingsView.render();
-                    event.stopPropagation();
-                }
-            },
+                    if (this.courseVideoSettingsView) {
+                        this.courseVideoSettingsView.showCourseVideoSettings();
+                    } else {
+                        this.courseVideoSettingsView = new CourseVideoSettingsView({
+                            activeTranscriptPreferences: this.activeTranscriptPreferences,
+                            videoTranscriptSettings: this.videoTranscriptSettings
+                        });
+                        this.courseVideoSettingsView.render();
+                        event.stopPropagation();
+                    }
 
-            destroyCourseVideoSettingsView: function() {
-                this.courseVideoSettingsView = null;
+                }
             },
 
             render: function() {
