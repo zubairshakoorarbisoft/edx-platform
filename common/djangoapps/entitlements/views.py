@@ -13,30 +13,22 @@ from .utils import get_json_entitlements_by_user
 from .models import CourseEntitlement
 from django.contrib.auth.models import User
 
-
 # TODO Temp?
 from django.core.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
-
-
-from openedx.core.lib.api.permissions import ApiKeyHeaderPermission, ApiKeyHeaderPermissionIsAuthenticated
 
 
 class EntitlementView(APIView):
     authentication_classes = (JwtAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, username):
+    def get(self, request):
         """
         TODO:
          - Add check to only return entitlements for a given user
         """
+        username = 'honor'
         return Response(get_json_entitlements_by_user(self, username))
-
-
-class AddEntitlementView(APIView):
-    authentication_classes = (JwtAuthentication,)
-    permission_classes = (permissions.IsAuthenticated,)
 
     @csrf_exempt
     def post(self, request):

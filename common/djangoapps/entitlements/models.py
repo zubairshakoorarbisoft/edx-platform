@@ -24,7 +24,7 @@ class CourseEntitlement(models.Model):
     is_active = models.BooleanField(default=1)
 
     @classmethod
-    def entitlements_for_user(self, username):
+    def entitlements_for_user(cls, username):
         # TODO: Update to use the user provided
         user = User.objects.get(username=username)
-        return self.objects.filter(user_id=user)
+        return cls.objects.filter(user_id=user)
