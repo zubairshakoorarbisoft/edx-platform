@@ -27,8 +27,7 @@ class EntitlementView(APIView):
         TODO:
          - Add check to only return entitlements for a given user
         """
-        username = 'honor'
-        return Response(get_json_entitlements_by_user(self, username))
+        return Response(get_json_entitlements_by_user(self, request.query_params.get('username', '')))
 
     @csrf_exempt
     def put(self, request):
