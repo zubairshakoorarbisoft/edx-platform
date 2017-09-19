@@ -31,21 +31,25 @@ class EntitlementView(APIView):
         return Response(get_json_entitlements_by_user(self, username))
 
     @csrf_exempt
-    def post(self, request):
+    def put(self, request):
 
         # TODO: Check the input data for Mode
         # TODO: Check to see if the Course Entitlement already exists for a user
-        course_id = request.data.get('course_id', '')  # TODO: Replace test data
+        course_entitlement_details = request.data.get('course_entitlement_details', {})  # TODO: Replace test data
+        course_id = course_entitlement_details.get('course_id', '')
         expiration_date = request.data.get('expiration_date', '')  # '2017-09-14 11:47:58.000000'
         mode = request.data.get('mode', '')
+        username = request.data.get('user', '')
+        is_active = request.data.get('is_active', False)
 
         # TODO: Add actual user id retrieval
         # TODO: Add checking for the format of the course id and the expiration date format
-        user = User.objects.get(id=6)
+        user = User.objects.get(username=username)
         new_entitlement = CourseEntitlement(user_id=user,
                                             root_course_id=course_id,
                                             enroll_end_date=expiration_date,
-                                            mode=mode)
+                                            mode=mode,
+                                            is_active=is_active)
         new_entitlement.save()
 
         return Response('Success')
