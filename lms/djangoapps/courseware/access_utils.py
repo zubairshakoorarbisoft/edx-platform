@@ -60,6 +60,8 @@ def check_start_date(user, days_early_for_beta, start, course_key):
     Returns:
         AccessResponse: Either ACCESS_GRANTED or StartDateError.
     """
+    if COURSE_PRE_START_ACCESS_FLAG.is_enabled(course_key):
+        return ACCESS_GRANTED
     start_dates_disabled = settings.FEATURES['DISABLE_START_DATES']
     if start_dates_disabled and not is_masquerading_as_student(user, course_key):
         return ACCESS_GRANTED
