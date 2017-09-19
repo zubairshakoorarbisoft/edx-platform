@@ -64,7 +64,7 @@ class StartDateTransformer(FilteringTransformerMixin, BlockStructureTransformer)
             merged_field_name=cls.MERGED_START_DATE,
             default_date=DEFAULT_START_DATE,
             func_merge_parents=min,
-            func_merge_ancestors=max,
+            func_merge_ancestors=lambda x, y: y,
         )
 
     def transform_block_filters(self, usage_info, block_structure):
