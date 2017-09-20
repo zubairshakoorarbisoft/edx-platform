@@ -63,7 +63,7 @@ class StartDateTransformer(FilteringTransformerMixin, BlockStructureTransformer)
             xblock_field_name='start',
             merged_field_name=cls.MERGED_START_DATE,
             default_date=DEFAULT_START_DATE,
-            func_merge_parents=min,
+            func_merge_parents=max,
             func_merge_ancestors=lambda x, y: y,
         )
 
