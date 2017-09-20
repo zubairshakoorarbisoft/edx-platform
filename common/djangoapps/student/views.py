@@ -64,6 +64,7 @@ from course_modes.models import CourseMode
 from courseware.access import has_access
 from courseware.courses import get_courses, sort_by_announcement, sort_by_start_date  # pylint: disable=import-error
 from django_comment_common.models import assign_role
+from entitlements.utils import get_list_course_entitlements
 from edxmako.shortcuts import render_to_response, render_to_string
 from eventtracking import tracker
 from lms.djangoapps.commerce.utils import EcommerceService  # pylint: disable=import-error
@@ -663,6 +664,8 @@ def dashboard(request):
     # enrollments, because it could have been a data push snafu.
     course_enrollments = list(get_course_enrollments(user, course_org_filter, org_filter_out_set))
 
+    course_entitlements = get_list_course_entitlements(user)
+
     # Record how many courses there are so that we can get a better
     # understanding of usage patterns on prod.
     monitoring_utils.accumulate('num_courses', len(course_enrollments))
@@ -837,6 +840,7 @@ def dashboard(request):
         'redirect_message': redirect_message,
         'account_activation_messages': account_activation_messages,
         'course_enrollments': course_enrollments,
+        'course_entitlements': course_entitlements,
         'course_optouts': course_optouts,
         'banner_account_activation_message': banner_account_activation_message,
         'sidebar_account_activation_message': sidebar_account_activation_message,

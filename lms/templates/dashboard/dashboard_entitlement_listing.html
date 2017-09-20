@@ -1,0 +1,30 @@
+<%page args="entitlement"/>
+
+<%namespace name='static' file='../static_content.html'/>
+
+<li class="course-item">
+    <div class="course-container">
+        Entitlement: ${ entitlement.root_course_id }
+        <article class="course">
+            <section class="details" aria-labelledby="details-heading-">
+                <div class="wrapper-course-image" aria-hidden="true">
+                    Add Course Image
+                    <a href="#" class="cover">
+                        <img src="" class="course-image" alt="Test Image" />
+                    </a>
+                </div>
+                <div class="wrapper-course-details">
+                    <h3 class="course-title">
+                          <a data-course-key="course-key" href="#">Course Name Here</a>
+                    </h3>
+                    <div class="course-info">
+                          <span class="info-university">edX - </span>
+                          <span class="info-course-id">42</span>
+                          <span class="info-date-block" data-tooltip="">Course Date</span>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </div>
+
+</li>

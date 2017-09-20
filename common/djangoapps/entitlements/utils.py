@@ -6,7 +6,7 @@ def get_json_entitlements_by_user(self, username):
     #     return Response('No Permission')
     list_entitlements = []
 
-    for entitlement in CourseEntitlement.entitlements_for_user(username).all():
+    for entitlement in CourseEntitlement.entitlements_for_username(username).all():
         list_entitlements.append({
             'user_id': entitlement.user_id.id,
             'course_id': entitlement.root_course_id,
@@ -15,3 +15,13 @@ def get_json_entitlements_by_user(self, username):
             'is_active': entitlement.is_active
         })
     return {'entitlements': list_entitlements}
+
+
+def get_list_course_entitlements(user):
+    list_entitlements = []
+
+    # TODO: Add filtering
+    for entitlement in CourseEntitlement.entitlements_for_user(user).all():
+        list_entitlements.append(entitlement)
+
+    return list_entitlements
