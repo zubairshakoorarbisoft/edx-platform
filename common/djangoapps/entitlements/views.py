@@ -44,12 +44,21 @@ class EntitlementView(APIView):
         # TODO: Add actual user id retrieval
         # TODO: Add checking for the format of the course id and the expiration date format
         user = User.objects.get(username=username)
-        new_entitlement = CourseEntitlement(user_id=user,
-                                            root_course_id=course_id,
-                                            enroll_end_date=expiration_date,
-                                            mode=mode,
-                                            is_active=is_active)
-        new_entitlement.save()
+        entitlement_data = {
+            'user_id': user,
+            'root_course_id': course_id,
+            'enroll_end_date': expiration_date,
+            'mode': mode,
+            'is_active': is_active
+        }
+        stored_entitlement, is_created = CourseEntitlement.objects.update_or_create(
+            user_id=user,
+            root_course_id=course_id,
+            defaults=entitlement_data
+        )
 
-        return Response('Success')
+        if is_created:
+            return Response('New entitlement created')
+        else:
+            return Response('Updated existing entitlement')
 

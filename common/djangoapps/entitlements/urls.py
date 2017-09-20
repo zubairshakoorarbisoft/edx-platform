@@ -4,5 +4,5 @@ from .views import EntitlementView
 
 urlpatterns = patterns(
     'entitlements.views',
-    url(r'^entitlement$', EntitlementView.as_view(), name='test')
+    url(r'^entitlement/$', EntitlementView.as_view(), name='test')
 )
