@@ -49,6 +49,13 @@
                 <div class="course-list js-course-list-in-progress row"></div>
             </div>
         <% } %>
+        <div class="in-progress-group">
+            <h4 class="course-list-heading">
+                <span class="status"><%- gettext('COURSE ENTITLEMENTS') %></span>
+                <span class="count"><%- entitlementCount %></span>
+            </h4>
+            <div class="course-list js-course-list-entitlements row"></div>
+        </div>
         <% if (remainingCount) { %>
             <div class="remaining-group">
                 <h4 class="course-list-heading">

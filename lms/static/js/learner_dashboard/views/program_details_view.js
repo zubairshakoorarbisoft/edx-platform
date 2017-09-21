@@ -52,7 +52,10 @@
                         this.courseData.get('not_started') || [],
                         this.options.userPreferences
                      );
-
+                     this.entitlementCourseCollection = new CourseCardCollection(
+                        this.courseData.get('entitlements') || [],
+                        this.options.userPreferences
+                     );
                      this.render();
                  },
 
@@ -67,12 +70,14 @@
                      var completedCount = this.completedCourseCollection.length,
                          inProgressCount = this.inProgressCourseCollection.length,
                          remainingCount = this.remainingCourseCollection.length,
+                         entitlementCount = this.entitlementCourseCollection.length,
                          totalCount = completedCount + inProgressCount + remainingCount,
                          buyButtonUrl = this.getUrl(this.options.urls.buy_button_url, this.options.programData),
                          data = {
                              totalCount: totalCount,
                              inProgressCount: inProgressCount,
                              remainingCount: remainingCount,
+                             entitlementCount: entitlementCount,
                              completedCount: completedCount,
                              completeProgramURL: buyButtonUrl
                          };
@@ -91,6 +96,15 @@
                              el: '.js-course-list-remaining',
                              childView: CourseCardView,
                              collection: this.remainingCourseCollection,
+                             context: this.options
+                         }).render();
+                     }
+
+                     if (this.entitlementCourseCollection.length > 0) {
+                         new CollectionListView({
+                             el: '.js-course-list-entitlements',
+                             childView: CourseCardView,
+                             collection: this.entitlementCourseCollection,
                              context: this.options
                          }).render();
                      }

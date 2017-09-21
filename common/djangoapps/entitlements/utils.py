@@ -25,3 +25,13 @@ def get_list_course_entitlements(user):
         list_entitlements.append(entitlement)
 
     return list_entitlements
+
+
+def get_entitlement_data(user, course):
+    is_entitled = False
+
+    course_entitlements = CourseEntitlement.get_user_course_entitlement(user, course)
+    if len(course_entitlements) > 0 and course_entitlements[0].is_active:
+        is_entitled = True
+
+    return is_entitled

@@ -27,6 +27,7 @@ from openedx.core.djangoapps.commerce.utils import ecommerce_api_client
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.credentials.utils import get_credentials
 from student.models import CourseEnrollment
+from entitlements.utils import get_entitlement_data
 from util.date_utils import strftime_localized
 from xmodule.modulestore.django import modulestore
 
@@ -201,7 +202,7 @@ class ProgramProgressMeter(object):
         programs = programs or self.engaged_programs
         for program in programs:
             program_copy = deepcopy(program)
-            completed, in_progress, not_started = [], [], []
+            completed, in_progress, not_started, entitlements = [], [], [], []
 
             for course in program_copy['courses']:
                 if self._is_course_complete(course):
@@ -213,14 +214,17 @@ class ProgramProgressMeter(object):
                     else:
                         course['expired'] = not course_in_progress
                         not_started.append(course)
-                else:
+                elif not course.get('is_entitlement', False):
                     not_started.append(course)
+                else:
+                    entitlements.append(course)
 
             progress.append({
                 'uuid': program_copy['uuid'],
                 'completed': len(completed) if count_only else completed,
                 'in_progress': len(in_progress) if count_only else in_progress,
                 'not_started': len(not_started) if count_only else not_started,
+                'entitlements': len(entitlements) if count_only else entitlements
             })
 
         return progress
@@ -372,6 +376,7 @@ class ProgramDataExtender(object):
         """Execute extension handlers, returning the extended data."""
         self._execute('_extend')
         self._collect_one_click_purchase_eligibility_data()
+        self._add_course_entitlement_data()
         return self.data
 
     def _execute(self, prefix, *args):
@@ -393,6 +398,14 @@ class ProgramDataExtender(object):
                 self.enrollment_start = self.course_overview.enrollment_start or DEFAULT_ENROLLMENT_START_DATE
 
                 self._execute('_attach_course_run', course_run)
+
+    def _add_course_entitlement_data(self):
+        # TODO: Steps for Entitlement
+        # Look at each Course and check if it has an entitlement
+        # Set a boolean on the Course
+        for course in self.data['courses']:
+            is_entitled = get_entitlement_data(self.user, course.get('key', ''))
+            course['is_entitlement'] = is_entitled
 
     def _attach_course_run_certificate_url(self, run_mode):
         certificate_data = certificate_api.certificate_downloadable_status(self.user, self.course_run_key)

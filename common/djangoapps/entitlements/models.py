@@ -32,3 +32,8 @@ class CourseEntitlement(models.Model):
     @classmethod
     def entitlements_for_user(cls, user):
         return cls.objects.filter(user_id=user)
+
+    @classmethod
+    def get_user_course_entitlement(cls, user, course):
+        # TODO: Implement check to see if the Course ID is valid
+        return cls.objects.filter(user_id=user, root_course_id=course).all()
