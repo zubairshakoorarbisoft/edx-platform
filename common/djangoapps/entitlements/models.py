@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from student.models import CourseEnrollment
 from course_modes.models import CourseMode
 
-
 class CourseEntitlement(models.Model):
     """
     Represents a Student's Entitlement to a Course Run for a given Course.
