@@ -36,7 +36,7 @@ class EntitlementView(APIView):
         # TODO: Check to see if the Course Entitlement already exists for a user
         course_entitlement_details = request.data.get('course_entitlement_details', {})  # TODO: Replace test data
         course_id = course_entitlement_details.get('course_id', '')
-        expiration_date = request.data.get('expiration_date', '')  # '2017-09-14 11:47:58.000000'
+        expiration_date = request.data.get('expiration_date', None)  # '2017-09-14 11:47:58.000000'
         mode = request.data.get('mode', '')
         username = request.data.get('user', '')
         is_active = request.data.get('is_active', False)
@@ -51,6 +51,11 @@ class EntitlementView(APIView):
             'mode': mode,
             'is_active': is_active
         }
+        key_list = entitlement_data.keys()
+        for key in key_list:
+            if entitlement_data[key] is None:
+                entitlement_data.pop(key)
+
         stored_entitlement, is_created = CourseEntitlement.objects.update_or_create(
             user_id=user,
             root_course_id=course_id,
