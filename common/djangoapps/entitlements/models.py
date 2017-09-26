@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-from student.models import CourseEnrollment
 from course_modes.models import CourseMode
+from opaque_keys.edx.keys import CourseKey
+
 
 class CourseEntitlement(models.Model):
     """
@@ -18,7 +19,7 @@ class CourseEntitlement(models.Model):
 
     mode = models.CharField(default=CourseMode.DEFAULT_MODE_SLUG, max_length=100)
 
-    enrollment_course_id = models.ForeignKey(CourseEnrollment, null=True)
+    enrollment_course_id = models.ForeignKey('student.CourseEnrollment', null=True)
 
     is_active = models.BooleanField(default=1)
 
@@ -36,3 +37,11 @@ class CourseEntitlement(models.Model):
     def get_user_course_entitlement(cls, user, course):
         # TODO: Implement check to see if the Course ID is valid
         return cls.objects.filter(user_id=user, root_course_id=course).all()
+
+    @classmethod
+    def set_enrollment(cls, user, course_key, course_enrollment):
+        course = course_key.org + '+' + course_key.course
+        return cls.objects.filter(
+            user_id=user,
+            root_course_id=course
+        ).update(enrollment_course_id=course_enrollment)

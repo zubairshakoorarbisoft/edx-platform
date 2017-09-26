@@ -50,7 +50,9 @@
 
                  handleEnroll: function() {
                      // Enrollment click event handled here
-                     var courseRunKey = $('.run-select').val() || this.model.get('course_run_key');
+                     var courseRunKey = $('.' + this.$el[0].className + ' .run-select').val() ||
+                         this.model.get('course_run_key');
+
                      this.model.updateCourseRun(courseRunKey);
                      if (!this.model.get('is_enrolled')) {
                          // Create the enrollment.
