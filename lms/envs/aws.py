@@ -275,6 +275,11 @@ RECALCULATE_GRADES_ROUTING_KEY = ENV_TOKENS.get('RECALCULATE_GRADES_ROUTING_KEY'
 # Queue to use for updating grades due to grading policy change
 POLICY_CHANGE_GRADES_ROUTING_KEY = ENV_TOKENS.get('POLICY_CHANGE_GRADES_ROUTING_KEY', LOW_PRIORITY_QUEUE)
 
+GRADES_DOWNLOAD_ROUTING_KEY = ENV_TOKENS.get('GRADES_DOWNLOAD_ROUTING_KEY', HIGH_MEM_QUEUE)
+
+############## Settings for CourseGraph ############################
+COURSEGRAPH_JOB_QUEUE = ENV_TOKENS.get('COURSEGRAPH_JOB_QUEUE', LOW_PRIORITY_QUEUE)
+
 # Message expiry time in seconds
 CELERY_EVENT_QUEUE_TTL = ENV_TOKENS.get('CELERY_EVENT_QUEUE_TTL', None)
 
@@ -639,8 +644,6 @@ DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH = ENV_TOKENS.get(
 )
 
 # Grades download
-GRADES_DOWNLOAD_ROUTING_KEY = ENV_TOKENS.get('GRADES_DOWNLOAD_ROUTING_KEY', HIGH_MEM_QUEUE)
-
 GRADES_DOWNLOAD = ENV_TOKENS.get("GRADES_DOWNLOAD", GRADES_DOWNLOAD)
 
 # financial reports
@@ -1030,9 +1033,6 @@ COURSES_API_CACHE_TIMEOUT = ENV_TOKENS.get('COURSES_API_CACHE_TIMEOUT', COURSES_
 # Add an ICP license for serving content in China if your organization is registered to do so
 ICP_LICENSE = ENV_TOKENS.get('ICP_LICENSE', None)
 
-############## Settings for CourseGraph ############################
-COURSEGRAPH_JOB_QUEUE = ENV_TOKENS.get('COURSEGRAPH_JOB_QUEUE', LOW_PRIORITY_QUEUE)
-
 ########################## Parental controls config  #######################
 
 # The age at which a learner no longer requires parental consent, or None
@@ -1050,3 +1050,9 @@ ACE_CHANNEL_SAILTHRU_TEMPLATE_NAME = ENV_TOKENS.get('ACE_CHANNEL_SAILTHRU_TEMPLA
 ACE_CHANNEL_SAILTHRU_API_KEY = AUTH_TOKENS.get('ACE_CHANNEL_SAILTHRU_API_KEY', ACE_CHANNEL_SAILTHRU_API_KEY)
 ACE_CHANNEL_SAILTHRU_API_SECRET = AUTH_TOKENS.get('ACE_CHANNEL_SAILTHRU_API_SECRET', ACE_CHANNEL_SAILTHRU_API_SECRET)
 ACE_ROUTING_KEY = ENV_TOKENS.get('ACE_ROUTING_KEY', ACE_ROUTING_KEY)
+
+# To support Red/Black deployments all Queues/Routes will be prefixed with the app SHA
+CELERY_QUEUES = {
+        k: '{0}.{1}'.format(EDX_PLATFORM_REVISION, v)
+        for k, v in CELERY_QUEUES.items()
+    }

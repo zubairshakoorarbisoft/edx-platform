@@ -523,3 +523,9 @@ PARENTAL_CONSENT_AGE_LIMIT = ENV_TOKENS.get(
     'PARENTAL_CONSENT_AGE_LIMIT',
     PARENTAL_CONSENT_AGE_LIMIT
 )
+
+# To support Red/Black deployments all Queues/Routes will be prefixed with the app SHA
+CELERY_QUEUES = {
+        k: '{0}.{1}'.format(EDX_PLATFORM_REVISION, v)
+        for k, v in CELERY_QUEUES.items()
+    }
