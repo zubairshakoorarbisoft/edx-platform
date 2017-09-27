@@ -894,6 +894,7 @@
 }
 
 .doc-link {
+  @extend %ui-print-excluded;
   @include float(right);
   @include margin(($baseline*0.75), ($baseline*0.75), ($baseline*0.75), ($baseline*0.75));
   font-size: 14px;

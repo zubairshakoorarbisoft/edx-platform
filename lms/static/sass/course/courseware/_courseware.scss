@@ -27,6 +27,7 @@ html.video-fullscreen {
 
   .instructor-info-action {
     @extend %t-copy-sub2;
+    @extend %ui-print-excluded;
     @include float(right);
     @include margin-left($baseline/2);
     @include text-align(right);
