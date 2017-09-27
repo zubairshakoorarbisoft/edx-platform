@@ -47,11 +47,12 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
             },
 
             render: function() {
-                if (this.model.get('number_children') > 3) {
-                    this.renderNudge();
-                } else {
-                    this.renderNormal();
-                }
+                this.renderNormal();
+                // if (this.model.get('number_children') > 3) {
+                //     this.renderNudge();
+                // } else {
+                //     this.renderNormal();
+                // }
             },
 
             showComponentTemplates: function(event) {
