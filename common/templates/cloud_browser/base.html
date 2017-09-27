@@ -12,32 +12,50 @@
 
 <style>
   #cloud-browser-objects {
-    margin: 10px 0 0 0 !important;
+    margin-left: 0 !important;
+    margin-top: 5px;
+    float: left !important;
+    padding-right: 10px !important;
     width: 100% !important;
-  }
-
-  table#cloud-browser-objects-table thead, table#cloud-browser-objects-table tfoot {
     font-family: 'Helvetica' !important;
-    background: none !important;
-    text-align: left !important;
-    border: none !important;
+    font-weight: 300 !important;
   }
 
-  table#cloud-browser-objects-table th {
-    border: none !important;
+  #cloud-browser-objects .object-container {
+    width: 100% !important;
+    float: left !important;
+    padding: 10px 20px !important;
+    border-bottom: 1px solid #ddd !important;
   }
 
-  table#cloud-browser-objects-table tr {
-    font-size: 14px !important;
+  #cloud-browser-objects .object-container .icon {
+    float: left !important;
+    padding-right: 10px !important;
   }
 
-  table#cloud-browser-objects-table tbody tr:hover {
-    background-color: transparent !important;
+  #cloud-browser-objects .object-container .icon img{
+    width: 30px !important;
   }
 
-  table#cloud-browser-objects-table tr a:hover {
+  #cloud-browser-objects .object-container .description {
+    float: left !important;
+  }
+
+  #cloud-browser-objects .object-container .last_modified {
+    float: left !important;
+    color: #999 !important;
+  }
+
+  #cloud-browser-objects a{
+    float: left !important;
+    color: #555 !important;
+    padding-right: 10px !important;
+    font-size: 16px !important;
     text-decoration: none !important;
-    color: #aaa;
+  }
+
+  #cloud-browser-objects a:hover{
+    color: #1c72ff !important;
   }
 
 </style>
