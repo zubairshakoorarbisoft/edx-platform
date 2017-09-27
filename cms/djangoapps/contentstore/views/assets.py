@@ -26,6 +26,10 @@ from openedx.core.djangoapps.contentserver.caching import del_cached_content
 from student.auth import has_course_author_access
 from util.date_utils import get_default_time_display
 from util.json_request import JsonResponse
+import boto3
+import mimetypes
+import datetime
+
 
 __all__ = ['assets_handler']
 
@@ -402,6 +406,59 @@ def _upload_asset(request, course_key):
         'msg': _('Upload completed')
     })
 
+@require_POST
+@ensure_csrf_cookie
+@login_required
+def _upload_asset_s3(request, course_key):
+    course_exists_error = _get_error_if_course_does_not_exist(course_key)
+
+    if course_exists_error is not None:
+        return course_exists_error
+
+    # compute a 'filename' which is similar to the location formatting, we're
+    # using the 'filename' nomenclature since we're using a FileSystem paradigm
+    # here. We're just imposing the Location string formatting expectations to
+    # keep things a bit more consistent
+    upload_file = request.FILES['file']
+    file_name = upload_file.name.replace(' ', '')
+    logging.info(upload_file)
+
+    try:
+        logging.info('creating S3 client')
+        client = boto3.client(
+            's3',
+            aws_access_key_id='AKIAIENAHYSMKQDWIZVQ',
+            aws_secret_access_key='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'
+        )
+  
+        # with open(upload_file.path, 'rb') as data:
+        logging.info('calling upload on file %s', file_name)
+        #mime = magic.Magic(mime=True)
+        #mime.from_file
+        mimetypes.init()
+        types = mimetypes.guess_type(file_name, False)
+        logging.info("mime-type=%s", types[0])
+        client.upload_fileobj(upload_file, 'edx-hackathon', file_name, ExtraArgs={'ContentType': types[0]})  
+
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({
+        'msg': _('Upload failed')
+    })
+
+    logging.info('returning upload complete')
+    return JsonResponse({
+        'asset': _get_asset_json(
+            file_name,
+            types[0],
+            datetime.datetime.now(),
+            upload_file,
+            upload_file,
+            False
+        ),
+        'msg': _('Upload completed')
+    })
+
 
 def _get_error_if_course_does_not_exist(course_key):
     try:
@@ -499,18 +556,16 @@ def _update_asset(request, course_key, asset_key):
 
     elif request.method in ('PUT', 'POST'):
         if 'file' in request.FILES:
-            return _upload_asset(request, course_key)
+            return _upload_asset_s3(request, course_key)
 
-        # update existing asset
         try:
             modified_asset = json.loads(request.body)
+            logging.info("modified_asset=%s", modified_asset)
         except ValueError:
+            logging.error("error getting json response")
             return HttpResponseBadRequest()
-        contentstore().set_attr(asset_key, 'locked', modified_asset['locked'])
-        # delete the asset from the cache so we check the lock status the next time it is requested.
-        del_cached_content(asset_key)
+       
         return JsonResponse(modified_asset, status=201)
-
 
 def _save_content_to_trash(content):
     contentstore('trashcan').save(content)
