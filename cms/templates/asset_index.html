@@ -1,13 +1,14 @@
 <%page expression_filter="h"/>
 <%inherit file="base.html" />
-<%def name="online_help_token()"><% return "files" %></%def>
-<%!
+<%def name="online_help_token()"><% return "files" %>
+    </%def>
+    <%!
   from django.core.urlresolvers import reverse
   from django.utils.translation import ugettext as _
   from openedx.core.djangolib.markup import HTML, Text
   from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
 %>
-<%block name="title">${_("Files & Uploads")}</%block>
+        <%block name="title">${_("Digital Locker")}</%block>
 <%block name="bodyclass">is-signedin course uploads view-uploads</%block>
 
 <%namespace name='static' file='static_content.html'/>
@@ -44,7 +45,7 @@
     <header class="mast has-actions has-subtitle">
         <h3 class="page-header">
             <small class="subtitle">${_("Content")}</small>
-            <span class="sr">- </span>${_("Files & Uploads")}
+            <span class="sr">- </span>${_("Digital Locker")}
         </h3>
 
         <div class="nav-actions">
@@ -57,7 +58,7 @@
     </header>
 </div>
 
-<div class="wrapper-content wrapper">
+<!-- <div class="wrapper-content wrapper">
     <div class="content">
         <div class="content-primary">
             % if waffle_flag_enabled:
@@ -95,7 +96,7 @@
 
         </aside>
     </div>
-</div>
+</div> -->
 
 <div class="upload-modal modal">
     <a href="#" class="close-button"><span class="icon fa fa-times-circle" aria-hidden="true"></span> <span class="sr">${_('close')}</span></a>
