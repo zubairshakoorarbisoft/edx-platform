@@ -17,6 +17,7 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 BaseView.prototype.initialize.call(this, options);
                 that = this;
                 this.template = this.loadTemplate('add-xblock-component');
+                this.nudgeTemplate = this.loadTemplate('add-xblock-component-nudge');
                 this.model.set({number_children: $('.level-element').length});
                 // this.model.on('change:number_children', function(model){
                 //     console.log('number of children changed!');
@@ -25,7 +26,11 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 this.model.on('change:number_children', this.render, this);
             },
 
-            render: function() {
+            renderNudge: function() {
+                this.$el.html(this.nudgeTemplate());
+            },
+
+            renderNormal: function() {
                 var that = this;
                 this.$el.html(this.template({numberChildren: that.model.get('number_children')}));
                 this.collection.each(
@@ -39,6 +44,14 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                         that.$el.append(menu.render().el);
                     }
                 );
+            },
+
+            render: function() {
+                if (this.model.get('number_children') > 3) {
+                    this.renderNudge();
+                } else {
+                    this.renderNormal();
+                }
             },
 
             showComponentTemplates: function(event) {

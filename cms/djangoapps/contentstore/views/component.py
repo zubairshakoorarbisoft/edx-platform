@@ -44,7 +44,7 @@ ADVANCED_PROBLEM_TYPES = settings.ADVANCED_PROBLEM_TYPES
 CONTAINER_TEMPLATES = [
     "basic-modal", "modal-button", "edit-xblock-modal",
     "editor-mode-button", "upload-dialog",
-    "add-xblock-component", "add-xblock-component-button", "add-xblock-component-menu",
+    "add-xblock-component", "add-xblock-component-nudge", "add-xblock-component-button", "add-xblock-component-menu",
     "add-xblock-component-support-legend", "add-xblock-component-support-level", "add-xblock-component-menu-problem",
     "xblock-string-field-editor", "xblock-access-editor", "publish-xblock", "publish-history",
     "unit-outline", "container-message", "container-access", "license-selector",
