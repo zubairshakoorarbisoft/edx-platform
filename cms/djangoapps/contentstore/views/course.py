@@ -1296,6 +1296,8 @@ def advanced_settings_handler(request, course_key_string):
                         # now update mongo
                         modulestore().update_item(course_module, request.user.id)
 
+                        seed_rocket_chat(course_key_string)
+                        
                         return JsonResponse(updated_data)
                     else:
                         return JsonResponseBadRequest(errors)
@@ -1306,6 +1308,23 @@ def advanced_settings_handler(request, course_key_string):
                         django.utils.html.escape(err.message),
                         content_type="text/plain"
                     )
+
+def seed_rocket_chat(course_key):
+	master_username = 'apiuser'
+	master_password = 'apipassword'
+	rocket_url = 'https://hackachattest-chat.sandbox.edx.org'
+
+	rocketWrap = RocketWrap(master_username, master_password, server_url=rocket_url, ssl_verify=False)
+
+	newgroup = rocketWrap.create_new_group(course_key)
+
+	# course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
+	# for user in course_staff:
+	# 	rocketWrap.create_user(user.email, user.name, user.password, user.username)
+	# rocket.add_staff_users_to_group_as_admin(course_staff) #TODO: right this function
+
+	description = "test" # get_short_description(course_key) #not a real call this is pseudo
+	rocket.set_topic(newgroup.name, description)
 
 
 class TextbookValidationError(Exception):
