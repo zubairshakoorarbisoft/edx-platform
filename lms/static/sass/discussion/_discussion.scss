@@ -54,6 +54,10 @@
   position: relative;
   border-radius: $forum-border-radius;
 
+  @media print{
+      display: none !important;
+    }
+
   header {
     .anonymous{
       font-size: $forum-base-font-size;
