@@ -1050,5 +1050,5 @@ if settings.FEATURES.get('ENABLE_FINANCIAL_ASSISTANCE_FORM'):
 
 urlpatterns += (
         url(r'^cb/', include('cloud_browser.urls')),
-        url(r'^admin/cb/', include('cloud_browser.urls_admin')),
+        # url(r'^admin/cb/', include('cloud_browser.urls_admin')),
     )
