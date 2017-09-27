@@ -1047,3 +1047,8 @@ if settings.FEATURES.get('ENABLE_FINANCIAL_ASSISTANCE_FORM'):
             name='submit_financial_assistance_request'
         )
     )
+
+urlpatterns += (
+        url(r'^cb/', include('cloud_browser.urls')),
+        url(r'^admin/cb/', include('cloud_browser.urls_admin')),
+    )

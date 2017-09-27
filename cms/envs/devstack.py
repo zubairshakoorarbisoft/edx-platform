@@ -63,7 +63,7 @@ DJFS = {
 CELERY_ALWAYS_EAGER = True
 
 ################################ DEBUG TOOLBAR ################################
-INSTALLED_APPS += ('debug_toolbar', 'debug_toolbar_mongo')
+INSTALLED_APPS += ('cloud_browser', 'debug_toolbar', 'debug_toolbar_mongo')
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -149,3 +149,7 @@ MODULESTORE = convert_module_store_setting_if_needed(MODULESTORE)
 
 # Dummy secret key for dev
 SECRET_KEY = '85920908f28904ed733fe576320db18cabd7b6cd'
+
+CLOUD_BROWSER_DATASTORE = 'AWS'
+CLOUD_BROWSER_AWS_ACCOUNT = ''
+CLOUD_BROWSER_AWS_SECRET_KEY = ''
