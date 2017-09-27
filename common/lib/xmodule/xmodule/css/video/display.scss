@@ -143,6 +143,7 @@ $cool-dark: rgb(79, 89, 93); // UXPL cool dark
     }
 
   .video-wrapper {
+    @extend %ui-print-excluded;
     @include float(left);
     @include margin-right(flex-gutter(9));
     width: flex-grid(6, 9);
@@ -732,6 +733,11 @@ $cool-dark: rgb(79, 89, 93); // UXPL cool dark
     padding: 0;
     font-size: 14px;
     visibility: visible;
+
+    @media print{
+      width: 100%;
+      max-height: none !important;
+    }
 
     a {
         color: #0074b5;
