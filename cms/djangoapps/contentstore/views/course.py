@@ -64,6 +64,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from openedx.core.djangolib.js_utils import dump_js_escaped_json
 from openedx.core.lib.course_tabs import CourseTabPluginManager
 from openedx.core.lib.courses import course_image_url
+from rocketwrap import RocketWrap
 from student import auth
 from student.auth import has_course_author_access, has_studio_read_access, has_studio_write_access
 from student.roles import CourseCreatorRole, CourseInstructorRole, CourseStaffRole, GlobalStaff, UserBasedRole
@@ -1296,6 +1297,8 @@ def advanced_settings_handler(request, course_key_string):
                         # now update mongo
                         modulestore().update_item(course_module, request.user.id)
 
+                        seed_rocket_chat(course_key_string)
+                        
                         return JsonResponse(updated_data)
                     else:
                         return JsonResponseBadRequest(errors)
@@ -1306,6 +1309,23 @@ def advanced_settings_handler(request, course_key_string):
                         django.utils.html.escape(err.message),
                         content_type="text/plain"
                     )
+
+def seed_rocket_chat(course_key):
+	master_username = 'apiuser'
+	master_password = 'apipassword'
+	rocket_url = 'https://hackachattest-chat.sandbox.edx.org'
+
+	rocketWrap = RocketWrap(master_username, master_password, server_url=rocket_url, ssl_verify=False)
+
+	newgroup = rocketWrap.create_new_group(course_key)
+
+	# course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
+	# for user in course_staff:
+	# 	rocketuser = rocketWrap.create_user(user.email, user.name, user.password, user.username)
+	#   rocketWrap.add_user_to_group(rocketuser.username, newgroup.name, moderator=True)
+    
+	description = "test" # get_short_description(course_key) #not a real call this is pseudo
+	rocket.set_topic(newgroup.name, description)
 
 
 class TextbookValidationError(Exception):
