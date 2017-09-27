@@ -47,6 +47,7 @@ $bookmarked-icon: "\f02e"; // .fa-bookmark
 
   // Rules for bookmark button's different styles
   .bookmark-button-wrapper {
+    @extend %ui-print-excluded;
     margin-bottom: ($baseline * 1.5);
   }
 
