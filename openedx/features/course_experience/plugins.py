@@ -139,4 +139,4 @@ class DigitalLockerTool(CourseTool):
         """
         Returns the URL for this tool for the specified course key.
         """
-        return reverse('openedx.course_experience.digital_locker', args=[])
+        return reverse('openedx.course_experience.digital_locker', args=[course_key])

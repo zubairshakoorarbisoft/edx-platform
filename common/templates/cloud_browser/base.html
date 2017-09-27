@@ -8,10 +8,47 @@
 {% endcomment %}
 
 <html>
+
+
+<style>
+  #cloud-browser-objects {
+    margin: 10px 0 0 0 !important;
+    width: 100% !important;
+  }
+
+  table#cloud-browser-objects-table thead, table#cloud-browser-objects-table tfoot {
+    font-family: 'Helvetica' !important;
+    background: none !important;
+    text-align: left !important;
+    border: none !important;
+  }
+
+  table#cloud-browser-objects-table th {
+    border: none !important;
+  }
+
+  table#cloud-browser-objects-table tr {
+    font-size: 14px !important;
+  }
+
+  table#cloud-browser-objects-table tbody tr:hover {
+    background-color: transparent !important;
+  }
+
+  table#cloud-browser-objects-table tr a:hover {
+    text-decoration: none !important;
+    color: #aaa;
+  }
+
+</style>
+
+
+
 <head>
-  <title>{% block title %}WOW{% endblock %}</title>
+  <title>{% block title %}Digital Locker{% endblock %}</title>
 {% block cloud_browser_template_head %}{% endblock %}
 {% block extra_head %}{% endblock %}
+  <link rel='stylesheet' href="/static/digital_locker.scss" type='text/css'>
 </head>
 <body>
 {% block body %}

@@ -33,11 +33,11 @@ from openedx.features.course_experience import course_home_page_title
         </div>
     </header>
     <div class="page-content">
-        ${HTML(digital_locker_fragment.body_html())}
         <div class="locker-description">
             <h1>Digital Locker</h1>
             <p>The digital locker contains all files added by the course author. You can only access these files as a verified user, or you can purchase the files below.</p>
         </div>
+        ${HTML(digital_locker_fragment.body_html())}
     </div>
 </div>
 </%block>

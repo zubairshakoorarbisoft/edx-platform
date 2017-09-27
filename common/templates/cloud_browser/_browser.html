@@ -8,32 +8,14 @@
 
 {% block cloud_browser_content %}
 <div id="cloud-browser-all" class="cloud-browser-defaults">
-<div id="cloud-browser-containers">
-<h2>Containers WOW</h2>
-<ul>
-{% for cont in containers %}
-  {% if cont == container %}
-  <li class="cb-selected">{{ cont.name|truncatechars:22 }}</li>
-  {% else %}
-  <li>
-    <a href="{% url "cloud_browser_browser" cont.name|urlencode %}"
-       title="{{ cont.name }}">{{ cont.name|truncatechars:22 }}</a>
-  </li>
-  {% endif %}
-{% endfor %}
-</ul>
-</div>
-
 <div id="cloud-browser-objects">
-<h2>Objects</h2>
 {% if objects %}
 <table id="cloud-browser-objects-table">
   <thead>
     <tr>
-      <th style="width: 16px;">&nbsp;</th>
+      <th style="width: 16px; background-color:transparent">&nbsp;</th>
       <th>Name</th>
-      <th>Content Type</th>
-      <th>Encoding</th>
+      <!--<th>Content Type</th>-->
       <th>Size (Bytes)</th>
       <th>Date</th>
     </tr>
@@ -54,16 +36,11 @@
                class="cloud-browser-document-link"
             >{{ obj.basename }}</a></td>
         {% endif %}
-        <td>
-            {% if obj.smart_content_type %}
-                {{ obj.smart_content_type }}
-            {% else %}--{% endif %}
-        </td>
-        <td>
-            {% if obj.smart_content_encoding %}
-                {{ obj.smart_content_encoding }}
-            {% else %}--{% endif %}
-        </td>
+        <!--<td>-->
+            <!--{% if obj.smart_content_type %}-->
+                <!--{{ obj.smart_content_type }}-->
+            <!--{% else %}&#45;&#45;{% endif %}-->
+        <!--</td>-->
         <td>
             {% if obj.is_file or obj.size > 0 %}
                 {{ obj.size|filesizeformat }}

@@ -18,7 +18,7 @@ class DigitalLockerView(CourseTabView):
         Displays the digital locker for the specified course.
         """
         # Render the bookmarks list as a fragment
-        digital_locker_fragment = DigitalLockerFragmentView().render_to_fragment(request)
+        digital_locker_fragment = DigitalLockerFragmentView().render_to_fragment(request, course_id=course_id)
 
         # Render the course bookmarks page
         context = {
