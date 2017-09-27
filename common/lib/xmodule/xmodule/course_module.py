@@ -623,6 +623,15 @@ class CourseFields(object):
         scope=Scope.settings
     )
 
+    enable_rocket_chat = Boolean(
+        display_name=_("Enable Rocket Chat"),
+        help=_(
+            "Enter true or false. If true, learners can access a Rocket chat group for the course."
+        ),
+        default=False,
+        scope=Scope.settings
+    )
+
     allow_public_wiki_access = Boolean(
         display_name=_("Allow Public Wiki Access"),
         help=_(
