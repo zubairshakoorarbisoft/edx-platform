@@ -170,7 +170,8 @@ define(['jquery', 'underscore', 'backbone', 'gettext', 'js/views/pages/base_page
                         var component = new AddXBlockComponent({
                             el: element,
                             createComponent: _.bind(self.createComponent, self),
-                            collection: self.options.templates
+                            collection: self.options.templates,
+                            model: self.model
                         });
                         component.render();
                     });
@@ -288,12 +289,15 @@ define(['jquery', 'underscore', 'backbone', 'gettext', 'js/views/pages/base_page
             onDelete: function(xblockElement) {
                 // get the parent so we can remove this component from its parent.
                 var xblockView = this.xblockView,
-                    parent = this.findXBlockElement(xblockElement.parent());
+                    parent = this.findXBlockElement(xblockElement.parent()),
+                    model = this.model;
                 xblockElement.remove();
 
                 // Inform the runtime that the child has been deleted in case
                 // other views are listening to deletion events.
                 xblockView.acknowledgeXBlockDeletion(parent.data('locator'));
+
+                model.set({number_children: model.get('number_children') - 1});
 
                 // Update publish and last modified information from the server.
                 this.model.fetch();

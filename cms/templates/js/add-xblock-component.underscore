@@ -1,5 +1,6 @@
 <div class="new-component">
     <h5><%= gettext("Add New Component") %></h5>
+    <p>There are <%= numberChildren %> components in this unit!</p>
     <ul class="new-component-type">
     </ul>
 </div>

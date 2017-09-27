@@ -15,25 +15,30 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
 
             initialize: function(options) {
                 BaseView.prototype.initialize.call(this, options);
+                that = this;
                 this.template = this.loadTemplate('add-xblock-component');
+                this.model.set({number_children: $('.level-element').length});
+                // this.model.on('change:number_children', function(model){
+                //     console.log('number of children changed!');
+                //     console.log(model.get('number_children'));
+                // }, this.model);
+                this.model.on('change:number_children', this.render, this);
             },
 
             render: function() {
-                if (!this.$el.html()) {
-                    var that = this;
-                    this.$el.html(this.template({}));
-                    this.collection.each(
-                        function(componentModel) {
-                            var view, menu;
+                var that = this;
+                this.$el.html(this.template({numberChildren: that.model.get('number_children')}));
+                this.collection.each(
+                    function(componentModel) {
+                        var view, menu;
 
-                            view = new AddXBlockButton({model: componentModel});
-                            that.$el.find('.new-component-type').append(view.render().el);
+                        view = new AddXBlockButton({model: componentModel});
+                        that.$el.find('.new-component-type').append(view.render().el);
 
-                            menu = new AddXBlockMenu({model: componentModel});
-                            that.$el.append(menu.render().el);
-                        }
-                    );
-                }
+                        menu = new AddXBlockMenu({model: componentModel});
+                        that.$el.append(menu.render().el);
+                    }
+                );
             },
 
             showComponentTemplates: function(event) {
@@ -65,7 +70,9 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 ViewUtils.runOperationShowingMessage(
                     gettext('Adding'),
                     _.bind(this.options.createComponent, this, saveData, element)
-                ).always(function() {
+                ).success(function(){
+                    self.model.set({number_children: self.model.get('number_children') + 1});
+                }).always(function() {
                     // Restore the scroll position of the buttons so that the new
                     // component appears above them.
                     ViewUtils.setScrollOffset(self.$el, oldOffset);
