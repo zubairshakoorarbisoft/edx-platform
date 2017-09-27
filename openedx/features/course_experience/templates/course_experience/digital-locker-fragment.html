@@ -1,0 +1,19 @@
+## mako
+
+<%page expression_filter="h"/>
+<%namespace name='static' file='../static_content.html'/>
+
+<%!
+from django.utils.translation import ugettext as _
+
+from openedx.core.djangolib.markup import HTML
+from openedx.features.course_experience import course_home_page_title
+%>
+
+<%block name="content">
+<div class="digital-locker" id="digital-locker">
+    <div class="locker">
+        Digital locker goes here.
+    </div>
+</div>
+</%block>

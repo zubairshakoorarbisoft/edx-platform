@@ -9,6 +9,7 @@ from views.course_outline import CourseOutlineFragmentView
 from views.course_reviews import CourseReviewsView
 from views.course_updates import CourseUpdatesFragmentView, CourseUpdatesView
 from views.course_sock import CourseSockFragmentView
+from views.digital_locker import DigitalLockerFragmentView, DigitalLockerView
 from views.latest_update import LatestUpdateFragmentView
 from views.welcome_message import WelcomeMessageFragmentView, dismiss_welcome_message
 
@@ -29,6 +30,11 @@ urlpatterns = [
         name='openedx.course_experience.course_reviews',
     ),
     url(
+        r'^digital_locker',
+        DigitalLockerView.as_view(),
+        name='openedx.course_experience.digital_locker',
+    ),
+    url(
         r'^home_fragment$',
         CourseHomeFragmentView.as_view(),
         name='openedx.course_experience.course_home_fragment_view',
@@ -42,6 +48,11 @@ urlpatterns = [
         r'^updates_fragment$',
         CourseUpdatesFragmentView.as_view(),
         name='openedx.course_experience.course_updates_fragment_view',
+    ),
+    url(
+        r'^digital_locker_fragment',
+        DigitalLockerFragmentView.as_view(),
+        name='openedx.course_experience.digital_locker_fragment',
     ),
     url(
         r'^welcome_message_fragment$',

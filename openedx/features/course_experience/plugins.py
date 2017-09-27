@@ -100,3 +100,43 @@ class CourseReviewsTool(CourseTool):
         Returns the URL for this tool for the specified course key.
         """
         return reverse('openedx.course_experience.course_reviews', args=[course_key])
+
+
+class DigitalLockerTool(CourseTool):
+    """
+    The digital locker tool.
+    """
+    @classmethod
+    def analytics_id(cls):
+        """
+        Returns an id to uniquely identify this tool in analytics events.
+        """
+        return 'edx.digital_locker'
+
+    @classmethod
+    def title(cls):
+        """
+        Returns the title of this tool.
+        """
+        return _('Digital Locker')
+
+    @classmethod
+    def icon_classes(cls):
+        """
+        Returns icon classes needed to represent this tool.
+        """
+        return 'fa fa-files-o'
+
+    @classmethod
+    def is_enabled(cls, request, course_key):
+        """
+        Returns True if this tool is enabled for the specified course key.
+        """
+        return True
+
+    @classmethod
+    def url(cls, course_key):
+        """
+        Returns the URL for this tool for the specified course key.
+        """
+        return reverse('openedx.course_experience.digital_locker', args=[])

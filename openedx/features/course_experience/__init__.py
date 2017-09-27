@@ -22,6 +22,9 @@ DISPLAY_COURSE_SOCK_FLAG = CourseWaffleFlag(WAFFLE_FLAG_NAMESPACE, 'display_cour
 # Waffle flag to let learners access a course before its start date.
 COURSE_PRE_START_ACCESS_FLAG = CourseWaffleFlag(WAFFLE_FLAG_NAMESPACE, 'pre_start_access')
 
+# Waffle flag to let learners access course contents after course end date.
+COURSE_LOCKER_ACCESS_FLAG = CourseWaffleFlag(WAFFLE_FLAG_NAMESPACE, 'enable_locker_access')
+
 # Waffle flag to enable a review page link from the unified home page.
 SHOW_REVIEWS_TOOL_FLAG = CourseWaffleFlag(WAFFLE_FLAG_NAMESPACE, 'show_reviews_tool')
 

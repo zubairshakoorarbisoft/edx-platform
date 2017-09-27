@@ -208,7 +208,17 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
                 % endif
 
             % endif
-
+            <div class="digital-locker-container">
+              <i class="digital-locker-dropdown fa fa-files-o" tabindex="1"></i>
+              <div class="file-viewer-container">
+                  <div class="file-viewer">
+                      <div class="close fa fa-close"></div>
+                      % if digital_locker_fragment_view:
+                        ${HTML(digital_locker_fragment_view.body_html())}
+                      % endif
+                  </div>
+              </div>
+            </div>
             <div class="wrapper-action-more" data-course-key="${enrollment.course_id}">
               <button type="button" class="action action-more" id="actions-dropdown-link-${dashboard_index}" aria-haspopup="true" aria-expanded="false" aria-controls="actions-dropdown-${dashboard_index}" data-course-number="${course_overview.number}" data-course-name="${course_overview.display_name_with_default}" data-dashboard-index="${dashboard_index}">
                 <span class="sr">${_('Course options for')}</span>
@@ -217,49 +227,6 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
                 </span>
                 <span class="fa fa-cog" aria-hidden="true"></span>
               </button>
-              <div class="actions-dropdown" id="actions-dropdown-${dashboard_index}" tabindex="-1">
-                <ul class="actions-dropdown-list" id="actions-dropdown-list-${dashboard_index}" aria-label="${_('Available Actions')}" role="menu">
-                  % if can_unenroll:
-                    <li class="actions-item" id="actions-item-unenroll-${dashboard_index}" role="menuitem">
-                      <% course_refund_url = reverse('course_run_refund_status', args=[unicode(course_overview.id)]) %>
-                          % if not is_course_blocked:
-                          <a href="#unenroll-modal" class="action action-unenroll" rel="leanModal"
-                             data-course-id="${course_overview.id}"
-                             data-course-number="${course_overview.number}"
-                             data-course-name="${course_overview.display_name_with_default}"
-                             data-dashboard-index="${dashboard_index}"
-                             data-course-refund-url="${course_refund_url}"
-                             data-course-is-paid-course="${is_paid_course}"
-                             data-course-cert-name-long="${cert_name_long}"
-                             data-course-enrollment-mode="${enrollment.mode}">
-                            ${_('Unenroll')}
-                          </a>
-                          % else:
-                          <a class="action action-unenroll is-disabled"
-                             data-course-id="${course_overview.id}"
-                             data-course-number="${course_overview.number}"
-                             data-course-name="${course_overview.display_name_with_default}"
-                             data-dashboard-index="${dashboard_index}"
-                             data-course-refund-url="${course_refund_url}"
-                             data-course-is-paid-course="${is_paid_course}"
-                             data-course-cert-name-long="${cert_name_long}"
-                             data-course-enrollment-mode="${enrollment.mode}">
-                            ${_('Unenroll')}
-                          </a>
-                        % endif
-                    </li>
-                % endif
-                  <li class="actions-item" id="actions-item-email-settings-${dashboard_index}" role="menuitem">
-                    % if show_email_settings:
-                      % if not is_course_blocked:
-                        <a href="#email-settings-modal" class="action action-email-settings" rel="leanModal" data-course-id="${course_overview.id}" data-course-number="${course_overview.number}" data-dashboard-index="${dashboard_index}" data-optout="${unicode(course_overview.id) in course_optouts}">${_('Email Settings')}</a>
-                      % else:
-                        <a class="action action-email-settings is-disabled" data-course-id="${course_overview.id}" data-course-number="${course_overview.number}" data-dashboard-index="${dashboard_index}" data-optout="${unicode(course_overview.id) in course_optouts}">${_('Email Settings')}</a>
-                      % endif
-                    % endif
-                  </li>
-                </ul>
-              </div>
             </div>
           </div>
         </div>
@@ -422,6 +389,7 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
                }
            });
 </script>
+<script src="${static.url('js/digital_locker/digital_locker.js')}"></script>
 
 % if share_settings.get('DASHBOARD_FACEBOOK', False) and share_settings.get('DASHBOARD_TWITTER', False):
     <%static:require_module_async module_name="js/course_sharing/course_sharing_events" class_name="CourseSharingEvents">

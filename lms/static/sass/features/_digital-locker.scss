@@ -1,0 +1,67 @@
+
+// Digital Locker Styling
+.digital-locker-container {
+  @include float(right);
+  position: relative;
+
+  .digital-locker-dropdown {
+    @include float(right);
+    cursor: pointer;
+    padding: 13px;
+    color: black;
+    outline: none;
+
+    &:hover {
+      color: gray;
+    }
+  }
+
+  .file-viewer-container {
+    @include right(0);
+    top: $baseline*2;
+    z-index: 100;
+    border: 1px solid black;
+    border-radius: 5px;
+    position: absolute;
+    background: white;
+    display: none;
+
+    .file-viewer {
+      position: relative;
+      padding: $baseline*5;
+
+      .digital-locker {
+
+      }
+
+      .close {
+        position: absolute;
+        top: $baseline/4;
+        right: $baseline/4;
+        color: black;
+        cursor: pointer;
+        font-size: 12px;
+
+        &:hover {
+          color: gray;
+        }
+      }
+    }
+  }
+}
+
+// Styling for digital locker on course page
+.course-view {
+  .digital-locker {
+    border: 1px solid gray;
+    margin-top: $baseline;
+    padding: 30px 30px 80px;
+    width: 50%;
+    border-radius: 5px;
+  }
+}
+
+// Styling for the shared digital locker
+.digital-locker {
+
+}
