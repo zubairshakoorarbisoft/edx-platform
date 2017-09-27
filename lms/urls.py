@@ -318,6 +318,13 @@ urlpatterns += (
         'courseware.views.views.course_info',
         name='info',
     ),
+    url(
+        r'^courses/{}/chat$'.format(
+            settings.COURSE_ID_PATTERN,
+        ),
+        'courseware.views.views.enter_chat',
+        name='chat',
+    ),
     # TODO arjun remove when custom tabs in place, see courseware/courses.py
     url(
         r'^courses/{}/syllabus$'.format(

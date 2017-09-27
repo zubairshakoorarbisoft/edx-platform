@@ -3,9 +3,11 @@ Courseware views functions
 """
 import json
 import logging
+import re
 import urllib
 from collections import OrderedDict, namedtuple
 from datetime import datetime, timedelta
+from rocketwrap import RocketWrap
 
 import analytics
 import shoppingcart
@@ -1664,3 +1666,35 @@ def get_financial_aid_courses(user):
             )
 
     return financial_aid_courses
+
+@ensure_csrf_cookie
+@ensure_valid_course_key
+@data_sharing_consent_required
+def enter_chat(request, course_id):
+    """
+    Add user to chatroom and redirect to rocketchat
+    """
+    SERVER_DOMAIN = 'https://hackachattest-chat.sandbox.edx.org'
+    lms_user = request.user
+    rocketchat = RocketWrap('apiuser', 'apipassword', server_url=SERVER_DOMAIN, ssl_verify=False)
+    full_name = lms_user.get_full_name() if lms_user.get_full_name() else "_"
+    
+    formatted_course_id = re.sub('[^0-9a-zA-Z]+', '_', course_id)
+
+    if not rocketchat.get_group(formatted_course_id):
+        rocketchat.create_new_group(formatted_course_id)
+
+    rc_user = rocketchat.get_or_create_user(
+        lms_user.email,
+        full_name,
+        'BAD HARDCODED DEFAULT PASSWORD',
+        lms_user.username
+    )
+
+    rocketchat.add_user_to_group(lms_user.username, formatted_course_id, moderator=False)
+    return HttpResponse(
+        '<meta http-equiv="refresh" content="0; url={}/group/{}" />'.format(
+            SERVER_DOMAIN,
+            formatted_course_id
+        )
+    )
