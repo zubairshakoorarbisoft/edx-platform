@@ -225,7 +225,8 @@
         };
 
         Sequence.prototype.render = function(newPosition) {
-            var bookmarked, currentTab, modxFullUrl, sequenceLinks,
+            var bookmarked, currentTab, modxFullUrl, sequenceLinks, allTabContent,
+                allTabs = true,
                 self = this;
             if (this.position !== newPosition) {
                 if (this.position) {
@@ -244,10 +245,22 @@
                 bookmarked = this.el.find('.active .bookmark-icon').hasClass('bookmarked');
 
                 // update the data-attributes with latest contents only for updated problems.
-                this.content_container
-                    .html(currentTab.text())
-                    .attr('aria-labelledby', currentTab.attr('aria-labelledby'))
-                    .data('bookmarked', bookmarked);
+                if (allTabs) {
+                    allTabContent = '';
+                    this.contents.each(function() {
+                        allTabContent += $(this).text() + '<br>';
+                    });
+
+                    this.content_container
+                        .html(allTabContent)
+                        .attr('aria-labelledby', currentTab.attr('aria-labelledby'))
+                        .data('bookmarked', bookmarked);
+                } else {
+                    this.content_container
+                        .html(currentTab.text())
+                        .attr('aria-labelledby', currentTab.attr('aria-labelledby'))
+                        .data('bookmarked', bookmarked);
+                }
 
 
                 if (this.anyUpdatedProblems(newPosition)) {
