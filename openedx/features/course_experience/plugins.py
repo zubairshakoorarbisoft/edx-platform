@@ -125,7 +125,7 @@ class DigitalLockerTool(CourseTool):
         """
         Returns icon classes needed to represent this tool.
         """
-        return 'fa fa-files-o'
+        return 'fa fa-briefcase'
 
     @classmethod
     def is_enabled(cls, request, course_key):
