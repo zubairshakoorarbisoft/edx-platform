@@ -1321,9 +1321,9 @@ def seed_rocket_chat(course_key):
 
 	# course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
 	# for user in course_staff:
-	# 	rocketWrap.create_user(user.email, user.name, user.password, user.username)
-	# rocket.add_staff_users_to_group_as_admin(course_staff) #TODO: right this function
-
+	# 	rocketuser = rocketWrap.create_user(user.email, user.name, user.password, user.username)
+	#   rocketWrap.add_user_to_group(rocketuser.username, newgroup.name, moderator=True)
+    
 	description = "test" # get_short_description(course_key) #not a real call this is pseudo
 	rocket.set_topic(newgroup.name, description)
 
