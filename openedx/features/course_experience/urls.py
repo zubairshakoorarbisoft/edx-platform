@@ -9,7 +9,8 @@ from views.course_outline import CourseOutlineFragmentView
 from views.course_reviews import CourseReviewsView
 from views.course_updates import CourseUpdatesFragmentView, CourseUpdatesView
 from views.course_sock import CourseSockFragmentView
-from views.digital_locker import DigitalLockerFragmentView, DigitalLockerView
+from views.digital_locker_fragment import DigitalLockerFragmentView 
+from views.digital_locker import DigitalLockerView
 from views.latest_update import LatestUpdateFragmentView
 from views.welcome_message import WelcomeMessageFragmentView, dismiss_welcome_message
 

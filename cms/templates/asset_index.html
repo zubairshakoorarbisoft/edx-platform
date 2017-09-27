@@ -97,6 +97,11 @@
         </aside>
     </div>
 </div> -->
+<div class="wrapper-content wrapper">
+    % if digital_locker_fragment_view:
+    ${HTML(digital_locker_fragment_view.body_html())}
+  % endif
+</div>
 
 <div class="upload-modal modal">
     <a href="#" class="close-button"><span class="icon fa fa-times-circle" aria-hidden="true"></span> <span class="sr">${_('close')}</span></a>

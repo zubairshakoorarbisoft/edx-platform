@@ -832,7 +832,7 @@ def dashboard(request):
     display_sidebar_on_dashboard = len(order_history_list) or verification_status in valid_verification_statuses
 
     # Add fragment for digital locker
-    from openedx.features.course_experience.views.digital_locker import DigitalLockerFragmentView
+    from openedx.features.course_experience.views.digital_locker_fragment import DigitalLockerFragmentView
     digital_locker_fragment_view = DigitalLockerFragmentView().render_to_fragment(request)
 
     context = {

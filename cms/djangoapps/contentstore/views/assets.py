@@ -29,6 +29,7 @@ from util.json_request import JsonResponse
 import boto3
 import mimetypes
 import datetime
+from openedx.features.course_experience.views.digital_locker_fragment import DigitalLockerFragmentView
 
 
 __all__ = ['assets_handler']
@@ -78,7 +79,7 @@ def assets_handler(request, course_key_string=None, asset_key_string=None):
         return _update_asset(request, course_key, asset_key)
 
     elif request.method == 'GET':  # assume html
-        return _asset_index(course_key)
+        return _asset_index(request, course_key)
 
     return HttpResponseNotFound()
 
@@ -91,7 +92,7 @@ def _request_response_format_is_json(request, response_format):
     return response_format == 'json' or 'application/json' in request.META.get('HTTP_ACCEPT', 'application/json')
 
 
-def _asset_index(course_key):
+def _asset_index(request, course_key):
     '''
     Display an editable asset library.
 
@@ -99,13 +100,17 @@ def _asset_index(course_key):
     '''
     course_module = modulestore().get_course(course_key)
 
+    # Add fragment for digital locker
+    digital_locker_fragment_view = DigitalLockerFragmentView().render_to_fragment(request)
+
     return render_to_response('asset_index.html', {
         'waffle_flag_enabled': NewAssetsPageFlag.feature_enabled(course_key),
         'context_course': course_module,
         'max_file_size_in_mbs': settings.MAX_ASSET_UPLOAD_FILE_SIZE_IN_MB,
         'chunk_size_in_mbs': settings.UPLOAD_CHUNK_SIZE_IN_MB,
         'max_file_size_redirect_url': settings.MAX_ASSET_UPLOAD_FILE_SIZE_URL,
-        'asset_callback_url': reverse_course_url('assets_handler', course_key)
+        'asset_callback_url': reverse_course_url('assets_handler', course_key),
+        'digital_locker_fragment_view': digital_locker_fragment_view
     })
 
 
