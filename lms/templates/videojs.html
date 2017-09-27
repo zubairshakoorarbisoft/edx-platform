@@ -1,0 +1,55 @@
+<%page expression_filter="h"/>
+
+<%namespace name='static' file='static_content.html'/>
+<%!
+    import json
+    import six
+    from django.utils.translation import ugettext as _
+%>
+% if display_name is not UNDEFINED and display_name is not None:
+    <h3 class="hd hd-2">${display_name}</h3>
+% endif
+
+<%
+    parsed_metadata = json.loads(metadata)
+    # TODO Get poster for non-YouTube videos
+    poster = 'https://rawgit.com/edx/ecommerce-scripts/16c87ec30fc0bc189fd73a94b296dc82d63be31a/roku/a-taste.jpg'
+%>
+
+## The 6.x CSS is being broken by the Chromecast plugin. See https://github.com/videojs/video.js/issues/4423.
+<link href="http://vjs.zencdn.net/5.20.1/video-js.css" rel="stylesheet">
+<link href="https://cdn.rawgit.com/benjipott/video.js-chromecast/04f5f12f/dist/videojs-chromecast.css" rel="stylesheet">
+
+<style>
+    .video-js .vjs-big-play-button {
+        display: none;
+    }
+
+    .video-js .vjs-control-bar {
+        display: flex;
+    }
+
+    .vjs-tech-chromecast .casting-overlay .casting-information .casting-icon {
+        float: none;
+    }
+</style>
+
+<video class="video-js" controls preload="auto" poster="${poster}" data-setup="{}">
+    % for source in parsed_metadata['sources']:
+        <source src="${source}">
+    % endfor
+    ## NOTE: Only WebVTT files are supported
+    % for code, language in six.iteritems(parsed_metadata['transcriptLanguages']):
+    <track kind="captions" src="${parsed_metadata['transcriptTranslationUrl'].replace('__lang__', code)}"
+           srclang="${code}" label="${language}" default>
+% endfor
+    <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to a web browser that
+        <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+    </p>
+</video>
+
+
+<script type="text/javascript"
+        src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+<%static:webpack entry="VideoModule"></%static:webpack>

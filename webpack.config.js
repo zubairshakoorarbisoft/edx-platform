@@ -30,7 +30,8 @@ var wpconfig = {
         CourseTalkReviews: './openedx/features/course_experience/static/course_experience/js/CourseTalkReviews.js',
         Enrollment: './openedx/features/course_experience/static/course_experience/js/Enrollment.js',
         LatestUpdate: './openedx/features/course_experience/static/course_experience/js/LatestUpdate.js',
-        WelcomeMessage: './openedx/features/course_experience/static/course_experience/js/WelcomeMessage.js'
+        WelcomeMessage: './openedx/features/course_experience/static/course_experience/js/WelcomeMessage.js',
+        VideoModule: './common/lib/xmodule/xmodule/js/src/video/video_player.js'
     },
 
     output: {

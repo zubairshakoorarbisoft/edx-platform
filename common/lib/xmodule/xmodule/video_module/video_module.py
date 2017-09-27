@@ -379,7 +379,8 @@ class VideoModule(VideoFields, VideoTranscriptsMixin, VideoStudentViewHandlers, 
             'transcript_download_formats_list': self.descriptor.fields['transcript_download_format'].values,
             'license': getattr(self, "license", None),
         }
-        return self.system.render_template('video.html', context)
+        # TODO Put this behind a feature flag
+        return self.system.render_template('videojs.html', context)
 
 
 @XBlock.wants("request_cache")
