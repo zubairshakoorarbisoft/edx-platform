@@ -430,20 +430,23 @@ def _upload_asset_s3(request, course_key):
 
     try:
         logging.info('creating S3 client')
-        client = boto3.client(
+        s3_client = boto3.client(
             's3',
             aws_access_key_id='AKIAIENAHYSMKQDWIZVQ',
             aws_secret_access_key='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'
         )
   
-        # with open(upload_file.path, 'rb') as data:
         logging.info('calling upload on file %s', file_name)
-        #mime = magic.Magic(mime=True)
-        #mime.from_file
         mimetypes.init()
         types = mimetypes.guess_type(file_name, False)
-        logging.info("mime-type=%s", types[0])
-        client.upload_fileobj(upload_file, 'edx-hackathon', file_name, ExtraArgs={'ContentType': types[0]})  
+        mime_type = types[0]
+        bucket_name = 'edx-hackathon'
+        logging.info("mime-type=%s", mime_type)
+
+        if mime_type is None:
+            s3_client.upload_fileobj(upload_file, bucket_name, file_name)
+        else:
+            s3_client.upload_fileobj(upload_file, bucket_name, file_name, ExtraArgs={'ContentType': mime_type})
 
     except Exception as ex:
         logging.exception(ex)
@@ -455,7 +458,7 @@ def _upload_asset_s3(request, course_key):
     return JsonResponse({
         'asset': _get_asset_json(
             file_name,
-            types[0],
+            mime_type,
             datetime.datetime.now(),
             upload_file,
             upload_file,
