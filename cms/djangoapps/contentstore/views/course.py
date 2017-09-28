@@ -1315,10 +1315,11 @@ def seed_rocket_chat(course_key):
 	master_password = 'apipassword'
 	rocket_url = 'https://hackachattest-chat.sandbox.edx.org'
 
+    log.info('Seeding rocket chat group')
 	rocketWrap = RocketWrap(master_username, master_password, server_url=rocket_url, ssl_verify=False)
-
-	newgroup = rocketWrap.create_new_group(course_key)
-
+    log.info('instantiated wrapper')
+    newgroup = rocketWrap.create_new_group(course_key)
+    log.info('made group')
 	# course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
 	# for user in course_staff:
 	# 	rocketuser = rocketWrap.create_user(user.email, user.name, user.password, user.username)
@@ -1326,6 +1327,7 @@ def seed_rocket_chat(course_key):
     
 	description = "test" # get_short_description(course_key) #not a real call this is pseudo
 	rocket.set_topic(newgroup.name, description)
+    log.info('set topic')
 
 
 class TextbookValidationError(Exception):
