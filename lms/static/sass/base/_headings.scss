@@ -111,14 +111,6 @@ $headings-base-color:                       $gray-d2;
     }
 }
 
-h1.print-section-title {
-    display: none;
-
-    @media print {
-        display: block !important;
-    }
-}
-
 // H3 was problematic in xblocks, we so we'll keep it as it was
 
 .xblock .xblock {
@@ -140,19 +132,39 @@ h1.print-section-title {
         }
     }
 
-    h2.unit-title {
+    .unit-title-wrapper {
+        text-align: center;
+        width: 100%;
+        display: inline-block;
+        background-color: rgba(0, 0, 0, 0.1);
+
         @media print {
-            margin-bottom: 1.41575em;
-            font-size: 2em;
-            line-height: 1.4em;
+            page-break-before: always;
+        }
+
+        h2.unit-title {
+            @media print {
+                padding-bottom: 1.41575em;
+                font-size: 2em;
+                line-height: 1.4em;
+            }
+        }
+
+        .print-section-title {
+            display: none;
+
+            @media print {
+                display: block !important;
+                padding-top: 3rem;
+            }
         }
     }
+}
 
-    hr.unit-title-line {
-        display: none;
-
+.xblock .xblock:first-child {
+    .unit-title-wrapper {
         @media print {
-            display: block !important;
+            page-break-before: avoid;
         }
     }
 }

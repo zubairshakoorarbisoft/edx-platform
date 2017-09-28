@@ -1,8 +1,10 @@
 <%page expression_filter="h"/>
 <%! from openedx.core.djangolib.markup import HTML %>
 %if unit_title:
-  <h2 class="hd hd-2 unit-title">${unit_title}</h2>
-  <hr class="unit-title-line" aria-hidden="true">
+  <div class="unit-title-wrapper">
+    <h3 class="print-section-title" aria-hidden="true">Foobar</h3>
+    <h2 class="hd hd-2 unit-title">${unit_title}</h2>
+  </div>
 % endif
 
 % if show_bookmark_button:

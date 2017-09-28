@@ -470,6 +470,11 @@ html.video-fullscreen {
           padding-bottom: 0;
         }
 
+        @media print {
+          width: 75%;
+          float: right;
+        }
+
         .histogram {
           width: 200px;
           height: 150px;
@@ -506,6 +511,14 @@ html.video-fullscreen {
         border-bottom: 1px solid #ddd;
         margin-bottom: ($baseline*0.75);
         padding: 0 0 15px;
+
+        @media print {
+          border: none !important;
+
+          &:first-child {
+            margin-top: 2rem;
+          }
+        }
       }
 
       .vert > .xblock-student_view.is-hidden {

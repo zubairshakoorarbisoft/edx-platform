@@ -37,5 +37,12 @@
     @include rtl {
       @include transform(rotateY(180deg));
     }
+
+  }
+
+  .fa-angle-right:nth-child(3) {
+    @media print {
+      display: none;
+    }
   }
 }
