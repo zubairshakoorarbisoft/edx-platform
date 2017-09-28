@@ -1297,7 +1297,7 @@ def advanced_settings_handler(request, course_key_string):
                         # now update mongo
                         modulestore().update_item(course_module, request.user.id)
 
-                        if updated_data['c']
+                        #if updated_data['c']
                         seed_rocket_chat(course_key_string)
 
                         return JsonResponse(updated_data)
