@@ -434,7 +434,7 @@
         };
 
         Sequence.prototype.printSubmodule = function() {
-            var interval, foundIframes, loadingIndex;
+            var interval, foundIframes, loadingIndex, sectionTitle;
             var self = this;
             var loadingIframes = [];
             var doneIframes = [];
@@ -442,6 +442,10 @@
             var done = false;
             // TODO: this function belongs outside of this file
             this.render(parseInt(this.el.data('position'), 10), true);
+            sectionTitle = $('#print-section-title').text();
+            $('.print-section-title').each(function() {
+                $(this).text(sectionTitle);
+            });
             interval = setInterval(function() {
                 intervalCounter += 50;
                 // wait for iframes to be inserted into DOM

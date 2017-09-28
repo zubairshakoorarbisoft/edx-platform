@@ -111,6 +111,10 @@ $headings-base-color:                       $gray-d2;
     }
 }
 
+#print-section-title {
+    display: none;
+}
+
 // H3 was problematic in xblocks, we so we'll keep it as it was
 
 .xblock .xblock {
@@ -133,12 +137,11 @@ $headings-base-color:                       $gray-d2;
     }
 
     .unit-title-wrapper {
-        text-align: center;
-        width: 100%;
-        display: inline-block;
-        background-color: rgba(0, 0, 0, 0.1);
-
         @media print {
+            text-align: center;
+            width: 100%;
+            display: inline-block;
+            background-color: rgba(0, 0, 0, 0.1);
             page-break-before: always;
         }
 
