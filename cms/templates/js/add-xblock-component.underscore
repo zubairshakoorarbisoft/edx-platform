@@ -1,8 +1,32 @@
 <div class="new-component">
     <h5><%= gettext("Add New Component") %></h5>
-    <p>There are <%= numberChildren %> components in this unit!</p>
-    <% if (numberChildren < 4) { %>
+    <p>Learner engagement is generally higher when units have fewer components. <a href="https://partners.edx.org/" target="_blank">Read more.</a></p>
+    <% if (numberChildren < 4 || overrideNudge) { %>
     <ul class="new-component-type">
+
     </ul>
+    <% } if (numberChildren >= 4) { %>
+    <p>This unit already contains <%= numberChildren %> components. Sylvia demands that start a new unit.</p>
+
     <% } %>
+
+    <% if (isVertical) { %>
+        <button class="add-unit-button add-unit-button-style" data-category="vertical"
+               data-parent="<%= parentId %>" data-default-name="<%= defaultNewName %>"
+               title="<%= interpolate(
+                     gettext('Click to add a new %(xblock_type)s'), { xblock_type: defaultNewName }, true
+               ) %>"
+            >
+            <%= interpolate(
+                gettext('New %(xblock_type)s'),
+                { xblock_type: defaultNewName },
+                true
+            ) %>
+        </button>
+    <% } %>
+
+    <% if (numberChildren > 3 && !overrideNudge) { %>
+        <button class="override-button">Thwart Sylvia</button>
+    <% } %>
+
 </div>

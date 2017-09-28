@@ -2,15 +2,17 @@
  * This is a simple component that renders add buttons for all available XBlock template types.
  */
 define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/components/utils/view_utils',
-        'js/views/components/add_xblock_button', 'js/views/components/add_xblock_menu'],
-    function($, _, gettext, BaseView, ViewUtils, AddXBlockButton, AddXBlockMenu) {
+        'js/views/components/add_xblock_button', 'js/views/components/add_xblock_menu', 'js/views/utils/xblock_utils'],
+    function($, _, gettext, BaseView, ViewUtils, AddXBlockButton, AddXBlockMenu, XBlockViewUtils) {
         var AddXBlockComponent = BaseView.extend({
             events: {
                 'click .new-component .new-component-type .multiple-templates': 'showComponentTemplates',
                 'click .new-component .new-component-type .single-template': 'createNewComponent',
                 'click .new-component .cancel-button': 'closeNewComponent',
                 'click .new-component-templates .new-component-template .button-component': 'createNewComponent',
-                'click .new-component-templates .cancel-button': 'closeNewComponent'
+                'click .new-component-templates .cancel-button': 'closeNewComponent',
+                'click .new-component .add-unit-button': 'addNewUnit',
+                'click .new-component .override-button': 'overrideNudge'
             },
 
             initialize: function(options) {
@@ -19,11 +21,17 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 this.template = this.loadTemplate('add-xblock-component');
                 this.nudgeTemplate = this.loadTemplate('add-xblock-component-nudge');
                 this.model.set({number_children: $('.level-element').length});
+                this.model.set({overrideNudge: false});
                 // this.model.on('change:number_children', function(model){
                 //     console.log('number of children changed!');
                 //     console.log(model.get('number_children'));
                 // }, this.model);
                 this.model.on('change:number_children', this.render, this);
+                this.model.on('change:overrideNudge', this.render, this);
+            },
+
+            overrideNudge: function() {
+                this.model.set({overrideNudge: true});
             },
 
             renderNudge: function() {
@@ -32,7 +40,13 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
 
             renderNormal: function() {
                 var that = this;
-                this.$el.html(this.template({numberChildren: that.model.get('number_children')}));
+                this.$el.html(this.template({
+                    numberChildren: that.model.get('number_children'),
+                    isVertical: that.model.isVertical(),
+                    parentId: that.model.get('ancestor_info').ancestors[0].get('id'),
+                    defaultNewName: that.model.get('display_name'),
+                    overrideNudge: that.model.get('overrideNudge')
+                }));
                 this.collection.each(
                     function(componentModel) {
                         var view, menu;
@@ -90,6 +104,16 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                     // Restore the scroll position of the buttons so that the new
                     // component appears above them.
                     ViewUtils.setScrollOffset(self.$el, oldOffset);
+                });
+            },
+
+            addNewUnit: function(event) {
+                var $target = $(event.currentTarget);
+                console.log($target);
+                    // category = $target.data('category');
+                event.preventDefault();
+                XBlockViewUtils.addXBlock($target).done(function(locator) {
+                    ViewUtils.redirect('/container/' + locator + '?action=new')
                 });
             }
         });

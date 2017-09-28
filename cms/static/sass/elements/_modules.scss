@@ -122,17 +122,42 @@
       margin-bottom: ($baseline*0.75);
       color: $uxpl-green-base;
     }
+    button {
+      @include clearfix();
+      display: inline-block;
+      @extend %t-action3;
+      @include margin-right($baseline*0.75);
+      position: relative;
+      display: inline-block;
+      width: ($baseline*5);
+      height: ($baseline*5);
+      margin-bottom: ($baseline/2);
+      box-shadow: 0 1px 1px $shadow, 0 1px 0 rgba(255, 255, 255, 0.4) inset;
+      border-radius: ($baseline/4);
+      padding: 0;
+      text-align: center;
+      // @extend %btn-primary-blue;
+      &.override-button {
+        @extend %btn-secondary-blue;
+      }
+      &.add-unit-button-style {
+        @extend %btn-primary-blue;
+        margin-left: $baseline;
+      }
+    }
 
     // add component - list of green buttons
     .new-component-type {
       @include clearfix();
+
+      // display: inline-block;
 
       li {
         display: inline-block;
       }
 
       // green button
-      .add-xblock-component-button {
+      .add-xblock-component-button{
         @extend %t-action3;
 
         @include margin-right($baseline*0.75);
