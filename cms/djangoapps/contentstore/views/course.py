@@ -1297,6 +1297,7 @@ def advanced_settings_handler(request, course_key_string):
                         # now update mongo
                         modulestore().update_item(course_module, request.user.id)
 
+                        log.info(type(updated_data['enable_rocket_chat']))
                         if updated_data['enable_rocket_chat']:
                             seed_rocket_chat(course_key_string)
 
