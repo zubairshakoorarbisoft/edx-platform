@@ -114,8 +114,7 @@ from openedx.core.djangolib.markup import HTML, Text
 </main>
 
 <script>
-  var full_url = window.location.href;
-  full_url = full_url.substring(0, full_url.length-4) + 'chat';
+  var full_url = window.location.protocol + '//' + window.location.host + '/courses/${course_id}/chat';
   tab_list = document.querySelector('.course-tabs');
   tab_list.innerHTML = tab_list.innerHTML + '<li class="tab"><a href="' + full_url + '">Chat</a></li>';
 </script>
