@@ -1318,7 +1318,11 @@ def seed_rocket_chat(course_key):
     log.info('Seeding rocket chat group')
     rocketWrap = RocketWrap(master_username, master_password, server_url=rocket_url, ssl_verify=False)
     log.info('instantiated wrapper')
-    newgroup = rocketWrap.create_new_group(course_key)
+    try:
+        newgroup = rocketWrap.create_new_group(course_key)
+    except Exception as e:
+        log.error(e)
+
     log.info('made group')
 	# course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
 	# for user in course_staff:
