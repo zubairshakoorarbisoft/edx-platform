@@ -213,6 +213,11 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
               <div class="file-viewer-container">
                   <div class="file-viewer">
                       <div class="close">X</div>
+                      <%
+                        # Add fragment for digital locker
+                        from openedx.features.course_experience.views.digital_locker_fragment import DigitalLockerFragmentView
+                        digital_locker_fragment_view = DigitalLockerFragmentView().render_to_fragment(request, course_id=enrollment.course_id)
+                      %>
                       % if digital_locker_fragment_view:
                         ${HTML(digital_locker_fragment_view.body_html())}
                       % endif

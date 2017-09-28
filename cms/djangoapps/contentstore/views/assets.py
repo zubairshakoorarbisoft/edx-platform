@@ -22,6 +22,7 @@ from contentstore.config.models import NewAssetsPageFlag
 from contentstore.utils import reverse_course_url
 from contentstore.views.exception import AssetNotFoundException, AssetSizeTooLargeException
 from edxmako.shortcuts import render_to_response
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.contentserver.caching import del_cached_content
 from student.auth import has_course_author_access
 from util.date_utils import get_default_time_display
@@ -101,7 +102,7 @@ def _asset_index(request, course_key):
     course_module = modulestore().get_course(course_key)
 
     # Add fragment for digital locker
-    digital_locker_fragment_view = DigitalLockerFragmentView().render_to_fragment(request)
+    digital_locker_fragment_view = DigitalLockerFragmentView().render_to_fragment(request, course_key)
 
     return render_to_response('asset_index.html', {
         'waffle_flag_enabled': NewAssetsPageFlag.feature_enabled(course_key),
@@ -442,6 +443,11 @@ def _upload_asset_s3(request, course_key):
         mime_type = types[0]
         bucket_name = 'edx-hackathon'
         logging.info("mime-type=%s", mime_type)
+
+        course_overview = CourseOverview.get_from_id(course_key)
+        bucket_name = course_overview.display_name_with_default.replace(' ','').lower()
+        s3_client.create_bucket(Bucket=bucket_name)
+
 
         if mime_type is None:
             s3_client.upload_fileobj(upload_file, bucket_name, file_name)

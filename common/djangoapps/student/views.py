@@ -831,10 +831,6 @@ def dashboard(request):
     valid_verification_statuses = ['approved', 'must_reverify', 'pending', 'expired']
     display_sidebar_on_dashboard = len(order_history_list) or verification_status in valid_verification_statuses
 
-    # Add fragment for digital locker
-    from openedx.features.course_experience.views.digital_locker_fragment import DigitalLockerFragmentView
-    digital_locker_fragment_view = DigitalLockerFragmentView().render_to_fragment(request)
-
     context = {
         'enterprise_message': enterprise_message,
         'enrollment_message': enrollment_message,
@@ -847,7 +843,6 @@ def dashboard(request):
         'staff_access': staff_access,
         'errored_courses': errored_courses,
         'show_courseware_links_for': show_courseware_links_for,
-        'digital_locker_fragment_view': digital_locker_fragment_view,
         'all_course_modes': course_mode_info,
         'cert_statuses': cert_statuses,
         'credit_statuses': _credit_statuses(user, course_enrollments),
