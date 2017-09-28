@@ -1330,7 +1330,7 @@ def seed_rocket_chat(course_key):
 	#   rocketWrap.add_user_to_group(rocketuser.username, newgroup.name, moderator=True)
     
     description = "test" # get_short_description(course_key) #not a real call this is pseudo
-    rocket.set_topic(newgroup.name, description)
+    rocketWrap.set_topic(newgroup.name, description)
     log.info('set topic')
 
 
