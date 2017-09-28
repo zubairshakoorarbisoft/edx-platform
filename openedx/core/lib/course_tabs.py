@@ -40,5 +40,8 @@ class CourseTabPluginManager(PluginManager):
             else:
                 return 1
         tab_types = cls.get_available_plugins().values()
+        # for tab_type in tab_types:
+        #    print('BF - tab_types', tab_types)
+
         tab_types.sort(cmp=compare_tabs)
         return tab_types

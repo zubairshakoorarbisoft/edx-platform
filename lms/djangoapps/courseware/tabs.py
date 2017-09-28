@@ -11,6 +11,7 @@ from openedx.core.lib.course_tabs import CourseTabPluginManager
 from openedx.features.course_experience import UNIFIED_COURSE_TAB_FLAG, default_course_url_name
 from student.models import CourseEnrollment
 from xmodule.tabs import CourseTab, CourseTabList, course_reverse_func_from_name_func, key_checker
+from xmodule.tabs import TabFragmentViewMixin
 
 
 class EnrolledTab(CourseTab):
@@ -90,6 +91,22 @@ class SyllabusTab(EnrolledTab):
             return False
         return getattr(course, 'syllabus_present', False)
 
+class DigitalLockerTab(TabFragmentViewMixin, EnrolledTab):
+    """
+    A tab for the course digital locker.
+    """
+    type = 'digital_locker'
+    title = ugettext_noop('Digital Locker')
+    priority = 30
+    # view_name = 'openedx.course_experience.digital_locker_fragment'
+    fragment_view_name = 'openedx.features.course_experience.views.digital_locker_fragment.DigitalLockerFragmentView'
+    allow_multiple = False
+    is_dynamic = True
+
+    @classmethod
+    def is_enabled(cls, course, user=None):
+        print('DigitalLockerTab returning True is_enabled')
+        return True
 
 class ProgressTab(EnrolledTab):
     """
