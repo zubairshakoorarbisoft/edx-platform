@@ -1,18 +1,18 @@
-var is_showing = false;
-
-$('.digital-locker-dropdown').on('click', function(e) {
-    // Only allow one file viewer at a time
-    $('.file-viewer-container').hide()
-
-    // Show file view
+$('.digital-locker-container .digital-locker-dropdown').on('click', function(e) {
+    // Grab file view container
     $fileViewerContainer = $(e.target).parent().find('.file-viewer-container');
-    if (is_showing) {
+    if (JSON.parse($fileViewerContainer.data('in-progress'))) return;
+    if ($fileViewerContainer.is(":visible")) {
         $fileViewerContainer.hide();
-        is_showing = false;
     } else {
+        // Only allow one file viewer at a time
+        $('.file-viewer-container').hide();
         $fileViewerContainer.show();
-        is_showing = true;
     }
+    $fileViewerContainer.data('in-progress', 'true');
+    setTimeout(function(){
+        $fileViewerContainer.data('in-progress', 'false');
+    }, 50);
 });
 
 $('.file-viewer-container .close').on('click', function(e) {
