@@ -54,7 +54,8 @@
 }
 
 // Styling for digital locker on course page
-.course-view {
+.course-view,
+.content-wrapper {
   .locker-description {
     width: 100%;
     padding: 20px 10px;
@@ -70,6 +71,7 @@
     padding: 5px 8px 5px 4px;
     width: 100%;
     border-radius: 5px;
+    background-color: white;
 
     .locker {
       iframe {
