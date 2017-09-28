@@ -11,7 +11,7 @@ from openedx.features.course_experience import course_home_page_title
 %>
 
 <%block name="content">
-<div class="digital-locker" id="digital-locker">
+<div class="digital-locker ${'on-dashboard' if on_dashboard else 'in-course'}" id="digital-locker">
     <div class="locker">
         <iframe src="/cb/browser/${bucket_name}"></iframe>
     </div>
