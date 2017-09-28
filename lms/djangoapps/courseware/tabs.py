@@ -263,7 +263,7 @@ class ExternalDiscussionCourseTab(LinkTab):
 
     type = 'external_discussion'
     # Translators: 'Discussion' refers to the tab in the courseware that leads to the discussion forums
-    title = ugettext_noop('Discussion')
+    title = ugettext_noop('Discussion213123')
     priority = None
     is_default = False
 
@@ -346,6 +346,8 @@ def get_course_tab_list(request, course):
         if tab.type == 'static_tab' and tab.course_staff_only and \
                 not bool(user and has_access(user, 'staff', course, course.id)):
             continue
+        if tab.type == 'discussion':
+            tab.name = 'Digital Locker'
         course_tab_list.append(tab)
 
     # Add in any dynamic tabs, i.e. those that are not persisted
