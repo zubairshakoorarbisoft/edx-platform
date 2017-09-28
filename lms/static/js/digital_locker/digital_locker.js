@@ -15,8 +15,3 @@ $('.digital-locker-container .digital-locker-dropdown').on('click', function(e) 
         $fileViewerContainer.data('in-progress', 'false');
     }, 50);
 });
-
-$('.file-viewer-container .close').on('click', function(e) {
-    $fileViewerContainer = $(e.target).closest('.file-viewer-container');
-    $fileViewerContainer.hide();
-});
