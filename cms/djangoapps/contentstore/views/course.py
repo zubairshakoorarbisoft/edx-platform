@@ -1322,6 +1322,7 @@ def seed_rocket_chat(course_key):
     try:
         course_chat_group = rocketWrap.get_group(course_key)
         if not course_chat_group:
+            log.info('calling: course_chat_group = rocketWrap.create_new_group(\'{}\')'.format(course_key))
             course_chat_group = rocketWrap.create_new_group(course_key)
         log.info('made group')
         # course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
@@ -1330,6 +1331,7 @@ def seed_rocket_chat(course_key):
         #   rocketWrap.add_user_to_group(rocketuser.username, newgroup.name, moderator=True)
         
         description = "test" # get_short_description(course_key) #not a real call this is pseudo
+        log.info('calling: rocketWrap.set_topic(\'{}\', \'{}\')'.format(course_key, description))
         rocketWrap.set_topic(course_key, description)
         log.info('set topic')
     except Exception as e:
