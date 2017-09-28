@@ -25,7 +25,7 @@ class DigitalLockerFragmentView(EdxFragmentView):
         context = {
             'course_id': course_id,
             'bucket_name': bucket_name,
-            'on_dashboard': 'dashboard' in request.path,
+            'on_dashboard': 'yes' if ('dashboard' in request.path) else 'no',
         }
         html = render_to_string('course_experience/digital-locker-fragment.html', context)
         return Fragment(html)
