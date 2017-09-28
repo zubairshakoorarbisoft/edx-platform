@@ -79,3 +79,11 @@ CELERY_BROKER_HOSTNAME = 'edx.devstack.rabbitmq'
 # CELERY_BROKER_VHOST =
 CELERY_BROKER_USER = 'user'
 CELERY_BROKER_PASSWORD = 'user'
+
+# Require a separate celery worker
+CELERY_ALWAYS_EAGER = False
+
+# Disable transaction management because we are using a worker. Views
+# that request a task and wait for the result will deadlock otherwise.
+for database_name in DATABASES:
+    DATABASES[database_name]['ATOMIC_REQUESTS'] = False
