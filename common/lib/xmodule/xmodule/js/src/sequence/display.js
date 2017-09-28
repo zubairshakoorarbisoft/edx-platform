@@ -74,6 +74,8 @@
             this.el.on('bookmark:remove', this.removeBookmarkIconFromActiveNavItem);
             this.$('#sequence-list .nav-item').on('focus mouseenter', this.displayTabTooltip);
             this.$('#sequence-list .nav-item').on('blur mouseleave', this.hideTabTooltip);
+            // lol hackathon
+            $('.print-submodule').click($.proxy(this.printSubmodule, this));
         };
 
         Sequence.prototype.previousNav = function(focused, index) {
@@ -224,11 +226,10 @@
             this.updateButtonState(nextButtonClass, this.selectNext, isLastTab, this.nextUrl);
         };
 
-        Sequence.prototype.render = function(newPosition) {
-            var bookmarked, currentTab, modxFullUrl, sequenceLinks, allTabContent,
-                allTabs = true,
+        Sequence.prototype.render = function(newPosition, allTabs) {
+            var bookmarked, currentTab, modxFullUrl, sequenceLinks, currentTabText,
                 self = this;
-            if (this.position !== newPosition) {
+            if (this.position !== newPosition || allTabs) {
                 if (this.position) {
                     this.mark_visited(this.position);
                     modxFullUrl = '' + this.ajaxUrl + '/goto_position';
@@ -246,21 +247,17 @@
 
                 // update the data-attributes with latest contents only for updated problems.
                 if (allTabs) {
-                    allTabContent = '';
+                    currentTabText = '';
                     this.contents.each(function() {
-                        allTabContent += $(this).text() + '<br>';
+                        currentTabText += $(this).text() + '<br>';
                     });
-
-                    this.content_container
-                        .html(allTabContent)
-                        .attr('aria-labelledby', currentTab.attr('aria-labelledby'))
-                        .data('bookmarked', bookmarked);
                 } else {
-                    this.content_container
-                        .html(currentTab.text())
-                        .attr('aria-labelledby', currentTab.attr('aria-labelledby'))
-                        .data('bookmarked', bookmarked);
+                    currentTabText = currentTab.text();
                 }
+                this.content_container
+                    .html(currentTabText)
+                    .attr('aria-labelledby', currentTab.attr('aria-labelledby'))
+                    .data('bookmarked', bookmarked);
 
 
                 if (this.anyUpdatedProblems(newPosition)) {
@@ -434,6 +431,16 @@
             event.preventDefault();
             this.el.find('.nav-item.active .bookmark-icon').removeClass('bookmarked').addClass('is-hidden');
             this.el.find('.nav-item.active .bookmark-icon-sr').text('');
+        };
+
+        Sequence.prototype.printSubmodule = function() {
+            // TODO: this function belongs outside of this file
+            this.render(parseInt(this.el.data('position'), 10), true);
+            setTimeout(function() {
+                // wait for iframes to be inserted into DOM
+                // TODO: this is a hackathon hack. Find a way to listen and wait for YouTube iframes to load.
+                window.print();
+            }, 1500);
         };
 
         return Sequence;

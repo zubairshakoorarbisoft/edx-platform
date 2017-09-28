@@ -909,4 +909,13 @@
 .page-header {
   padding: $baseline;
   border-bottom: 1px solid $border-color-2;
+
+  .page-header-main {
+    display: inline-block;
+  }
+
+  .print-submodule {
+    float: right;
+    display: inline-block;
+  }
 }
