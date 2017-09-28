@@ -1298,7 +1298,7 @@ def advanced_settings_handler(request, course_key_string):
                         modulestore().update_item(course_module, request.user.id)
 
                         seed_rocket_chat(course_key_string)
-                        
+
                         return JsonResponse(updated_data)
                     else:
                         return JsonResponseBadRequest(errors)
@@ -1311,12 +1311,12 @@ def advanced_settings_handler(request, course_key_string):
                     )
 
 def seed_rocket_chat(course_key):
-	master_username = 'apiuser'
-	master_password = 'apipassword'
-	rocket_url = 'https://hackachattest-chat.sandbox.edx.org'
+    master_username = 'apiuser'
+    master_password = 'apipassword'
+    rocket_url = 'https://hackachattest-chat.sandbox.edx.org'
 
     log.info('Seeding rocket chat group')
-	rocketWrap = RocketWrap(master_username, master_password, server_url=rocket_url, ssl_verify=False)
+    rocketWrap = RocketWrap(master_username, master_password, server_url=rocket_url, ssl_verify=False)
     log.info('instantiated wrapper')
     newgroup = rocketWrap.create_new_group(course_key)
     log.info('made group')
@@ -1325,8 +1325,8 @@ def seed_rocket_chat(course_key):
 	# 	rocketuser = rocketWrap.create_user(user.email, user.name, user.password, user.username)
 	#   rocketWrap.add_user_to_group(rocketuser.username, newgroup.name, moderator=True)
     
-	description = "test" # get_short_description(course_key) #not a real call this is pseudo
-	rocket.set_topic(newgroup.name, description)
+    description = "test" # get_short_description(course_key) #not a real call this is pseudo
+    rocket.set_topic(newgroup.name, description)
     log.info('set topic')
 
 
