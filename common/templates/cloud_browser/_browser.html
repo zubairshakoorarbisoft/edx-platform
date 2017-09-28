@@ -20,9 +20,11 @@
         {% endif %}
           <div class="description">
             {% if obj.is_file %}
-            <div class="title file"><a href="{% url "cloud_browser_document" obj.path|urlencode %}"
-               >{{ obj.basename }}</a></div>
+            <div class="title file">
+                <a href="{% url "cloud_browser_document" obj.path|urlencode %}"
+               >{{ obj.basename }}</a>
               <a class = 'fa fa-cloud-download' href="{% url "cloud_browser_document" obj.path|urlencode %}" download></a>
+                </div>
               {% else %}
               <div class="title link"><a href="{% url "cloud_browser_browser" obj.path|urlencode %}"
                    class="cloud-browser-document-link"
