@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from web_fragments.fragment import Fragment
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
+from opaque_keys.edx.keys import CourseKey
 
 class DigitalLockerFragmentView(EdxFragmentView):
     """
@@ -16,6 +17,8 @@ class DigitalLockerFragmentView(EdxFragmentView):
 
         """
 
+        if type(course_id) in [unicode, str]:
+            course_id = CourseKey.from_string(course_id)
         course_overview = CourseOverview.get_from_id(course_id)
         bucket_name = course_overview.display_name_with_default.replace(' ','').lower()
 

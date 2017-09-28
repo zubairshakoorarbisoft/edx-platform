@@ -23,5 +23,6 @@ class DigitalLockerView(CourseTabView):
         # Render the course bookmarks page
         context = {
             'digital_locker_fragment': digital_locker_fragment,
+            'course_id': course_id,
         }
         return render_to_response('courseware/digital-locker.html', context)
