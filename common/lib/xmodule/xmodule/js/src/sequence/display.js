@@ -434,13 +434,57 @@
         };
 
         Sequence.prototype.printSubmodule = function() {
+            var interval, foundIframes, loadingIndex;
+            var self = this;
+            var loadingIframes = [];
+            var doneIframes = [];
+            var intervalCounter = 0;
+            var done = false;
             // TODO: this function belongs outside of this file
             this.render(parseInt(this.el.data('position'), 10), true);
-            setTimeout(function() {
+            interval = setInterval(function() {
+                intervalCounter += 50;
                 // wait for iframes to be inserted into DOM
-                // TODO: this is a hackathon hack. Find a way to listen and wait for YouTube iframes to load.
-                window.print();
-            }, 1500);
+                foundIframes = self.content_container.find('iframe');
+                foundIframes.each(function() {
+                    if (($.inArray(this.id, loadingIframes) === -1) && ($.inArray(this.id, doneIframes) === -1)) {
+                        loadingIframes.push(this.id);
+                        $(this).one('load', function() {
+                            loadingIndex = $.inArray(this.id, loadingIframes);
+                            if (loadingIndex !== -1) {
+                                loadingIframes.splice(loadingIndex, 1);
+                                doneIframes.push(this.id);
+                            }
+                            if (loadingIframes.length === 0) {
+                                window.clearInterval(interval);
+                                if (!done) {
+                                    done = true;
+                                    window.print();
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                });
+
+                if (intervalCounter > 2000 && loadingIframes.length === 0) {
+                    window.clearInterval(interval);
+                    if (!done) {
+                        done = true;
+                        window.print();
+                        return;
+                    }
+                }
+
+                if (intervalCounter > 5000) {
+                    window.clearInterval(interval);
+                    if (!done) {
+                        window.print();
+                        done = true;
+                        return;
+                    }
+                }
+            }, 50);
         };
 
         return Sequence;

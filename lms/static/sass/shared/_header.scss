@@ -917,5 +917,9 @@
   .print-submodule {
     float: right;
     display: inline-block;
+
+    @media print {
+      display: none !important;
+    }
   }
 }

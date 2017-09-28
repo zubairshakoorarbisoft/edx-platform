@@ -39,6 +39,10 @@ $cool-dark: rgb(79, 89, 93); // UXPL cool dark
     border: 0;
   }
 
+  @media print {
+    margin-top: ($baseline*1.5);
+  }
+
   &.is-initialized {
 
     .video-wrapper {
@@ -99,6 +103,10 @@ $cool-dark: rgb(79, 89, 93); // UXPL cool dark
             margin-top: $baseline;
             @include padding-right($baseline);
             vertical-align: top;
+
+            @media print {
+              display: none;
+            }
         }
 
         .wrapper-download-video {
@@ -778,6 +786,12 @@ $cool-dark: rgb(79, 89, 93); // UXPL cool dark
 
         &:empty {
           margin-bottom: 0;
+        }
+
+        &.spacing {
+          @media print {
+            display: none;
+          }
         }
 
         &.spacing:last-of-type {

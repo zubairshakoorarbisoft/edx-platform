@@ -111,9 +111,22 @@ $headings-base-color:                       $gray-d2;
     }
 }
 
+h1.print-section-title {
+    display: none;
+
+    @media print {
+        display: block !important;
+    }
+}
+
 // H3 was problematic in xblocks, we so we'll keep it as it was
 
 .xblock .xblock {
+    h2,
+    h3,
+    h4 {
+        page-break-after: avoid;
+    }
 
     h2 {
         @extend %hd-2;
@@ -124,6 +137,22 @@ $headings-base-color:                       $gray-d2;
         &.discussion-module-title {
             margin-bottom: 0;
             display: inline-block;
+        }
+    }
+
+    h2.unit-title {
+        @media print {
+            margin-bottom: 1.41575em;
+            font-size: 2em;
+            line-height: 1.4em;
+        }
+    }
+
+    hr.unit-title-line {
+        display: none;
+
+        @media print {
+            display: block !important;
         }
     }
 }
