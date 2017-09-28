@@ -637,7 +637,7 @@ html.video-fullscreen {
   }
 
   @media print {
-    border: 0;
+    border: none !important;
     background: transparent !important;
   }
 }

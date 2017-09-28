@@ -7,6 +7,12 @@
   font-size: font-size(small);
   line-height: line-height(small);
 
+  .nav-item-sequence {
+    @media print {
+      display: none !important;
+    }
+  }
+
   .nav-item {
     @include margin-left($baseline/4);
 
