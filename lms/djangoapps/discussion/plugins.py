@@ -16,10 +16,11 @@ class DiscussionTab(TabFragmentViewMixin, EnrolledTab):
     """
 
     type = 'discussion'
-    title = ugettext_noop('Discussion')
+    title = 'Digital Locker'
     priority = None
     view_name = 'discussion.views.forum_form_discussion'
-    fragment_view_name = 'discussion.views.DiscussionBoardFragmentView'
+    # fragment_view_name = 'discussion.views.DiscussionBoardFragmentView'
+    fragment_view_name = 'openedx.features.course_experience.views.digital_locker_fragment.DigitalLockerFragmentView'
     is_hideable = settings.FEATURES.get('ALLOW_HIDING_DISCUSSION_TAB', False)
     is_default = False
     body_class = 'discussion'

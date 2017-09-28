@@ -101,12 +101,12 @@ class DigitalLockerTab(TabFragmentViewMixin, EnrolledTab):
     # view_name = 'openedx.course_experience.digital_locker_fragment'
     fragment_view_name = 'openedx.features.course_experience.views.digital_locker_fragment.DigitalLockerFragmentView'
     allow_multiple = False
-    is_dynamic = True
+    #is_dynamic = True
+    is_default = False
 
     @classmethod
     def is_enabled(cls, course, user=None):
-        print('DigitalLockerTab returning True is_enabled')
-        return True
+        return False
 
 class ProgressTab(EnrolledTab):
     """
