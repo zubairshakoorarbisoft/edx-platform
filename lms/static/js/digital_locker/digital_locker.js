@@ -7,6 +7,7 @@ $('.digital-locker-container .digital-locker-dropdown').on('click', function(e) 
     } else {
         // Only allow one file viewer at a time
         $('.file-viewer-container').hide();
+        $fileViewerContainer.find('iframe')[0].contentWindow.location.reload();
         $fileViewerContainer.show();
     }
     $fileViewerContainer.data('in-progress', 'true');
