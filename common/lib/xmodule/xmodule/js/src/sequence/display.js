@@ -75,7 +75,7 @@
             this.$('#sequence-list .nav-item').on('focus mouseenter', this.displayTabTooltip);
             this.$('#sequence-list .nav-item').on('blur mouseleave', this.hideTabTooltip);
             // lol hackathon
-            $('.print-submodule').click($.proxy(this.printSubmodule, this));
+            $('.print-subsection').click($.proxy(this.printSubmodule, this));
         };
 
         Sequence.prototype.previousNav = function(focused, index) {
