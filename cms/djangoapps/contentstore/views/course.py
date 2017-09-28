@@ -1319,19 +1319,20 @@ def seed_rocket_chat(course_key):
     rocketWrap = RocketWrap(master_username, master_password, server_url=rocket_url, ssl_verify=False)
     log.info('instantiated wrapper')
     try:
-        newgroup = rocketWrap.create_new_group(course_key)
+        course_chat_group = rocketWrap.get_group(course_key)
+        if not course_chat_group:
+            course_chat_group = rocketWrap.create_new_group(course_key)
+        log.info('made group')
+        # course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
+        # for user in course_staff:
+        # 	rocketuser = rocketWrap.create_user(user.email, user.name, user.password, user.username)
+        #   rocketWrap.add_user_to_group(rocketuser.username, newgroup.name, moderator=True)
+        
+        description = "test" # get_short_description(course_key) #not a real call this is pseudo
+        rocketWrap.set_topic(course_chat_group.name, description)
+        log.info('set topic')
     except Exception as e:
         log.error(e)
-
-    log.info('made group')
-	# course_staff = []  # get_course_staff(course_key) #not a real call, this is pseudo 
-	# for user in course_staff:
-	# 	rocketuser = rocketWrap.create_user(user.email, user.name, user.password, user.username)
-	#   rocketWrap.add_user_to_group(rocketuser.username, newgroup.name, moderator=True)
-    
-    description = "test" # get_short_description(course_key) #not a real call this is pseudo
-    rocketWrap.set_topic(newgroup.name, description)
-    log.info('set topic')
 
 
 class TextbookValidationError(Exception):
