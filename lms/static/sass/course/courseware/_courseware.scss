@@ -434,6 +434,11 @@ html.video-fullscreen {
         padding-bottom: 0;
         border-bottom: none;
       }
+
+      @media print {
+        width: 75%;
+        margin-left: auto;
+      }
     }
 
     .vert-mod {
@@ -474,11 +479,6 @@ html.video-fullscreen {
           border-bottom: none;
           margin-bottom: 0;
           padding-bottom: 0;
-        }
-
-        @media print {
-          width: 75%;
-          float: right;
         }
 
         .histogram {

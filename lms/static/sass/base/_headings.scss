@@ -138,15 +138,15 @@ $headings-base-color:                       $gray-d2;
 
     .page-break-wrapper {
         @media print {
+            margin-left: -33%;
             page-break-before: always;
+            background-color: rgba(0, 0, 0, 0.1);
         }
 
         .unit-title-wrapper {
             @media print {
-                text-align: center;
-                width: 100%;
-                display: inline-block;
-                background-color: rgba(0, 0, 0, 0.1);
+                margin: auto;
+                width: 80%;
             }
 
             h2.unit-title {
