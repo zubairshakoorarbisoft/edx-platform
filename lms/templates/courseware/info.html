@@ -112,12 +112,13 @@ from openedx.core.djangolib.markup import HTML, Text
       </div>
   </div>
 </main>
-
+% if course._deprecated_per_instance_field_data._kvs._fields['enable_rocket_chat']
 <script>
   var full_url = window.location.protocol + '//' + window.location.host + '/courses/${course_id}/chat';
   tab_list = document.querySelector('.course-tabs');
   tab_list.innerHTML = tab_list.innerHTML + '<li class="tab"><a href="' + full_url + '">Chat</a></li>';
 </script>
+% endif
 
 <%static:require_module_async module_name="js/dateutil_factory" class_name="DateUtilFactory">
     DateUtilFactory.transform(iterationKey=".localized-datetime");

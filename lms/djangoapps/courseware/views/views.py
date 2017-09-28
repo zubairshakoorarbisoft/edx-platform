@@ -1678,11 +1678,9 @@ def enter_chat(request, course_id):
     lms_user = request.user
     rocketchat = RocketWrap('apiuser', 'apipassword', server_url=SERVER_DOMAIN, ssl_verify=False)
     full_name = lms_user.get_full_name() if lms_user.get_full_name() else "_"
-    
-    formatted_course_id = re.sub('[^0-9a-zA-Z]+', '_', course_id)
 
-    if not rocketchat.get_group(formatted_course_id):
-        rocketchat.create_new_group(formatted_course_id)
+    if not rocketchat.get_group(course_id):
+        rocketchat.create_new_group(course_id)
 
     rc_user = rocketchat.get_or_create_user(
         lms_user.email,
