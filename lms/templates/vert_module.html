@@ -1,9 +1,11 @@
 <%page expression_filter="h"/>
 <%! from openedx.core.djangolib.markup import HTML %>
 %if unit_title:
-  <div class="unit-title-wrapper">
-    <h3 class="print-section-title" aria-hidden="true"></h3>
-    <h2 class="hd hd-2 unit-title">${unit_title}</h2>
+  <div class="page-break-wrapper">
+    <div class="unit-title-wrapper">
+      <h3 class="print-section-title" aria-hidden="true"></h3>
+      <h2 class="hd hd-2 unit-title">${unit_title}</h2>
+    </div>
   </div>
 % endif
 

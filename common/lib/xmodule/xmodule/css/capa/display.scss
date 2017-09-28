@@ -144,6 +144,12 @@ div.problem-progress {
   font-size: em(14);
 }
 
+div.problem-wrapper {
+    @media print {
+        page-break-inside: avoid;
+    }
+}
+
 // +Problem - Base
 // ====================
 div.problem {
@@ -153,7 +159,6 @@ div.problem {
     display: block;
     padding: 0;
     width: auto;
-    page-break-inside: avoid;
 
     canvas, img {
       page-break-inside: avoid;

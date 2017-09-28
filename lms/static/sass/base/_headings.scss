@@ -136,36 +136,41 @@ $headings-base-color:                       $gray-d2;
         }
     }
 
-    .unit-title-wrapper {
+    .page-break-wrapper {
         @media print {
-            text-align: center;
-            width: 100%;
-            display: inline-block;
-            background-color: rgba(0, 0, 0, 0.1);
             page-break-before: always;
         }
 
-        h2.unit-title {
+        .unit-title-wrapper {
             @media print {
-                padding-bottom: 1.41575em;
-                font-size: 2em;
-                line-height: 1.4em;
+                text-align: center;
+                width: 100%;
+                display: inline-block;
+                background-color: rgba(0, 0, 0, 0.1);
             }
-        }
 
-        .print-section-title {
-            display: none;
+            h2.unit-title {
+                @media print {
+                    padding-bottom: 1.41575em;
+                    font-size: 2em;
+                    line-height: 1.4em;
+                }
+            }
 
-            @media print {
-                display: block !important;
-                padding-top: 3rem;
+            .print-section-title {
+                display: none;
+
+                @media print {
+                    display: block !important;
+                    padding-top: 3rem;
+                }
             }
         }
     }
 }
 
 .xblock .xblock:first-child {
-    .unit-title-wrapper {
+    .page-break-wrapper {
         @media print {
             page-break-before: avoid;
         }

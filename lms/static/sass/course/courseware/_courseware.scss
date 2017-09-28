@@ -111,6 +111,12 @@ html.video-fullscreen {
     padding: $baseline;
   }
 
+  p {
+    @media print {
+      font-family: $f-serif;
+    }
+  }
+
   .course-content {
     padding: 0;
   }
