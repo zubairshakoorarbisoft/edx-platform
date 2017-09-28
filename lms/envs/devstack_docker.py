@@ -79,6 +79,7 @@ CELERY_BROKER_HOSTNAME = 'edx.devstack.rabbitmq'
 # CELERY_BROKER_VHOST =
 CELERY_BROKER_USER = 'user'
 CELERY_BROKER_PASSWORD = 'user'
+BROKER_URL="amqp://user:user@edx.devstack.rabbitmq/test"
 
 # Require a separate celery worker
 CELERY_ALWAYS_EAGER = False
