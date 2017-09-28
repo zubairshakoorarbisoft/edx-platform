@@ -1,12 +1,12 @@
 <div class="new-component">
     <h5><%= gettext("Add New Component") %></h5>
-    <p>Learner engagement is generally higher when units have fewer components. <a href="https://partners.edx.org/" target="_blank">Read more.</a></p>
-    <% if (numberChildren < 4 || overrideNudge) { %>
+    <p><%= gettext("Learning engagement is optimized when units have 2-4 components.") %> <a href="https://partners.edx.org/" target="_blank"><%= gettext("Read more.") %></a></p>
+    <% if (showComponentButtons) { %>
     <ul class="new-component-type">
 
     </ul>
-    <% } if (numberChildren >= 4) { %>
-    <p>This unit already contains <%= numberChildren %> components. Sylvia demands that start a new unit.</p>
+    <% } if (numberChildren > 3) { %>
+    <p>This unit already contains <%= numberChildren %> components. Sylvia demands that you start a new unit.</p>
 
     <% } %>
 
@@ -25,7 +25,7 @@
         </button>
     <% } %>
 
-    <% if (numberChildren > 3 && !overrideNudge) { %>
+    <% if (!showComponentButtons) { %>
         <button class="override-button">Thwart Sylvia</button>
     <% } %>
 

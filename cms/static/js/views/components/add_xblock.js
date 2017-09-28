@@ -19,13 +19,8 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 BaseView.prototype.initialize.call(this, options);
                 that = this;
                 this.template = this.loadTemplate('add-xblock-component');
-                this.nudgeTemplate = this.loadTemplate('add-xblock-component-nudge');
                 this.model.set({number_children: $('.level-element').length});
                 this.model.set({overrideNudge: false});
-                // this.model.on('change:number_children', function(model){
-                //     console.log('number of children changed!');
-                //     console.log(model.get('number_children'));
-                // }, this.model);
                 this.model.on('change:number_children', this.render, this);
                 this.model.on('change:overrideNudge', this.render, this);
             },
@@ -34,18 +29,17 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 this.model.set({overrideNudge: true});
             },
 
-            renderNudge: function() {
-                this.$el.html(this.nudgeTemplate());
-            },
-
-            renderNormal: function() {
-                var that = this;
+            render: function() {
+                var that = this,
+                    numberChildren = this.model.get('number_children'),
+                    overrideNudge = this.model.get('overrideNudge');
                 this.$el.html(this.template({
-                    numberChildren: that.model.get('number_children'),
+                    numberChildren: numberChildren,
                     isVertical: that.model.isVertical(),
                     parentId: that.model.get('ancestor_info').ancestors[0].get('id'),
                     defaultNewName: that.model.get('display_name'),
-                    overrideNudge: that.model.get('overrideNudge')
+                    overrideNudge: overrideNudge,
+                    showComponentButtons: (numberChildren < 4 || overrideNudge)
                 }));
                 this.collection.each(
                     function(componentModel) {
@@ -58,15 +52,6 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                         that.$el.append(menu.render().el);
                     }
                 );
-            },
-
-            render: function() {
-                this.renderNormal();
-                // if (this.model.get('number_children') > 3) {
-                //     this.renderNudge();
-                // } else {
-                //     this.renderNormal();
-                // }
             },
 
             showComponentTemplates: function(event) {
@@ -109,8 +94,6 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
 
             addNewUnit: function(event) {
                 var $target = $(event.currentTarget);
-                console.log($target);
-                    // category = $target.data('category');
                 event.preventDefault();
                 XBlockViewUtils.addXBlock($target).done(function(locator) {
                     ViewUtils.redirect('/container/' + locator + '?action=new')
