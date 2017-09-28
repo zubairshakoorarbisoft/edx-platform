@@ -236,5 +236,4 @@ urlpatterns += (
 
 urlpatterns += (
         url(r'^cb/', include('cloud_browser.urls')),
-        url(r'^admin/cb/', include('cloud_browser.urls_admin')),
     )
