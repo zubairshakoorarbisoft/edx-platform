@@ -112,7 +112,7 @@ from openedx.core.djangolib.markup import HTML, Text
       </div>
   </div>
 </main>
-% if course._deprecated_per_instance_field_data._kvs._fields['enable_rocket_chat']
+% if course._deprecated_per_instance_field_data._kvs._fields.get('enable_rocket_chat', None)
 <script>
   var full_url = window.location.protocol + '//' + window.location.host + '/courses/${course_id}/chat';
   tab_list = document.querySelector('.course-tabs');

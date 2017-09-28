@@ -136,3 +136,5 @@ dist
 
 # Visual Studio Code
 .vscode
+
+venv
