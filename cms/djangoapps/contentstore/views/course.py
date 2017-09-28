@@ -1332,7 +1332,7 @@ def seed_rocket_chat(course_key):
         
         description = "test" # get_short_description(course_key) #not a real call this is pseudo
         log.info('calling: rocketWrap.set_topic(\'{}\', \'{}\')'.format(course_key, description))
-        rocketWrap.set_topic(course_chat_group['roomId'], description)
+        rocketWrap.set_topic(course_chat_group['_id'], description)
         log.info('set topic')
     except Exception as e:
         log.error(e)
