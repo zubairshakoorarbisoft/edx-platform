@@ -72,3 +72,10 @@ MKTG_URLS = {
 CREDENTIALS_SERVICE_USERNAME = 'credentials_worker'
 
 COURSE_CATALOG_API_URL = 'http://edx.devstack.discovery:18381/api/v1/'
+
+# Celery Overrides
+CELERY_BROKER_TRANSPORT = 'amqp'
+CELERY_BROKER_HOSTNAME = 'edx.devstack.rabbitmq'
+# CELERY_BROKER_VHOST =
+CELERY_BROKER_USER = 'user'
+CELERY_BROKER_PASSWORD = 'user'

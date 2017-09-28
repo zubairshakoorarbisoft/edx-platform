@@ -28,3 +28,10 @@ JWT_AUTH.update({
     'JWT_ISSUER': OAUTH_OIDC_ISSUER,
     'JWT_AUDIENCE': 'lms-key',
 })
+
+# Celery Overrides
+CELERY_BROKER_TRANSPORT = 'amqp'
+CELERY_BROKER_HOSTNAME = 'edx.devstack.rabbitmq'
+# CELERY_BROKER_VHOST =
+CELERY_BROKER_USER = 'user'
+CELERY_BROKER_PASSWORD = 'user'
