@@ -101,12 +101,10 @@ class DigitalLockerTab(TabFragmentViewMixin, EnrolledTab):
     # view_name = 'openedx.course_experience.digital_locker_fragment'
     fragment_view_name = 'openedx.features.course_experience.views.digital_locker_fragment.DigitalLockerFragmentView'
     allow_multiple = False
-    #is_dynamic = True
-    is_default = False
-
+    is_dynamic = True
     @classmethod
     def is_enabled(cls, course, user=None):
-        return False
+        return True
 
 class ProgressTab(EnrolledTab):
     """
@@ -346,8 +344,6 @@ def get_course_tab_list(request, course):
         if tab.type == 'static_tab' and tab.course_staff_only and \
                 not bool(user and has_access(user, 'staff', course, course.id)):
             continue
-        if tab.type == 'discussion':
-            tab.name = 'Digital Locker'
         course_tab_list.append(tab)
 
     # Add in any dynamic tabs, i.e. those that are not persisted
