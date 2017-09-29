@@ -62,6 +62,7 @@ from ipware.ip import get_ip
 from lms.djangoapps.ccx.custom_exception import CCXLocatorValidationException
 from lms.djangoapps.ccx.utils import prep_course_for_grading
 from lms.djangoapps.courseware.exceptions import CourseAccessRedirect, Redirect
+from lms.djangoapps.courseware.tabs import get_course_tab_list
 from lms.djangoapps.experiments.utils import get_experiment_user_metadata_context
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 from lms.djangoapps.instructor.enrollment import uses_shib
@@ -465,7 +466,8 @@ class CourseTabView(EdxFragmentView):
             course = get_course_with_access(request.user, 'load', course_key)
             try:
                 # Render the page
-                tab = CourseTabList.get_tab_by_type(course.tabs, tab_type)
+                course_tabs = get_course_tab_list(request, course)
+                tab = CourseTabList.get_tab_by_type(course_tabs, tab_type)
                 page_context = self.create_page_context(request, course=course, tab=tab, **kwargs)
 
                 # Show warnings if the user has limited access
