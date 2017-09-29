@@ -36,12 +36,20 @@ class CourseEntitlement(models.Model):
     @classmethod
     def get_user_course_entitlement(cls, user, course):
         # TODO: Implement check to see if the Course ID is valid
-        return cls.objects.filter(user_id=user, root_course_id=course).all()
+        return cls.objects.filter(user_id=user, root_course_id=course).first()
 
     @classmethod
-    def set_enrollment(cls, user, course_key, course_enrollment):
+    def set_entitlement_enrollment(cls, user, course_key, course_enrollment):
         course = course_key.org + '+' + course_key.course
         return cls.objects.filter(
             user_id=user,
             root_course_id=course
         ).update(enrollment_course_id=course_enrollment)
+
+    @classmethod
+    def remove_enrollment(cls, user, course_key):
+        course = course_key.org + '+' + course_key.course
+        return cls.objects.filter(
+            user_id=user,
+            root_course_id=course
+        ).update(enrollment_course_id=None)

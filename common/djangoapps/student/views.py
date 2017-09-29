@@ -63,6 +63,8 @@ from certificates.models import (  # pylint: disable=import-error
 from course_modes.models import CourseMode
 from courseware.access import has_access
 from courseware.courses import get_courses, sort_by_announcement, sort_by_start_date  # pylint: disable=import-error
+from entitlements.models import CourseEntitlement
+from entitlements.utils import is_user_entitled_to_course, is_user_entitlement_enrolled
 from django_comment_common.models import assign_role
 from entitlements.utils import get_list_course_entitlements
 from edxmako.shortcuts import render_to_response, render_to_string
@@ -1301,8 +1303,12 @@ def change_enrollment(request, check_access=True):
         if certificate_info.get('status') in DISABLE_UNENROLL_CERT_STATES:
             return HttpResponseBadRequest(_("Your certificate prevents you from unenrolling from this course"))
 
-        CourseEnrollment.unenroll(user, course_id)
-        REFUND_ORDER.send(sender=None, course_enrollment=enrollment)
+        if is_user_entitlement_enrolled(user, course_id):
+            CourseEnrollment.unenroll(user, course_id, skip_refund=True)
+            CourseEntitlement.remove_enrollment(user, course_id)
+        else:
+            CourseEnrollment.unenroll(user, course_id)
+            REFUND_ORDER.send(sender=None, course_enrollment=enrollment)
         return HttpResponse()
     else:
         return HttpResponseBadRequest(_("Enrollment action is invalid"))

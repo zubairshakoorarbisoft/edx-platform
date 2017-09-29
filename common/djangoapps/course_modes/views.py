@@ -25,7 +25,7 @@ from lms.djangoapps.commerce.utils import EcommerceService
 from lms.djangoapps.experiments.utils import get_experiment_user_metadata_context
 from openedx.core.djangoapps.embargo import api as embargo_api
 from student.models import CourseEnrollment
-from entitlements.utils import get_entitlement_data
+from entitlements.utils import is_user_entitled_to_course
 from third_party_auth.decorators import tpa_hint_ends_existing_session
 from util import organizations_helpers as organization_api
 from util.db import outer_atomic
@@ -86,7 +86,7 @@ class ChooseModeView(View):
             return redirect(embargo_redirect)
 
         enrollment_mode, is_active = CourseEnrollment.enrollment_mode_for_user(request.user, course_key)
-        entitlement_data = get_entitlement_data(request.user, course_key)
+        entitlement_data = is_user_entitled_to_course(request.user, course_key)
         modes = CourseMode.modes_for_course_dict(course_key)
         ecommerce_service = EcommerceService()
 

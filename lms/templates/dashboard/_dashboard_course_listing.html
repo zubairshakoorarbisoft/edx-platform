@@ -248,6 +248,19 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
                           </a>
                         % endif
                     </li>
+                    <li>
+                      <span id="switch-enrollment" class="action action-switch"
+                         data-course-id="${course_overview.id}"
+                         data-course-number="${course_overview.number}"
+                         data-course-name="${course_overview.display_name_with_default}"
+                         data-dashboard-index="${dashboard_index}"
+                         data-course-refund-url="${course_refund_url}"
+                         data-course-is-paid-course="${is_paid_course}"
+                         data-course-cert-name-long="${cert_name_long}"
+                         data-course-enrollment-mode="${enrollment.mode}">
+                        ${_('Switch Entitlement')}
+                      </span>
+                    </li>
                 % endif
                   <li class="actions-item" id="actions-item-email-settings-${dashboard_index}" role="menuitem">
                     % if show_email_settings:

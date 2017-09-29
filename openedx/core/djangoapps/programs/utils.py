@@ -27,7 +27,7 @@ from openedx.core.djangoapps.commerce.utils import ecommerce_api_client
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.credentials.utils import get_credentials
 from student.models import CourseEnrollment
-from entitlements.utils import get_entitlement_data
+from entitlements.utils import is_user_entitled_to_course
 from util.date_utils import strftime_localized
 from xmodule.modulestore.django import modulestore
 
@@ -404,7 +404,7 @@ class ProgramDataExtender(object):
         # Look at each Course and check if it has an entitlement
         # Set a boolean on the Course
         for course in self.data['courses']:
-            is_entitled = get_entitlement_data(self.user, course.get('key', ''))
+            is_entitled = is_user_entitled_to_course(self.user, course.get('key', ''))
             course['is_entitlement'] = is_entitled
 
     def _attach_course_run_certificate_url(self, run_mode):

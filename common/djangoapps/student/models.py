@@ -53,7 +53,7 @@ from course_modes.models import CourseMode
 from courseware.models import DynamicUpgradeDeadlineConfiguration, CourseDynamicUpgradeDeadlineConfiguration
 from enrollment.api import _default_course_mode
 
-from entitlements.utils import get_entitlement_data
+from entitlements.utils import is_user_entitled_to_course, is_user_entitlement_enrolled
 from entitlements.models import CourseEntitlement
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.schedules.models import ScheduleConfig
@@ -1336,8 +1336,8 @@ class CourseEnrollment(models.Model):
         enrollment.update_enrollment(is_active=True, mode=mode)
         enrollment.send_signal(EnrollStatusChange.enroll)
 
-        if get_entitlement_data(user, course_key.org + '+' + course_key.course):
-            CourseEntitlement.set_enrollment(user, course_key, enrollment)
+        if is_user_entitled_to_course(user, course_key.org + '+' + course_key.course):
+            CourseEntitlement.set_entitlement_enrollment(user, course_key, enrollment)
 
         return enrollment
 

@@ -123,6 +123,13 @@
              Logger.log('edx.course.enrollment.upgrade.clicked', [user, course], {location: 'learner_dashboard'});
          });
 
+         $('#switch-enrollment').click(function(event) {
+             var user = $(event.target).closest('.action-switch').data('user'),
+                 course = $(event.target).closest('.action-switch').data('course-id');
+
+             // Logger.log('edx.course.enrollment.upgrade.clicked', [user, course], {location: 'learner_dashboard'});
+         });
+
          $('.action-email-settings').click(function(event) {
              $('#email_settings_course_id').val($(event.target).data('course-id'));
              $('#email_settings_course_number').text($(event.target).data('course-number'));
