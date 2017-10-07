@@ -910,6 +910,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djcelery',
     'method_override',
+    'rest_framework',
 
     # Common views
     'openedx.core.djangoapps.common_views',

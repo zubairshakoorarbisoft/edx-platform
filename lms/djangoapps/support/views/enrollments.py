@@ -10,7 +10,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
-from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 
 from course_modes.models import CourseMode
 from edxmako.shortcuts import render_to_response
@@ -40,7 +40,7 @@ class EnrollmentSupportView(View):
         })
 
 
-class EnrollmentSupportListView(GenericAPIView):
+class EnrollmentSupportListView(APIView):
     """
     Allows viewing and changing learner enrollments by support
     staff.

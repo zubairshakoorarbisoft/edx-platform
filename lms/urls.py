@@ -10,6 +10,7 @@ from django.contrib.admin import autodiscover as django_autodiscover
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import RedirectView
 from ratelimitbackend import admin
+from rest_framework.documentation import include_docs_urls
 
 from courseware.views.index import CoursewareIndex
 from courseware.views.views import CourseTabView, EnrollStaffView, StaticCourseTabView
@@ -119,6 +120,7 @@ urlpatterns = (
 
     url(r'^dashboard/', include('learner_dashboard.urls')),
     url(r'^api/experiments/', include('experiments.urls', namespace='api_experiments')),
+    url(r'^api-docs/', include_docs_urls(title='LMS API', public=False)),
 )
 
 # TODO: This needs to move to a separate urls.py once the student_account and

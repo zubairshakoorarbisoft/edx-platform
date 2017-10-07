@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from django.contrib.admin import autodiscover as django_autodiscover
 from django.utils.translation import ugettext_lazy as _
 from ratelimitbackend import admin
+from rest_framework.documentation import include_docs_urls
 
 from cms.djangoapps.contentstore.views.organization import OrganizationListView
 
@@ -75,6 +76,7 @@ urlpatterns = patterns(
     # For redirecting to help pages.
     url(r'^help_token/', include('help_tokens.urls')),
     url(r'^api/', include('cms.djangoapps.api.urls', namespace='api')),
+    url(r'^api-docs/', include_docs_urls(title='Studio API', public=True)),
 )
 
 # restful api

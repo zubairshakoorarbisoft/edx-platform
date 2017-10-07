@@ -8,6 +8,8 @@ from .helpers import is_comprehensive_theming_enabled
 from .views import ThemingAdministrationFragmentView
 
 
+urlpatterns = []
+
 if is_comprehensive_theming_enabled():
     urlpatterns = [
         url(
