@@ -255,10 +255,23 @@ class CourseStartDate(DateSummary):
             else:
                 CourseHomeMessages.register_info_message(
                     request,
-                    Text(_("Course starts in {time_remaining_string} at {course_start_time}.")).format(
+                    HTML(_(
+                        '<div title="Add to Calendar" class="addeventatc">\
+                            Click to add a reminder to your calendar.\
+                            <span class="start">08/23/2017 09:00 AM</span>\
+                            <span class="end">08/23/2017 10:00 AM</span>\
+                            <span class="timezone">America/New_York</span>\
+                            <span class="title">Demo Course Begins!</span>\
+                            <span class="description">Please go to www.edx.org/Demo to start the course!</span>\
+                            <span class="organizer">Organizer</span>\
+                            <span class="date_format">MM/DD/YYYY</span>\
+                            <span class="client">aJwCTiEfmzUApJNQTmnT30293</span>\
+                         </div>'
+                    )),
+                    title=Text(_("Course starts in {time_remaining_string} at {course_start_time}.")).format(
                         time_remaining_string=self.time_remaining_string,
                         course_start_time=self.short_time_html,
-                    )
+                    ),
                 )
 
 

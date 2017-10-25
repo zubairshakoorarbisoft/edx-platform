@@ -30,6 +30,17 @@ export class CourseHome {  // eslint-disable-line import/prefer-default-export
       );
     });
 
+    // Use these settings to internationalize the strings
+    window.addeventasync = function() {
+     addeventatc.settings({
+         appleical: { show: true, text: 'Apple'},
+         google: { show: true, text: 'Google'},
+         outlook: { show: true, text: 'Outlook'},
+         outlookcom: {show: true, text: 'Outlook.com'},
+         yahoo: { show: true, text: 'Yahoo'},
+     });
+    };
+
     // Course goal editing elements
     const $goalSection = $('.section-goals');
     const $editGoalIcon = $('.section-goals .edit-icon');
