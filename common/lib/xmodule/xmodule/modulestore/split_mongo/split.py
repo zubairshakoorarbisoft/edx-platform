@@ -512,6 +512,8 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
             org_target,
             course_keys=course_keys)
 
+        log.info('Number of matching indexes found: [%d]', len(indexes))
+
         indexes = self._add_indexes_from_active_records(
             indexes,
             branch,
@@ -544,6 +546,7 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
                     return
             course_indexes.append(altered_index)
 
+        log.info('Total number of active_records: [%d]', len(self._active_records))
         for _, record in self._active_records:
             if branch and branch not in record.index.get('versions', {}):
                 continue

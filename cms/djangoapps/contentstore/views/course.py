@@ -469,6 +469,7 @@ def _accessible_courses_list_from_groups(request):
     if course_keys:
         courses_list = modulestore().get_course_summaries(course_keys=course_keys)
 
+    log.info('Number of course summaries fetched: [%d]', len(courses_list))
     return courses_list, []
 
 
