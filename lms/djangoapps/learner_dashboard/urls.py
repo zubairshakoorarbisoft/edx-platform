@@ -6,4 +6,5 @@ from . import views
 urlpatterns = [
     url(r'^programs/$', views.program_listing, name='program_listing_view'),
     url(r'^programs/(?P<program_uuid>[0-9a-f-]+)/$', views.program_details, name='program_details_view'),
+    url(r'^dashboard$', views.dashboard, name="dashboard"),
 ]
