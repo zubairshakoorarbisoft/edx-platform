@@ -1197,7 +1197,7 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
                 'highlights': xblock.highlights,
                 'highlights_enabled': highlights_setting.is_enabled(),
                 'highlights_preview_only': not COURSE_UPDATE_WAFFLE_FLAG.is_enabled(course.id),
-                'highlights_doc_url': HelpUrlExpert.the_one().url_for_token('content-highlights'),
+                'highlights_doc_url': HelpUrlExpert.the_one().url_for_token('content_highlights'),
             })
 
         # update xblock_info with special exam information if the feature flag is enabled
