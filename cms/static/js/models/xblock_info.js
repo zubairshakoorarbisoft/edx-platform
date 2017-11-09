@@ -164,7 +164,9 @@ function(Backbone, _, str, ModuleUtils) {
              * This xBlock's Highlights to message to learners.
              */
             highlights: null,
-            highlights_enabled: null
+            highlights_enabled: null,
+            highlights_preview_only: null,
+            highlights_doc_url: null
         },
 
         initialize: function() {

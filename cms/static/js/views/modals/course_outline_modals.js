@@ -236,12 +236,32 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
         },
 
         getIntroductionMessage: function() {
-            return StringUtils.interpolate(
+            var preview_text = '';
+            if (this.model.get('highlights_preview_only')) {
+                preview_text = StringUtils.interpolate(
+                    gettext(
+                        'We are testing this feature right now. So messages will not actually be sent at this time.'
+                    )
+                );
+                preview_text = '<p><b>' + preview_text + '</b></p>';
+            }
+            var intro_text = StringUtils.interpolate(
                 gettext(
-                  'Enter 3-5 highlights to include in the email message that learners receive for ' +
-                  'this section (250 character limit).'
+                    'Enter 3-5 highlights to include in the email message that learners receive for ' +
+                    'this section (250 character limit).'
                 )
             );
+            var doc_text = StringUtils.interpolate(
+                gettext(
+                    'For more information and an example of the email template, ' +
+                    'read our {linkStart}documentation{linkEnd}.'
+                ),
+                {
+                    linkStart: '<a href="{' + this.model.get('highlights_doc_url') + '}">',
+                    linkEnd: '</a>'
+                }
+            );
+            return preview_text + intro_text + '<p>' + doc_text + '</p>';
         },
 
         callAnalytics: function(event) {
