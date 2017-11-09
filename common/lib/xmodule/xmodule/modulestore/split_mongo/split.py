@@ -1081,7 +1081,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                 block_data
                 for block_key, block_data in entry['blocks'].items()
                 if block_key.type == "library"
-                ]
+            ]
             if not library_block:
                 raise ItemNotFoundError
 

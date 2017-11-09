@@ -504,7 +504,7 @@ def course_listing(request):
     user = request.user
     start_time = time.time()
     libraries = _accessible_libraries_iter(request.user, org) if LIBRARIES_ENABLED else []
-    log.info("_accessible_libraries_iter completed in [%f]" , (time.time() - start_time))
+    log.info("_accessible_libraries_iter completed in [%f]", (time.time() - start_time))
 
     def format_in_process_course_view(uca):
         """
@@ -554,7 +554,7 @@ def course_listing(request):
         u'archived_courses': archived_courses,
         u'in_process_course_actions': in_process_course_actions,
         u'libraries_enabled': LIBRARIES_ENABLED,
-        u'libraries': formated_libs ,
+        u'libraries': formated_libs,
         u'show_new_library_button': get_library_creator_status(user),
         u'user': user,
         u'request_course_creator_url': reverse('request_course_creator'),
@@ -566,6 +566,7 @@ def course_listing(request):
     })
 
     return response
+
 
 def _get_rerun_link_for_item(course_key):
     """ Returns the rerun link for the given course key. """

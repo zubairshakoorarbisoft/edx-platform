@@ -641,11 +641,11 @@ class LibraryContentDescriptor(LibraryContentFields, MakoModuleDescriptor, XmlDe
                 xml_object.set(field_name, unicode(field.read_from(self)))
         return xml_object
 
+
 class LibrarySummary(object):
     """
     A library summary object which contains the fields required for library listing on studio.
     """
-
 
     def __init__(self, library_locator, display_name):
         """
