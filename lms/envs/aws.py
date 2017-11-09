@@ -1072,4 +1072,8 @@ MIDDLEWARE_CLASSES.extend(ENV_TOKENS.get('EXTRA_MIDDLEWARE_CLASSES', []))
 
 ########################## Derive Any Derived Settings  #######################
 
+# In a janky, hotfix branch, never to merge, disable comprehensive theming for
+# the analytics exporter.  See PLAT-1786
+ENABLE_COMPREHENSIVE_THEMING = False
+
 derive_settings(__name__)
