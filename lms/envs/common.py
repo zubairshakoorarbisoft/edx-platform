@@ -2078,6 +2078,9 @@ INSTALLED_APPS = [
     # Video module configs (This will be moved to Video once it becomes an XBlock)
     'openedx.core.djangoapps.video_config',
 
+    # edX Video Pipeline integration
+    'openedx.core.djangoapps.video_pipeline',
+
     # Bookmarks
     'openedx.core.djangoapps.bookmarks.apps.BookmarksConfig',
 
@@ -2240,7 +2243,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'openedx.core.djangoapps.cors_csrf',
 
-    'commerce',
+    'lms.djangoapps.commerce.apps.CommerceConfig',
 
     # Credit courses
     'openedx.core.djangoapps.credit.apps.CreditConfig',
@@ -2251,7 +2254,7 @@ INSTALLED_APPS = [
     'xblock_django',
 
     # programs support
-    'openedx.core.djangoapps.programs',
+    'openedx.core.djangoapps.programs.apps.ProgramsConfig',
 
     # Catalog integration
     'openedx.core.djangoapps.catalog',
