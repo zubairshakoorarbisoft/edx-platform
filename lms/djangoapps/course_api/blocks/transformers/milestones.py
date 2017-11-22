@@ -66,8 +66,6 @@ class MilestonesAndSpecialExamsTransformer(BlockStructureTransformer):
 
             if usage_info.has_staff_access:
                 return False
-            elif self.has_pending_milestones_for_user(block_key, usage_info):
-                return False #TODO: tag something here
             elif self.gated_by_required_content(block_key, block_structure, required_content):
                 return True
             elif (settings.FEATURES.get('ENABLE_SPECIAL_EXAMS', False) and
@@ -100,6 +98,7 @@ class MilestonesAndSpecialExamsTransformer(BlockStructureTransformer):
         Test whether the current user has any unfulfilled milestones preventing
         them from accessing this block.
         """
+        # TODO: what attribute on the block holds data about the prereq?
         return bool(milestones_helpers.get_course_content_milestones(
             unicode(block_key.course_key),
             unicode(block_key),
