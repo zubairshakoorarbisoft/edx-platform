@@ -11,7 +11,7 @@ from courseware.courses import get_course_overview_with_access
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 
 from ..utils import get_course_outline_block_tree
-from util.milestones_helpers import get_course_content_milestones
+from util.milestones_helpers import get_course_content_milestones, get_course_content_milestones_by_course
 
 
 class CourseOutlineFragmentView(EdxFragmentView):
@@ -33,25 +33,20 @@ class CourseOutlineFragmentView(EdxFragmentView):
         if not course_block_tree:
             return None
 
-        block_id_0 = course_block_tree.get('children')[0].get('children')[0].get('id')
-        prereq_0 = get_course_content_milestones(
+        milestones = get_course_content_milestones_by_course(
             course_id=course_key,
-            content_id=block_id_0,
             relationship='requires',
             user_id=request.user.id)
 
-        block_id_1 = course_block_tree.get('children')[0].get('children')[1].get('id')
-        prereq_1 = get_course_content_milestones(
-            course_id=course_key,
-            content_id=block_id_1,
-            relationship='requires',
-            user_id=request.user.id)
+        content_block_milestones = []
+        for milestone in milestones:
+            content_block_milestones.append( milestone['content_id'] )
 
         context = {
             'csrf': csrf(request)['csrf_token'],
             'course': course_overview,
-            'blocks': course_block_tree #,
-            # 'has_prereq': has_prereq
+            'blocks': course_block_tree,
+            'milestones': content_block_milestones
         }
         html = render_to_string('course_experience/course-outline-fragment.html', context)
         return Fragment(html)

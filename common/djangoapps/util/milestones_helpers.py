@@ -344,12 +344,41 @@ def add_course_content_milestone(course_id, content_id, relationship, milestone)
     return milestones_api.add_course_content_milestone(course_id, content_id, relationship, milestone)
 
 
+def get_course_content_milestones_by_course(course_id, relationship, user_id=None):
+    """
+    Client API operation adapter/wrapper
+    Uses the request cache to store all of a user's
+    milestones
+    """
+    #TODO: better name
+    if not settings.FEATURES.get('MILESTONES_APP'):
+        return []
+
+    if user_id is None:
+        return milestones_api.get_course_content_milestones(course_id, content_id, relationship)
+
+    request_cache_dict = request_cache.get_cache(REQUEST_CACHE_NAME)
+    if user_id not in request_cache_dict:
+        request_cache_dict[user_id] = {}
+
+    if relationship not in request_cache_dict[user_id]:
+        request_cache_dict[user_id][relationship] = milestones_api.get_course_content_milestones(
+            course_key=course_id,
+            relationship=relationship,
+            user={"id": user_id}
+        )
+
+    return request_cache_dict[user_id][relationship]
+
+
 def get_course_content_milestones(course_id, content_id, relationship, user_id=None):
     """
     Client API operation adapter/wrapper
     Uses the request cache to store all of a user's
     milestones
     """
+    #TODO: refactor and call get course content by course
+
     if not settings.FEATURES.get('MILESTONES_APP'):
         return []
 

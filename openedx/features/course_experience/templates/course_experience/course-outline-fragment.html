@@ -38,6 +38,11 @@ from openedx.core.djangolib.markup import HTML, Text
                                         <span class="subsection-title">${ subsection['display_name'] }</span>
 
                                         <div class="details">
+                                            % if subsection['id'] in milestones:
+                                            <span class="subtitle">
+                                                THIS IS GATED CONTENT!
+                                            </span>
+                                            % endif
                                             ## There are behavior differences between rendering of subsections which have
                                             ## exams (timed, graded, etc) and those that do not.
                                             ##
