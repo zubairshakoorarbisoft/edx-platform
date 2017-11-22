@@ -36,14 +36,14 @@ class CourseOutlineFragmentView(EdxFragmentView):
         block_id_0 = course_block_tree.get('children')[0].get('children')[0].get('id')
         prereq_0 = get_course_content_milestones(
             course_id=course_key,
-            content_id=block_id,
+            content_id=block_id_0,
             relationship='requires',
             user_id=request.user.id)
 
         block_id_1 = course_block_tree.get('children')[0].get('children')[1].get('id')
         prereq_1 = get_course_content_milestones(
             course_id=course_key,
-            content_id=block_id,
+            content_id=block_id_1,
             relationship='requires',
             user_id=request.user.id)
 
