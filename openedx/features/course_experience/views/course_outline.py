@@ -11,7 +11,7 @@ from courseware.courses import get_course_overview_with_access
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 
 from ..utils import get_course_outline_block_tree
-from util.milestones_helpers import get_course_content_milestones_by_course, milestones_achieved_by_user
+from util.milestones_helpers import get_all_course_content_milestones, get_course_content_milestones_by_course, milestones_achieved_by_user, get_course_content_milestones
 
 
 class CourseOutlineFragmentView(EdxFragmentView):
@@ -30,25 +30,32 @@ class CourseOutlineFragmentView(EdxFragmentView):
         if not course_block_tree:
             return None
 
-        completed_milestones = milestones_achieved_by_user(request.user, course_id)
 
+        content_milestones = {}
+        
+        course_prereqs = get_all_course_content_milestones(course_key) #, relationship='requires')
 
-        milestones = get_course_content_milestones_by_course(
+        unfulfilled_prereqs = get_course_content_milestones_by_course(
             course_id=course_key,
             relationship='requires',
             user_id=request.user.id)
 
-        content_block_milestones = {}
-        for milestone in milestones:
-            content_block_milestones[ milestone['content_id'] ] = {
-                'completed_prereqs': False
-            }
+        for milestone in course_prereqs:
+            # check that its a 'requires' relationship
+            # TODO: just grab the 'requires' milestones from the database
+            if milestone['requirements']: 
+                content_milestones[ milestone['content_id'] ] = {
+                    'completed_prereqs': True
+                }
+        
+        for milestone in unfulfilled_prereqs:
+            content_milestones[ milestone['content_id'] ]['completed_prereqs'] = False
 
         context = {
             'csrf': csrf(request)['csrf_token'],
             'course': course_overview,
             'blocks': course_block_tree,
-            'milestones': content_block_milestones
+            'milestones': content_milestones
         }
         html = render_to_string('course_experience/course-outline-fragment.html', context)
         return Fragment(html)

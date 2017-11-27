@@ -399,6 +399,9 @@ def get_course_content_milestones(course_id, content_id, relationship, user_id=N
     return [m for m in request_cache_dict[user_id][relationship] if m['content_id'] == unicode(content_id)]
 
 
+def get_all_course_content_milestones(course_key, relationship=None):
+    return milestones_api.get_course_content_milestones(course_key, relationship)
+
 def remove_course_content_user_milestones(course_key, content_key, user, relationship):
     """
     Removes the specified User-Milestone link from the system for the specified course content module.
