@@ -47,7 +47,8 @@ class CourseOutlineFragmentView(EdxFragmentView):
             # TODO: just grab the 'requires' milestones from the database
             if milestone['requirements']: 
                 content_milestones[ milestone['content_id'] ] = {
-                    'completed_prereqs': True
+                    'completed_prereqs': True,
+                    'min_score': milestone['requirements']['min_score']
                 }
         
         for milestone in unfulfilled_prereqs:
