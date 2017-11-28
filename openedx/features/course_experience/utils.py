@@ -8,6 +8,26 @@ from lms.djangoapps.course_blocks.utils import get_student_module_as_dict
 from request_cache.middleware import request_cached
 from xmodule.modulestore.django import modulestore
 
+#TODO: what does request_cached do?
+@request_cached
+def get_all_course_blocks(request, course_id):
+    #TODO: add description
+    
+    course_key = CourseKey.from_string(course_id)
+    course_usage_key = modulestore().make_course_usage_key(course_key)
+
+    # TODO: dedup this code
+    # TODO: :have this only be called once per outline render fragment
+    all_blocks = get_blocks(
+        request,
+        course_usage_key,
+        user=request.user,
+        nav_depth=3,
+        requested_fields=['children', 'display_name', 'type',
+                          'due', 'graded', 'special_exam_info', 'format'],
+        block_types_filter=['course', 'chapter', 'sequential']
+    )
+    return all_blocks
 
 @request_cached
 def get_course_outline_block_tree(request, course_id):
@@ -62,6 +82,8 @@ def get_course_outline_block_tree(request, course_id):
     course_key = CourseKey.from_string(course_id)
     course_usage_key = modulestore().make_course_usage_key(course_key)
 
+    # TODO: dedup this code
+    # TODO: :have this only be called once per outline render fragment
     all_blocks = get_blocks(
         request,
         course_usage_key,
@@ -77,3 +99,6 @@ def get_course_outline_block_tree(request, course_id):
         set_last_accessed_default(course_outline_root_block)
         mark_last_accessed(request.user, course_key, course_outline_root_block)
     return course_outline_root_block
+
+
+
