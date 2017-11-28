@@ -104,6 +104,13 @@ from openedx.core.djangolib.markup import HTML, Text
                                                 % endif
                                             </span>
                                             % endif
+                                            % if subsection['id'] in milestones and not milestones[subsection['id']]['completed_prereqs']:
+                                            <span class="subtitle">
+                                                <span class="subtitle-name">
+                                                    Prereq is: ${milestones[subsection['id']]['prereq']}
+                                                </span>
+                                            </span>
+                                            % endif
                                         </div> <!-- /details -->
                                     </div> <!-- /subsection-text -->
                                     <div class="subsection-actions">
