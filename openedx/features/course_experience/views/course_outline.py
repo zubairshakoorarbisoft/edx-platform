@@ -11,7 +11,7 @@ from courseware.courses import get_course_overview_with_access
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 
 from ..utils import get_course_outline_block_tree, get_all_course_blocks
-from util.milestones_helpers import get_all_course_content_milestones, get_course_content_milestones_by_course, milestones_achieved_by_user, get_course_content_milestones
+from util.milestones_helpers import get_milestone_relationship_types, get_all_course_content_milestones, get_course_content_milestones_by_course, milestones_achieved_by_user, get_course_content_milestones
 
 
 class CourseOutlineFragmentView(EdxFragmentView):
@@ -32,12 +32,29 @@ class CourseOutlineFragmentView(EdxFragmentView):
             return None
 
 
-        content_milestones = {}
-        
-        #TODO: should i be using a user id here? probably
-        course_prereqs = get_all_course_content_milestones(course_key) #, relationship='requires')
+        content_milestones = self.get_content_milestones(request, course_key, all_course_blocks)
 
-        unfulfilled_prereqs = get_course_content_milestones_by_course(
+        relationship_types = get_milestone_relationship_types()
+
+        context = {
+            'csrf': csrf(request)['csrf_token'],
+            'course': course_overview,
+            'blocks': course_block_tree,
+            'milestones': content_milestones
+        }
+        html = render_to_string('course_experience/course-outline-fragment.html', context)
+        return Fragment(html)
+
+    def get_content_milestones(self, request, course_key, all_course_blocks):
+        content_milestones = {}
+
+        #TODO: should i be using a user id here? probably
+        # course_prereqs = get_all_course_content_milestones(course_key, request.user.id) #, relationship='requires')
+        course_prereqs = get_course_content_milestones(
+            course_id=course_key,
+            user_id=request.user.id)
+
+        unfulfilled_prereqs = get_course_content_milestones(
             course_id=course_key,
             relationship='requires',
             user_id=request.user.id)
@@ -55,12 +72,5 @@ class CourseOutlineFragmentView(EdxFragmentView):
             content_milestones[milestone['content_id']]['completed_prereqs'] = False
             content_milestones[milestone['content_id']]['prereq'] = all_course_blocks['blocks'][milestone['namespace'].replace('.gating','')]['display_name']
             #TODO: can there be multiple prereqs?
-
-        context = {
-            'csrf': csrf(request)['csrf_token'],
-            'course': course_overview,
-            'blocks': course_block_tree,
-            'milestones': content_milestones
-        }
-        html = render_to_string('course_experience/course-outline-fragment.html', context)
-        return Fragment(html)
+    
+        return content_milestones

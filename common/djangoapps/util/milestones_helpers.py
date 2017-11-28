@@ -355,7 +355,8 @@ def get_course_content_milestones_by_course(course_id, relationship, user_id=Non
         return []
 
     if user_id is None:
-        return milestones_api.get_course_content_milestones(course_id, content_id, relationship)
+        #TODO handle this case - maybe just have it when you are 
+        return milestones_api.get_course_content_milestones(course_id, relationship)
 
     request_cache_dict = request_cache.get_cache(REQUEST_CACHE_NAME)
     if user_id not in request_cache_dict:
@@ -371,13 +372,13 @@ def get_course_content_milestones_by_course(course_id, relationship, user_id=Non
     return request_cache_dict[user_id][relationship]
 
 
-def get_course_content_milestones(course_id, content_id, relationship, user_id=None):
+def get_course_content_milestones(course_id, content_id=None, relationship=None, user_id=None):
     """
     Client API operation adapter/wrapper
     Uses the request cache to store all of a user's
     milestones
     """
-    #TODO: refactor and call get course content by course
+    #TODO: refactor and call get course content by course or just set content_id to None by default and make sure that case is handled
 
     if not settings.FEATURES.get('MILESTONES_APP'):
         return []
@@ -399,8 +400,8 @@ def get_course_content_milestones(course_id, content_id, relationship, user_id=N
     return [m for m in request_cache_dict[user_id][relationship] if m['content_id'] == unicode(content_id)]
 
 
-def get_all_course_content_milestones(course_key, relationship=None):
-    return milestones_api.get_course_content_milestones(course_key, relationship)
+def get_all_course_content_milestones(course_key, user_id=None, relationship=None):
+    return milestones_api.get_course_content_milestones(course_key, user={"id": user_id}, relationship=relationship)
 
 def remove_course_content_user_milestones(course_key, content_key, user, relationship):
     """
