@@ -8,29 +8,9 @@ from lms.djangoapps.course_blocks.utils import get_student_module_as_dict
 from request_cache.middleware import request_cached
 from xmodule.modulestore.django import modulestore
 
-#TODO: what does request_cached do?
-@request_cached
-def get_all_course_blocks(request, course_id):
-    #TODO: add description
-    
-    course_key = CourseKey.from_string(course_id)
-    course_usage_key = modulestore().make_course_usage_key(course_key)
-
-    # TODO: dedup this code
-    # TODO: :have this only be called once per outline render fragment
-    all_blocks = get_blocks(
-        request,
-        course_usage_key,
-        user=request.user,
-        nav_depth=3,
-        requested_fields=['children', 'display_name', 'type',
-                          'due', 'graded', 'special_exam_info', 'format'],
-        block_types_filter=['course', 'chapter', 'sequential']
-    )
-    return all_blocks
 
 @request_cached
-def get_course_outline_block_tree(request, course_id):
+def get_course_outline_block_tree(request, course_id, all_blocks=None):
     """
     Returns the root block of the course outline, with children as blocks.
     """
@@ -80,18 +60,9 @@ def get_course_outline_block_tree(request, course_id):
                 block['children'][-1]['last_accessed'] = True
 
     course_key = CourseKey.from_string(course_id)
-    course_usage_key = modulestore().make_course_usage_key(course_key)
 
-    # TODO: dedup this code
-    # TODO: :have this only be called once per outline render fragment
-    all_blocks = get_blocks(
-        request,
-        course_usage_key,
-        user=request.user,
-        nav_depth=3,
-        requested_fields=['children', 'display_name', 'type', 'due', 'graded', 'special_exam_info', 'format'],
-        block_types_filter=['course', 'chapter', 'sequential']
-    )
+    if all_blocks is None:
+        all_blocks = get_all_course_blocks(request, course_id)
 
     course_outline_root_block = all_blocks['blocks'].get(all_blocks['root'], None)
     if course_outline_root_block:
@@ -101,4 +72,22 @@ def get_course_outline_block_tree(request, course_id):
     return course_outline_root_block
 
 
+# TODO: what does request_cached do?
+# TODO: this annotation breaks the build why?
+# @request_cached
+def get_all_course_blocks(request, course_id):
+    #TODO: add description
+    
+    course_key = CourseKey.from_string(course_id)
+    course_usage_key = modulestore().make_course_usage_key(course_key)
 
+    all_blocks = get_blocks(
+        request,
+        course_usage_key,
+        user=request.user,
+        nav_depth=3,
+        requested_fields=['children', 'display_name', 'type',
+                          'due', 'graded', 'special_exam_info', 'format'],
+        block_types_filter=['course', 'chapter', 'sequential']
+    )
+    return all_blocks
