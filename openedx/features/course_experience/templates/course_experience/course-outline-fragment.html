@@ -40,9 +40,16 @@ from openedx.core.djangolib.markup import HTML, Text
                                                 ${ subsection['display_name'] }
                                             </span>
                                             % if subsection['id'] in milestones:
-                                                <span class="menu-icon icon fa ${ 'fa-unlock' if milestones[subsection['id']]['completed_prereqs'] else 'fa-lock' }"
-                                                aria-hidden="true">
-                                            </span>
+                                                % if milestones[subsection['id']]['completed_prereqs']:
+                                                    <span class="menu-icon icon fa fa-unlock"
+                                                        aria-hidden="true">
+                                                    </span>
+                                                % else:
+                                                    <span class="menu-icon icon fa fa-lock" 
+                                                    aria-hidden="true">
+                                                    </span>
+                                                    <span class="sr">${_("You must complete the prerequisite to access this content")}</span>
+                                                % endif
                                             % endif
                                         <div class="details">
 
@@ -107,7 +114,7 @@ from openedx.core.djangolib.markup import HTML, Text
                                             % if subsection['id'] in milestones:
                                             <span class="subtitle">
                                                 <span class="subtitle-name">
-                                                    Prerequisite: ${milestones[subsection['id']]['prereq']}
+                                                    ${ _("Prerequisite") }: ${milestones[subsection['id']]['prereq']}
                                                 </span>
                                             </span>
                                             % endif
