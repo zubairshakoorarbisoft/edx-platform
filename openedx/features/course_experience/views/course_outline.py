@@ -34,7 +34,6 @@ class CourseOutlineFragmentView(EdxFragmentView):
 
         content_milestones = self.get_content_milestones(request, course_key, all_course_blocks)
 
-        relationship_types = get_milestone_relationship_types()
 
         context = {
             'csrf': csrf(request)['csrf_token'],
@@ -50,9 +49,20 @@ class CourseOutlineFragmentView(EdxFragmentView):
 
         #TODO: should i be using a user id here? probably
         # course_prereqs = get_all_course_content_milestones(course_key, request.user.id) #, relationship='requires')
-        course_prereqs = get_course_content_milestones(
-            course_id=course_key,
-            user_id=request.user.id)
+        
+        course_prereqs = get_all_course_content_milestones(
+            course_key,
+            relationship='requires',
+            user_id=None) #MAYBE MAKE user_id none actually pass none in the method
+
+        # TODO: try grabbing non userspecifc 'requires'
+        # TODO: try grabbing non userspecifc 'fulfills'
+        # TODO: try all all non user specific
+        # TODO: try user spefic requires
+        # TODO: try user spefic fulfills
+        # TODO: try user specific no relationship
+        
+
 
         unfulfilled_prereqs = get_course_content_milestones(
             course_id=course_key,
