@@ -572,12 +572,10 @@ def account_settings_context(request):
     sync_learner_profile_data = False
     enterprise_learner_data = get_enterprise_learner_data(site=request.site, user=request.user)
     if enterprise_learner_data and 'enterprise_customer' in enterprise_learner_data[0]:
-        enterprise_customer_name = enterprise_learner_data[0]['name']
-        enterprise_idp = enterprise_learner_data[0]['identity_provider']
+        enterprise_customer_name = enterprise_learner_data[0]['enterprise_customer']['name']
+        enterprise_idp = enterprise_learner_data[0]['enterprise_customer']['identity_provider']
         identity_provider = third_party_auth.provider.Registry.get(provider_id=enterprise_idp)
-        # TODO: Get flag  "sync_learner_profile_data" from Uman's PR: https://github.com/edx/edx-platform/pull/16624/
-        # identity_provider = third_party_auth.provider.Registry.get(provider_id='saml-ubc')
-        sync_learner_profile_data = True
+        sync_learner_profile_data = identity_provider.sync_learner_profile_data
 
     context['sync_learner_profile_data'] = sync_learner_profile_data
     context['edx_support_url'] = settings.ENTERPRISE_SUPPORT_URL
