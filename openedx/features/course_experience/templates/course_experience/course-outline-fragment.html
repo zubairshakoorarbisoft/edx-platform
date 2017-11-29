@@ -104,10 +104,10 @@ from openedx.core.djangolib.markup import HTML, Text
                                                 % endif
                                             </span>
                                             % endif
-                                            % if subsection['id'] in milestones and not milestones[subsection['id']]['completed_prereqs']:
+                                            % if subsection['id'] in milestones:
                                             <span class="subtitle">
                                                 <span class="subtitle-name">
-                                                    Score of <em>${milestones[subsection['id']]['min_score']}</em> required on <em>${milestones[subsection['id']]['prereq']}</em> to access this content
+                                                    Prerequisite: ${milestones[subsection['id']]['prereq']}
                                                 </span>
                                             </span>
                                             % endif

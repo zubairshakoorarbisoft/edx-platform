@@ -25,6 +25,7 @@ class CourseOutlineFragmentView(EdxFragmentView):
         """
         course_key = CourseKey.from_string(course_id)
         course_overview = get_course_overview_with_access(request.user, 'load', course_key, check_if_enrolled=True)
+        # TODO: only generate all course blocks once
         course_block_tree = get_course_outline_block_tree(request, course_id)
         all_course_blocks = get_all_course_blocks(request, course_id)
 
@@ -33,7 +34,6 @@ class CourseOutlineFragmentView(EdxFragmentView):
 
 
         content_milestones = self.get_content_milestones(request, course_key, all_course_blocks)
-
 
         context = {
             'csrf': csrf(request)['csrf_token'],
@@ -45,42 +45,27 @@ class CourseOutlineFragmentView(EdxFragmentView):
         return Fragment(html)
 
     def get_content_milestones(self, request, course_key, all_course_blocks):
-        content_milestones = {}
-
-        #TODO: should i be using a user id here? probably
-        # course_prereqs = get_all_course_content_milestones(course_key, request.user.id) #, relationship='requires')
         
-        course_prereqs = get_all_course_content_milestones(
+        course_content_milestones = {}
+
+        all_course_prereqs = get_all_course_content_milestones(
             course_key,
             relationship='requires',
-            user_id=None) #MAYBE MAKE user_id none actually pass none in the method
+            user_id=None) 
 
-        # TODO: try grabbing non userspecifc 'requires'
-        # TODO: try grabbing non userspecifc 'fulfills'
-        # TODO: try all all non user specific
-        # TODO: try user spefic requires
-        # TODO: try user spefic fulfills
-        # TODO: try user specific no relationship
-        
-
-
-        unfulfilled_prereqs = get_course_content_milestones(
-            course_id=course_key,
+        unfulfilled_prereqs = get_all_course_content_milestones(
+            course_key,
             relationship='requires',
             user_id=request.user.id)
 
-        for milestone in course_prereqs:
-            # check that its a 'requires' relationship
-            # TODO: just grab the 'requires' milestones from the database
-            if milestone['requirements']: 
-                content_milestones[ milestone['content_id'] ] = {
-                    'completed_prereqs': True,
-                    'min_score': milestone['requirements']['min_score']
-                }
+        for milestone in all_course_prereqs:
+            course_content_milestones[ milestone['content_id'] ] = {
+                'completed_prereqs': True,
+                'min_score': milestone['requirements']['min_score'],
+                'prereq': all_course_blocks['blocks'][milestone['namespace'].replace('.gating', '')]['display_name']
+            }
         
         for milestone in unfulfilled_prereqs:
-            content_milestones[milestone['content_id']]['completed_prereqs'] = False
-            content_milestones[milestone['content_id']]['prereq'] = all_course_blocks['blocks'][milestone['namespace'].replace('.gating','')]['display_name']
-            #TODO: can there be multiple prereqs?
+            course_content_milestones[milestone['content_id']]['completed_prereqs'] = False
     
-        return content_milestones
+        return course_content_milestones
