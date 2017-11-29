@@ -32,7 +32,7 @@
                 accountsSectionData, ordersSectionData, accountSettingsView, showAccountSettingsPage,
                 showLoadingError, orderNumber, getUserField, userFields, timeZoneDropdownField, countryDropdownField,
                 emailFieldView, socialFields, platformData,
-                aboutSectionMessageType, aboutSectionMessage, fullnameFieldView, countryFieldView
+                aboutSectionMessageType, aboutSectionMessage, fullnameFieldView, countryFieldView;
 
             $accountSettingsElement = $('.wrapper-account-settings');
 
@@ -42,7 +42,7 @@
             userPreferencesModel = new UserPreferencesModel();
             userPreferencesModel.url = userPreferencesApiUrl;
 
-            if (syncLearnerProfileData) {
+            if (syncLearnerProfileData && enterpriseName) {
                 aboutSectionMessageType = 'info';
                 aboutSectionMessage = HtmlUtils.interpolateHtml(
                     gettext('Your profile settings are managed by {enterprise_name}. Contact your administrator or {link_start}edX Support{link_end} for help.'),  // eslint-disable-line max-len
@@ -57,10 +57,10 @@
                         ),
                         link_end: HtmlUtils.HTML('</a>')
                     }
-                )
+                );
             }
 
-            if (!allowEmailChange || (syncLearnerProfileData && enterpriseReadonlyAccountFields.fields.indexOf('email') != -1)) {
+            if (!allowEmailChange || (syncLearnerProfileData && enterpriseReadonlyAccountFields.fields.indexOf('email') !== -1)) {  // eslint-disable-line max-len
                 emailFieldView = {
                     view: new AccountSettingsFieldViews.ReadonlyFieldView({
                         model: userAccountModel,
@@ -87,7 +87,7 @@
                 };
             }
 
-            if (syncLearnerProfileData && enterpriseReadonlyAccountFields.fields.indexOf('name') != -1) {
+            if (syncLearnerProfileData && enterpriseReadonlyAccountFields.fields.indexOf('name') !== -1) {
                 fullnameFieldView = {
                     view: new AccountSettingsFieldViews.ReadonlyFieldView({
                         model: userAccountModel,
@@ -95,7 +95,7 @@
                         valueAttribute: 'name',
                         helpMessage: gettext('The name that is used for ID verification and that appears on your certificates.')  // eslint-disable-line max-len
                     })
-                }
+                };
             } else {
                 fullnameFieldView = {
                     view: new AccountSettingsFieldViews.TextFieldView({
@@ -105,10 +105,10 @@
                         helpMessage: gettext('The name that is used for ID verification and that appears on your certificates.'),  // eslint-disable-line max-len,
                         persistChanges: true
                     })
-                }
+                };
             }
 
-            if (syncLearnerProfileData && enterpriseReadonlyAccountFields.fields.indexOf('country') != -1) {
+            if (syncLearnerProfileData && enterpriseReadonlyAccountFields.fields.indexOf('country') !== -1) {
                 countryFieldView = {
                     view: new AccountSettingsFieldViews.DropdownFieldView({
                         model: userAccountModel,
@@ -119,7 +119,7 @@
                         editable: 'never',
                         helpMessage: gettext('The country or region where you live.')
                     })
-                }
+                };
             } else {
                 countryFieldView = {
                     view: new AccountSettingsFieldViews.DropdownFieldView({
@@ -131,7 +131,7 @@
                         persistChanges: true,
                         helpMessage: gettext('The country or region where you live.')
                     })
-                }
+                };
             }
 
             aboutSectionsData = [
@@ -166,7 +166,7 @@
                                 passwordResetSupportUrl: passwordResetSupportUrl,
                                 linkTitle: gettext('Reset Your Password'),
                                 linkHref: fieldsData.password.url,
-                                helpMessage: gettext('Check your email account for instructions to reset your password.'),  // eslint-disable-line max-len
+                                helpMessage: gettext('Check your email account for instructions to reset your password.')  // eslint-disable-line max-len
                             })
                         },
                         {
