@@ -25,9 +25,8 @@ class CourseOutlineFragmentView(EdxFragmentView):
         """
         course_key = CourseKey.from_string(course_id)
         course_overview = get_course_overview_with_access(request.user, 'load', course_key, check_if_enrolled=True)
-        # TODO: only generate all course blocks once
-        course_block_tree = get_course_outline_block_tree(request, course_id)
         all_course_blocks = get_all_course_blocks(request, course_id)
+        course_block_tree = get_course_outline_block_tree(request, course_id, all_course_blocks)
 
         if not course_block_tree:
             return None
@@ -48,11 +47,13 @@ class CourseOutlineFragmentView(EdxFragmentView):
         
         course_content_milestones = {}
 
+        #TODO: use cache not the get_all method
         all_course_prereqs = get_all_course_content_milestones(
             course_key,
             relationship='requires',
             user_id=None) 
 
+        #TODO: use cache not the get_all method
         unfulfilled_prereqs = get_all_course_content_milestones(
             course_key,
             relationship='requires',
