@@ -43,7 +43,7 @@ from openedx.core.djangoapps.user_api.errors import (
 
 from openedx.core.lib.edx_api_utils import get_edx_api_data
 from openedx.core.lib.time_zone_utils import TIME_ZONE_CHOICES
-from openedx.features.enterprise_support.api import enterprise_customer_for_request
+from openedx.features.enterprise_support.api import enterprise_customer_for_request, get_enterprise_learner_data
 from student.helpers import destroy_oauth_tokens, get_next_url_for_login_page
 from student.models import UserProfile
 from student.views import register_user as old_register_view
@@ -566,6 +566,24 @@ def account_settings_context(request):
         'show_program_listing': ProgramsApiConfig.is_enabled(),
         'show_dashboard_tabs': True,
         'order_history': user_orders
+    }
+
+    enterprise_customer_name = None
+    sync_learner_profile_data = False
+    enterprise_learner_data = get_enterprise_learner_data(site=request.site, user=request.user)
+    if enterprise_learner_data and 'enterprise_customer' in enterprise_learner_data[0]:
+        enterprise_customer_name = enterprise_learner_data[0]['name']
+        enterprise_idp = enterprise_learner_data[0]['identity_provider']
+        identity_provider = third_party_auth.provider.Registry.get(provider_id=enterprise_idp)
+        # TODO: Get flag  "sync_learner_profile_data" from Uman's PR: https://github.com/edx/edx-platform/pull/16624/
+        # identity_provider = third_party_auth.provider.Registry.get(provider_id='saml-ubc')
+        sync_learner_profile_data = True
+
+    context['sync_learner_profile_data'] = sync_learner_profile_data
+    context['edx_support_url'] = settings.ENTERPRISE_SUPPORT_URL
+    context['enterprise_name'] = enterprise_customer_name
+    context['enterprise_readonly_account_fields'] = {
+        'fields': settings.ENTERPRISE_READONLY_ACCOUNT_FIELDS
     }
 
     if third_party_auth.is_enabled():
