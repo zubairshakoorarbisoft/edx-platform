@@ -53,6 +53,13 @@ class Env(object):
 
     # Reports Directory
     REPORT_DIR = REPO_ROOT / 'reports'
+
+    # Override the Reports Dir for jenkins packer builds
+    # so that we can archive the artifacts
+    if os.environ.get('WORKSPACE') and os.environ.get('JOB_NAME') == 'build-packer-ami':
+        print ('DEBUG DEBUG DEBUG: overriding the reports dir')
+        REPORT_DIR = os.environ.get('WORKSPACE') / 'reports'
+
     METRICS_DIR = REPORT_DIR / 'metrics'
 
     # Generic log dir
