@@ -8,6 +8,7 @@ import urllib
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.urlresolvers import reverse
 from django.utils.translation import get_language_bidi
+from xblock.completable import XBlockCompletionMode
 from xblock.core import XBlock
 from xblock.fields import Scope, String, UNIQUE_ID
 from xblock.fragment import Fragment
@@ -66,6 +67,8 @@ class DiscussionXBlock(XBlock, StudioEditableXBlockMixin, XmlParserMixin):
     editable_fields = ["display_name", "discussion_category", "discussion_target"]
 
     has_author_view = True  # Tells Studio to use author_view
+
+    completion_mode = XBlockCompletionMode.EXCLUDED
 
     # support for legacy OLX format - consumed by XmlParserMixin.load_metadata
     metadata_translations = dict(RawDescriptor.metadata_translations)
