@@ -16,6 +16,7 @@ from mock import Mock, patch
 from edxmako.shortcuts import render_to_string
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.theming.tests.test_util import with_comprehensive_theme
+from openedx.core.djangolib.testing.utils import CacheIsolationTestCase, CacheIsolationMixin
 from student.models import PendingEmailChange, Registration, UserProfile
 from student.tests.factories import PendingEmailChangeFactory, RegistrationFactory, UserFactory
 from student.views import (
@@ -74,7 +75,7 @@ class EmailTestMixin(object):
 
 
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
-class ActivationEmailTests(TestCase):
+class ActivationEmailTests(CacheIsolationTestCase):
     """Test sending of the activation email. """
 
     ACTIVATION_SUBJECT = u"Action Required: Activate your {} account".format(settings.PLATFORM_NAME)
@@ -148,7 +149,7 @@ class ActivationEmailTests(TestCase):
 
 @patch('student.views.render_to_string', Mock(side_effect=mock_render_to_string, autospec=True))
 @patch('django.contrib.auth.models.User.email_user')
-class ReactivationEmailTests(EmailTestMixin, TestCase):
+class ReactivationEmailTests(EmailTestMixin, CacheIsolationTestCase):
     """Test sending a reactivation email to a user"""
 
     def setUp(self):
@@ -221,7 +222,7 @@ class ReactivationEmailTests(EmailTestMixin, TestCase):
         self.assertTrue(response_data['success'])
 
 
-class EmailChangeRequestTests(EventTestMixin, TestCase):
+class EmailChangeRequestTests(EventTestMixin, CacheIsolationTestCase):
     """Test changing a user's email address"""
 
     def setUp(self):
@@ -329,10 +330,12 @@ class EmailChangeRequestTests(EventTestMixin, TestCase):
 @patch('django.contrib.auth.models.User.email_user')
 @patch('student.views.render_to_response', Mock(side_effect=mock_render_to_response, autospec=True))
 @patch('student.views.render_to_string', Mock(side_effect=mock_render_to_string, autospec=True))
-class EmailChangeConfirmationTests(EmailTestMixin, TransactionTestCase):
+class EmailChangeConfirmationTests(EmailTestMixin, CacheIsolationMixin, TransactionTestCase):
     """Test that confirmation of email change requests function even in the face of exceptions thrown while sending email"""
     def setUp(self):
         super(EmailChangeConfirmationTests, self).setUp()
+        self.clear_caches()
+        self.addCleanup(self.clear_caches)
         self.user = UserFactory.create()
         self.profile = UserProfile.objects.get(user=self.user)
         self.req_factory = RequestFactory()
@@ -341,6 +344,16 @@ class EmailChangeConfirmationTests(EmailTestMixin, TransactionTestCase):
         self.user.email_user = Mock()
         self.pending_change_request = PendingEmailChangeFactory.create(user=self.user)
         self.key = self.pending_change_request.activation_key
+
+    @classmethod
+    def setUpClass(cls):
+        super(EmailChangeConfirmationTests, cls).setUpClass()
+        cls.start_cache_isolation()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.end_cache_isolation()
+        super(EmailChangeConfirmationTests, cls).tearDownClass()
 
     def assertRolledBack(self):
         """Assert that no changes to user, profile, or pending email have been made to the db"""
