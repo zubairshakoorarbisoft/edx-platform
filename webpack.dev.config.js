@@ -37,7 +37,21 @@ module.exports = Merge.smart(commonConfig, {
                         options: {
                             sourceMap: true,
                             modules: true,
-                            localIdentName: '[name]__[local]'
+                            localIdentName: '[local]',
+                            importLoaders: 1
+                        }
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            sourceMap: true,
+                            ident: 'postcss',
+                            plugins: function() {
+                                return [
+                                    require('postcss-initial')(),
+                                    require('postcss-prepend-selector')({selector: '.SFE '})
+                                ];
+                            }
                         }
                     },
                     {
@@ -46,6 +60,7 @@ module.exports = Merge.smart(commonConfig, {
                             data: '$base-rem-size: 0.625; @import "paragon-reset";',
                             includePaths: [
                                 path.join(__dirname, './node_modules/@edx/paragon/src/utils'),
+                                path.join(__dirname, './node_modules/@edx/studio-frontend/src'),
                                 path.join(__dirname, './node_modules/')
                             ],
                             sourceMap: true

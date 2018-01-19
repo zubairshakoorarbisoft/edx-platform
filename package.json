@@ -4,7 +4,7 @@
   "dependencies": {
     "@edx/edx-bootstrap": "0.4.3",
     "@edx/paragon": "1.7.1",
-    "@edx/studio-frontend": "0.8.3",
+    "@edx/studio-frontend": "edx/studio-frontend#thallada/all-initial-reset",
     "babel-core": "6.26.0",
     "babel-loader": "6.4.1",
     "babel-plugin-transform-class-properties": "6.24.1",
@@ -76,6 +76,9 @@
     "pa11y": "4.0.1",
     "pa11y-reporter-json-oldnode": "1.0.0",
     "plato": "1.2.2",
+    "postcss-initial": "^2.0.0",
+    "postcss-loader": "^2.0.10",
+    "postcss-prepend-selector": "^0.3.1",
     "selenium-webdriver": "3.4.0",
     "sinon": "2.3.5",
     "squirejs": "0.1.0",
