@@ -126,6 +126,7 @@ class CourseDetailsViewTest(CourseTestCase, MilestonesTestCaseMixin):
 
         self.alter_field(url, details, 'enrollment_end', datetime.datetime(2012, 11, 15, 1, 30, tzinfo=UTC))
         self.alter_field(url, details, 'short_description', "Short Description")
+        self.alter_field(url, details, 'about_sidebar_html', "About Sidebar HTML")
         self.alter_field(url, details, 'overview', "Overview")
         self.alter_field(url, details, 'intro_video', "intro_video")
         self.alter_field(url, details, 'effort', "effort")
@@ -143,6 +144,9 @@ class CourseDetailsViewTest(CourseTestCase, MilestonesTestCaseMixin):
         self.compare_date_fields(details, encoded, context, 'enrollment_end')
         self.assertEqual(
             details['short_description'], encoded['short_description'], context + " short_description not =="
+        )
+        self.assertEqual(
+            details['about_sidebar_html'], encoded['about_sidebar_html'], context + " about_sidebar_html not =="
         )
         self.assertEqual(details['overview'], encoded['overview'], context + " overviews not ==")
         self.assertEqual(details['intro_video'], encoded.get('intro_video', None), context + " intro_video not ==")
@@ -267,6 +271,7 @@ class CourseDetailsViewTest(CourseTestCase, MilestonesTestCaseMixin):
             self.assertContains(response, "Introducing Your Course")
             self.assertContains(response, "Course Card Image")
             self.assertContains(response, "Course Short Description")
+            self.assertNotContains(response, "Course About Sidebar HTML")
             self.assertNotContains(response, "Course Title")
             self.assertNotContains(response, "Course Subtitle")
             self.assertNotContains(response, "Course Duration")
@@ -423,6 +428,7 @@ class CourseDetailsViewTest(CourseTestCase, MilestonesTestCaseMixin):
             self.assertContains(response, "Course Duration")
             self.assertContains(response, "Course Description")
             self.assertContains(response, "Course Short Description")
+            self.assertContains(response, "Course About Sidebar HTML")
             self.assertContains(response, "Course Overview")
             self.assertContains(response, "Course Introduction Video")
             self.assertContains(response, "Requirements")

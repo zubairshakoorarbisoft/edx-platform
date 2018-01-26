@@ -418,6 +418,32 @@ class AboutWithClosedEnrollment(ModuleStoreTestCase):
 
 
 @attr(shard=1)
+class AboutSidebarHTMLTestCase(SharedModuleStoreTestCase):
+    """
+    This test case will check the About page for the content in the HTML sidebar.
+    """
+    def setUp(self):
+        super(AboutSidebarHTMLTestCase, self).setUp()
+        self.course = CourseFactory.create()
+
+    def test_html_sidebar_empty(self):
+        url = reverse('about_course', args=[self.course.id.to_deprecated_string()])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn("About Sidebar HTML Heading", resp.content)
+
+    def test_html_sidebar_has_content(self):
+        ItemFactory.create(
+            category="about", parent_location=self.course.location,
+            data="About Sidebar HTML Heading", display_name="about_sidebar_html"
+        )
+        url = reverse('about_course', args=[self.course.id.to_deprecated_string()])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("About Sidebar HTML Heading", resp.content)
+
+
+@attr(shard=1)
 @patch.dict(settings.FEATURES, {'ENABLE_SHOPPING_CART': True})
 @patch.dict(settings.FEATURES, {'ENABLE_PAID_COURSE_REGISTRATION': True})
 class AboutPurchaseCourseTestCase(LoginEnrollmentTestCase, SharedModuleStoreTestCase):
