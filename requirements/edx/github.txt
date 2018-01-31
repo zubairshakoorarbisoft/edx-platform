@@ -109,3 +109,4 @@ git+https://github.com/edx/edx-analytics-data-api-client.git@0.13.0#egg=edx-anal
 git+https://github.com/mitodl/edx-sga.git@d019b8a050c056db535e3ff13c93096145a932de#egg=edx-sga==0.7.1
 git+https://github.com/open-craft/xblock-poll@7ba819b968fe8faddb78bb22e1fe7637005eb414#egg=xblock-poll==1.2.7
 git+https://github.com/edx-solutions/xblock-drag-and-drop-v2@2.1.5#egg=xblock-drag-and-drop-v2==2.1.5
+git+https://github.com/dianakhuang/xblock-in-video-quiz.git@7a88e959f46f817557d68a4d8bbefea7169ab1cc#egg=xblock-in-video-quiz==0.2.0
