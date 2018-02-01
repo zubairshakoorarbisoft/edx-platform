@@ -29,7 +29,7 @@ def get_logger_config(log_dir,
         local_loglevel = 'INFO'
 
     hostname = platform.node().split(".")[0]
-    syslog_format = ("[service_variant={service_variant}]"
+    log_format = ("[service_variant={service_variant}]"
                      "[%(name)s][env:{logging_env}] %(levelname)s "
                      "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] "
                      "- %(message)s").format(service_variant=service_variant,
@@ -40,11 +40,7 @@ def get_logger_config(log_dir,
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
-            'standard': {
-                'format': '%(asctime)s %(levelname)s %(process)d '
-                          '[%(name)s] %(filename)s:%(lineno)d - %(message)s',
-            },
-            'syslog_format': {'format': syslog_format},
+            'standard': {'format': log_format},
             'raw': {'format': '%(message)s'},
         },
         'filters': {
@@ -68,7 +64,7 @@ def get_logger_config(log_dir,
                 'level': local_loglevel,
                 'class': 'logging.handlers.SysLogHandler',
                 'address': '/dev/log',
-                'formatter': 'syslog_format',
+                'formatter': 'standard',
                 'facility': SysLogHandler.LOG_LOCAL0,
             },
             'tracking': {
