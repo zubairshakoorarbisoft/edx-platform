@@ -23,3 +23,7 @@ class AceCommonConfig(AppConfig):
             }
         }
     }
+
+    def ready(self):
+        # noinspection PyUnresolvedReferences
+        from . import models  # pylint: disable=unused-variable

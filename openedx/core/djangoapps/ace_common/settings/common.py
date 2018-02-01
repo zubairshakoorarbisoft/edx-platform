@@ -1,6 +1,6 @@
 def plugin_settings(settings):
     settings.ACE_ENABLED_CHANNELS = [
-        'file_email'
+        'file_email',
     ]
     settings.ACE_ENABLED_POLICIES = [
         'bulk_email_optout'
@@ -9,6 +9,8 @@ def plugin_settings(settings):
     settings.ACE_CHANNEL_SAILTHRU_TEMPLATE_NAME = 'Automated Communication Engine Email'
     settings.ACE_CHANNEL_SAILTHRU_API_KEY = None
     settings.ACE_CHANNEL_SAILTHRU_API_SECRET = None
+
+    settings.ACE_CHANNEL_FIREBASE_API_KEY = None
 
     settings.ACE_ROUTING_KEY = 'edx.core.low'
 

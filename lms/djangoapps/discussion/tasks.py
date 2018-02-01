@@ -19,6 +19,7 @@ from edx_ace.recipient import Recipient
 from opaque_keys.edx.keys import CourseKey
 from lms.djangoapps.django_comment_client.utils import permalink
 import lms.lib.comment_client as cc
+from openedx.core.djangoapps.ace_common.models import UserMobileDevice
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
@@ -43,10 +44,14 @@ def send_ace_message(context):
     if _should_send_message(context):
         context['site'] = Site.objects.get(id=context['site_id'])
         thread_author = User.objects.get(id=context['thread_author_id'])
+        try:
+            device_id = UserMobileDevice.objects.get(user=thread_author).device_id
+        except UserMobileDevice.DoesNotExist:
+            device_id = None
         with emulate_http_request(site=context['site'], user=thread_author):
             message_context = _build_message_context(context)
             message = ResponseNotification().personalize(
-                Recipient(thread_author.username, thread_author.email),
+                Recipient(thread_author.username, thread_author.email, device_id),
                 _get_course_language(context['course_id']),
                 message_context
             )
