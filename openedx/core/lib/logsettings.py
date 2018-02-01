@@ -91,9 +91,7 @@ def get_logger_config(log_dir,
                 'propagate': False
             },
             'django.request': {
-                'handlers': ['mail_admins'],
                 'level': 'ERROR',
-                'propagate': True,
             },
             # requests is so loud at INFO (logs every connection) that we
             # force it to warn by default.
