@@ -30,7 +30,9 @@ class CountryMiddleware(object):
 
         Store country code in session.
         """
-        new_ip_address = get_real_ip(request)
+        # new_ip_address = get_real_ip(request)
+        new_ip_address= '18.189.85.157'
+
         old_ip_address = request.session.get('ip_address', None)
 
         if not new_ip_address and old_ip_address:
@@ -43,4 +45,5 @@ class CountryMiddleware(object):
                 country_code = pygeoip.GeoIP(settings.GEOIP_PATH).country_code_by_addr(new_ip_address)
             request.session['country_code'] = country_code
             request.session['ip_address'] = new_ip_address
+
             log.debug('Country code for IP: %s is set to %s', new_ip_address, country_code)

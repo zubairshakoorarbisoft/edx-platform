@@ -169,11 +169,16 @@ def get_user_info_cookie_data(request):
     for url_name, url_path in six.iteritems(header_urls):
         header_urls[url_name] = request.build_absolute_uri(url_path)
 
+    geo_located_country = request.session.get('country_code', None)
+    if geo_located_country is None:
+        geo_located_country = user.profile.country.code
+
     user_info = {
         'version': settings.EDXMKTG_USER_INFO_COOKIE_VERSION,
         'username': user.username,
         'header_urls': header_urls,
-        'enrollmentStatusHash': CourseEnrollment.generate_enrollment_status_hash(user)
+        'enrollmentStatusHash': CourseEnrollment.generate_enrollment_status_hash(user),
+        'geo_located_country': geo_located_country
     }
 
     return user_info
