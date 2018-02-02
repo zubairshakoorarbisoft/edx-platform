@@ -118,4 +118,12 @@ if __name__ == "__main__":
     startup.run()
 
     from django.core.management import execute_from_command_line
+    if True:
+        import ptvsd
+        try:
+            ptvsd.enable_attach("my_secret", address=('0.0.0.0', 21000))
+            print('Connected to ptvsd!')
+        except Exception as err:
+            print('Error trying to attach to ptvsd!!', err)
+
     execute_from_command_line([sys.argv[0]] + django_args)
