@@ -143,6 +143,24 @@ module.exports = {
                 )
             },
             {
+                test: filesWithRequireJSBlocks,
+                loader: StringReplace.replace(
+                    ['babel-loader'],
+                    {
+                        replacements: [
+                            {
+                                pattern: /(\/\* RequireJS) \*\//g,
+                                replacement: function (match, p1) { return p1; }
+                            },
+                            {
+                                pattern: /\/\* Webpack/g,
+                                replacement: function (match) { return match + ' */'; }
+                            }
+                        ]
+                    }
+                )
+            },
+            {
                 test: /\.(js|jsx)$/,
                 exclude: [
                     /node_modules/,
