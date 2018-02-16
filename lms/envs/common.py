@@ -2360,6 +2360,7 @@ INSTALLED_APPS = [
 
     # DRF filters
     'django_filters',
+    'completion_aggregator',
 ]
 
 ######################### CSRF #########################################
@@ -2950,6 +2951,7 @@ OPTIONAL_APPS = [
 
     # Required by the Enterprise App
     ('django_object_actions', None),  # https://github.com/crccheck/django-object-actions
+
 ]
 
 for app_name, insert_before in OPTIONAL_APPS:
@@ -3448,6 +3450,12 @@ EDX_PLATFORM_REVISION = 'unknown'
 # (0.0 = 0%, 1.0 = 100%)
 COMPLETION_VIDEO_COMPLETE_PERCENTAGE = 0.95
 COMPLETION_BY_VIEWING_DELAY_MS = 5000
+COMPLETION_AGGREGATOR_BLOCK_TYPES = {
+    'course',
+    'chapter',
+    'sequential',
+    'vertical',
+}
 
 ############### Settings for Django Rate limit #####################
 RATELIMIT_ENABLE = True
