@@ -228,3 +228,6 @@ XBlock==1.1.1
 redis==2.10.6
 
 -r base_common.txt
+
+# Completion aggregator
+git+https://github.com/open-craft/openedx-completion-aggregator@cliff/async-update#egg=openedx-completion-aggregator==0.0.1
