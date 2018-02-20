@@ -50,7 +50,9 @@ from lms.djangoapps.verify_student.services import VerificationService
 from openedx.core.djangoapps.bookmarks.services import BookmarksService
 from openedx.core.djangoapps.crawlers.models import CrawlersConfig
 from openedx.core.djangoapps.credit.services import CreditService
-from openedx.core.djangoapps.monitoring_utils import set_custom_metrics_for_course_key, set_monitoring_transaction_name
+from openedx.core.djangoapps.monitoring_utils import (
+    graph_memory_leaks, set_custom_metrics_for_course_key, set_monitoring_transaction_name
+)
 from openedx.core.djangoapps.util.user_utils import SystemUser
 from openedx.core.lib.gating.services import GatingService
 from openedx.core.lib.license import wrap_with_license
@@ -943,6 +945,7 @@ def handle_xblock_callback(request, course_id, usage_id, handler, suffix=None):
     Raises:
         Http404: If the course is not found in the modulestore.
     """
+    graph_memory_leaks(request)
     # NOTE (CCB): Allow anonymous GET calls (e.g. for transcripts). Modifying this view is simpler than updating
     # the XBlocks to use `handle_xblock_callback_noauth`...which is practically identical to this view.
     if request.method != 'GET' and not request.user.is_authenticated():
