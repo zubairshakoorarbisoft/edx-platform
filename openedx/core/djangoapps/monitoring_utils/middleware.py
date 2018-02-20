@@ -30,7 +30,6 @@ except ImportError:
 
 
 REQUEST_CACHE_KEY = 'monitoring_custom_metrics'
-MONITORING_MEMORY_REQUEST_CACHE_KEY = 'monitoring_memory'
 WAFFLE_NAMESPACE = 'monitoring_utils'
 
 
@@ -112,9 +111,9 @@ class MonitoringMemoryMiddleware(object):
 
     def process_request(self, request):
         if self._is_enabled():
-            self._cache[self.guid_key] = unicode(uuid4())
+            setattr(request, self.guid_key, unicode(uuid4()))
             log_prefix = self._log_prefix(u"Before", request)
-            self._cache[self.memory_data_key] = self._memory_data(request, log_prefix)
+            setattr(request, self.memory_data_key, self._memory_data(request, log_prefix))
             self._reset_memory_leak_baseline()
 
     def process_response(self, request, response):
@@ -123,15 +122,8 @@ class MonitoringMemoryMiddleware(object):
             new_memory_data = self._memory_data(request, log_prefix)
 
             log_prefix = self._log_prefix(u"Diff", request)
-            self._log_diff_memory_data(log_prefix, new_memory_data, self._cache.get(self.memory_data_key))
+            self._log_diff_memory_data(log_prefix, new_memory_data, getattr(request, self.memory_data_key))
         return response
-
-    @property
-    def _cache(self):
-        """
-        Namespaced request cache for tracking memory usage.
-        """
-        return get_cache(name=MONITORING_MEMORY_REQUEST_CACHE_KEY)
 
     def _log_prefix(self, prefix, request):
         """
@@ -140,7 +132,7 @@ class MonitoringMemoryMiddleware(object):
         # After a celery task runs, the request cache is cleared. So if celery
         # tasks are running synchronously (CELERY_ALWAYS _EAGER), "guid_key"
         # will no longer be in the request cache when process_response executes.
-        cached_guid = self._cache.get(self.guid_key) or u"without_guid"
+        cached_guid = getattr(request, self.guid_key) or u"without_guid"
         return u"{} request '{} {} {}'".format(prefix, request.method, request.path, cached_guid)
 
     def _memory_data(self, request, log_prefix):
