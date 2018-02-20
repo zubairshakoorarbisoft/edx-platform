@@ -142,7 +142,8 @@ class MonitoringMemoryMiddleware(object):
         """
         graphed_view_name = getattr(request, self.memory_graphs_key, u'')
         if graphed_view_name:
-            show_memory_leaks(graphed_view_name)
+            show_memory_leaks(graphed_view_name,
+                              show_graphs=WaffleSwitchNamespace(name=WAFFLE_NAMESPACE).is_enabled(u'show_memory_graphs'))
         machine_data = psutil.virtual_memory()
 
         process = psutil.Process()

@@ -32,7 +32,8 @@ def show_memory_leaks(
         refs_depth=REFS_DEPTH,
         back_refs_depth=BACK_REFS_DEPTH,
         max_objects_per_type=MAX_OBJECTS_PER_TYPE,
-        ignored_types=IGNORED_TYPES):
+        ignored_types=IGNORED_TYPES,
+        show_graphs=True):
     """
     Call this function to get data about memory leaks; what objects are being
     leaked, where did they come from, and what do they contain?  The leaks
@@ -70,6 +71,8 @@ def show_memory_leaks(
     path = u'{dir}/{label}_{pid}_{index}.txt'.format(dir=dump_dir, label=label, pid=pid, index=index)
     tmp_storage.save(path, ContentFile(new_objects_text))
 
+    if not show_graphs:
+        return
     sorted_by_count = sorted(new_ids.items(), key=lambda entry: len(entry[1]), reverse=True)
 
     for item in sorted_by_count[:max_graphed_object_types]:
