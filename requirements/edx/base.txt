@@ -97,7 +97,7 @@ pyjwkest==1.3.2
 # TODO Replace PyJWT usage with pyjwkest
 PyJWT==1.4.0
 pymongo==2.9.1
-python-memcached==1.48
+python-memcached==1.59
 django-memcached-hashring==0.1.2
 python-openid==2.2.5
 python-dateutil==2.1

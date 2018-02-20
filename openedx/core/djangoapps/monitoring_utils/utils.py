@@ -16,11 +16,12 @@ indices = {}
 
 DUMP_DIR = u'memory_graphs'
 MAX_CONSOLE_ROWS = 20
-MAX_GRAPHED_OBJECT_TYPES = 5
+MAX_GRAPHED_OBJECT_TYPES = 20
 REFS_DEPTH = 3
 BACK_REFS_DEPTH = 8
 MAX_OBJECTS_PER_TYPE = 5
 IGNORED_TYPES = ('set',)
+GRAPH_TYPES = {'list', 'builtin_function_or_method', 'dict', 'cell', 'function', 'set'}
 
 
 def show_memory_leaks(
@@ -59,15 +60,22 @@ def show_memory_leaks(
     """
     new_objects_output = StringIO()
     new_ids = objgraph.get_new_ids(limit=max_console_rows, file=new_objects_output)
-    log.info('\n' + new_objects_output.getvalue())
+    new_objects_text = new_objects_output.getvalue()
+    log.info('\n' + new_objects_text)
     index = indices.setdefault(label, 1)
     indices[label] += 1
+    pid = os.getpid()
+
+    tmp_storage = FileSystemStorage(location='/tmp')
+    path = u'{dir}/{label}_{pid}_{index}.txt'.format(dir=dump_dir, label=label, pid=pid, index=index)
+    tmp_storage.save(path, ContentFile(new_objects_text))
+
     sorted_by_count = sorted(new_ids.items(), key=lambda entry: len(entry[1]), reverse=True)
 
     for item in sorted_by_count[:max_graphed_object_types]:
         type_name = item[0]
         object_ids = new_ids[type_name]
-        if type_name in ignored_types or len(object_ids) == 0:
+        if type_name not in GRAPH_TYPES or len(object_ids) == 0:
             continue
         objects = objgraph.at_addrs(object_ids)[:max_objects_per_type]
 
@@ -76,9 +84,7 @@ def show_memory_leaks(
 
         objgraph.show_backrefs(objects, max_depth=back_refs_depth, output=backrefs_dot)
         objgraph.show_refs(objects, max_depth=refs_depth, output=refs_dot)
-        data = {'dir': dump_dir, 'label': label, 'pid': os.getpid(), 'index': index, 'type_name': type_name}
-
-        tmp_storage = FileSystemStorage(location='/tmp')
+        data = {'dir': dump_dir, 'label': label, 'pid': pid, 'index': index, 'type_name': type_name}
 
         path = u'{dir}/{label}_{pid}_{index}_{type_name}_backrefs.dot'.format(**data)
         tmp_storage.save(path, ContentFile(backrefs_dot.getvalue()))
