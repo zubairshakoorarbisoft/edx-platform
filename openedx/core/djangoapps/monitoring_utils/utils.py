@@ -21,7 +21,7 @@ REFS_DEPTH = 3
 BACK_REFS_DEPTH = 8
 MAX_OBJECTS_PER_TYPE = 5
 IGNORED_TYPES = ('set',)
-GRAPH_TYPES = {'list', 'builtin_function_or_method', 'dict', 'cell', 'function', 'set'}
+GRAPH_TYPES = {'cell', 'dict', 'function', 'instancemethod', 'list', 'set', 'tuple', 'type', 'weakref'}
 
 
 def show_memory_leaks(
@@ -60,7 +60,7 @@ def show_memory_leaks(
             tracking the number of new objects of each type.
     """
     new_objects_output = StringIO()
-    new_ids = objgraph.get_new_ids(limit=max_console_rows, file=new_objects_output)
+    new_ids = objgraph.get_new_ids(limit=max_console_rows, sortby='old', file=new_objects_output)
     new_objects_text = new_objects_output.getvalue()
     log.info('\n' + new_objects_text)
     index = indices.setdefault(label, 1)
@@ -75,7 +75,7 @@ def show_memory_leaks(
         return
     sorted_by_count = sorted(new_ids.items(), key=lambda entry: len(entry[1]), reverse=True)
 
-    for item in sorted_by_count[:max_graphed_object_types]:
+    for item in sorted_by_count:
         type_name = item[0]
         object_ids = new_ids[type_name]
         if type_name not in GRAPH_TYPES or len(object_ids) == 0:
@@ -93,6 +93,6 @@ def show_memory_leaks(
         tmp_storage.save(path, ContentFile(backrefs_dot.getvalue()))
         log.info(u'Graph generated at %s', os.path.join(tmp_storage.location, path))
 
-        path = u'{dir}/{label}_{pid}_{index}_{type_name}_refs.dot'.format(**data)
-        tmp_storage.save(path, ContentFile(refs_dot.getvalue()))
-        log.info(u'Graph generated at %s', os.path.join(tmp_storage.location, path))
+        # path = u'{dir}/{label}_{pid}_{index}_{type_name}_refs.dot'.format(**data)
+        # tmp_storage.save(path, ContentFile(refs_dot.getvalue()))
+        # log.info(u'Graph generated at %s', os.path.join(tmp_storage.location, path))
