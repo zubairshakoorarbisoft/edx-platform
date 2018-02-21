@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 indices = {}
 
 DUMP_DIR = u'memory_graphs'
-MAX_CONSOLE_ROWS = 20
+MAX_CONSOLE_ROWS = 30
 MAX_GRAPHED_OBJECT_TYPES = 20
 REFS_DEPTH = 3
 BACK_REFS_DEPTH = 8
