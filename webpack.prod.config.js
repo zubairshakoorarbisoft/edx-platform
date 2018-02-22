@@ -7,7 +7,7 @@ var webpack = require('webpack');
 
 var commonConfig = require('./webpack.common.config.js');
 
-var optimizedConfig = Merge.smart(commonConfig, {
+var optimizedConfig = commonConfig.map(cfg => Merge.smart(cfg, {
     output: {
         filename: '[name].[chunkhash].js'
     },
@@ -19,9 +19,16 @@ var optimizedConfig = Merge.smart(commonConfig, {
         new webpack.LoaderOptionsPlugin({  // This may not be needed; legacy option for loaders written for webpack 1
             minimize: true
         }),
-        new webpack.optimize.UglifyJsPlugin()
+        new webpack.optimize.UglifyJsPlugin(),
+        new webpack.optimize.CommonsChunkPlugin({
+            // If the value below changes, update the render_bundle call in
+            // common/djangoapps/pipeline_mako/templates/static_content.html
+            name: 'commons',
+            filename: 'commons.[chunkhash].js',
+            minChunks: 3
+        })
     ]
-});
+}));
 
 // requireCompatConfig only exists so that you can use RequireJS to require a
 // Webpack bundle (but try not to do that if you can help it). RequireJS knows
@@ -36,18 +43,27 @@ var optimizedConfig = Merge.smart(commonConfig, {
 // gone.
 
 // Step 1: Alter the bundle output names to omit the chunkhash.
-var requireCompatConfig = Merge.smart(optimizedConfig, {
+var requireCompatConfig = optimizedConfig.map(cfg => Merge.smart(cfg, {
     output: {
         filename: '[name].js'
-    }
-})
+    },
+    plugins: [
+        new webpack.optimize.CommonsChunkPlugin({
+            // If the value below changes, update the render_bundle call in
+            // common/djangoapps/pipeline_mako/templates/static_content.html
+            name: 'commons',
+            filename: 'commons.js',
+            minChunks: 3
+        })
+    ]
+}));
 
 // Step 2: Remove the plugin entries that generate the webpack-stats.json files
 // that Django needs to look up resources. We never want to accidentally
 // overwrite those because it means that we'll be serving assets with shorter
 // cache times. RequireJS never looks at the webpack-stats.json file.
-requireCompatConfig.plugins = requireCompatConfig.plugins.filter(
+requireCompatConfig[0].plugins = requireCompatConfig[0].plugins.filter(
     plugin => !plugin.options || (plugin.options && plugin.options.filename != 'webpack-stats.json')
 );
 
-module.exports = [optimizedConfig, requireCompatConfig];
+module.exports = optimizedConfig.concat(requireCompatConfig);

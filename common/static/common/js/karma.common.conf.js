@@ -56,8 +56,8 @@ delete webpackConfig.entry;
 //     https://github.com/webpack-contrib/karma-webpack/issues/24#issuecomment-257613167
 //
 // This should be fixed in v3 of karma-webpack
-const commonsChunkPluginIndex = webpackConfig.plugins.findIndex(plugin => plugin.chunkNames);
-webpackConfig.plugins.splice(commonsChunkPluginIndex, 1);
+const commonsChunkPluginIndex = webpackConfig[0].plugins.findIndex(plugin => plugin.chunkNames);
+webpackConfig[0].plugins.splice(commonsChunkPluginIndex, 1);
 
 // Files which are needed by all lms/cms suites.
 var commonFiles = {

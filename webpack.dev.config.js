@@ -8,7 +8,7 @@ var webpack = require('webpack');
 
 var commonConfig = require('./webpack.common.config.js');
 
-module.exports = Merge.smart(commonConfig, {
+module.exports = commonConfig.map(cfg => Merge.smart(cfg, {
     output: {
         filename: '[name].js'
     },
@@ -57,4 +57,4 @@ module.exports = Merge.smart(commonConfig, {
     watchOptions: {
         ignored: [/node_modules/, /\.git/]
     }
-});
+}));
