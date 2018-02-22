@@ -250,10 +250,7 @@ class WordCloudModule(WordCloudFields, XModule):
             'submitted': self.submitted,
         }))
 
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/d3.min.js'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/d3.layout.cloud.js'))
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/word_cloud.js'))
-        fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/word_cloud_main.js'))
 
         return fragment
 
