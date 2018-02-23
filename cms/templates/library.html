@@ -25,19 +25,23 @@ from openedx.core.djangolib.markup import HTML, Text
 </script>
 </%block>
 
-<%block name="requirejs">
-    require(["js/factories/library"], function(LibraryFactory) {
-        LibraryFactory(
-            ${component_templates | n, dump_js_escaped_json},
-            ${xblock_info | n, dump_js_escaped_json},
-            {
-                isUnitPage: false,
-                page_size: 10,
-                canEdit: ${can_edit | n, dump_js_escaped_json},
-                showChildrenPreviews: ${context_library.show_children_previews | n, dump_js_escaped_json}
-            }
-        );
-    });
+<%block name="page_bundle">
+    <!-- <script type="text/javascript">
+        <%! from pipeline_js.utils import get_xmodule_urls %>
+    window.xmoduleUrls = ${get_xmodule_urls() | n, dump_js_escaped_json};
+    </script> -->
+    <%static:webpack entry='descriptors/js/all'/>
+    <%static:webpack entry='modules/js/all'/>
+    <%static:invoke_page_bundle page_name="js/pages/library" class_name="LibraryFactory">
+        ${component_templates | n, dump_js_escaped_json},
+        ${xblock_info | n, dump_js_escaped_json},
+        {
+            isUnitPage: false,
+            page_size: 10,
+            canEdit: ${can_edit | n, dump_js_escaped_json},
+            showChildrenPreviews: ${context_library.show_children_previews | n, dump_js_escaped_json}
+        }
+    </%static:invoke_page_bundle>
 </%block>
 
 <%block name="content">
