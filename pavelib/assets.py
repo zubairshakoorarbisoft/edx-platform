@@ -978,6 +978,8 @@ def update_assets(args):
     args = parser.parse_args(args)
     collect_log_args = {}
 
+    sh("find . -type f -exec 'md5sum' '{{}}' ';' > assets.{}.before.md5.txt".format('-'.join(args.system)))
+
     process_xmodule_assets()
     process_npm_assets()
     compile_coffeescript()
@@ -1007,3 +1009,5 @@ def update_assets(args):
                 'wait': [float(args.wait)]
             },
         )
+
+    sh("find . -type f -exec 'md5sum' '{{}}' ';' > assets.{}.after.md5.txt".format('-'.join(args.system)))
