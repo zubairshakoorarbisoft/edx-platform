@@ -19,6 +19,7 @@ module.exports = Merge.smart(commonConfig, {
         new webpack.LoaderOptionsPlugin({  // This may not be needed; legacy option for loaders written for webpack 1
             minimize: true
         }),
-        new webpack.optimize.UglifyJsPlugin()
+        new webpack.optimize.UglifyJsPlugin(),
+        new webpack.HashedModuleIdsPlugin(),
     ]
 });
