@@ -817,7 +817,7 @@ def webpack(options):
     )
     sh(
         cmd(
-            '{environment} $(npm bin)/webpack --config={config_path}'.format(
+            '{environment} $(npm bin)/webpack --verbose --config={config_path}'.format(
                 environment=environment,
                 config_path=config_path
             )
