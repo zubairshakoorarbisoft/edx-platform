@@ -978,7 +978,7 @@ def update_assets(args):
     args = parser.parse_args(args)
     collect_log_args = {}
 
-    sh("find . -type f -exec 'md5sum' '{{}}' ';' > assets.{}.before.md5.txt".format('-'.join(args.system)))
+    sh("find . -type f -exec 'md5sum' '{{}}' ';' > /tmp/assets.{}.before.md5.txt".format('-'.join(args.system)))
 
     process_xmodule_assets()
     process_npm_assets()
