@@ -1010,4 +1010,4 @@ def update_assets(args):
             },
         )
 
-    sh("find . -type f -exec 'md5sum' '{{}}' ';' > assets.{}.after.md5.txt".format('-'.join(args.system)))
+    sh("find . -type f -exec 'md5sum' '{{}}' ';' > /tmp/assets.{}.after.md5.txt".format('-'.join(args.system)))
