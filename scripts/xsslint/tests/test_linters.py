@@ -9,7 +9,10 @@ from unittest import TestCase
 
 from ddt import data, ddt
 
-from xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from xsslint.linters.javascript import JavaScriptLinter
+from xsslint.linters.mako import MakoTemplateLinter
+from xsslint.linters.python import PythonLinter
+from xsslint.linters.underscore import UnderscoreTemplateLinter
 from xsslint.reporting import FileResults
 from xsslint.rules import Rules
 from xsslint.utils import ParseString

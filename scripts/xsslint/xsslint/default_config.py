@@ -1,5 +1,8 @@
 # Default xsslint config module.
-from xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from xsslint.linters.javascript import JavaScriptLinter
+from xsslint.linters.mako import MakoTemplateLinter
+from xsslint.linters.python import PythonLinter
+from xsslint.linters.underscore import UnderscoreTemplateLinter
 
 
 # Define the directories that should be ignored by the script.

@@ -9,7 +9,10 @@ from unittest import TestCase
 
 import mock
 
-from xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from xsslint.linters.javascript import JavaScriptLinter
+from xsslint.linters.mako import MakoTemplateLinter
+from xsslint.linters.python import PythonLinter
+from xsslint.linters.underscore import UnderscoreTemplateLinter
 from xsslint.main import _lint
 from xsslint.reporting import SummaryResults
 from xsslint.rules import Rules

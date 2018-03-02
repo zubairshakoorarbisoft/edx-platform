@@ -7,7 +7,10 @@ import sys
 scripts_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(scripts_dir, 'xsslint'))
 
-from xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from xsslint.linters.javascript import JavaScriptLinter
+from xsslint.linters.mako import MakoTemplateLinter
+from xsslint.linters.python import PythonLinter
+from xsslint.linters.underscore import UnderscoreTemplateLinter
 
 
 # Define the directories that should be ignored by the script.
