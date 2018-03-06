@@ -128,7 +128,7 @@ module.exports = [
                 'modules/js/032-076e3448a3ad7741e28f926565666245.js',
                 'modules/js/033-8d60f6dee0a19ca7f9d7bbccf816b7e0.js',
                 'modules/js/034-d6d8c7d542edd9cf783c08cee3ef6e44.js',
-                'modules/js/035-b5c924b18e68709de546ed6a2dc577ec.js',
+                'modules/js/035-4675afd9c7b9c4473aa765bdd4a1dd4f.js',
             ]
         },
 
