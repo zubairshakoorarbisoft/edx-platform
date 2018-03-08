@@ -22,6 +22,9 @@ module.exports = {
         'js/pages/login': './cms/static/js/pages/login.js',
         'js/pages/textbooks': './cms/static/js/pages/textbooks.js',
         'js/sock': './cms/static/js/sock.js',
+        SFEVendor: './node_modules/@edx/studio-frontend/dist/vendor.min.js',
+        assets: './node_modules/@edx/studio-frontend/dist/assets.min.js',
+        accessibilityPolicy: './node_modules/@edx/studio-frontend/dist/accessibilityPolicy.min.js',
 
         // LMS
         SingleSupportForm: './lms/static/support/jsx/single_support_form.jsx',
