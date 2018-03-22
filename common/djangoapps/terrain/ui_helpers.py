@@ -48,7 +48,7 @@ REQUIREJS_WAIT = {
 
     # Dashboard
     re.compile(r'^Studio Home \|'): [
-        "js/sock", "gettext", "js/base",
+        "gettext", "js/base",
         "jquery.ui", "cms/js/main", "underscore"],
 
     # Pages
