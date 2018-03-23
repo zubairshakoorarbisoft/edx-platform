@@ -53,8 +53,14 @@ REQUIREJS_WAIT = {
 
     # Pages
     re.compile(r'^Pages \|'): [
-        'js/models/explicit_url', 'js/views/tabs',
-        'xmodule', 'cms/js/main', 'xblock/cms.runtime.v1'
+        'js/models/explicit_url', 'js/views/tabs', 'cms/js/main', 'xblock/cms.runtime.v1'
+    ],
+}
+
+TRUTHY_WAIT = {
+    # Pages
+    re.compile(r'^Pages \|'): [
+        'XBlock'
     ],
 }
 
@@ -66,12 +72,16 @@ def wait(seconds):
 
 @world.absorb
 def wait_for_js_to_load():
-    requirements = None
     for test, req in REQUIREJS_WAIT.items():
         if test.search(world.browser.title):
-            requirements = req
+            world.wait_for_requirejs(req)
             break
-    world.wait_for_requirejs(requirements)
+
+
+    for test, req in TRUTHY_WAIT.items():
+        if test.search(world.browser.title):
+            for var in req:
+                world.wait_for_js_variable_truthy(var)
 
 
 # Selenium's `execute_async_script` function pauses Selenium's execution
