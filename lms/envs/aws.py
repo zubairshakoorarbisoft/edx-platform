@@ -1098,6 +1098,9 @@ COMPLETION_VIDEO_COMPLETE_PERCENTAGE = ENV_TOKENS.get(
 ############### Settings for django-fernet-fields ##################
 FERNET_KEYS = AUTH_TOKENS.get('FERNET_KEYS', FERNET_KEYS)
 
+################# Settings for the maintenance banner #################
+EDXAPP_MAINTENANCE_BANNER_TEXT = ENV_TOKENS.get('EDXAPP_MAINTENANCE_BANNER_TEXT', None)
+
 ############################### Plugin Settings ###############################
 
 from openedx.core.djangoapps.plugins import plugin_settings, constants as plugin_constants
