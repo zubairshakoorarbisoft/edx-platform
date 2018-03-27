@@ -202,7 +202,8 @@
                         },
                         handleInputBehavior = function(input) {
                             // Initially put label in input
-                            if (input.find(inputSelectors).val().length === 0) {
+                            if (input.find(inputSelectors).length > 0 &&
+                                input.find(inputSelectors).val().length === 0) {
                                 input.find('label').addClass('focus-out')
                                     .removeClass('focus-in');
                             }
@@ -223,7 +224,8 @@
                                     isCheckbox = $input.attr('class').indexOf('checkbox') !== -1;
 
                                 if (!isCheckbox) {
-                                    if ($input.find(inputSelectors).val().length === 0
+                                    if ($input.find(inputSelectors).length > 0
+                                        && $input.find(inputSelectors).val().length === 0
                                         && !$input.is(':-webkit-autofill')) {
                                         $input.find('label').addClass('focus-out')
                                             .removeClass('focus-in');

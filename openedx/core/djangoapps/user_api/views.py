@@ -31,6 +31,7 @@ from openedx.core.djangoapps.user_api.preferences.api import get_country_time_zo
 from openedx.core.djangoapps.user_api.serializers import CountryTimeZoneSerializer, UserPreferenceSerializer, UserSerializer
 from openedx.core.lib.api.authentication import SessionAuthenticationAllowInactiveUser
 from openedx.core.lib.api.permissions import ApiKeyHeaderPermission
+from openedx.features.course_experience import ENABLE_GDPR_COMPAT_FLAG
 from student.cookies import set_logged_in_cookies
 from student.views import AccountValidationError, create_account_with_params
 from util.json_request import JsonResponse
@@ -137,6 +138,11 @@ class RegistrationView(APIView):
                 for field in conflicts
             }
             return JsonResponse(errors, status=409)
+
+        # For GDPR, submission of the registration form is considered
+        # agreement to TOS and Honor Code
+        if ENABLE_GDPR_COMPAT_FLAG.is_enabled_without_course_context():
+            data["honor_code"] = 'true'
 
         # Backwards compatibility: the student view expects both
         # terms of service and honor code values.  Since we're combining
