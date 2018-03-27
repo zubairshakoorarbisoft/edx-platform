@@ -59,7 +59,7 @@ def get_email_cookies_via_sailthru(self, user_email, post_parms):
 
 
 # pylint: disable=not-callable
-@task(bind=True, default_retry_delay=3600, max_retries=24, routing_key=ACE_ROUTING_KEY)
+@task(bind=True, default_retry_delay=3600, max_retries=24)
 def update_user(self, sailthru_vars, email, site=None, new_user=False, send_welcome_email=False):
     """
     Adds/updates Sailthru profile information for a user.

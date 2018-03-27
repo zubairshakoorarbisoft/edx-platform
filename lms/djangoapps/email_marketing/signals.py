@@ -120,7 +120,7 @@ def add_email_marketing_cookies(sender, response=None, user=None,
 
 
 @receiver(REGISTER_USER)
-def email_marketing_register_user(sender, user, registration,
+def email_marketing_register_user(sender, user, registration, send_welcome_email,
                                   **kwargs):  # pylint: disable=unused-argument
     """
     Called after user created and saved

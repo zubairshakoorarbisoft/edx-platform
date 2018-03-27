@@ -766,7 +766,12 @@ def create_account_with_params(request, params):
         )
 
     # Announce registration
-    REGISTER_USER.send(sender=None, user=user, registration=registration)
+    REGISTER_USER.send(
+        sender=None,
+        user=user,
+        registration=registration,
+        send_welcome_email=third_party_provider.send_welcome_email if third_party_provider else True
+    )
 
     create_comments_service_user(user)
 
