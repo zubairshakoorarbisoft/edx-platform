@@ -742,6 +742,25 @@ class AcceptanceTest(WebAppTest):
         # Use long messages so that failures show actual and expected values
         self.longMessage = True  # pylint: disable=invalid-name
 
+    def tearDown(self):
+        logs = self.browser.execute_script("return window.localStorage.getItem('console_log_capture');")
+        if not logs:
+            return
+        logs = json.loads(logs)
+
+        log_dir = path('test_root/log/')
+        log_dir.mkdir_p()
+        with (log_dir / '{}.browser.log'.format(self.id())).open('w') as browser_log:
+            for (message, url, line_no, col_no, stack) in logs:
+                browser_log.write(u"{}:{}:{}: {}\n    {}\n".format(
+                    url,
+                    line_no,
+                    col_no,
+                    message,
+                    (stack or "").replace('\n', '\n    ')
+                ))
+
+        super(AcceptanceTest, self).tearDown()
 
 class UniqueCourseTest(AcceptanceTest):
     """
