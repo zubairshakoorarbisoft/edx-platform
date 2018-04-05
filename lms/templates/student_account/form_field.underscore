@@ -76,6 +76,12 @@
         <% } %>
     <% } else if (type === 'plaintext' ) { %>
             <span class="plaintext-field"><%= HtmlUtils.HTML(label) %></span>
+            <input id="<%- form %>-<%- name %>"
+               type="hidden"
+               name="<%- name %>"
+               class="input-block"
+               value="true"
+            />
     <% } else { %>
         <% if ( type === 'checkbox' ) { %>
             <% if (supplementalLink && supplementalText) { %>

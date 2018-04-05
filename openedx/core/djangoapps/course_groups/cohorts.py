@@ -19,8 +19,6 @@ from eventtracking import tracker
 from openedx.core.djangoapps.request_cache import clear_cache, get_cache
 from openedx.core.djangoapps.request_cache.middleware import request_cached
 from student.models import get_user_by_username_or_email
-from xmodule.course_module import CourseDescriptor
-from xmodule.error_module import ErrorDescriptor
 
 from .models import (
     CohortMembership,
@@ -258,17 +256,10 @@ def get_cohort(user, course_key, assign=True, use_cached=False):
             else:
                 course_user_group = get_random_cohort(course_key)
 
-            membership, created = CohortMembership.objects.get_or_create(
+            membership = CohortMembership.objects.create(
                 user=user,
                 course_user_group=course_user_group,
             )
-            if not created:
-                # EDUCATOR-2549: Adding temporary log to test if we hit a situation where user already has
-                # a member ship group.
-                log.info(
-                    "COHORT_MEMBERSHIP_FOUND: Membership found %s for course %s and user %s",
-                    membership.course_user_group, course_key, user.id
-                )
 
             return cache.setdefault(cache_key, membership.course_user_group)
     except IntegrityError as integrity_error:
@@ -290,12 +281,6 @@ def get_random_cohort(course_key):
     If there are no existing cohorts of type RANDOM in the course, one will be created.
     """
     course = courses.get_course(course_key)
-    if not isinstance(course, CourseDescriptor):
-        course_or_error_msg = course.error_msg if isinstance(course, ErrorDescriptor) else unicode(course)
-        log.error(
-            "COURSE_LOADING_ERROR: Error while loading course %s from the module store: %s",
-            unicode(course_key), course_or_error_msg
-        )
     cohorts = get_course_cohorts(course, assignment_type=CourseCohort.RANDOM)
     if cohorts:
         cohort = local_random().choice(cohorts)

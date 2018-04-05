@@ -14,7 +14,17 @@ from openedx.core.djangolib.markup import HTML, Text
 
 <main role="main" class="course-outline-visualprogress" id="main" tabindex="-1">
     % if blocks.get('children'):
-        <ol class="block-tree accordion" role="presentation">
+        <button class="btn btn-primary"
+                id="expand-collapse-outline-all-button"
+                aria-expanded="false"
+                aria-controls="course-outline-block-tree"
+                >
+          <span class="expand-collapse-outline-all-extra-padding" id="expand-collapse-outline-all-span">${_("Expand All")}</span>
+        </button>
+        <ol class="block-tree accordion"
+            id="course-outline-block-tree"
+            role="presentation"
+            aria-labeledby="expand-collapse-outline-all-button">
             % for section in blocks.get('children'):
                 <% section_is_auto_opened = section.get('resume_block') is True %>
                 <li
@@ -112,6 +122,7 @@ from openedx.core.djangolib.markup import HTML, Text
                                                         class="localized-datetime subtitle-name"
                                                         data-datetime="${subsection.get('due')}"
                                                         data-string="${data_string}"
+                                                        data-format= "${due_date_display_format}"
                                                         data-timezone="${user_timezone}"
                                                         data-language="${user_language}"
                                                     ></span>
@@ -122,6 +133,7 @@ from openedx.core.djangolib.markup import HTML, Text
                                                 <span
                                                     class="localized-datetime subtitle-name"
                                                     data-datetime="${subsection.get('due')}"
+                                                    data-format= "${due_date_display_format}"
                                                     data-string="${data_string}"
                                                     data-timezone="${user_timezone}"
                                                     data-language="${user_language}"
