@@ -139,6 +139,7 @@ class CMSVideoBaseTest(UniqueCourseTest):
             xblock_index: number starting from 1 (0th entry is the unit page itself)
         """
         self.unit_page.xblocks[xblock_index].edit()
+        import time; time.sleep(5)
 
     def open_advanced_tab(self):
         """
