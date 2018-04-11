@@ -21,6 +21,8 @@ import requests
 import six
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
@@ -117,6 +119,52 @@ class IDVerificationAttempt(StatusModel):
         days_good_for = settings.VERIFY_STUDENT["DAYS_GOOD_FOR"]
         return self.created_at + timedelta(days=days_good_for)
 
+    def active_at_datetime(self, deadline):
+        """Check whether the verification was active at a particular datetime.
+
+        Arguments:
+            deadline (datetime): The date at which the verification was active
+                (created before and expiration datetime is after today).
+
+        Returns:
+            bool
+
+        """
+        return (
+            self.created_at < deadline and
+            self.expiration_datetime > datetime.now(pytz.UTC)
+        )
+
+
+class IDVerification(IDVerificationAttempt):
+    """
+
+    """
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta(object):
+        app_label = "verify_student"
+        ordering = ['-created_at']
+
+
+def post_save_id_verification(sender, instance, created, **kwargs):
+    """
+    Post save handler to create/update IDVerificationAttempt instances.
+    """
+    content_type = ContentType.objects.get_for_model(instance)
+    try:
+        id_verification = IDVerification.objects.get(content_type=content_type, object_id=instance.id)
+    except IDVerification.DoesNotExist:
+        id_verification = IDVerification(content_type=content_type, object_id=instance.id)
+    id_verification.status = instance.status
+    id_verification.user = instance.user
+    id_verification.name = instance.name
+    id_verification.created_at = instance.created_at
+    id_verification.updated_at = instance.updated_at
+    id_verification.save()
+
 
 class SSOVerification(IDVerificationAttempt):
     """
@@ -158,6 +206,7 @@ class SSOVerification(IDVerificationAttempt):
             name=self.name,
             status=self.status,
         )
+models.signals.post_save.connect(post_save_id_verification, sender=SSOVerification)
 
 
 class PhotoVerification(IDVerificationAttempt):
@@ -251,22 +300,6 @@ class PhotoVerification(IDVerificationAttempt):
         app_label = "verify_student"
         abstract = True
         ordering = ['-created_at']
-
-    def active_at_datetime(self, deadline):
-        """Check whether the verification was active at a particular datetime.
-
-        Arguments:
-            deadline (datetime): The date at which the verification was active
-                (created before and expiration datetime is after today).
-
-        Returns:
-            bool
-
-        """
-        return (
-            self.created_at < deadline and
-            self.expiration_datetime > datetime.now(pytz.UTC)
-        )
 
     def parsed_error_msg(self):
         """
@@ -819,6 +852,7 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         log.debug("Return message:\n\n{}\n\n".format(response.text))
 
         return response
+models.signals.post_save.connect(post_save_id_verification, sender=SoftwareSecurePhotoVerification)
 
 
 class VerificationDeadline(TimeStampedModel):
