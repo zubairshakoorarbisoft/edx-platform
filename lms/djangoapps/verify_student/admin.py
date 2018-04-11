@@ -24,4 +24,6 @@ class SSOVerificationAdmin(admin.ModelAdmin):
     Admin for the SSOVerification table.
     """
     list_display = ('id', 'user', 'status', 'identity_provider_slug', 'created_at', 'updated_at')
+    readonly_fields = ('user', 'identity_provider_slug', 'identity_provider_type')
+    raw_id_fields = ('user')
     search_fields = ('user__username', 'identity_provider_slug')
