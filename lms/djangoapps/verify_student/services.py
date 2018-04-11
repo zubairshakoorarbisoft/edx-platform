@@ -12,7 +12,7 @@ from course_modes.models import CourseMode
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from student.models import User
 
-from .models import SoftwareSecurePhotoVerification
+from .models import IDVerification
 from .utils import earliest_allowed_verification_date
 
 log = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class IDVerificationService(object):
         that are still valid according to the earliest_allowed_date
         value or policy settings.
         """
-        return SoftwareSecurePhotoVerification.objects.filter(
+        return IDVerification.objects.filter(
             status="approved",
             created_at__gte=(earliest_allowed_date or earliest_allowed_verification_date()),
         )
@@ -80,7 +80,7 @@ class IDVerificationService(object):
         """
         Return a query set for all records associated with the given user.
         """
-        return SoftwareSecurePhotoVerification.objects.filter(user=user)
+        return IDVerification.objects.filter(user=user)
 
     @classmethod
     def get_verified_users(cls, users):
@@ -115,7 +115,7 @@ class IDVerificationService(object):
         valid_statuses = ['submitted', 'approved', 'must_retry']
 
         if queryset is None:
-            queryset = SoftwareSecurePhotoVerification.objects.filter(user=user)
+            queryset = IDVerification.objects.filter(user=user)
 
         return queryset.filter(
             status__in=valid_statuses,
@@ -141,11 +141,11 @@ class IDVerificationService(object):
             verification.
         """
         if queryset is None:
-            queryset = SoftwareSecurePhotoVerification.objects.filter(user=user)
+            queryset = IDVerification.objects.filter(user=user)
 
-        photo_verification = queryset.filter(status='approved').first()
-        if photo_verification:
-            return photo_verification.expiration_datetime
+        id_verification = queryset.filter(status='approved').first()
+        if id_verification:
+            return id_verification.expiration_datetime
 
     @classmethod
     def user_has_valid_or_pending(cls, user, earliest_allowed_date=None, queryset=None):
@@ -156,26 +156,6 @@ class IDVerificationService(object):
             bool: True or False according to existence of valid verifications
         """
         return cls.verification_valid_or_pending(user, earliest_allowed_date, queryset).exists()
-
-    @classmethod
-    def active_for_user(cls, user):
-        """
-        Return the most recent PhotoVerification that is marked ready (i.e. the
-        user has said they're set, but we haven't submitted anything yet).
-
-        This checks for the original verification.
-        """
-        # This should only be one at the most, but just in case we create more
-        # by mistake, we'll grab the most recently created one.
-        active_attempts = SoftwareSecurePhotoVerification.objects.filter(
-            user=user,
-            status='ready'
-        ).order_by('-created_at')
-
-        if active_attempts:
-            return active_attempts[0]
-        else:
-            return None
 
     @classmethod
     def user_status(cls, user):
@@ -205,8 +185,8 @@ class IDVerificationService(object):
             # we need to check the most recent attempt to see if we need to ask them to do
             # a retry
             try:
-                attempts = SoftwareSecurePhotoVerification.objects.filter(user=user).order_by('-updated_at')
-                attempt = attempts[0]
+                attempts = IDVerification.objects.filter(user=user).order_by('-updated_at')
+                attempt = attempts[0].content_object
             except IndexError:
                 # we return 'none'
 
@@ -224,7 +204,7 @@ class IDVerificationService(object):
             if attempt.status == 'denied':
                 status = 'must_reverify'
 
-            if attempt.error_msg:
+            if hasattr(attempt, 'error_msg') and attempt.error_msg:
                 error_msg = attempt.parsed_error_msg()
 
         return (status, error_msg)
