@@ -60,11 +60,11 @@ def verification_for_datetime(deadline, candidates):
 
     # If there's no deadline, then return the most recently created verification
     if deadline is None:
-        return candidates[0]
+        return candidates[0].content_object
 
     # Otherwise, look for a verification that was in effect at the deadline,
     # preferring recent verifications.
     # If no such verification is found, implicitly return `None`
     for verification in candidates:
         if verification.active_at_datetime(deadline):
-            return verification
+            return verification.content_object
