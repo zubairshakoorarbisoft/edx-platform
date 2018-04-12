@@ -175,7 +175,7 @@ class IDVerificationService(object):
         user_status = {
             'status': 'none',
             'error': '',
-            'should_display': False,
+            'should_display': True,
         }
 
         # We need to check the user's most recent attempt.

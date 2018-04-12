@@ -153,7 +153,7 @@ def check_verify_status_by_course(user, course_enrollments):
 
             # By default, don't show any status related to verification
             status = None
-            should_display = False
+            should_display = True
 
             # Check whether the user was approved or is awaiting approval
             if relevant_verification is not None:
