@@ -264,7 +264,9 @@ from student.models import CourseEnrollment
                 </li>
                 % endif
 
-                <%include file="${static.get_template_path('dashboard/_dashboard_status_verification.html')}" />
+                % if verification_display:
+                    <%include file="${static.get_template_path('dashboard/_dashboard_status_verification.html')}" />
+                % endif
 
               </ul>
             </div>

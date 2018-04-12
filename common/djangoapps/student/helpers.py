@@ -213,7 +213,8 @@ def check_verify_status_by_course(user, course_enrollments):
 
                 status_by_course[enrollment.course_id] = {
                     'status': status,
-                    'days_until_deadline': days_until_deadline
+                    'days_until_deadline': days_until_deadline,
+                    'should_display': relevant_verification.should_display_status_to_user()
                 }
 
     if recent_verification_datetime:

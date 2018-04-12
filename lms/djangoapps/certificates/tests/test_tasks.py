@@ -51,7 +51,10 @@ class GenerateUserCertificateTest(TestCase):
             'expected_verification_status': 'approved'
         }
 
-        user_status_mock.side_effect = [('pending', ''), ('approved', '')]
+        user_status_mock.side_effect = [
+            {'status': 'pending', 'error': '', 'should_display': True}, 
+            {'status': 'approved', 'error': '', 'should_display': True}
+        ]
 
         generate_certificate.apply_async(kwargs=kwargs).get()
 
