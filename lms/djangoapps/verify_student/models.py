@@ -136,13 +136,17 @@ class IDVerificationAttempt(StatusModel):
         )
 
 
-class IDVerification(IDVerificationAttempt):
+class IDVerificationAggregate(IDVerificationAttempt):
     """
 
     """
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+
+    # override these fields so we can set the value
+    created_at = models.DateTimeField(db_index=True)
+    updated_at = models.DateTimeField(db_index=True)
 
     class Meta(object):
         app_label = "verify_student"
