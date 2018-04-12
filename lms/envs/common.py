@@ -3352,10 +3352,11 @@ ENTERPRISE_CUSTOMER_LOGO_IMAGE_SIZE = 512   # Enterprise logo image size limit i
 
 ENTERPRISE_PLATFORM_WELCOME_TEMPLATE = _(u'Welcome to {platform_name}.')
 ENTERPRISE_SPECIFIC_BRANDED_WELCOME_TEMPLATE = _(
-    u'You have left {enterprise_name} website and are now on the {platform_name} site. {enterprise_name} '
-    'has partnered with {platform_name} to offer you high-quality, always available learning programs to '
-    'help you advance your knowledge and career. {line_break}Please note that {platform_name} has a '
-    'different {privacy_policy_link_start}Privacy Policy{privacy_policy_link_end} from {enterprise_name}.'
+    u'You have left {start_bold}{enterprise_name}{end_bold} website and are now on the {platform_name} site. '
+    '{enterprise_name} has partnered with {platform_name} to offer you high-quality, always available learning '
+    'programs to help you advance your knowledge and career. '
+    '{line_break}Please note that {platform_name} has a different {privacy_policy_link_start}Privacy Policy'
+    '{privacy_policy_link_end} from {enterprise_name}.'
 )
 ENTERPRISE_TAGLINE = ''
 ENTERPRISE_EXCLUDED_REGISTRATION_FIELDS = {
