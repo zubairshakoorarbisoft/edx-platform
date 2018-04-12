@@ -119,6 +119,10 @@ class IDVerificationAttempt(StatusModel):
         days_good_for = settings.VERIFY_STUDENT["DAYS_GOOD_FOR"]
         return self.created_at + timedelta(days=days_good_for)
 
+    def should_display_status_to_user(self):
+        """Whether or not the status from this attempt should be displayed to the user."""
+        raise NotImplementedError
+
     def active_at_datetime(self, deadline):
         """Check whether the verification was active at a particular datetime.
 
@@ -152,6 +156,10 @@ class IDVerificationAggregate(IDVerificationAttempt):
         app_label = "verify_student"
         ordering = ['-created_at']
 
+    def should_display_status_to_user(self):
+        """Whether or not the status from this attempt should be displayed to the user."""
+        return self.content_object.should_display_status_to_user()
+
 
 def post_save_id_verification(sender, instance, created, **kwargs):
     """
@@ -159,9 +167,9 @@ def post_save_id_verification(sender, instance, created, **kwargs):
     """
     content_type = ContentType.objects.get_for_model(instance)
     try:
-        id_verification = IDVerification.objects.get(content_type=content_type, object_id=instance.id)
-    except IDVerification.DoesNotExist:
-        id_verification = IDVerification(content_type=content_type, object_id=instance.id)
+        id_verification = IDVerificationAggregate.objects.get(content_type=content_type, object_id=instance.id)
+    except IDVerificationAggregate.DoesNotExist:
+        id_verification = IDVerificationAggregate(content_type=content_type, object_id=instance.id)
     id_verification.status = instance.status
     id_verification.user = instance.user
     id_verification.name = instance.name
@@ -210,6 +218,11 @@ class SSOVerification(IDVerificationAttempt):
             name=self.name,
             status=self.status,
         )
+
+    def should_display_status_to_user(self):
+        """Whether or not the status from this attempt should be displayed to the user."""
+        return False
+
 models.signals.post_save.connect(post_save_id_verification, sender=SSOVerification)
 
 
@@ -856,6 +869,11 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         log.debug("Return message:\n\n{}\n\n".format(response.text))
 
         return response
+
+    def should_display_status_to_user(self):
+        """Whether or not the status from this attempt should be displayed to the user."""
+        return True
+
 models.signals.post_save.connect(post_save_id_verification, sender=SoftwareSecurePhotoVerification)
 
 

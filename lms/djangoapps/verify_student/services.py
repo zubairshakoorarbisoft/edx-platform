@@ -170,44 +170,49 @@ class IDVerificationService(object):
 
         This checks initial verifications
         """
-        status = 'none'
-        error_msg = ''
+        # should_display only refers to displaying the verification attempt status to a user
+        # once a verification attempt has been made, otherwise we will display a prompt to complete ID verification.
+        user_status = {
+            'status': 'none',
+            'error': '',
+            'should_display': False,
+        }
 
-        if cls.user_is_verified(user):
-            status = 'approved'
+        # We need to check the user's most recent attempt.
+        try:
+            attempts = IDVerificationAggregate.objects.filter(user=user).order_by('-updated_at')
+            attempt = attempts[0].content_object
+        except IndexError:
+            # The user has no verification attempts, return the default set of data.
+            return user_status
 
-        elif cls.user_has_valid_or_pending(user):
+        user_status['should_display'] = attempt.should_display_status_to_user()
+        if attempt.created_at < earliest_allowed_verification_date():
+            if user_status['should_display']:
+                user_status['status'] = 'expired'
+                user_status['error'] = _("Your {platform_name} verification has expired.").format(
+                    platform_name=configuration_helpers.get_value('platform_name', settings.PLATFORM_NAME),
+                )
+            else:
+                # If we have a verification attempt that never would have displayed to the user,
+                # and that attempt is expired, then we should treat it as if the user had never verified.
+                return user_status
+
+        # If someone is denied their original verification attempt, they can try to reverify.
+        elif attempt.status == 'denied':
+            user_status['status'] = 'must_reverify'
+            if hasattr(attempt, 'error_msg') and attempt.error_msg:
+                user_status['error'] = attempt.parsed_error_msg()
+
+        elif attempt.status == 'approved':
+            user_status['status'] = 'approved'
+
+        elif attempt.status in ['submitted', 'approved', 'must_retry']:
             # user_has_valid_or_pending does include 'approved', but if we are
             # here, we know that the attempt is still pending
-            status = 'pending'
+            user_status['status'] = 'pending'
 
-        else:
-            # we need to check the most recent attempt to see if we need to ask them to do
-            # a retry
-            try:
-                attempts = IDVerificationAggregate.objects.filter(user=user).order_by('-updated_at')
-                attempt = attempts[0].content_object
-            except IndexError:
-                # we return 'none'
-
-                return ('none', error_msg)
-
-            if attempt.created_at < earliest_allowed_verification_date():
-                return (
-                    'expired',
-                    _("Your {platform_name} verification has expired.").format(
-                        platform_name=configuration_helpers.get_value('platform_name', settings.PLATFORM_NAME),
-                    )
-                )
-
-            # If someone is denied their original verification attempt, they can try to reverify.
-            if attempt.status == 'denied':
-                status = 'must_reverify'
-
-            if hasattr(attempt, 'error_msg') and attempt.error_msg:
-                error_msg = attempt.parsed_error_msg()
-
-        return (status, error_msg)
+        return user_status
 
     @classmethod
     def verification_status_for_user(cls, user, user_enrollment_mode, user_is_verified=None):
