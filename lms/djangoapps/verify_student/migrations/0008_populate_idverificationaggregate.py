@@ -6,9 +6,9 @@ from itertools import chain
 from django.db import migrations
 
 
-def populate_id_verification(apps, schema_editor):
+def populate_id_verification_aggregate(apps, schema_editor):
     ContentType = apps.get_model('contenttypes', 'ContentType')
-    IDVerification = apps.get_model('verify_student', 'IDVerification')
+    IDVerificationAggregate = apps.get_model('verify_student', 'IDVerificationAggregate')
     SoftwareSecurePhotoVerification = apps.get_model('verify_student', 'SoftwareSecurePhotoVerification')
     SSOVerification = apps.get_model('verify_student', 'SSOVerification')
 
@@ -16,7 +16,7 @@ def populate_id_verification(apps, schema_editor):
     sso_verifications = SSOVerification.objects.all()
     for verification in chain(software_secure_verifications, sso_verifications):
         content_type = ContentType.objects.get_for_model(verification)
-        IDVerification.objects.create(
+        IDVerificationAggregate.objects.create(
             status=verification.status,
             user=verification.user,
             name=verification.name,
@@ -30,9 +30,9 @@ def populate_id_verification(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('verify_student', '0007_idverification'),
+        ('verify_student', '0007_idverificationaggregate'),
     ]
 
     operations = [
-        migrations.RunPython(populate_id_verification, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(populate_id_verification_aggregate, reverse_code=migrations.RunPython.noop),
     ]

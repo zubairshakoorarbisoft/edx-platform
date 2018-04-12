@@ -12,7 +12,7 @@ from course_modes.models import CourseMode
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from student.models import User
 
-from .models import IDVerification
+from .models import IDVerificationAggregate
 from .utils import earliest_allowed_verification_date
 
 log = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class IDVerificationService(object):
         that are still valid according to the earliest_allowed_date
         value or policy settings.
         """
-        return IDVerification.objects.filter(
+        return IDVerificationAggregate.objects.filter(
             status="approved",
             created_at__gte=(earliest_allowed_date or earliest_allowed_verification_date()),
         )
@@ -80,7 +80,7 @@ class IDVerificationService(object):
         """
         Return a query set for all records associated with the given user.
         """
-        return IDVerification.objects.filter(user=user)
+        return IDVerificationAggregate.objects.filter(user=user)
 
     @classmethod
     def get_verified_users(cls, users):
@@ -115,7 +115,7 @@ class IDVerificationService(object):
         valid_statuses = ['submitted', 'approved', 'must_retry']
 
         if queryset is None:
-            queryset = IDVerification.objects.filter(user=user)
+            queryset = IDVerificationAggregate.objects.filter(user=user)
 
         return queryset.filter(
             status__in=valid_statuses,
@@ -141,7 +141,7 @@ class IDVerificationService(object):
             verification.
         """
         if queryset is None:
-            queryset = IDVerification.objects.filter(user=user)
+            queryset = IDVerificationAggregate.objects.filter(user=user)
 
         id_verification = queryset.filter(status='approved').first()
         if id_verification:
@@ -185,7 +185,7 @@ class IDVerificationService(object):
             # we need to check the most recent attempt to see if we need to ask them to do
             # a retry
             try:
-                attempts = IDVerification.objects.filter(user=user).order_by('-updated_at')
+                attempts = IDVerificationAggregate.objects.filter(user=user).order_by('-updated_at')
                 attempt = attempts[0].content_object
             except IndexError:
                 # we return 'none'
