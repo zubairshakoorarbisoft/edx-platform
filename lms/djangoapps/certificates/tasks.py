@@ -30,8 +30,8 @@ def generate_certificate(self, **kwargs):
     student = User.objects.get(id=kwargs.pop('student'))
     course_key = CourseKey.from_string(kwargs.pop('course_key'))
     expected_verification_status = kwargs.pop('expected_verification_status', None)
-    if expected_verification_status:
-        actual_verification_status, _ = IDVerificationService.user_status(student)
-        if expected_verification_status != actual_verification_status:
+    if expected_verification_status['status']:
+        actual_verification_status = IDVerificationService.user_status(student)
+        if expected_verification_status['status'] != actual_verification_status['status']:
             raise self.retry(kwargs=original_kwargs)
     generate_user_certificates(student=student, course_key=course_key, **kwargs)

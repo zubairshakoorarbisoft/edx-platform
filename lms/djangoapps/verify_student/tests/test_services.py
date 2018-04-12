@@ -77,12 +77,12 @@ class TestIDVerificationService(MockS3Mixin, ModuleStoreTestCase):
         # test for correct status when no error returned
         user = UserFactory.create()
         status = IDVerificationService.user_status(user)
-        self.assertEquals(status, ('none', ''))
+        self.assertEquals(status, {'status': 'none', 'error': '', 'should_display': False})
 
         # test for when one has been created
         attempt = SoftwareSecurePhotoVerification.objects.create(user=user, status='approved')
         status = IDVerificationService.user_status(user)
-        self.assertEquals(status, ('approved', ''))
+        self.assertEquals(status, {'status': 'approved', 'error': '', 'should_display': True})
 
         # create another one for the same user, make sure the right one is
         # returned
@@ -90,13 +90,13 @@ class TestIDVerificationService(MockS3Mixin, ModuleStoreTestCase):
             user=user, status='denied', error_msg='[{"photoIdReasons": ["Not provided"]}]'
         )
         status = IDVerificationService.user_status(user)
-        self.assertEquals(status, ('approved', ''))
+        self.assertEquals(status, {'status': 'approved', 'error': '', 'should_display': True})
 
         # now delete the first one and verify that the denial is being handled
         # properly
         attempt.delete()
         status = IDVerificationService.user_status(user)
-        self.assertEquals(status, ('must_reverify', ['id_image_missing']))
+        self.assertEquals(status, {'status': 'must_reverify', 'error': ['id_image_missing'], 'should_display': True})
 
     @ddt.unpack
     @ddt.data(
