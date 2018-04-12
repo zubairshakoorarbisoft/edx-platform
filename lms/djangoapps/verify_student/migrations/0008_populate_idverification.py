@@ -3,11 +3,11 @@
 from __future__ import unicode_literals
 
 from itertools import chain
-from django.contrib.contenttypes.models import ContentType
 from django.db import migrations
 
 
 def populate_id_verification(apps, schema_editor):
+    ContentType = apps.get_model('contenttypes', 'ContentType')
     IDVerification = apps.get_model('verify_student', 'IDVerification')
     SoftwareSecurePhotoVerification = apps.get_model('verify_student', 'SoftwareSecurePhotoVerification')
     SSOVerification = apps.get_model('verify_student', 'SSOVerification')
