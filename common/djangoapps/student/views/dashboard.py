@@ -1,7 +1,7 @@
 """
 Dashboard view and supporting methods
 """
-
+from edx_rest_api_client.client import EdxRestApiClient
 import datetime
 import logging
 from collections import defaultdict
@@ -545,12 +545,16 @@ def student_dashboard(request):
         The dashboard response.
 
     """
+
+    # journal_url = 'http://journals.app:18606/api/v1/'
+    # journal_client = EdxRestApiClient(journal_url)
+    # journal_response = journal_client.journalaccess.get(username=request.user.username)
+
     user = request.user
     if not UserProfile.objects.filter(user=user).exists():
         return redirect(reverse('account_settings'))
 
     platform_name = configuration_helpers.get_value("platform_name", settings.PLATFORM_NAME)
-
     enable_verified_certificates = configuration_helpers.get_value(
         'ENABLE_VERIFIED_CERTIFICATES',
         settings.FEATURES.get('ENABLE_VERIFIED_CERTIFICATES')
