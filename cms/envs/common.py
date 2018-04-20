@@ -127,7 +127,10 @@ from lms.envs.common import (
     VIDEO_IMAGE_SETTINGS,
     VIDEO_TRANSCRIPTS_SETTINGS,
 
+    RETIRED_USERNAME_PREFIX,
     RETIRED_USERNAME_FMT,
+    RETIRED_EMAIL_PREFIX,
+    RETIRED_EMAIL_DOMAIN,
     RETIRED_EMAIL_FMT,
     RETIRED_USER_SALTS,
     RETIREMENT_SERVICE_WORKER_USERNAME,
@@ -165,6 +168,10 @@ FEATURES = {
     'ENABLE_DISCUSSION_SERVICE': True,
     'ENABLE_TEXTBOOK': True,
     'ENABLE_STUDENT_NOTES': True,
+
+    # DO NOT SET TO True IN THIS FILE
+    # Doing so will cause all courses to be released on production
+    'DISABLE_START_DATES': False,  # When True, all courses will be active, regardless of start date
 
     'AUTH_USE_CERTIFICATES': False,
 
@@ -806,10 +813,7 @@ PIPELINE_JS = {
     },
 }
 
-PIPELINE_COMPILERS = (
-    'pipeline.compilers.coffee.CoffeeScriptCompiler',
-)
-
+PIPELINE_COMPILERS = ()
 PIPELINE_CSS_COMPRESSOR = None
 PIPELINE_JS_COMPRESSOR = None
 
@@ -825,10 +829,6 @@ STATICFILES_IGNORE_PATTERNS = (
     "sass/*/*.scss",
     "sass/*/*/*.scss",
     "sass/*/*/*/*.scss",
-    "coffee/*.coffee",
-    "coffee/*/*.coffee",
-    "coffee/*/*/*.coffee",
-    "coffee/*/*/*/*.coffee",
 
     # Ignore tests
     "spec",

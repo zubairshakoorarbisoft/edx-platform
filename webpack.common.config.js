@@ -51,6 +51,8 @@ module.exports = {
         LatestUpdate: './openedx/features/course_experience/static/course_experience/js/LatestUpdate.js',
         WelcomeMessage: './openedx/features/course_experience/static/course_experience/js/WelcomeMessage.js',
 
+        CookiePolicyBanner: './common/static/js/src/CookiePolicyBanner.jsx',
+
         // Common
         ReactRenderer: './common/static/js/src/ReactRenderer.jsx'
     },
@@ -153,7 +155,7 @@ module.exports = {
                 use: 'babel-loader'
             },
             {
-                test: path.resolve(__dirname, 'common/static/coffee/src/ajax_prefix.js'),
+                test: path.resolve(__dirname, 'common/static/js/src/ajax_prefix.js'),
                 use: [
                     'babel-loader',
                     {
@@ -202,8 +204,12 @@ module.exports = {
                 )
             },
             {
-                test: /\.(woff2?|ttf|svg|eot)(\?v=\d+\.\d+\.\d+)?$/,
+                test: /\.(woff2?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
                 loader: 'file-loader'
+            },
+            {
+                test: /\.svg$/,
+                loader: 'svg-inline-loader'
             }
         ]
     },
@@ -234,8 +240,7 @@ module.exports = {
             'common/static',
             'common/static/js/src',
             'common/static/js/vendor/',
-            'common/static/js/vendor/jQuery-File-Upload/js/',
-            'common/static/coffee/src'
+            'common/static/js/vendor/jQuery-File-Upload/js/'
         ]
     },
 

@@ -22,6 +22,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client, RequestFactory
 from django.test.utils import override_settings
+from django.utils.translation import ugettext as _
 from mock import Mock, patch
 from nose.plugins.attrib import attr
 from opaque_keys.edx.keys import CourseKey
@@ -1623,8 +1624,11 @@ class TestSubmitPhotosForVerification(TestCase):
         """
         if expect_email:
             # Verify that photo submission confirmation email was sent
+            subject = _("{platform_name} ID Verification Photos Received").format(
+                platform_name=settings.PLATFORM_NAME
+            )
             self.assertEqual(len(mail.outbox), 1)
-            self.assertEqual("Verification photos received", mail.outbox[0].subject)
+            self.assertEqual(subject, mail.outbox[0].subject)
         else:
             # Verify that photo submission confirmation email was not sent
             self.assertEqual(len(mail.outbox), 0)
@@ -1779,6 +1783,7 @@ class TestPhotoVerificationResultsCallback(ModuleStoreTestCase):
         attempt = SoftwareSecurePhotoVerification.objects.get(receipt_id=self.receipt_id)
         self.assertEqual(attempt.status, u'approved')
         self.assertEquals(response.content, 'OK!')
+        self.assertEqual(len(mail.outbox), 1)
 
     @mock.patch(
         'lms.djangoapps.verify_student.ssencrypt.has_valid_signature',
@@ -1857,6 +1862,29 @@ class TestPhotoVerificationResultsCallback(ModuleStoreTestCase):
             HTTP_DATE='testdate'
         )
         self.assertIn('Result Unknown not understood', response.content)
+
+    @mock.patch(
+        'lms.djangoapps.verify_student.utils.send_mail',
+        mock.Mock(side_effect=Exception())
+    )
+    def test_verification_status_email_not_sent(self):
+        """
+        Test email is not sent in case of exception
+        """
+        data = {
+            "EdX-ID": self.receipt_id,
+            "Result": "PASS",
+            "Reason": "",
+            "MessageType": "You have been verified."
+        }
+        json_data = json.dumps(data)
+        self.client.post(
+            reverse('verify_student_results_callback'), data=json_data,
+            content_type='application/json',
+            HTTP_AUTHORIZATION='test BBBBBBBBBBBBBBBBBBBB:testing',
+            HTTP_DATE='testdate'
+        )
+        self.assertEqual(len(mail.outbox), 0)
 
 
 @attr(shard=2)

@@ -15,6 +15,7 @@ import edx_oauth2_provider
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, load_backend, login as django_login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.urlresolvers import NoReverseMatch, reverse, reverse_lazy
@@ -44,6 +45,7 @@ from eventtracking import tracker
 from openedx.core.djangoapps.external_auth.login_and_register import login as external_auth_login
 from openedx.core.djangoapps.external_auth.models import ExternalAuthMap
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangoapps.user_api.accounts.utils import generate_password
 from openedx.features.course_experience import course_home_url_name
 from student.cookies import delete_logged_in_cookies, set_logged_in_cookies
 from student.forms import AccountCreationForm
@@ -386,6 +388,32 @@ def send_reactivation_email_for_user(user):
     return JsonResponse({"success": True})
 
 
+@login_required
+@ensure_csrf_cookie
+def verify_user_password(request):
+    """
+    If the user is logged in and we want to verify that they have submitted the correct password
+    for a major account change (for example, retiring this user's account).
+
+    Args:
+        request (HttpRequest): A request object where the password should be included in the POST fields.
+    """
+    try:
+        _check_excessive_login_attempts(request.user)
+        user = authenticate(username=request.user.username, password=request.POST['password'], request=request)
+        if user:
+            if LoginFailures.is_feature_enabled():
+                LoginFailures.clear_lockout_counter(user)
+            return JsonResponse({'success': True})
+        else:
+            _handle_failed_authentication(request.user)
+    except AuthFailedError as err:
+        return HttpResponse(err.value, content_type="text/plain", status=403)
+    except Exception:  # pylint: disable=broad-except
+        log.exception("Could not verify user password")
+        return HttpResponseBadRequest()
+
+
 @ensure_csrf_cookie
 def login_user(request):
     """
@@ -558,10 +586,11 @@ def auto_auth(request):
 
     # Generate a unique name to use if none provided
     generated_username = uuid.uuid4().hex[0:30]
+    generated_password = generate_password()
 
     # Use the params from the request, otherwise use these defaults
     username = request.GET.get('username', generated_username)
-    password = request.GET.get('password', username)
+    password = request.GET.get('password', generated_password)
     email = request.GET.get('email', username + "@example.com")
     full_name = request.GET.get('full_name', username)
     is_staff = str2bool(request.GET.get('staff', False))
