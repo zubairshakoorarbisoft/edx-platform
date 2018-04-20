@@ -1,6 +1,5 @@
+import _ from 'underscore';
 import Backbone from 'backbone';
-
-import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
 
 import exploreTpl from '../../../templates/learner_dashboard/explore_new_programs.underscore';
 
@@ -13,7 +12,7 @@ class ExploreNewProgramsView extends Backbone.View {
   }
 
   initialize(data) {
-    this.tpl = HtmlUtils.template(exploreTpl);
+    this.tpl = _.template(exploreTpl);
     this.context = data.context;
     this.$parentEl = $(this.parentEl);
 
@@ -27,7 +26,7 @@ class ExploreNewProgramsView extends Backbone.View {
   }
 
   render() {
-    HtmlUtils.setHtml(this.$el, this.tpl(this.context));
+    this.$el.html(this.tpl(this.context));
   }
 }
 

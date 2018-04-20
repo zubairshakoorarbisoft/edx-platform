@@ -4,8 +4,7 @@ Factories for generating edXML for testing XModule import
 
 import inspect
 
-from tempfile import mkdtemp
-from fs.osfs import OSFS
+from fs.memoryfs import MemoryFS
 from factory import Factory, lazy_attribute, post_generation, Sequence
 from lxml import etree
 
@@ -69,7 +68,7 @@ class XmlImportFactory(Factory):
     class Meta(object):
         model = XmlImportData
 
-    filesystem = OSFS(mkdtemp())
+    filesystem = MemoryFS()
     xblock_mixins = (InheritanceMixin, XModuleMixin, HierarchyMixin)
     xblock_select = only_xmodules
     url_name = Sequence(str)

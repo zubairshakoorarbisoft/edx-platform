@@ -3,7 +3,7 @@ Setup for discussion-forum XBlock.
 """
 
 import os
-from setuptools import find_packages, setup
+from setuptools import setup
 
 
 def package_data(pkg, root_list):
@@ -31,6 +31,5 @@ setup(
             'discussion = xblock_discussion:DiscussionXBlock'
         ]
     },
-    packages=find_packages(exclude=['tests.*']),
     package_data=package_data("xblock_discussion", ["static"]),
 )

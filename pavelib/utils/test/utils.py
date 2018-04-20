@@ -10,10 +10,7 @@ from paver.easy import cmdopts, sh, task
 from pavelib.utils.envs import Env
 from pavelib.utils.timer import timed
 
-try:
-    from bok_choy.browser import browser
-except ImportError:
-    browser = None
+from bok_choy.browser import browser
 
 MONGO_PORT_NUM = int(os.environ.get('EDXAPP_TEST_MONGO_PORT', '27017'))
 MINIMUM_FIREFOX_VERSION = 28.0

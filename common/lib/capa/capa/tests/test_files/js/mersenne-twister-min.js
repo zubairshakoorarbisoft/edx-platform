@@ -64,7 +64,6 @@
    email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
 */
 
-/* eslint-disable */
 var MersenneTwister = function(seed) {
   if (seed == undefined) {
     seed = new Date().getTime();

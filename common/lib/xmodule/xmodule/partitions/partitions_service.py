@@ -13,6 +13,8 @@ from xmodule.modulestore.django import modulestore
 
 log = logging.getLogger(__name__)
 
+
+# settings will not be available when running nosetests.
 FEATURES = getattr(settings, 'FEATURES', {})
 
 

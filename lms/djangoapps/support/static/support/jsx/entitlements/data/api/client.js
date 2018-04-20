@@ -25,7 +25,6 @@ const postEntitlement = ({ username, courseUuid, mode, action, comments = null }
       course_uuid: courseUuid,
       user: username,
       mode,
-      refund_locked: true,
       support_details: [{
         action,
         comments,

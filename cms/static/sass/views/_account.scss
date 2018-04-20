@@ -160,9 +160,6 @@
               + .tip {
                 color: $gray-d1;
               }
-              + .tip-error {
-                color: $red;
-              }
             }
           }
 
@@ -189,10 +186,6 @@
             display: block;
             margin-top: ($baseline/4);
             color: $gray-d1;
-          }
-
-          .tip-error {
-              color: $red;
           }
         }
 

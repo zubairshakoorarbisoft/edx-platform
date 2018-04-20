@@ -107,8 +107,10 @@ class HtmlModuleMixin(HtmlBlock, XModule):
     Attributes and methods used by HtmlModules internally.
     """
     js = {
+        'coffee': [
+            resource_string(__name__, 'js/src/html/display.coffee'),
+        ],
         'js': [
-            resource_string(__name__, 'js/src/html/display.js'),
             resource_string(__name__, 'js/src/javascript_loader.js'),
             resource_string(__name__, 'js/src/collapsible.js'),
             resource_string(__name__, 'js/src/html/imageModal.js'),
@@ -137,7 +139,7 @@ class HtmlDescriptor(HtmlBlock, XmlDescriptor, EditingDescriptor):  # pylint: di
     template_dir_name = "html"
     show_in_read_only_mode = True
 
-    js = {'js': [resource_string(__name__, 'js/src/html/edit.js')]}
+    js = {'coffee': [resource_string(__name__, 'js/src/html/edit.coffee')]}
     js_module_name = "HTMLEditingDescriptor"
     css = {'scss': [resource_string(__name__, 'css/editor/edit.scss'), resource_string(__name__, 'css/html/edit.scss')]}
 

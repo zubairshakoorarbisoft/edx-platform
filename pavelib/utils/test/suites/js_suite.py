@@ -39,6 +39,7 @@ class JsTestSuite(TestSuite):
             test_utils.clean_dir(self.report_dir)
 
         assets.process_npm_assets()
+        assets.compile_coffeescript("`find lms cms common -type f -name \"*.coffee\"`")
 
     @property
     def _default_subsuites(self):
@@ -50,7 +51,7 @@ class JsTestSuite(TestSuite):
 
 class JsTestSubSuite(TestSuite):
     """
-    Class for JS suites like cms, cms-squire, lms, common,
+    Class for JS suites like cms, cms-squire, lms, lms-coffee, common,
     common-requirejs and xmodule
     """
     def __init__(self, *args, **kwargs):

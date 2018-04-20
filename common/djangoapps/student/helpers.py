@@ -26,11 +26,11 @@ from pytz import UTC
 from six import iteritems, text_type
 import third_party_auth
 from course_modes.models import CourseMode
-from lms.djangoapps.certificates.api import (
+from lms.djangoapps.certificates.api import (  # pylint: disable=import-error
     get_certificate_url,
     has_html_certificates_enabled
 )
-from lms.djangoapps.certificates.models import (
+from lms.djangoapps.certificates.models import (  # pylint: disable=import-error
     CertificateStatuses,
     certificate_status_for_student
 )
@@ -65,7 +65,6 @@ DISABLE_UNENROLL_CERT_STATES = [
     'generating',
     'downloadable',
 ]
-USERNAME_EXISTS_MSG_FMT = _("An account with the Public Username '{username}' already exists.")
 
 
 log = logging.getLogger(__name__)
@@ -626,9 +625,8 @@ def do_create_account(form, custom_form=None):
     if errors:
         raise ValidationError(errors)
 
-    proposed_username = form.cleaned_data["username"]
     user = User(
-        username=proposed_username,
+        username=form.cleaned_data["username"],
         email=form.cleaned_data["email"],
         is_active=False
     )
@@ -651,12 +649,12 @@ def do_create_account(form, custom_form=None):
         # AccountValidationError and a consistent user message returned (i.e. both should
         # return "It looks like {username} belongs to an existing account. Try again with a
         # different username.")
-        if User.objects.filter(username=user.username):
+        if len(User.objects.filter(username=user.username)) > 0:
             raise AccountValidationError(
-                USERNAME_EXISTS_MSG_FMT.format(username=proposed_username),
+                _("An account with the Public Username '{username}' already exists.").format(username=user.username),
                 field="username"
             )
-        elif User.objects.filter(email=user.email):
+        elif len(User.objects.filter(email=user.email)) > 0:
             raise AccountValidationError(
                 _("An account with the Email '{email}' already exists.").format(email=user.email),
                 field="email"
@@ -684,7 +682,7 @@ def do_create_account(form, custom_form=None):
         profile.meta = json.dumps(extended_profile)
     try:
         profile.save()
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         log.exception("UserProfile creation failed for user {id}.".format(id=user.id))
         raise
 

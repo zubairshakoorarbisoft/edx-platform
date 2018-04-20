@@ -8,11 +8,6 @@ import logging
 import pytz
 
 from django.conf import settings
-from django.core.mail import send_mail
-from django.utils.translation import ugettext as _
-
-from edxmako.shortcuts import render_to_string
-from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 
 log = logging.getLogger(__name__)
 
@@ -65,33 +60,11 @@ def verification_for_datetime(deadline, candidates):
 
     # If there's no deadline, then return the most recently created verification
     if deadline is None:
-        return candidates[0]
+        return candidates[0].content_object
 
     # Otherwise, look for a verification that was in effect at the deadline,
     # preferring recent verifications.
     # If no such verification is found, implicitly return `None`
     for verification in candidates:
         if verification.active_at_datetime(deadline):
-            return verification
-
-
-def send_verification_status_email(context):
-    """
-    Send an email to inform learners about their verification status
-    """
-    subject = context['subject']
-    message = render_to_string(context['message'], context['email_template_context'])
-    from_address = configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
-    to_address = context['email']
-
-    try:
-        send_mail(subject, message, from_address, [to_address], fail_silently=False)
-    except:  # pylint: disable=bare-except
-        # We catch all exceptions and log them.
-        # It would be much, much worse to roll back the transaction due to an uncaught
-        # exception than to skip sending the notification email.
-        log.exception(
-            _("Could not send verification status email having subject: {subject} and email of user: {email}").format(
-                subject=context['subject'],
-                email=context['email']
-            ))
+            return verification.content_object

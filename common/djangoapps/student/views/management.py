@@ -65,7 +65,6 @@ from openedx.core.djangoapps.programs.models import ProgramsApiConfig
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from openedx.core.djangoapps.user_api import accounts as accounts_settings
-from openedx.core.djangoapps.user_api.accounts.utils import generate_password
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
 from openedx.core.djangoapps.user_api.config.waffle import PREVENT_AUTH_USER_WRITES, SYSTEM_MAINTENANCE_MSG, waffle
 from openedx.core.djangolib.markup import HTML, Text
@@ -611,7 +610,7 @@ def create_account_with_params(request, params):
     is_third_party_auth_enabled = third_party_auth.is_enabled()
 
     if is_third_party_auth_enabled and (pipeline.running(request) or third_party_auth_credentials_in_api):
-        params["password"] = generate_password()
+        params["password"] = pipeline.make_random_password()
 
     # in case user is registering via third party (Google, Facebook) and pipeline has expired, show appropriate
     # error message

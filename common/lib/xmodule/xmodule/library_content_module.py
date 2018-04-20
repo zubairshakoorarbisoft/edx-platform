@@ -409,7 +409,7 @@ class LibraryContentDescriptor(LibraryContentFields, MakoModuleDescriptor, XmlDe
 
     module_class = LibraryContentModule
     mako_template = 'widgets/metadata-edit.html'
-    js = {'js': [resource_string(__name__, 'js/src/vertical/edit.js')]}
+    js = {'coffee': [resource_string(__name__, 'js/src/vertical/edit.coffee')]}
     js_module_name = "VerticalDescriptor"
 
     show_in_read_only_mode = True

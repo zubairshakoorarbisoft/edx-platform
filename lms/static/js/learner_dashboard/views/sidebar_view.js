@@ -1,6 +1,5 @@
+import _ from 'underscore';
 import Backbone from 'backbone';
-
-import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
 
 import NewProgramsView from './explore_new_programs_view';
 
@@ -15,12 +14,12 @@ class SidebarView extends Backbone.View {
   }
 
   initialize(data) {
-    this.tpl = HtmlUtils.template(sidebarTpl);
+    this.tpl = _.template(sidebarTpl);
     this.context = data.context;
   }
 
   render() {
-    HtmlUtils.setHtml(this.$el, this.tpl(this.context));
+    this.$el.html(this.tpl(this.context));
     this.postRender();
   }
 

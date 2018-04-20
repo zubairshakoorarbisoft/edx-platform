@@ -73,9 +73,7 @@ from student.models import CourseEnrollment
     $(document).ready(function() {
       EntitlementUnenrollmentFactory({
         dashboardPath: "${reverse('dashboard') | n, js_escaped_string}",
-        signInPath: "${reverse('signin_user') | n, js_escaped_string}",
-        browseCourses: "${marketing_link('COURSES') | n, js_escaped_string}",
-        isEdx: true
+        signInPath: "${reverse('signin_user') | n, js_escaped_string}"
       });
     });
   </%static:webpack>

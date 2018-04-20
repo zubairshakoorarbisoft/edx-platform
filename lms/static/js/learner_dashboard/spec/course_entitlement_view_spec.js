@@ -1,5 +1,7 @@
 /* globals setFixtures */
 
+import _ from 'underscore';
+
 import CourseEntitlementView from '../views/course_entitlement_view';
 
 describe('Course Entitlement View', () => {
@@ -76,13 +78,13 @@ describe('Course Entitlement View', () => {
     });
 
     it('Self paced courses should have visual indication in the selection option.', () => {
-      const selfPacedOptionIndex = entitlementAvailableSessions.findIndex(session => session.pacing_type === 'self_paced');
+      const selfPacedOptionIndex = _.findIndex(entitlementAvailableSessions, session => session.pacing_type === 'self_paced');
       const selfPacedOption = selectOptions[selfPacedOptionIndex];
       expect(selfPacedOption && selfPacedOption.text.includes('(Self-paced)')).toBe(true);
     });
 
     it('Courses with an an enroll by date should indicate so on the selection option.', () => {
-      const enrollEndSetOptionIndex = entitlementAvailableSessions.findIndex(
+      const enrollEndSetOptionIndex = _.findIndex(entitlementAvailableSessions,
         session => session.enrollment_end !== null);
       const enrollEndSetOption = selectOptions[enrollEndSetOptionIndex];
       expect(enrollEndSetOption && enrollEndSetOption.text.includes('Open until')).toBe(true);
@@ -121,7 +123,7 @@ describe('Course Entitlement View', () => {
     });
 
     it('Currently selected session should be specified in the dropdown options.', () => {
-      const selectedSessionIndex = entitlementAvailableSessions.findIndex(
+      const selectedSessionIndex = _.findIndex(entitlementAvailableSessions,
         session => initialSessionId === session.session_id);
       expect(selectOptions[selectedSessionIndex].text.includes('Currently Selected')).toBe(true);
     });

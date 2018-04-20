@@ -3,7 +3,7 @@ Tests around our XML modulestore, including importing
 well-formed and not-well-formed XML.
 """
 import os.path
-from django.test import TestCase
+import unittest
 from glob import glob
 from mock import patch, Mock
 
@@ -28,7 +28,7 @@ def glob_tildes_at_end(path):
     return no_tildes + with_tildes
 
 
-class TestXMLModuleStore(TestCase):
+class TestXMLModuleStore(unittest.TestCase):
     """
     Test around the XML modulestore
     """

@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from student.tests.factories import UserFactory, CourseEnrollmentFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
+from openedx.core.djangoapps.content.course_structures.tasks import update_course_structure
 from openedx.core.djangolib.testing.utils import skip_unless_lms
 
 
@@ -43,6 +44,7 @@ class CompletionBatchTestCase(CompletionWaffleTestMixin, ModuleStoreTestCase):
             category="problem",
             display_name="Test Problem",
         )
+        update_course_structure(unicode(self.course.id))
 
         # Create users
         self.staff_user = UserFactory(is_staff=True)
@@ -97,31 +99,15 @@ class CompletionBatchTestCase(CompletionWaffleTestMixin, ModuleStoreTestCase):
                 }
             }, 400, {"detail": "Invalid course key: not:a:course:key"}
         ),
-        # Block must be a valid key
-        (
-            {
-                'username': ENROLLED_USERNAME,
-                'course_key': COURSE_KEY,
-                'blocks': {
-                    'not:a:block:key': 1.0,
-                }
-            }, 400, {"detail": "Invalid block key: not:a:block:key"}
-        ),
         # Block not in course
         (
             {
                 'username': ENROLLED_USERNAME,
                 'course_key': COURSE_KEY,
                 'blocks': {
-                    'i4x://some/other_course/problem/Test_Problem': 1.0,
+                    'some:other:block': 1.0,
                 }
-            },
-            400,
-            {
-                "detail": "Block with key: 'i4x://some/other_course/problem/Test_Problem' is not in course {}".format(
-                    COURSE_KEY,
-                )
-            }
+            }, 400, {"detail": "Block with key: 'some:other:block' is not in course {}".format(COURSE_KEY)}
         ),
         # Course key is required
         (
@@ -166,7 +152,7 @@ class CompletionBatchTestCase(CompletionWaffleTestMixin, ModuleStoreTestCase):
                 'blocks': {
                     BLOCK_KEY: 1.0,
                 }
-            }, 400, {"detail": "User is not enrolled in course."}
+            }, 404, {"detail": "CourseStructure matching query does not exist."}
         ),
     )
     @ddt.unpack

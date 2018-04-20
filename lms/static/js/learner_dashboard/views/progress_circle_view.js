@@ -1,6 +1,5 @@
+import _ from 'underscore';
 import Backbone from 'backbone';
-
-import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
 
 import progressViewTpl from '../../../templates/learner_dashboard//progress_circle_view.underscore';
 import progressSegmentTpl from '../../../templates/learner_dashboard/progress_circle_segment.underscore';
@@ -13,8 +12,8 @@ class ProgressCircleView extends Backbone.View {
     this.degrees = 180;
     this.strokeWidth = 1.2;
 
-    this.viewTpl = HtmlUtils.template(progressViewTpl);
-    this.segmentTpl = HtmlUtils.template(progressSegmentTpl);
+    this.viewTpl = _.template(progressViewTpl);
+    this.segmentTpl = _.template(progressSegmentTpl);
 
     const progress = this.model.get('progress');
 
@@ -34,7 +33,7 @@ class ProgressCircleView extends Backbone.View {
       strokeWidth: this.strokeWidth,
     });
 
-    HtmlUtils.setHtml(this.$el, this.viewTpl(data));
+    this.$el.html(this.viewTpl(data));
   }
 
   static getDegreeIncrement(total) {

@@ -38,11 +38,8 @@ class ApiAccessRequestForm(forms.ModelForm):
 class ViewersWidget(forms.widgets.TextInput):
     """Form widget to display a comma-separated list of usernames."""
 
-    def format_value(self, value):
-        """
-        Return a serialized value as it should appear when rendered in a template.
-        """
-        return ', '.join(value) if isinstance(value, list) else value
+    def render(self, name, value, attrs=None):
+        return super(ViewersWidget, self).render(name, ', '.join(value), attrs)
 
 
 class ViewersField(forms.Field):

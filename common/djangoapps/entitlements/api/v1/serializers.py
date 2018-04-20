@@ -35,7 +35,6 @@ class CourseEntitlementSerializer(serializers.ModelSerializer):
             'created',
             'modified',
             'mode',
-            'refund_locked',
             'order_number',
             'support_details'
         )

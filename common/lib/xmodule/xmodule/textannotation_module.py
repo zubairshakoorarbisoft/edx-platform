@@ -92,7 +92,8 @@ class AnnotatableFields(object):
 
 class TextAnnotationModule(AnnotatableFields, XModule):
     ''' Text Annotation Module '''
-    js = {'js': []}
+    js = {'coffee': [],
+          'js': []}
     css = {'scss': [resource_string(__name__, 'css/annotatable/display.scss')]}
     icon_class = 'textannotation'
 

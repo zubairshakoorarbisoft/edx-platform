@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import Backbone from 'backbone';
 
 import HtmlUtils from 'edx-ui-toolkit/js/utils/html-utils';
@@ -55,8 +56,8 @@ class CourseEnrollView extends Backbone.View {
         this.enrollModel.save({
           course_id: courseRunKey,
         }, {
-          success: this.enrollSuccess.bind(this),
-          error: this.enrollError.bind(this),
+          success: _.bind(this.enrollSuccess, this),
+          error: _.bind(this.enrollError, this),
         });
       }
     }
