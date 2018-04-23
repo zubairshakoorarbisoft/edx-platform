@@ -1,0 +1,34 @@
+## mako
+
+<%page expression_filter="h"/>
+
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from openedx.core.djangolib.js_utils import (
+    dump_js_escaped_json, js_escaped_string
+)
+%>
+<div class="dashboard" id="dashboard-main">
+
+  <div class="main-container">
+    <div class="my-courses" id="my-courses">
+      <!-- TODO: make say My Journals -->
+      <%include file="../learner_dashboard/_dashboard_navigation_courses.html"/>
+
+      % if len(journals) > 0:
+        <ul class="listing-courses">
+        % for journal in journals:
+          <li class="course-item">
+            <div class="course-container">
+
+            </div>
+          </li>
+        % endfor
+        </ul>
+      <!-- TODO: handle case where there are 0 journals -->
+      % endif
+    </div>
+  </div>
+</div>
+
+
