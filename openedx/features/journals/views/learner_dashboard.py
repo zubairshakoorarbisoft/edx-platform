@@ -14,36 +14,18 @@ def journal_listing(request):
     #TODO: check assumption, list journals that user HAD access to but no longer does
 
     # import pdb; pdb.set_trace()
-    journals_fragment = JournalsFragmentsView().render_to_fragment(request)
+    user = request.user
+
+    if not journals_enabled() or not user.is_authenticated():
+        raise Http404
+
+    journal_client = JournalsApiClient(user=user)
+    journals = journal_client.get_journal_access()
+
 
     context = {
-        'journals_fragment': journals_fragment,
+        'journals': journals,
     }
 
-    return render_to_response('learner_dashboard/journal_dashboard.html', context)
+    return render_to_response('journal_dashboard.html', context)
 
-
-class JournalsFragmentsView(EdxFragmentView):
-    """
-    A fragment to journal listing.
-    """
-    def render_to_fragment(self, request, **kwargs):
-        """
-        Render the journal listing fragment.
-        """
-        user = request.user
-
-        if not journals_enabled() or not user.is_authenticated():
-            raise Http404
-
-        journal_client = JournalsApiClient(user=user)
-        journals = journal_client.get_journal_access()
-
-        context = {
-            'journals': journals
-        }
-        html = render_to_string('dashboard/journals_fragment.html', context)
-        journals_fragment = Fragment(html)
-        self.add_fragment_resource_urls(journals_fragment)
-
-        return journals_fragment
