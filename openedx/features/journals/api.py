@@ -80,6 +80,19 @@ class JournalsApiClient(object):
             jwt=jwt
         )
 
+    def get_journal_access(self):
+        """ Get list of journals that the current user has or had access to. """
+        # TODO: what to do about expired journals
+        try:
+            response = self.client.journalaccess.get(username=self.user)
+            return response
+        except (HttpClientError, HttpServerError) as err:
+            LOGGER.exception(
+                'Failed to get journal access records from journal-service [%s]',
+                err.content
+            )
+            return []
+
 
 def get_cache_key(**kwargs):
     """
