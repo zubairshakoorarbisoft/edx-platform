@@ -93,7 +93,7 @@ from student.models import CourseEnrollment
 <!--TODO: replace journal uuid w/ journal slug -->
 
 
-<main id="main" aria-label="Conent" tabindex="-1">
+<main id="main" aria-label="Content" tabindex="-1">
   <div class="dashboard" id="dashboard-main">
     <!--TODO: make it say My Journals -->
     <%include file="learner_dashboard/_dashboard_navigation_courses.html"/>
@@ -109,6 +109,9 @@ from student.models import CourseEnrollment
                 <!--TODO: link article to appropriate journal page -->
                 <section class="details" aria-labelledby="details-heading-${journal['uuid']}">
                   <h2 class="hd hd-2 sr" id="details-heading-${journal['uuid']}">$_('Journal details')}</h2>
+                  <div class="wrapper-course-image" aria-label="true">
+
+                  </div>
                 </section>
               </article>
             </div>

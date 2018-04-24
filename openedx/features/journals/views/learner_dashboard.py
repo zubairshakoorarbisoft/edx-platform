@@ -13,7 +13,7 @@ def journal_listing(request):
     """ View a list of journals which the user has or had access to"""
     #TODO: check assumption, list journals that user HAD access to but no longer does
 
-    # import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     user = request.user
 
     if not journals_enabled() or not user.is_authenticated():
