@@ -7,6 +7,7 @@ from urlparse import urlsplit, urlunsplit
 import six
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from edx_rest_api_client.client import EdxRestApiClient
@@ -19,6 +20,8 @@ from slumber.exceptions import HttpClientError, HttpServerError
 LOGGER = logging.getLogger("edx.journals")
 JOURNALS_CACHE_TIMEOUT = 3600  # Value is in seconds
 JOURNALS_API_PATH = '/journal/api/v1/'
+JOURNAL_WORKER_USERNAME = 'journals_worker'
+User = get_user_model()
 
 
 class DiscoveryApiClient(object):
@@ -68,23 +71,30 @@ class JournalsApiClient(object):
     """
     Class for interacting with the Journals Service
     """
-    def __init__(self, user):
+    def __init__(self):
         """
         Initialize an authenticated Enterprise service API client by using the
         provided user.
         """
-        self.user = user
-        jwt = JwtBuilder(user).build_token([])
+
+        # import pdb; pdb.set_trace()
+        #TODO: pull this into some constants file?
+        self.user = self.get_journals_worker()
+        jwt = JwtBuilder(self.user).build_token(['email', 'profile'], 16000)
         self.client = EdxRestApiClient(
             configuration_helpers.get_value('JOURNALS_API_URL', settings.JOURNALS_API_URL),
             jwt=jwt
         )
 
-    def get_journal_access(self):
-        """ Get list of journals that the current user has or had access to. """
+    def get_journals_worker(self):
+        """ Return journals worker """
+        return User.objects.get(username=JOURNAL_WORKER_USERNAME)
+
+    def get_journal_access(self, user):
+        """ Get list of journals that the user has or had access to. """
         # TODO: what to do about expired journals
         try:
-            response = self.client.journalaccess.get(username=self.user)
+            response = self.client.journalaccess.get(user=user)
             return response
         except (HttpClientError, HttpServerError) as err:
             LOGGER.exception(

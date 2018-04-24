@@ -110,7 +110,14 @@ from student.models import CourseEnrollment
                 <section class="details" aria-labelledby="details-heading-${journal['uuid']}">
                   <h2 class="hd hd-2 sr" id="details-heading-${journal['uuid']}">$_('Journal details')}</h2>
                   <div class="wrapper-course-image" aria-label="true">
-
+                    <a href="${journal['url']}" class="cover" tabindex="-1">
+                      <img src="${journal['journal']['journalaboutpage']['card_image_absolute_url']}" class="course-image" alt="${_('{journal_title} Cover Image').format(journal_title=journal['journal']['name'])}"/>
+                    </a>
+                  </div>
+                  <div class="wrapper-course-details">
+                    <h3 class="course-title" id="course-title-${journal['uuid']}" href="${journal['url']}">
+                      <a data-course-key="${journal['uuid']}">${journal['journal']['name']}</a>
+                    </h3>
                   </div>
                 </section>
               </article>
