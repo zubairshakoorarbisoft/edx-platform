@@ -31,7 +31,8 @@ ACCOUNT_DETAIL = AccountViewSet.as_view({
 })
 
 RETIREMENT_QUEUE = AccountRetirementView.as_view({
-    'get': 'retirement_queue'
+    'get': 'retirement_queue',
+    'post': 'create',
 })
 
 RETIREMENT_RETRIEVE = AccountRetirementView.as_view({

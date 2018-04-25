@@ -6,8 +6,13 @@ https://openedx.atlassian.net/wiki/display/TNL/User+API
 """
 import datetime
 
+import pytz
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
+from django.views.decorators.csrf import ensure_csrf_cookie
 from edx_rest_framework_extensions.authentication import JwtAuthentication
 from rest_framework import permissions
 from rest_framework import status
@@ -16,14 +21,6 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from six import text_type
 from social_django.models import UserSocialAuth
-import pytz
-
-from openedx.core.djangoapps.user_api.preferences.api import update_email_opt_in
-from openedx.core.lib.api.authentication import (
-    SessionAuthenticationAllowInactiveUser,
-    OAuth2AuthenticationAllowInactiveUser,
-)
-from openedx.core.lib.api.parsers import MergePatchParser
 from student.models import (
     User,
     get_retired_email_by_email,
@@ -31,6 +28,12 @@ from student.models import (
     get_potentially_retired_user_by_username
 )
 
+from openedx.core.djangoapps.user_api.preferences.api import update_email_opt_in
+from openedx.core.lib.api.authentication import (
+    SessionAuthenticationAllowInactiveUser,
+    OAuth2AuthenticationAllowInactiveUser,
+)
+from openedx.core.lib.api.parsers import MergePatchParser
 from .api import get_account_settings, update_account_settings
 from .permissions import CanDeactivateUser, CanRetireUser
 from .serializers import UserRetirementStatusSerializer
@@ -476,3 +479,26 @@ class AccountRetirementView(ViewSet):
             return Response(text_type(exc), status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:  # pylint: disable=broad-except
             return Response(text_type(exc), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @method_decorator(login_required)
+    @method_decorator(ensure_csrf_cookie)
+    @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
+    def create(self, request):
+        """
+        POST /api/user/v1/accounts/retirement_queue
+
+        {
+            'username': 'user_to_retire'
+        }
+        """
+
+        if request.user:
+            try:
+                UserRetirementStatus.create_retirement(request.user)
+            except RetirementStateError:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
