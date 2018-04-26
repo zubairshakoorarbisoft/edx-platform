@@ -646,11 +646,13 @@ class PayAndVerifyView(View):
         Returns:
             datetime object in string format
         """
-        photo_verifications = IDVerificationService.verification_valid_or_pending(user)
+        expiration_datetime = IDVerificationService.get_expiration_datetime(
+            user, ['submitted', 'approved', 'must_retry']
+        )
         # return 'expiration_datetime' of latest photo verification if found,
         # otherwise implicitly return ''
-        if photo_verifications:
-            return photo_verifications[0].expiration_datetime.strftime(date_format)
+        if expiration_datetime:
+            return expiration_datetime.strftime(date_format)
 
         return ''
 

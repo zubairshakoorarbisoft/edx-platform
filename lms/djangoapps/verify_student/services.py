@@ -4,6 +4,7 @@ Implementation of abstraction layer for other parts of the system to make querie
 
 import logging
 
+from itertools import chain
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
@@ -12,7 +13,7 @@ from course_modes.models import CourseMode
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from student.models import User
 
-from .models import IDVerificationAggregate
+from .models import SoftwareSecurePhotoVerification, SSOVerification
 from .utils import earliest_allowed_verification_date
 
 log = logging.getLogger(__name__)
@@ -61,72 +62,42 @@ class IDVerificationService(object):
 
         This will check for the user's *initial* verification.
         """
-        return cls.verified_query(earliest_allowed_date).filter(user=user).exists()
+        filter_kwargs = {
+            'user': user,
+            'status': 'approved',
+            'created_at__gte': (earliest_allowed_date or earliest_allowed_verification_date())
+        }
 
-    @classmethod
-    def verified_query(cls, earliest_allowed_date=None):
-        """
-        Return a query set for all records with 'approved' state
-        that are still valid according to the earliest_allowed_date
-        value or policy settings.
-        """
-        return IDVerificationAggregate.objects.filter(
-            status="approved",
-            created_at__gte=(earliest_allowed_date or earliest_allowed_verification_date()),
-        )
+        return (SoftwareSecurePhotoVerification.objects.filter(**filter_kwargs).exists() or
+                SSOVerification.objects.filter(**filter_kwargs).exists())
 
     @classmethod
     def verifications_for_user(cls, user):
         """
         Return a query set for all records associated with the given user.
+        return chain of photo and sso verifications
         """
-        return IDVerificationAggregate.objects.filter(user=user)
+        return chain(SoftwareSecurePhotoVerification.objects.filter(user=user),
+                     SSOVerification.objects.filter(user=user))
 
     @classmethod
     def get_verified_users(cls, users):
         """
         Return the list of user ids that have non expired verifications from the given list of users.
+        return list of users that have either type of record
         """
-        return cls.verified_query().filter(user__in=users).select_related('user')
+        filter_kwargs = {
+            'user__in': users,
+            'status': 'approved',
+            'created_at__gte': (earliest_allowed_verification_date())
+        }
+        return chain(
+            SoftwareSecurePhotoVerification.objects.filter(**filter_kwargs).select_related('user'),
+            SSOVerification.objects.filter(**filter_kwargs).select_related('user')
+        )
 
     @classmethod
-    def verification_valid_or_pending(cls, user, earliest_allowed_date=None, queryset=None):
-        """
-        Check whether the user has a complete verification attempt that is
-        or *might* be good. This means that it's approved, been submitted,
-        or would have been submitted but had an non-user error when it was
-        being submitted.
-        It's basically any situation in which the user has signed off on
-        the contents of the attempt, and we have not yet received a denial.
-        This will check for the user's *initial* verification.
-
-        Arguments:
-            user:
-            earliest_allowed_date: earliest allowed date given in the
-                settings
-            queryset: If a queryset is provided, that will be used instead
-                of hitting the database.
-
-        Returns:
-            queryset: queryset of 'PhotoVerification' sorted by 'created_at' in
-            descending order.
-        """
-
-        valid_statuses = ['submitted', 'approved', 'must_retry']
-
-        if queryset is None:
-            queryset = IDVerificationAggregate.objects.filter(user=user)
-
-        return queryset.filter(
-            status__in=valid_statuses,
-            created_at__gte=(
-                earliest_allowed_date
-                or earliest_allowed_verification_date()
-            )
-        ).order_by('-created_at')
-
-    @classmethod
-    def get_expiration_datetime(cls, user, queryset=None):
+    def get_expiration_datetime(cls, user, statuses):
         """
         Check whether the user has an approved verification and return the
         "expiration_datetime" of most recent "approved" verification.
@@ -139,23 +110,48 @@ class IDVerificationService(object):
         Returns:
             expiration_datetime: expiration_datetime of most recent "approved"
             verification.
-        """
-        if queryset is None:
-            queryset = IDVerificationAggregate.objects.filter(user=user)
 
-        id_verification = queryset.filter(status='approved').first()
-        if id_verification:
-            return id_verification.expiration_datetime
+        add a status parameter to filter on
+        check both records and return expiration_datetime of most recent one
+        """
+        filter_kwargs = {
+            'user': user,
+            'status__in': statuses,
+        }
+
+        photo_id_verifications = SoftwareSecurePhotoVerification.objects.filter(**filter_kwargs)
+        sso_id_verifications = SSOVerification.objects.filter(**filter_kwargs)
+
+        photo_id_verification = photo_id_verifications and photo_id_verifications.first()
+        sso_id_verification = sso_id_verifications and sso_id_verifications.first()
+
+        if not photo_id_verification and not sso_id_verification:
+            return None
+        elif photo_id_verification and not sso_id_verification:
+            return photo_id_verification.expiration_datetime
+        elif sso_id_verification and not photo_id_verification:
+            return sso_id_verification.expiration_datetime
+        elif photo_id_verification.created_at > sso_id_verification.created_at:
+            return photo_id_verification.expiration_datetime
+        else:
+            return sso_id_verification.expiration_datetime
 
     @classmethod
-    def user_has_valid_or_pending(cls, user, earliest_allowed_date=None, queryset=None):
+    def user_has_valid_or_pending(cls, user):
         """
         Check whether the user has an active or pending verification attempt
 
         Returns:
             bool: True or False according to existence of valid verifications
         """
-        return cls.verification_valid_or_pending(user, earliest_allowed_date, queryset).exists()
+        filter_kwargs = {
+            'user': user,
+            'status__in': ['submitted', 'approved', 'must_retry'],
+            'created_at__gte': earliest_allowed_verification_date()
+        }
+
+        return (SoftwareSecurePhotoVerification.objects.filter(**filter_kwargs).exists() or
+                SSOVerification.objects.filter(**filter_kwargs).exists())
 
     @classmethod
     def user_status(cls, user):
@@ -180,8 +176,22 @@ class IDVerificationService(object):
 
         # We need to check the user's most recent attempt.
         try:
-            attempts = IDVerificationAggregate.objects.filter(user=user).order_by('-updated_at')
-            attempt = attempts[0].content_object
+            photo_id_verifications = SoftwareSecurePhotoVerification.objects.filter(user=user).order_by('-updated_at')
+            sso_id_verifications = SSOVerification.objects.filter(user=user).order_by('-updated_at')
+
+            photo_id_verification = photo_id_verifications and photo_id_verifications.first()
+            sso_id_verification = sso_id_verifications and sso_id_verifications.first()
+
+            if not photo_id_verification and not sso_id_verification:
+                return user_status
+            elif photo_id_verification and not sso_id_verification:
+                attempt = photo_id_verification
+            elif sso_id_verification and not photo_id_verification:
+                attempt = sso_id_verification
+            elif photo_id_verification.created_at > sso_id_verification.created_at:
+                attempt = photo_id_verification
+            else:
+                attempt = sso_id_verification
         except IndexError:
             # The user has no verification attempts, return the default set of data.
             return user_status
