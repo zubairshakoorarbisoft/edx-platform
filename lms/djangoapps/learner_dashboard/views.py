@@ -4,8 +4,25 @@ from django.views.decorators.http import require_GET
 
 from edxmako.shortcuts import render_to_response
 
+from lms.djangoapps.learner_dashboard.journals import JournalsFragmentView
 from lms.djangoapps.learner_dashboard.programs import ProgramsFragmentView, ProgramDetailsFragmentView
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
+
+@login_required
+@require_GET
+def journal_listing(request):
+    """View a list of programs in which the user is engaged."""
+    journals_fragment = JournalsFragmentView().render_to_fragment(request)
+
+    context = {
+        'disable_courseware_js': True,
+        'journals_fragment': journals_fragment,
+        'nav_hidden': True,
+        'show_dashboard_tabs': True,
+        'uses_pattern_library': True,
+    }
+
+    return render_to_response('learner_dashboard/journals.html', context)
 
 
 @login_required

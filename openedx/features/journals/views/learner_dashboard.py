@@ -29,7 +29,8 @@ def journal_listing(request):
         'journals': journals,
     }
 
-    return render_to_response('journal_dashboard.html', context)
+    #return render_to_response('journal_dashboard.html', context)
+    return None
 
 
 def get_journal_about_page_url(slug=''):
