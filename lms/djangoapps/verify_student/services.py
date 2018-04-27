@@ -74,10 +74,13 @@ class IDVerificationService(object):
     @classmethod
     def verifications_for_user(cls, user):
         """
-        Return an iterator for all verifications associated with the given user.
+        Return a list of all verifications associated with the given user.
         """
-        return chain(SoftwareSecurePhotoVerification.objects.filter(user=user),
-                     SSOVerification.objects.filter(user=user))
+        verifications = []
+        for verification in chain(SoftwareSecurePhotoVerification.objects.filter(user=user),
+                                  SSOVerification.objects.filter(user=user)):
+            verifications.append(verification)
+        return verifications
 
     @classmethod
     def get_verified_users(cls, users):
@@ -119,7 +122,7 @@ class IDVerificationService(object):
         sso_id_verifications = SSOVerification.objects.filter(**filter_kwargs)
 
         attempt = most_recent_verification(photo_id_verifications, sso_id_verifications, 'updated_at')
-        return attempt.expiration_datetime
+        return attempt and attempt.expiration_datetime
 
     @classmethod
     def user_has_valid_or_pending(cls, user):
@@ -161,16 +164,15 @@ class IDVerificationService(object):
 
         # We need to check the user's most recent attempt.
         try:
-            filter_kwargs = {
-                'user': user
-            }
-
             photo_id_verifications = SoftwareSecurePhotoVerification.objects.filter(user=user).order_by('-updated_at')
             sso_id_verifications = SSOVerification.objects.filter(user=user).order_by('-updated_at')
 
             attempt = most_recent_verification(photo_id_verifications, sso_id_verifications, 'updated_at')
         except IndexError:
             # The user has no verification attempts, return the default set of data.
+            return user_status
+
+        if not attempt:
             return user_status
 
         user_status['should_display'] = attempt.should_display_status_to_user()

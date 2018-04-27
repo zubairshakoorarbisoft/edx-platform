@@ -1230,7 +1230,7 @@ class ReverifyView(View):
         """
         verification_status = IDVerificationService.user_status(request.user)
 
-        expiration_datetime = IDVerificationService.get_expiration_datetime(request.user)
+        expiration_datetime = IDVerificationService.get_expiration_datetime(request.user, ['approved'])
         can_reverify = False
         if expiration_datetime:
             if is_verification_expiring_soon(expiration_datetime):
