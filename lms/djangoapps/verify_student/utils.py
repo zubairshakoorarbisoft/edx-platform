@@ -109,19 +109,16 @@ def most_recent_verification(photo_id_verifications, sso_id_verifications, most_
     Returns:
         The most recent verification.
     """
-    try:
-        photo_id_verification = photo_id_verifications and photo_id_verifications.first()
-        sso_id_verification = sso_id_verifications and sso_id_verifications.first()
+    photo_id_verification = photo_id_verifications and photo_id_verifications.first()
+    sso_id_verification = sso_id_verifications and sso_id_verifications.first()
 
-        if not photo_id_verification and not sso_id_verification:
-            return None
-        elif photo_id_verification and not sso_id_verification:
-            return photo_id_verification
-        elif sso_id_verification and not photo_id_verification:
-            return sso_id_verification
-        elif photo_id_verification.get(most_recent_key) > sso_id_verification.get(most_recent_key):
-            return photo_id_verification
-        else:
-            return sso_id_verification
-    except Exception:
-        log.exception(_("The key is not valid. Must be either created_at or updated_at."))
+    if not photo_id_verification and not sso_id_verification:
+        return None
+    elif photo_id_verification and not sso_id_verification:
+        return photo_id_verification
+    elif sso_id_verification and not photo_id_verification:
+        return sso_id_verification
+    elif getattr(photo_id_verification, most_recent_key) > getattr(sso_id_verification, most_recent_key):
+        return photo_id_verification
+    else:
+        return sso_id_verification
