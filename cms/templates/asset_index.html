@@ -16,6 +16,7 @@
     % if not settings.STUDIO_FRONTEND_CONTAINER_URL:
         <link rel="stylesheet" type="text/css" href="${static.url('common/css/vendor/common.min.css')}" />
         <link rel="stylesheet" type="text/css" href="${static.url('common/css/vendor/assets.min.css')}" />
+        <link rel="stylesheet" type="text/css" href="${static.url('common/css/vendor/helloWorld.min.css')}" />
     % endif
 </%block>
 
@@ -51,6 +52,11 @@
                 "upload_settings": {
                     "max_file_size_in_mbs": ${max_file_size_in_mbs|n, dump_js_escaped_json}
                 }
+            }
+        </%static:studiofrontend>
+        <%static:studiofrontend entry="helloWorld">
+            {
+                "lang": "${language_code | n, js_escaped_string}"
             }
         </%static:studiofrontend>
     </div>
