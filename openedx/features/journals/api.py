@@ -272,4 +272,4 @@ def get_journals_root_url():
     '''
     Return the base url used to display Journals
     '''
-    return configuration_helpers.get_configuration_value('JOURNALS_ROOT_URL', settings.JOURNALS_ROOT_URL)
+    return configuration_helpers.get_value('JOURNALS_ROOT_URL', settings.JOURNALS_ROOT_URL)
