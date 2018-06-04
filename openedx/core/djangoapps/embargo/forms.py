@@ -90,13 +90,3 @@ class IPFilterForm(forms.ModelForm):
             raise forms.ValidationError(msg)
 
         return addresses
-
-    def clean_whitelist(self):
-        """Validates the whitelist"""
-        whitelist = self.cleaned_data["whitelist"]
-        return self._valid_ip_addresses(whitelist)
-
-    def clean_blacklist(self):
-        """Validates the blacklist"""
-        blacklist = self.cleaned_data["blacklist"]
-        return self._valid_ip_addresses(blacklist)
