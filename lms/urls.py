@@ -167,6 +167,11 @@ if settings.FEATURES.get('ENABLE_MOBILE_REST_API'):
         url(r'^api/mobile/v0.5/', include('mobile_api.urls')),
     ]
 
+if settings.FEATURES.get('WTF_BUTTON'):
+    urlpatterns += [
+        url(r'^tellme/', include("tellme.urls")),
+    ]
+
 if settings.FEATURES.get('ENABLE_OPENBADGES'):
     urlpatterns += [
         url(r'^api/badges/v1/', include('badges.api.urls', app_name='badges', namespace='badges_api')),
