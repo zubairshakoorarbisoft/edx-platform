@@ -2322,6 +2322,9 @@ INSTALLED_APPS = [
 
     # API Documentation
     'rest_framework_swagger',
+
+    # Assignments app
+    'openedx.core.djangoapps.assignments',
 ]
 
 ######################### CSRF #########################################
