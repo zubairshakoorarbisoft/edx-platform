@@ -35,5 +35,5 @@ class CourseRunAssignmentViewSet(viewsets.ViewSet):
         assignments = models.CourseRunAssignment.objects.filter(
             course_run_id__in=[enrollment.course_id for enrollment in enrollments]
         )
-        serializer = serializers.CourseRunAssignmentSerializer(assignments)
+        serializer = serializers.CourseRunAssignmentSerializer(assignments, many=True)
         return Response(serializer.data)
