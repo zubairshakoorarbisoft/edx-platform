@@ -27,13 +27,13 @@ class CourseRunAssignmentViewSet(viewsets.ViewSet):
 
     def list(self, request):
         user = request.user
-        if request.GET.user_id:
-            user = User.objects.get(id=request.GET.user_id)
-        if user != request.user and not request.user.is_staff:
-            return
+        # if request.GET.user_id:
+        #     user = User.objects.get(id=request.GET.user_id)
+        # if user != request.user and not request.user.is_staff:
+        #     return
         enrollments = CourseEnrollment.objects.filter(user=user)
         assignments = models.CourseRunAssignment.objects.filter(
-            course_id__in=[enrollment.course_id for enrollment in enrollments]
+            course_run_id__in=[enrollment.course_id for enrollment in enrollments]
         )
         serializer = serializers.CourseRunAssignmentSerializer(assignments)
         return Response(serializer.data)

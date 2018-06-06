@@ -5,4 +5,5 @@ from django.apps import AppConfig
 
 
 class AssignmentsConfig(AppConfig):
-    name = 'assignments'
+    name = 'openedx.core.djangoapps.assignments'
+    verbose_name = _("Assignments")

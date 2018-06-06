@@ -143,6 +143,8 @@ urlpatterns = [
 
     url(r'^dashboard/', include('learner_dashboard.urls')),
     url(r'^api/experiments/', include('experiments.urls', namespace='api_experiments')),
+    url(r'^api/assignments/', include('openedx.core.djangoapps.assignments.urls')),
+
 ]
 
 # TODO: This needs to move to a separate urls.py once the student_account and
