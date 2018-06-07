@@ -1,0 +1,39 @@
+## mako
+
+<%page expression_filter="h"/>
+<%namespace name='static' file='../static_content.html'/>
+
+<%!
+from openedx.core.djangolib.js_utils import (
+    js_escaped_string
+)
+%>
+
+<%include file="tpl-description.html"/>
+<%include file="tpl-highlighter.html"/>
+<%include file="tpl-overview.html"/>
+<%include file="tpl-submit-success.html"/>
+<%include file="tpl-submit-error.html"/>
+
+<link rel="stylesheet" href="static/js/vendor/feedback.min.css">
+<script src="static/js/vendor/feedback.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $.feedback({
+            ajaxURL: "http://18.189.83.10:1234/",
+            html2canvasURL: "static/js/vendor/html2canvas.min.js",
+            feedbackButton: "#feedback-btn",
+            initButtonText: "Feedback",
+            postHTML: false,
+            tpl: {
+                description: $('#feedback-data-description').data('description'),
+                highlighter: $('#feedback-data-highlighter').data('highlighter'),
+                overview:    $('#feedback-data-overview').data('overview'),
+                submitSuccess:$('#feedback-data-success').data('success'),
+                submitError: $('#feedback-data-error').data('error'),
+            },
+            initialBox: true
+        });
+    });
+</script>

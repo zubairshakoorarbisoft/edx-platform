@@ -2517,7 +2517,7 @@ VERIFY_STUDENT = {
 }
 DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH = "verify_student_disable_account_activation_requirement"
 
-### This enables the Metrics tab for the Instructor dashboard ###########
+### This enables the WTF button
 FEATURES['WTF_BUTTON'] = True
 if FEATURES.get('WTF_BUTTON'):
     INSTALLED_APPS.append('tellme')
