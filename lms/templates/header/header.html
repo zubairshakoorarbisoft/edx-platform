@@ -39,6 +39,16 @@ from openedx.features.course_experience import ENABLE_GDPR_COMPAT_FLAG
             props={}
         )}
     % endif
+    <%
+        if not request.user.is_anonymous:
+            tpl = """<div style="background-color: lightblue; padding: 10px;">{% load masquerade %}{% masquerade_status %} {% masquerade_link %}</div>"""
+            from django.template import Template, Context
+            t = Template(tpl)
+            impersonate_banner = t.render(Context(dict_=dict(request=request)))
+        else:
+            impersonate_banner = '';
+    %>
+    ${impersonate_banner}
     <div class="main-header">
         <%include file="navbar-logo-header.html" args="online_help_token=online_help_token"/>
         <div class="hamburger-menu" role="button" aria-label=${_("Options Menu")} aria-expanded="false" aria-controls="mobile-menu" tabindex="0">

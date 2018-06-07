@@ -1298,6 +1298,10 @@ MIDDLEWARE_CLASSES = [
 
     'waffle.middleware.WaffleMiddleware',
 
+    # Allows a user to masquerade as another user.
+    # This must come after Session and Authentication middleware classes.
+    'masquerade.middleware.MasqueradeMiddleware',
+
     # This must be last
     'openedx.core.djangoapps.site_configuration.middleware.SessionCookieDomainOverrideMiddleware',
 ]
@@ -2315,6 +2319,9 @@ INSTALLED_APPS = [
 
     # DRF filters
     'django_filters',
+
+    # masquerading
+    'masquerade',
 ]
 
 ######################### CSRF #########################################
