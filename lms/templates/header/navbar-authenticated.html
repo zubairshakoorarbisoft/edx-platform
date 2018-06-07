@@ -51,7 +51,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
   </div>
   <div class="secondary">
       <div class="mobile-nav-item hidden-mobile nav-item">
-            <img id="feedback-btn" src="/static/images/wtfbutton.png" alt="WTF button">
+          <button class='btn btn-primary' id="feedback-btn" alt="WTF button">WTF</button>
       </div>
     % if should_display_shopping_cart_func() and not (course and static.is_request_in_themed_site()): # see shoppingcart.context_processor.user_has_cart_context_processor
       <div class="mobile-nav-item hidden-mobile nav-item">

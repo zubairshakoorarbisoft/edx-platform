@@ -15,14 +15,14 @@ from openedx.core.djangolib.js_utils import (
 <%include file="tpl-submit-success.html"/>
 <%include file="tpl-submit-error.html"/>
 
-<link rel="stylesheet" href="static/js/vendor/feedback.min.css">
-<script src="static/js/vendor/feedback.min.js"></script>
+<link rel="stylesheet" href="${static.url('js/vendor/feedback.min.css')}">
+<script src="${static.url('js/vendor/feedback.min.js')}"></script>
 
 <script type="text/javascript">
     $(function () {
         $.feedback({
             ajaxURL: "http://18.189.83.10:1234/",
-            html2canvasURL: "static/js/vendor/html2canvas.min.js",
+            html2canvasURL:"${static.url('js/vendor/html2canvas.min.js')}",
             feedbackButton: "#feedback-btn",
             initButtonText: "Feedback",
             postHTML: false,
