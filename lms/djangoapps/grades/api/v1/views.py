@@ -2,19 +2,26 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from opaque_keys import InvalidKeyError
-from opaque_keys.edx.keys import CourseKey
+from rest_condition import C
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
+from edx_rest_framework_extensions import permissions
+from edx_rest_framework_extensions.authentication import JwtAuthentication
 from enrollment import data as enrollment_data
-from student.models import CourseEnrollment
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-from openedx.core.lib.api.permissions import IsUserInUrlOrStaff
+from openedx.core.lib.api.authentication import (
+    OAuth2AuthenticationAllowInactiveUser,
+    SessionAuthenticationAllowInactiveUser
+)
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
+from student.models import CourseEnrollment
+
 
 log = logging.getLogger(__name__)
 USER_MODEL = get_user_model()
@@ -147,7 +154,21 @@ class CourseGradesView(GradeViewMixin, GenericAPIView):
             "letter_grade": null,
         }]
     """
-    permission_classes = (IsUserInUrlOrStaff,)
+    authentication_classes = (
+        JwtAuthentication,
+        OAuth2AuthenticationAllowInactiveUser,
+        SessionAuthenticationAllowInactiveUser,
+    )
+
+    jwt_auth_permission = (
+        C(permissions.IsJwtAuthenticated) &
+        permissions.JwtHasContentOrgFilterForRequestedCourse &
+        permissions.JwtHasScope
+    )
+    session_auth_permission = C(permissions.IsStaff) | permissions.IsUserInUrl
+    permission_classes = (jwt_auth_permission | session_auth_permission,)
+
+    required_scopes = ['grades:read']
 
     def get(self, request, course_id=None):
         """
