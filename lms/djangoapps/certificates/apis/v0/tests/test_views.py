@@ -168,6 +168,7 @@ class CertificatesRestApiTest(SharedModuleStoreTestCase, APITestCase):
     @patch('edx_rest_framework_extensions.permissions.log')
     @ddt.data(*list(AuthType))
     def test_another_user(self, auth_type, mock_log):
+        """ Returns 403 for OAuth and Session auth with IsUserInUrl. """
         resp = self._get_response(self.student_no_cert, auth_type)
         self.assertEqual(
             resp.status_code,
@@ -195,7 +196,7 @@ class CertificatesRestApiTest(SharedModuleStoreTestCase, APITestCase):
     @patch('edx_rest_framework_extensions.permissions.log')
     @ddt.data(True, False)
     def test_jwt_unrequired_scopes(self, scopes_enforced, mock_log):
-        """ Returns 403 when scopes are enforced. """
+        """ Returns 403 when scopes are enforced with JwtHasScope. """
         with TODO_REPLACE_SWITCH.override(active=scopes_enforced):
             jwt_token = self._create_jwt_token(
                 self.student,
@@ -223,7 +224,7 @@ class CertificatesRestApiTest(SharedModuleStoreTestCase, APITestCase):
     @patch('edx_rest_framework_extensions.permissions.log')
     @ddt.data(True, False)
     def test_jwt_on_behalf_of_other_user(self, scopes_enforced, mock_log):
-        """ Returns 403 when scopes are enforced. """
+        """ Returns 403 when scopes are enforced with JwtHasUserFilterForRequestedUser. """
         with TODO_REPLACE_SWITCH.override(active=scopes_enforced):
             jwt_token = self._create_jwt_token(
                 self.student_no_cert,
