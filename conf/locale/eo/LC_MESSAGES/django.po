@@ -32,8 +32,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1a\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-06-17 20:37+0000\n"
-"PO-Revision-Date: 2018-06-17 20:37:17.443299\n"
+"POT-Creation-Date: 2018-06-24 20:36+0000\n"
+"PO-Revision-Date: 2018-06-24 20:37:01.734188\n"
 "Last-Translator: \n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
 "Language: eo\n"
@@ -12622,6 +12622,24 @@ msgstr ""
 "        Pléäsé trý löggïng ïn ägäïn.  (Ýöü mäý nééd tö réstärt ýöür ßröwsér.)\n"
 "         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒ#"
 
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid ""
+"Comma-separated list of scopes that this application will be allowed to "
+"request."
+msgstr ""
+"Çömmä-sépärätéd lïst öf sçöpés thät thïs äpplïçätïön wïll ßé ällöwéd tö "
+"réqüést. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "Content Provider"
+msgstr "Çöntént Prövïdér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "The short_name of an existing Organization."
+msgstr ""
+"Thé shört_nämé öf än éxïstïng Örgänïzätïön. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
 #: openedx/core/djangoapps/password_policy/apps.py
 msgid "Password Policy"
 msgstr "Pässwörd Pölïçý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
@@ -25044,6 +25062,16 @@ msgstr "Çöürsé Téäm Ⱡ'σяєм ιρѕυм ∂σłσя #"
 msgid "Advanced Settings"
 msgstr "Àdvänçéd Séttïngs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
+#: cms/templates/checklists.html cms/templates/widgets/header.html
+msgid "Checklists"
+msgstr "Çhéçklïsts Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: cms/templates/checklists.html cms/templates/export.html
+#: cms/templates/export_git.html cms/templates/import.html
+#: cms/templates/widgets/header.html
+msgid "Tools"
+msgstr "Tööls Ⱡ'σяєм ιρѕ#"
+
 #: cms/templates/component.html cms/templates/studio_xblock_wrapper.html
 msgid "Duplicate"
 msgstr "Düplïçäté Ⱡ'σяєм ιρѕυм ∂σł#"
@@ -25798,11 +25826,6 @@ msgstr "Lïßrärý Éxpört Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 #: cms/templates/export.html
 msgid "Course Export"
 msgstr "Çöürsé Éxpört Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
-
-#: cms/templates/export.html cms/templates/export_git.html
-#: cms/templates/import.html cms/templates/widgets/header.html
-msgid "Tools"
-msgstr "Tööls Ⱡ'σяєм ιρѕ#"
 
 #: cms/templates/export.html
 msgid "About Exporting Libraries"

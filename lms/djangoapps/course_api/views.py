@@ -232,6 +232,7 @@ class CourseListView(DeveloperErrorViewMixin, ListAPIView):
     """
 
     pagination_class = NamespacedPageNumberPagination
+    pagination_class.max_page_size = 100
     serializer_class = CourseSerializer
     throttle_classes = CourseListUserThrottle,
 

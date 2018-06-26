@@ -32,8 +32,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1a\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-06-17 20:37+0000\n"
-"PO-Revision-Date: 2018-06-17 20:37:17.443299\n"
+"POT-Creation-Date: 2018-06-24 20:36+0000\n"
+"PO-Revision-Date: 2018-06-24 20:37:01.734188\n"
 "Last-Translator: \n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
 "Language: rtl\n"
@@ -10968,6 +10968,22 @@ msgstr ""
 "        حمثشسث فقغ مخللهرل هر شلشهر.  (غخع وشغ رثثي فخ قثسفشقف غخعق زقخصسثق.)\n"
 "        "
 
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid ""
+"Comma-separated list of scopes that this application will be allowed to "
+"request."
+msgstr ""
+"ذخووش-سثحشقشفثي مهسف خب سذخحثس فاشف فاهس شححمهذشفهخر صهمم زث شممخصثي فخ "
+"قثضعثسف."
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "Content Provider"
+msgstr "ذخرفثرف حقخدهيثق"
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "The short_name of an existing Organization."
+msgstr "فاث ساخقف_رشوث خب شر ثطهسفهرل خقلشرهظشفهخر."
+
 #: openedx/core/djangoapps/password_policy/apps.py
 msgid "Password Policy"
 msgstr "حشسسصخقي حخمهذغ"
@@ -21849,6 +21865,16 @@ msgstr "ذخعقسث فثشو"
 msgid "Advanced Settings"
 msgstr "شيدشرذثي سثففهرلس"
 
+#: cms/templates/checklists.html cms/templates/widgets/header.html
+msgid "Checklists"
+msgstr "ذاثذنمهسفس"
+
+#: cms/templates/checklists.html cms/templates/export.html
+#: cms/templates/export_git.html cms/templates/import.html
+#: cms/templates/widgets/header.html
+msgid "Tools"
+msgstr "فخخمس"
+
 #: cms/templates/component.html cms/templates/studio_xblock_wrapper.html
 msgid "Duplicate"
 msgstr "يعحمهذشفث"
@@ -22488,11 +22514,6 @@ msgstr "مهزقشقغ ثطحخقف"
 #: cms/templates/export.html
 msgid "Course Export"
 msgstr "ذخعقسث ثطحخقف"
-
-#: cms/templates/export.html cms/templates/export_git.html
-#: cms/templates/import.html cms/templates/widgets/header.html
-msgid "Tools"
-msgstr "فخخمس"
 
 #: cms/templates/export.html
 msgid "About Exporting Libraries"

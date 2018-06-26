@@ -32,8 +32,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1a\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-06-17 20:37+0000\n"
-"PO-Revision-Date: 2018-06-17 20:37:17.443299\n"
+"POT-Creation-Date: 2018-06-24 20:36+0000\n"
+"PO-Revision-Date: 2018-06-24 20:37:01.734188\n"
 "Last-Translator: \n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
 "Language: en\n"
@@ -9897,6 +9897,20 @@ msgid ""
 "        "
 msgstr ""
 
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid ""
+"Comma-separated list of scopes that this application will be allowed to "
+"request."
+msgstr ""
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "Content Provider"
+msgstr ""
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "The short_name of an existing Organization."
+msgstr ""
+
 #: openedx/core/djangoapps/password_policy/apps.py
 msgid "Password Policy"
 msgstr ""
@@ -19599,6 +19613,16 @@ msgstr ""
 msgid "Advanced Settings"
 msgstr ""
 
+#: cms/templates/checklists.html cms/templates/widgets/header.html
+msgid "Checklists"
+msgstr ""
+
+#: cms/templates/checklists.html cms/templates/export.html
+#: cms/templates/export_git.html cms/templates/import.html
+#: cms/templates/widgets/header.html
+msgid "Tools"
+msgstr ""
+
 #: cms/templates/component.html cms/templates/studio_xblock_wrapper.html
 msgid "Duplicate"
 msgstr ""
@@ -20157,11 +20181,6 @@ msgstr ""
 
 #: cms/templates/export.html
 msgid "Course Export"
-msgstr ""
-
-#: cms/templates/export.html cms/templates/export_git.html
-#: cms/templates/import.html cms/templates/widgets/header.html
-msgid "Tools"
 msgstr ""
 
 #: cms/templates/export.html

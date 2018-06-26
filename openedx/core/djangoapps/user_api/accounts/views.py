@@ -572,6 +572,38 @@ class AccountRetirementPartnerReportView(ViewSet):
 
         return Response(serializer.data)
 
+    @request_requires_username
+    def retirement_partner_status_create(self, request):
+        """
+        PUT /api/user/v1/accounts/retirement_partner_report/
+
+        {
+            'username': 'user_to_retire'
+        }
+
+        Creates a UserRetirementPartnerReportingStatus object for the given user
+        as part of the retirement pipeline.
+        """
+        username = request.data['username']
+
+        try:
+            retirement = UserRetirementStatus.get_retirement_for_retirement_action(username)
+            orgs = self._get_orgs_for_user(retirement.user)
+
+            if orgs:
+                UserRetirementPartnerReportingStatus.objects.get_or_create(
+                    user=retirement.user,
+                    defaults={
+                        'original_username': retirement.original_username,
+                        'original_email': retirement.original_email,
+                        'original_name': retirement.original_name
+                    }
+                )
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except UserRetirementStatus.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
     def retirement_partner_cleanup(self, request):
         """
         DELETE /api/user/v1/accounts/retirement_partner_report/
@@ -721,8 +753,6 @@ class LMSAccountRetirementView(ViewSet):
         """
 
         username = request.data['username']
-        if is_username_retired(username):
-            return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
             retirement = UserRetirementStatus.get_retirement_for_retirement_action(username)
@@ -770,8 +800,6 @@ class AccountRetirementView(ViewSet):
         any other PII associated with this user.
         """
         username = request.data['username']
-        if is_username_retired(username):
-            return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
             retirement_status = UserRetirementStatus.get_retirement_for_retirement_action(username)
@@ -800,9 +828,6 @@ class AccountRetirementView(ViewSet):
             # Retire any objects linked to the user via their original email
             CourseEnrollmentAllowed.delete_by_user_value(original_email, field='email')
             UnregisteredLearnerCohortAssignments.delete_by_user_value(original_email, field='email')
-
-            # TODO: Password Reset links - https://openedx.atlassian.net/browse/PLAT-2104
-            # TODO: Delete OAuth2 records - https://openedx.atlassian.net/browse/EDUCATOR-2703
 
             user.first_name = ''
             user.last_name = ''

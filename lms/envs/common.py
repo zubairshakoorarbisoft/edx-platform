@@ -301,12 +301,6 @@ FEATURES = {
     # log all information from cybersource callbacks
     'LOG_POSTPAY_CALLBACKS': True,
 
-    # enable beacons for video timing statistics
-    'ENABLE_VIDEO_BEACON': False,
-
-    # enable beacons for lms onload event statistics
-    'ENABLE_ONLOAD_BEACON': False,
-
     # Toggle platform-wide course licensing
     'LICENSING': False,
 
@@ -1296,6 +1290,8 @@ MIDDLEWARE_CLASSES = [
 
     # Inserts Enterprise content.
     'openedx.features.enterprise_support.middleware.EnterpriseMiddleware',
+
+    'edx_rest_framework_extensions.middleware.EnsureJWTAuthSettingsMiddleware',
 
     # This must be last
     'openedx.core.djangoapps.site_configuration.middleware.SessionCookieDomainOverrideMiddleware',
@@ -2996,13 +2992,6 @@ SEARCH_FILTER_GENERATOR = "lms.lib.courseware_search.lms_filter_generator.LmsSea
 # Override to skip enrollment start date filtering in course search
 SEARCH_SKIP_ENROLLMENT_START_DATE_FILTERING = False
 
-### PERFORMANCE EXPERIMENT SETTINGS ###
-# CDN experiment/monitoring flags
-CDN_VIDEO_URLS = {}
-
-# Page onload event sampling rate (min 0.0, max 1.0)
-ONLOAD_BEACON_SAMPLE_RATE = 0.0
-
 # The configuration visibility of account fields.
 ACCOUNT_VISIBILITY_CONFIGURATION = {
     # Default visibility level for accounts without a specified value
@@ -3423,26 +3412,20 @@ RETIREMENT_STATES = [
     'LOCKING_ACCOUNT',
     'LOCKING_COMPLETE',
 
-    'RETIRING_CREDENTIALS',
-    'CREDENTIALS_COMPLETE',
-
-    'RETIRING_ECOM',
-    'ECOM_COMPLETE',
-
+    # Use these states only when ENABLE_DISCUSSION_SERVICE is True.
     'RETIRING_FORUMS',
     'FORUMS_COMPLETE',
 
+    # TODO - Change these states to be the LMS-only email opt-out - PLAT-2189
     'RETIRING_EMAIL_LISTS',
     'EMAIL_LISTS_COMPLETE',
 
     'RETIRING_ENROLLMENTS',
     'ENROLLMENTS_COMPLETE',
 
+    # Use these states only when ENABLE_STUDENT_NOTES is True.
     'RETIRING_NOTES',
     'NOTES_COMPLETE',
-
-    'NOTIFYING_PARTNERS',
-    'PARTNERS_NOTIFIED',
 
     'RETIRING_LMS',
     'LMS_COMPLETE',

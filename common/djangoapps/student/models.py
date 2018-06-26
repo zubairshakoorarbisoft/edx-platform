@@ -49,7 +49,6 @@ from six import text_type
 from slumber.exceptions import HttpClientError, HttpServerError
 from user_util import user_util
 
-import dogstats_wrapper as dog_stats_api
 import lms.lib.comment_client as cc
 from student.signals import UNENROLL_DONE, ENROLL_STATUS_CHANGE, ENROLLMENT_TRACK_UPDATED
 from lms.djangoapps.certificates.models import GeneratedCertificate
@@ -104,6 +103,7 @@ UNENROLLED_TO_ENROLLED = 'from unenrolled to enrolled'
 ALLOWEDTOENROLL_TO_UNENROLLED = 'from allowed to enroll to enrolled'
 UNENROLLED_TO_UNENROLLED = 'from unenrolled to unenrolled'
 DEFAULT_TRANSITION_STATE = 'N/A'
+SCORE_RECALCULATION_DELAY_ON_ENROLLMENT_UPDATE = 30
 
 TRANSITION_STATES = (
     (UNENROLLED_TO_ALLOWEDTOENROLL, UNENROLLED_TO_ALLOWEDTOENROLL),
@@ -1271,7 +1271,7 @@ class CourseEnrollment(models.Model):
 
         Args:
             user (User): The user associated with the enrollment.
-            course_id (CourseKey): The key of the course associated with the enrollment.
+            course_key (CourseKey): The key of the course associated with the enrollment.
 
         Returns:
             Course enrollment object or None
@@ -1334,31 +1334,24 @@ class CourseEnrollment(models.Model):
         if activation_changed:
             if self.is_active:
                 self.emit_event(EVENT_NAME_ENROLLMENT_ACTIVATED)
-
-                dog_stats_api.increment(
-                    "common.student.enrollment",
-                    tags=[u"org:{}".format(self.course_id.org),
-                          u"offering:{}".format(self.course_id.offering),
-                          u"mode:{}".format(self.mode)]
-                )
-
             else:
                 UNENROLL_DONE.send(sender=None, course_enrollment=self, skip_refund=skip_refund)
-
                 self.emit_event(EVENT_NAME_ENROLLMENT_DEACTIVATED)
                 self.send_signal(EnrollStatusChange.unenroll)
 
-                dog_stats_api.increment(
-                    "common.student.unenrollment",
-                    tags=[u"org:{}".format(self.course_id.org),
-                          u"offering:{}".format(self.course_id.offering),
-                          u"mode:{}".format(self.mode)]
-                )
         if mode_changed:
             # Only emit mode change events when the user's enrollment
             # mode has changed from its previous setting
             self.emit_event(EVENT_NAME_ENROLLMENT_MODE_CHANGED)
-            ENROLLMENT_TRACK_UPDATED.send(sender=None, user=self.user, course_key=self.course_id)
+            # this signal is meant to trigger a score recalculation celery task,
+            # `countdown` is added to celery task as delay so that cohort is duly updated
+            # before starting score recalculation
+            ENROLLMENT_TRACK_UPDATED.send(
+                sender=None,
+                user=self.user,
+                course_key=self.course_id,
+                countdown=SCORE_RECALCULATION_DELAY_ON_ENROLLMENT_UPDATE
+            )
 
     def send_signal(self, event, cost=None, currency=None):
         """

@@ -10,7 +10,7 @@
 # Jong-Dae Park <jdpark7@gmail.com>, 2013
 # jeon <bluerespect@nate.com>, 2014
 # Jong-Dae Park <jdpark7@gmail.com>, 2013
-# 준구 강 <chr0m3.kr@gmail.com>, 2015
+# JunGu Kang <chr0m3.kr@gmail.com>, 2015
 # Gu Hong Min <placidmoon1@gmail.com>, 2015
 # NICK <nigitm@gmail.com>, 2017
 # Seok Jun Yoon <fake2real@dctribe.com>, 2015
@@ -90,7 +90,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-06-13 13:56+0000\n"
+"POT-Creation-Date: 2018-06-21 12:32+0000\n"
 "PO-Revision-Date: 2018-03-13 13:51+0000\n"
 "Last-Translator: kmooc <shevious@gmail.com>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/open-edx/edx-platform/language/ko_KR/)\n"
@@ -8825,7 +8825,7 @@ msgstr "모든 하위 문서 보기"
 msgid "This article was last modified:"
 msgstr "이 글의 최종 수정:"
 
-#: lms/templates/wiki/create.html
+#: lms/templates/wiki/create.html lms/templates/wiki/create.html.py
 msgid "Add new article"
 msgstr "위키 글 작성하기"
 
@@ -8834,10 +8834,12 @@ msgid "Create article"
 msgstr "저장"
 
 #: lms/templates/wiki/create.html lms/templates/wiki/delete.html
+#: lms/templates/wiki/delete.html.py
 msgid "Go back"
 msgstr "되돌아가기"
 
-#: lms/templates/wiki/delete.html lms/templates/wiki/edit.html
+#: lms/templates/wiki/delete.html lms/templates/wiki/delete.html.py
+#: lms/templates/wiki/edit.html
 msgid "Delete article"
 msgstr "글 삭제"
 
@@ -8882,7 +8884,8 @@ msgstr "글을 삭제하려고 합니다. 확인해 주십시오."
 msgid "Edit"
 msgstr "편집"
 
-#: lms/templates/wiki/edit.html lms/templates/ccx/schedule.html
+#: lms/templates/wiki/edit.html lms/templates/wiki/edit.html.py
+#: lms/templates/ccx/schedule.html
 msgid "Save changes"
 msgstr "변경사항 저장"
 
@@ -9741,6 +9744,20 @@ msgid ""
 "        Your university identity server did not return your ID information to us.\n"
 "        Please try logging in again.  (You may need to restart your browser.)\n"
 "        "
+msgstr ""
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid ""
+"Comma-separated list of scopes that this application will be allowed to "
+"request."
+msgstr ""
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "Content Provider"
+msgstr ""
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "The short_name of an existing Organization."
 msgstr ""
 
 #: openedx/core/djangoapps/password_policy/apps.py
@@ -11283,11 +11300,12 @@ msgstr "페이지를 찾을 수 없습니다."
 msgid "Page not found"
 msgstr "페이지를 찾을 수 없습니다."
 
-#: cms/templates/asset_index.html cms/templates/course_info.html
-#: cms/templates/course_outline.html cms/templates/edit-tabs.html
-#: cms/templates/textbooks.html cms/templates/videos_index.html
-#: cms/templates/widgets/header.html lms/templates/static_htmlbook.html
-#: lms/templates/static_pdfbook.html lms/templates/staticbook.html
+#: cms/templates/asset_index.html cms/templates/checklists.html
+#: cms/templates/course_info.html cms/templates/course_outline.html
+#: cms/templates/edit-tabs.html cms/templates/textbooks.html
+#: cms/templates/videos_index.html cms/templates/widgets/header.html
+#: lms/templates/static_htmlbook.html lms/templates/static_pdfbook.html
+#: lms/templates/staticbook.html
 msgid "Content"
 msgstr ""
 
@@ -19544,6 +19562,10 @@ msgstr "강좌 운영팀"
 msgid "Advanced Settings"
 msgstr "고급 설정"
 
+#: cms/templates/checklists.html
+msgid "Checklists"
+msgstr ""
+
 #: cms/templates/component.html cms/templates/studio_xblock_wrapper.html
 msgid "Duplicate"
 msgstr "복사"
@@ -20328,15 +20350,43 @@ msgid "What content is exported?"
 msgstr "어떤 콘텐츠가 내보내지는가?"
 
 #: cms/templates/export.html
-msgid ""
-"The course content and structure (including sections, subsections, and "
-"units) are exported. Values from Advanced Settings, including MATLAB API "
-"keys and LTI passports, are also exported. Other data, including student "
-"data, grading information, discussion forum data, course settings, and "
-"course team information, is not exported."
+msgid "The following content is exported."
 msgstr ""
-"강좌 콘텐츠와 구조 (주제, 소주제, 학습활동 포함)가 내보내기 됩니다. MATLAB API 키와 LTI Passport 포함 고급 설정"
-" 값 또한 내보내집니다. 학습자 데이터, 채점 정보, 게시판 데이터 등의 다른 자료들은 내보내기 되지 않습니다. "
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Course content and structure"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Course dates"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Grading policy"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Any group configurations"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid ""
+"Settings on the Advanced Settings page, including MATLAB API keys and LTI "
+"passports"
+msgstr ""
+
+#: cms/templates/export.html
+msgid "The following content is not exported."
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid ""
+"Learner-specific content, such as learner grades and discussion forum data"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "The course team"
+msgstr ""
 
 #. Translators: ".tar.gz" is a file extension, and should not be translated
 #: cms/templates/export.html
@@ -20910,36 +20960,7 @@ msgid "The following content is imported."
 msgstr ""
 
 #: cms/templates/import.html
-msgid "Course content and structure"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Course dates"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Grading policy"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Any group configurations"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Settings on the Advanced Settings page"
-msgstr ""
-
-#: cms/templates/import.html
 msgid "The following content is not imported."
-msgstr ""
-
-#: cms/templates/import.html
-msgid ""
-"Learner-specific content, such as learner grades and discussion forum data"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "The course team"
 msgstr ""
 
 #: cms/templates/import.html

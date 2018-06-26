@@ -265,7 +265,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-06-13 13:56+0000\n"
+"POT-Creation-Date: 2018-06-21 12:32+0000\n"
 "PO-Revision-Date: 2018-04-11 14:18+0000\n"
 "Last-Translator: Mireille Cabuay\n"
 "Language-Team: French (http://www.transifex.com/open-edx/edx-platform/language/fr/)\n"
@@ -9715,7 +9715,7 @@ msgstr "Voir tous les articles"
 msgid "This article was last modified:"
 msgstr "Cet article a été modifié pour la dernière fois:"
 
-#: lms/templates/wiki/create.html
+#: lms/templates/wiki/create.html lms/templates/wiki/create.html.py
 msgid "Add new article"
 msgstr "Ajouter un nouvel article"
 
@@ -9724,10 +9724,12 @@ msgid "Create article"
 msgstr "Créer un article"
 
 #: lms/templates/wiki/create.html lms/templates/wiki/delete.html
+#: lms/templates/wiki/delete.html.py
 msgid "Go back"
 msgstr "Retour"
 
-#: lms/templates/wiki/delete.html lms/templates/wiki/edit.html
+#: lms/templates/wiki/delete.html lms/templates/wiki/delete.html.py
+#: lms/templates/wiki/edit.html
 msgid "Delete article"
 msgstr "Supprimer l'article"
 
@@ -9778,7 +9780,8 @@ msgstr "Vous allez supprimer un article. Veuillez confirmer."
 msgid "Edit"
 msgstr "Éditer"
 
-#: lms/templates/wiki/edit.html lms/templates/ccx/schedule.html
+#: lms/templates/wiki/edit.html lms/templates/wiki/edit.html.py
+#: lms/templates/ccx/schedule.html
 msgid "Save changes"
 msgstr "Enregistrer les modifications"
 
@@ -10660,6 +10663,20 @@ msgstr ""
 "\n"
 "Votre serveur d'identité universitaire ne nous a pas retourné vos informations d'identification.\n"
 "S'il vous plaît essayez de vous connecter à nouveau. (Vous devrez peut-être redémarrer votre navigateur.) "
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid ""
+"Comma-separated list of scopes that this application will be allowed to "
+"request."
+msgstr ""
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "Content Provider"
+msgstr ""
+
+#: openedx/core/djangoapps/oauth_dispatch/models.py
+msgid "The short_name of an existing Organization."
+msgstr ""
 
 #: openedx/core/djangoapps/password_policy/apps.py
 msgid "Password Policy"
@@ -12263,11 +12280,12 @@ msgstr "Page non trouvée"
 msgid "Page not found"
 msgstr "Page non trouvée"
 
-#: cms/templates/asset_index.html cms/templates/course_info.html
-#: cms/templates/course_outline.html cms/templates/edit-tabs.html
-#: cms/templates/textbooks.html cms/templates/videos_index.html
-#: cms/templates/widgets/header.html lms/templates/static_htmlbook.html
-#: lms/templates/static_pdfbook.html lms/templates/staticbook.html
+#: cms/templates/asset_index.html cms/templates/checklists.html
+#: cms/templates/course_info.html cms/templates/course_outline.html
+#: cms/templates/edit-tabs.html cms/templates/textbooks.html
+#: cms/templates/videos_index.html cms/templates/widgets/header.html
+#: lms/templates/static_htmlbook.html lms/templates/static_pdfbook.html
+#: lms/templates/staticbook.html
 msgid "Content"
 msgstr "Contenu"
 
@@ -20776,6 +20794,10 @@ msgstr "Équipe pédagogique"
 msgid "Advanced Settings"
 msgstr "Paramètres avancés"
 
+#: cms/templates/checklists.html
+msgid "Checklists"
+msgstr ""
+
 #: cms/templates/component.html cms/templates/studio_xblock_wrapper.html
 msgid "Duplicate"
 msgstr "Dupliquer"
@@ -21599,18 +21621,43 @@ msgid "What content is exported?"
 msgstr "Quelles sont les données exportées ?"
 
 #: cms/templates/export.html
-msgid ""
-"The course content and structure (including sections, subsections, and "
-"units) are exported. Values from Advanced Settings, including MATLAB API "
-"keys and LTI passports, are also exported. Other data, including student "
-"data, grading information, discussion forum data, course settings, and "
-"course team information, is not exported."
+msgid "The following content is exported."
 msgstr ""
-"Le contenu du cours et sa structure (sections, sous-sections et unités) sont"
-" exportés. Les valeurs des paramètres avancés, y compris les clés d'API "
-"MATLAB et les passeports LTI, sont aussi exportés. Les autres données, "
-"étudiants, information d'évaluation, forum de discussion, paramètres du "
-"cours et de l'équipe ne sont pas exportées."
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Course content and structure"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Course dates"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Grading policy"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "Any group configurations"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid ""
+"Settings on the Advanced Settings page, including MATLAB API keys and LTI "
+"passports"
+msgstr ""
+
+#: cms/templates/export.html
+msgid "The following content is not exported."
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid ""
+"Learner-specific content, such as learner grades and discussion forum data"
+msgstr ""
+
+#: cms/templates/export.html cms/templates/import.html
+msgid "The course team"
+msgstr ""
 
 #. Translators: ".tar.gz" is a file extension, and should not be translated
 #: cms/templates/export.html
@@ -22209,36 +22256,7 @@ msgid "The following content is imported."
 msgstr ""
 
 #: cms/templates/import.html
-msgid "Course content and structure"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Course dates"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Grading policy"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Any group configurations"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "Settings on the Advanced Settings page"
-msgstr ""
-
-#: cms/templates/import.html
 msgid "The following content is not imported."
-msgstr ""
-
-#: cms/templates/import.html
-msgid ""
-"Learner-specific content, such as learner grades and discussion forum data"
-msgstr ""
-
-#: cms/templates/import.html
-msgid "The course team"
 msgstr ""
 
 #: cms/templates/import.html

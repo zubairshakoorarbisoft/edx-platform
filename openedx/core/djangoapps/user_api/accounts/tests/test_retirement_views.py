@@ -193,10 +193,10 @@ class RetirementTestCase(TestCase):
             ('ENROLLMENTS_COMPLETE', 130, False, False),
             ('RETIRING_NOTES', 140, False, False),
             ('NOTES_COMPLETE', 150, False, False),
-            ('NOTIFYING_PARTNERS', 160, False, False),
-            ('PARTNERS_NOTIFIED', 170, False, False),
-            ('RETIRING_LMS', 180, False, False),
-            ('LMS_COMPLETE', 190, False, False),
+            ('RETIRING_LMS', 160, False, False),
+            ('LMS_COMPLETE', 170, False, False),
+            ('ADDING_TO_PARTNER_QUEUE', 180, False, False),
+            ('PARTNER_QUEUE_COMPLETE', 190, False, False),
             ('ERRORED', 200, True, True),
             ('ABORTED', 210, True, True),
             ('COMPLETE', 220, True, True),
@@ -561,6 +561,68 @@ class TestPartnerReportingCleanup(ModuleStoreTestCase):
 
 
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Account APIs are only supported in LMS')
+class TestPartnerReportingPut(RetirementTestCase, ModuleStoreTestCase):
+    """
+    Tests the partner reporting list endpoint
+    """
+
+    def setUp(self):
+        super(TestPartnerReportingPut, self).setUp()
+        self.test_superuser = SuperuserFactory()
+        self.course = CourseFactory()
+        self.course_awesome_org = CourseFactory(org='awesome_org')
+        self.courses = (self.course, self.course_awesome_org)
+        self.headers = build_jwt_headers(self.test_superuser)
+        self.url = reverse('accounts_retirement_partner_report')
+        self.headers['content_type'] = "application/json"
+        self.maxDiff = None
+        self.partner_queue_state = RetirementState.objects.get(state_name='ADDING_TO_PARTNER_QUEUE')
+
+    def post_and_assert_status(self, data, expected_status=status.HTTP_204_NO_CONTENT):
+        """
+        Helper function for making a request to the retire subscriptions endpoint, and asserting the status.
+        """
+        response = self.client.put(self.url, json.dumps(data), **self.headers)
+        self.assertEqual(response.status_code, expected_status)
+        return response
+
+    def test_success(self):
+        """
+        Checks the simple success case of creating a user, enrolling in a course, and doing the partner
+        report PUT. User should then have the appropriate row in UserRetirementPartnerReportingStatus
+        """
+        retirement = self._create_retirement(self.partner_queue_state)
+        for course in self.courses:
+            CourseEnrollment.enroll(user=retirement.user, course_key=course.id)
+
+        self.post_and_assert_status({'username': retirement.original_username})
+        self.assertTrue(UserRetirementPartnerReportingStatus.objects.filter(user=retirement.user).exists())
+
+    def test_idempotent(self):
+        """
+        Runs the success test twice to make sure that re-running the step still succeeds.
+        """
+        retirement = self._create_retirement(self.partner_queue_state)
+        for course in self.courses:
+            CourseEnrollment.enroll(user=retirement.user, course_key=course.id)
+
+        # We really do want this twice.
+        self.post_and_assert_status({'username': retirement.original_username})
+        self.post_and_assert_status({'username': retirement.original_username})
+        self.assertTrue(UserRetirementPartnerReportingStatus.objects.filter(user=retirement.user).exists())
+
+    def test_unknown_user(self):
+        """
+        Checks that a username with no active retirement generates a 404
+        """
+        user = UserFactory()
+        for course in self.courses:
+            CourseEnrollment.enroll(user=user, course_key=course.id)
+
+        self.post_and_assert_status({'username': user.username}, status.HTTP_404_NOT_FOUND)
+
+
+@unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Account APIs are only supported in LMS')
 class TestPartnerReportingList(ModuleStoreTestCase):
     """
     Tests the partner reporting list endpoint
@@ -624,7 +686,7 @@ class TestPartnerReportingList(ModuleStoreTestCase):
 
     def assert_status_and_user_list(self, expected_users, expected_status=status.HTTP_200_OK):
         """
-        Makes the partner reporting list GET and asserts that the given users are
+        Makes the partner reporting list POST and asserts that the given users are
         in the returned list, as well as asserting the expected HTTP status code
         is returned.
         """
@@ -1177,14 +1239,6 @@ class TestAccountRetirementPost(RetirementTestCase):
         }
         self.assertEqual(expected_user_profile_pii, USER_PROFILE_PII)
 
-    def test_retire_user_where_user_does_not_exist(self):
-        path = 'openedx.core.djangoapps.user_api.accounts.views.is_username_retired'
-        with mock.patch(path, return_value=False) as mock_retired_username:
-            data = {'username': 'not_a_user'}
-            response = self.post_and_assert_status(data, status.HTTP_404_NOT_FOUND)
-            self.assertFalse(response.content)
-            mock_retired_username.assert_called_once_with('not_a_user')
-
     def test_retire_user_server_error_is_raised(self):
         path = 'openedx.core.djangoapps.user_api.models.UserRetirementStatus.get_retirement_for_retirement_action'
         with mock.patch(path, side_effect=Exception('Unexpected Exception')) as mock_get_retirement:
@@ -1197,9 +1251,9 @@ class TestAccountRetirementPost(RetirementTestCase):
         path = 'openedx.core.djangoapps.user_api.accounts.views.is_username_retired'
         with mock.patch(path, return_value=True) as mock_is_username_retired:
             data = {'username': self.test_user.username}
-            response = self.post_and_assert_status(data, status.HTTP_404_NOT_FOUND)
+            response = self.post_and_assert_status(data, status.HTTP_204_NO_CONTENT)
             self.assertFalse(response.content)
-            mock_is_username_retired.assert_called_once_with(self.original_username)
+            mock_is_username_retired.assert_not_called()
 
     def test_retire_user_where_username_not_provided(self):
         response = self.post_and_assert_status({}, status.HTTP_404_NOT_FOUND)
@@ -1250,6 +1304,11 @@ class TestAccountRetirementPost(RetirementTestCase):
 
         self.assertFalse(CourseEnrollmentAllowed.objects.filter(email=self.original_email).exists())
         self.assertFalse(UnregisteredLearnerCohortAssignments.objects.filter(email=self.original_email).exists())
+
+    def test_retire_user_twice_idempotent(self):
+        data = {'username': self.original_username}
+        self.post_and_assert_status(data)
+        self.post_and_assert_status(data)
 
     def test_deletes_pii_from_user_profile(self):
         for model_field, value_to_assign in USER_PROFILE_PII.iteritems():
@@ -1476,3 +1535,10 @@ class TestLMSAccountRetirementPost(RetirementTestCase, ModuleStoreTestCase):
         self.assertEqual(retired_api_access_request.company_name, '')
         self.assertEqual(retired_api_access_request.reason, '')
         self.assertEqual(SurveyAnswer.objects.get(user=self.test_user).field_value, '')
+
+    def test_retire_user_twice_idempotent(self):
+        # check that a second call to the retire_misc endpoint will work
+        UserRetirementStatus.get_retirement_for_retirement_action(self.test_user.username)
+        data = {'username': self.original_username}
+        self.post_and_assert_status(data)
+        self.post_and_assert_status(data)
