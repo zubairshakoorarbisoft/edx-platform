@@ -18,6 +18,8 @@ define([
                 'click .button-toggle-expand-collapse': 'toggleExpandCollapse'
             },
 
+            findElementCounter: 5000,
+
             options: {
                 collapsedClass: 'is-collapsed'
             },
@@ -88,6 +90,26 @@ define([
                 this.outlineView.render();
                 this.outlineView.setViewState(this.initialState || {});
                 return $.Deferred().resolve().promise();
+            },
+
+            afterRender: function() {
+                this.scrollToElement();
+            },
+
+            scrollToElement: function () {
+                this.findElementCounter -= 100;
+                const id = window.location.hash.replace("#", "");
+
+                if (this.findElementCounter > 0) {
+                    if (id) {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.scrollIntoView();
+                        } else {
+                            setTimeout(this.afterRender, 100);
+                        }
+                    }
+                }
             },
 
             hasContent: function() {

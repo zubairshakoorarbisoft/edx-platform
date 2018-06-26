@@ -77,11 +77,20 @@ class CourseValidationViewTest(SharedModuleStoreTestCase, APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         expected_data = {
             'assignments': {
-                'num_with_dates_before_end': 0,
-                'num_with_dates': 0,
-                'total_visible': 1,
-                'num_with_dates_after_start': 0,
-                'total_number': 1,
+                'all': {
+                    'num_with_dates_before_end': 0,
+                    'num_with_dates': 0,
+                    'total_visible': 1,
+                    'num_with_dates_after_start': 0,
+                    'total_number': 1,
+                },
+                'graded': {
+                    'total_number': 0,
+                    'total_visible': 0,
+                    'assignments_without_dates': [],
+                    'assignments_with_dates_before_start': [],
+                    'assignments_with_dates_after_end': [],
+                },
             },
             'dates': {
                 'has_start_date': True,
@@ -99,4 +108,5 @@ class CourseValidationViewTest(SharedModuleStoreTestCase, APITestCase):
             },
             'is_self_paced': True,
         }
+
         self.assertDictEqual(resp.data, expected_data)

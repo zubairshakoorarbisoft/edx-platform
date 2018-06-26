@@ -25,6 +25,10 @@ define(['jquery', 'underscore', 'js/views/xblock_outline', 'common/js/components
                 return renderResult;
             },
 
+            // afterRender: function() {
+            //     console.log('does this work?');
+            // },
+
             shouldExpandChildren: function() {
                 return this.expandedLocators.contains(this.model.get('id'));
             },
