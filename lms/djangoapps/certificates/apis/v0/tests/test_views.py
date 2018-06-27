@@ -1,9 +1,11 @@
 """
 Tests for the Certificate REST APIs.
 """
+# pylint: disable=missing-docstring
 from datetime import datetime, timedelta
-import ddt
 from enum import Enum
+from itertools import product
+import ddt
 from mock import patch
 
 from django.urls import reverse
@@ -14,6 +16,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from course_modes.models import CourseMode
+from edx_rest_framework_extensions import config as edx_drf_config
 from lms.djangoapps.certificates.apis.v0.views import CertificatesDetailView
 from lms.djangoapps.certificates.models import CertificateStatuses
 from lms.djangoapps.certificates.tests.factories import GeneratedCertificateFactory
@@ -26,13 +29,18 @@ from xmodule.modulestore.tests.factories import CourseFactory
 USER_PASSWORD = 'test'
 
 
-TODO_REPLACE_SWITCH = WaffleSwitch('oauth', 'repace_with_scopes_flag')
+# TODO replace this with the one defined in OAuth Dispatch.
+SWITCH_ENFORCE_JWT_SCOPES = WaffleSwitch(edx_drf_config.NAMESPACE_SWITCH, edx_drf_config.SWITCH_ENFORCE_JWT_SCOPES)
 
 
 class AuthType(Enum):
     session = 1
     oauth = 2
     jwt = 3
+    jwt_restricted = 4
+
+
+JWT_AUTH_TYPES = [AuthType.jwt, AuthType.jwt_restricted]
 
 
 @ddt.ddt
@@ -118,10 +126,22 @@ class CertificatesRestApiTest(SharedModuleStoreTestCase, APITestCase):
             token='test_token',
         )
 
-    def _create_jwt_token(self, user, scopes=None):
+    def _create_jwt_token(self, user, auth_type, scopes=None, include_org_filter=True, include_me_filter=False):
+        filters = []
+        if include_org_filter:
+            filters += ['content_org:{}'.format(self.course.id.org)]
+        if include_me_filter:
+            filters += ['user:me']
+
+        if scopes is None:
+            scopes = CertificatesDetailView.required_scopes
+
         return JwtBuilder(user).build_token(
-            scopes
-            if scopes is not None else CertificatesDetailView.required_scopes,
+            scopes,
+            additional_claims=dict(
+                is_restricted=(auth_type == AuthType.jwt_restricted),
+                filters=filters,
+            ),
         )
 
     def _get_response(self, requesting_user, auth_type, url=None, token=None):
@@ -129,55 +149,28 @@ class CertificatesRestApiTest(SharedModuleStoreTestCase, APITestCase):
         if auth_type == AuthType.session:
             self.client.login(username=requesting_user.username, password=USER_PASSWORD)
         elif auth_type == AuthType.oauth:
-            oauth_token = token if token else self._create_oauth_token(requesting_user)
-            auth_header = "Bearer {0}".format(oauth_token)
+            if not token:
+                token = self._create_oauth_token(requesting_user)
+            auth_header = "Bearer {0}".format(token)
         else:
-            assert auth_type == AuthType.jwt
-            jwt_token = token if token else self._create_jwt_token(requesting_user)
-            auth_header = "JWT {0}".format(jwt_token)
+            assert auth_type in JWT_AUTH_TYPES
+            if not token:
+                token = self._create_jwt_token(requesting_user, auth_type)
+            auth_header = "JWT {0}".format(token)
 
         extra = dict(HTTP_AUTHORIZATION=auth_header) if auth_header else {}
         return self.client.get(
-            url if url else self._get_url(self.student.username), 
+            url if url else self._get_url(self.student.username),
             **extra
         )
+
+    def _assert_in_log(self, text, mock_log_method):
+        self.assertTrue(mock_log_method.called)
+        self.assertIn(text, mock_log_method.call_args_list[0][0][0])
 
     def test_anonymous_user(self):
         resp = self.client.get(self._get_url(self.student.username))
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    @ddt.data(*list(AuthType))
-    def test_self_user(self, auth_type):
-        resp = self._get_response(self.student, auth_type)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self._assert_certificate_response(resp)
-
-    @ddt.data(*list(AuthType))
-    def test_staff_user(self, auth_type):
-        resp = self._get_response(self.staff_user, auth_type)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-
-    @ddt.data(*list(AuthType))
-    def test_inactive_user(self, auth_type):
-        self.student.is_active = False
-        self.student.save()
-
-        resp = self._get_response(self.student, auth_type)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-
-    @patch('edx_rest_framework_extensions.permissions.log')
-    @ddt.data(*list(AuthType))
-    def test_another_user(self, auth_type, mock_log):
-        """ Returns 403 for OAuth and Session auth with IsUserInUrl. """
-        resp = self._get_response(self.student_no_cert, auth_type)
-        self.assertEqual(
-            resp.status_code,
-            # JWT tokens without the user:me filter have access to other users
-            status.HTTP_200_OK if auth_type == AuthType.jwt else status.HTTP_403_FORBIDDEN,
-        )
-        if auth_type != AuthType.jwt:
-            self.assertTrue(mock_log.info.called)
-            self.assertIn('IsUserInUrl', mock_log.info.call_args_list[0][0][0])
 
     @ddt.data(*list(AuthType))
     def test_no_certificate(self, auth_type):
@@ -193,50 +186,103 @@ class CertificatesRestApiTest(SharedModuleStoreTestCase, APITestCase):
             'no_certificate_for_user',
         )
 
+    @ddt.data(*product(list(AuthType), (True, False)))
+    @ddt.unpack
+    def test_self_user(self, auth_type, scopes_enforced):
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            resp = self._get_response(self.student, auth_type)
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+            self._assert_certificate_response(resp)
+
+    @ddt.data(*product(list(AuthType), (True, False)))
+    @ddt.unpack
+    def test_inactive_user(self, auth_type, scopes_enforced):
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            self.student.is_active = False
+            self.student.save()
+
+            resp = self._get_response(self.student, auth_type)
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    @ddt.data(*product(list(AuthType), (True, False)))
+    @ddt.unpack
+    def test_staff_user(self, auth_type, scopes_enforced):
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            resp = self._get_response(self.staff_user, auth_type)
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
     @patch('edx_rest_framework_extensions.permissions.log')
-    @ddt.data(True, False)
-    def test_jwt_unrequired_scopes(self, scopes_enforced, mock_log):
+    @ddt.data(*product(list(AuthType), (True, False)))
+    @ddt.unpack
+    def test_another_user(self, auth_type, scopes_enforced, mock_log):
+        """ Returns 403 for OAuth and Session auth with IsUserInUrl. """
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            resp = self._get_response(self.student_no_cert, auth_type)
+
+            # Restricted JWT tokens without the user:me filter have access to other users
+            jwt_access_granted = scopes_enforced and auth_type == AuthType.jwt_restricted
+
+            self.assertEqual(
+                resp.status_code,
+                status.HTTP_200_OK if jwt_access_granted else status.HTTP_403_FORBIDDEN,
+            )
+            if not jwt_access_granted:
+                self._assert_in_log("IsUserInUrl", mock_log.info)
+
+    @patch('edx_rest_framework_extensions.permissions.log')
+    @ddt.data(*product(JWT_AUTH_TYPES, (True, False)))
+    @ddt.unpack
+    def test_jwt_no_scopes(self, auth_type, scopes_enforced, mock_log):
         """ Returns 403 when scopes are enforced with JwtHasScope. """
-        with TODO_REPLACE_SWITCH.override(active=scopes_enforced):
-            jwt_token = self._create_jwt_token(
-                self.student,
-                scopes=[],
-            )
-
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            jwt_token = self._create_jwt_token(self.student, auth_type, scopes=[])
             resp = self._get_response(self.student, AuthType.jwt, token=jwt_token)
-            self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN if scopes_enforced else status.HTTP_200_OK)
 
-            if scopes_enforced:
-                self.assertTrue(mock_log.warning.called)
-                self.assertIn("JwtHasScope", mock_log.call_args)
+            is_enforced = scopes_enforced and auth_type == AuthType.jwt_restricted
+            self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN if is_enforced else status.HTTP_200_OK)
 
-    @ddt.data(True, False)
-    def test_jwt_on_behalf_of_user(self, scopes_enforced):
-        with TODO_REPLACE_SWITCH.override(active=scopes_enforced):
-            jwt_token = self._create_jwt_token(
-                self.student,
-                scopes=CertificatesDetailView.required_scopes + ['user:me'],
-            )
+            if is_enforced:
+                self._assert_in_log("JwtHasScope", mock_log.warning)
+
+    @patch('edx_rest_framework_extensions.permissions.log')
+    @ddt.data(*product(JWT_AUTH_TYPES, (True, False)))
+    @ddt.unpack
+    def test_jwt_no_filter(self, auth_type, scopes_enforced, mock_log):
+        """ Returns 403 when scopes are enforced with JwtHasContentOrgFilterForRequestedCourse. """
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            jwt_token = self._create_jwt_token(self.student, auth_type, include_org_filter=False)
+            resp = self._get_response(self.student, AuthType.jwt, token=jwt_token)
+
+            is_enforced = scopes_enforced and auth_type == AuthType.jwt_restricted
+            self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN if is_enforced else status.HTTP_200_OK)
+
+            if is_enforced:
+                self._assert_in_log("JwtHasContentOrgFilterForRequestedCourse", mock_log.warning)
+
+    @ddt.data(*product(JWT_AUTH_TYPES, (True, False)))
+    @ddt.unpack
+    def test_jwt_on_behalf_of_user(self, auth_type, scopes_enforced):
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            jwt_token = self._create_jwt_token(self.student, auth_type, include_me_filter=True)
 
             resp = self._get_response(self.student, AuthType.jwt, token=jwt_token)
             self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     @patch('edx_rest_framework_extensions.permissions.log')
-    @ddt.data(True, False)
-    def test_jwt_on_behalf_of_other_user(self, scopes_enforced, mock_log):
+    @ddt.data(*product(JWT_AUTH_TYPES, (True, False)))
+    @ddt.unpack
+    def test_jwt_on_behalf_of_other_user(self, auth_type, scopes_enforced, mock_log):
         """ Returns 403 when scopes are enforced with JwtHasUserFilterForRequestedUser. """
-        with TODO_REPLACE_SWITCH.override(active=scopes_enforced):
-            jwt_token = self._create_jwt_token(
-                self.student_no_cert,
-                scopes=CertificatesDetailView.required_scopes + ['user:me'],
-            )
-
+        with SWITCH_ENFORCE_JWT_SCOPES.override(active=scopes_enforced):
+            jwt_token = self._create_jwt_token(self.student_no_cert, auth_type, include_me_filter=True)
             resp = self._get_response(self.student, AuthType.jwt, token=jwt_token)
-            self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN if scopes_enforced else status.HTTP_200_OK)
 
-            if scopes_enforced:
-                self.assertTrue(mock_log.warning.called)
-                self.assertIn("JwtHasUserFilterForRequestedUser", mock_log.call_args)
+            self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+            if scopes_enforced and auth_type == AuthType.jwt_restricted:
+                self._assert_in_log("JwtHasUserFilterForRequestedUser", mock_log.warning)
+            else:
+                self._assert_in_log("IsUserInUrl", mock_log.info)
 
     def test_valid_oauth_token(self):
         resp = self._get_response(self.student, AuthType.oauth)

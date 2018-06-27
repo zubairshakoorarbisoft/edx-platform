@@ -2,7 +2,6 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from rest_condition import C
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import GenericAPIView
