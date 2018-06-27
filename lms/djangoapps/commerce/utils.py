@@ -111,9 +111,13 @@ class EcommerceService(object):
             http://localhost:8002/basket/add/?sku=5H3HG5&sku=57FHHD&bundle=3bdf1dd1-49be-4a15-9145-38901f578c5a
         """
         program_uuid = kwargs.get('program_uuid')
-        url = '{checkout_page_path}?{skus}'.format(
+        enterprise_customer_catalog_uuid = kwargs.get('enterprise_customer_catalog_uuid')
+        url = '{checkout_page_path}?{query_params}'.format(
             checkout_page_path=self.get_absolute_ecommerce_url(self.config.basket_checkout_page),
-            skus=urlencode({'sku': skus}, doseq=True),
+            query_params=urlencode(
+                {'sku': skus, 'enterprise_customer_catalog_uuid': enterprise_customer_catalog_uuid},
+                doseq=True
+            ),
         )
         if program_uuid:
             url = '{url}&bundle={program_uuid}'.format(
