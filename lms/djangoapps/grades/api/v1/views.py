@@ -19,7 +19,7 @@ from openedx.core.lib.api.authentication import (
     OAuth2AuthenticationAllowInactiveUser,
     SessionAuthenticationAllowInactiveUser
 )
-from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
+from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
 from student.models import CourseEnrollment
 
 
@@ -27,7 +27,6 @@ log = logging.getLogger(__name__)
 USER_MODEL = get_user_model()
 
 
-@view_auth_classes()
 class GradeViewMixin(DeveloperErrorViewMixin):
     """
     Mixin class for Grades related views.
@@ -160,13 +159,7 @@ class CourseGradesView(GradeViewMixin, GenericAPIView):
         SessionAuthenticationAllowInactiveUser,
     )
 
-    jwt_auth_permission = (
-        C(permissions.IsJwtAuthenticated) &
-        permissions.JwtHasContentOrgFilterForRequestedCourse &
-        permissions.JwtHasScope
-    )
-    session_auth_permission = C(permissions.IsStaff) | permissions.IsUserInUrl
-    permission_classes = (jwt_auth_permission | session_auth_permission,)
+    permission_classes = (permissions.jwt_course_access_or_is_user_in_url_or_staff(),)
 
     required_scopes = ['grades:read']
 
