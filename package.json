@@ -5,7 +5,7 @@
     "@edx/cookie-policy-banner": "1.1.10",
     "@edx/edx-bootstrap": "0.4.3",
     "@edx/paragon": "2.6.4",
-    "@edx/studio-frontend": "git://github.com/edx/studio-frontend.git#a2f6acf3e305bd79f290362b538b09fc48946e55",
+    "@edx/studio-frontend": "git://github.com/edx/studio-frontend.git#abc23e31b60c11a1606de998a34a4d959d12ddc3",
     "babel-core": "6.26.0",
     "babel-loader": "6.4.1",
     "babel-plugin-transform-class-properties": "6.24.1",
