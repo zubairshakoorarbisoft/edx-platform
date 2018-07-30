@@ -72,7 +72,6 @@ FEATURES = {
     'DISPLAY_HISTOGRAMS_TO_STAFF': False,  # For large courses this slows down courseware access for staff.
 
     'REROUTE_ACTIVATION_EMAIL': False,  # nonempty string = address for all activation emails
-    'DEBUG_LEVEL': 0,  # 0 = lowest level, least verbose, 255 = max level, most verbose
 
     ## DO NOT SET TO True IN THIS FILE
     ## Doing so will cause all courses to be released on production
@@ -98,7 +97,6 @@ FEATURES = {
     'ENABLE_DJANGO_ADMIN_SITE': True,  # set true to enable django's admin site, even on prod (e.g. for course ops)
     'ENABLE_SQL_TRACKING_LOGS': False,
     'ENABLE_LMS_MIGRATION': False,
-    'ENABLE_MANUAL_GIT_RELOAD': False,
 
     'ENABLE_MASQUERADE': True,  # allow course staff to change to student view of courseware
 
@@ -143,9 +141,6 @@ FEATURES = {
     # LMS OPERATION. See analytics.py for details about what
     # this does.
     'RUN_AS_ANALYTICS_SERVER_ENABLED': False,
-
-    # Flip to True when the YouTube iframe API breaks (again)
-    'USE_YOUTUBE_OBJECT_API': False,
 
     # Give a UI to show a student's submission history in a problem by the
     # Staff Debug tool.
@@ -508,7 +503,8 @@ OAUTH2_DEFAULT_SCOPES = {
 
 OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'openedx.core.djangoapps.oauth_dispatch.dot_overrides.validators.EdxOAuth2Validator',
-    'REFRESH_TOKEN_EXPIRE_SECONDS': 20160,
+    # 6 months and then we expire refresh tokens using edx_clear_expired_tokens (length is mobile app driven)
+    'REFRESH_TOKEN_EXPIRE_SECONDS': 15552000,
     'SCOPES_BACKEND_CLASS': 'openedx.core.djangoapps.oauth_dispatch.scopes.ApplicationModelScopes',
     'SCOPES': dict(OAUTH2_DEFAULT_SCOPES, **{
         'grades:read': _('Retrieve your grades for your enrolled courses'),
@@ -1599,23 +1595,6 @@ PIPELINE_CSS = {
         ],
         'output_filename': 'css/discussion/inline-discussion-rtl.css',
     },
-    'style-xmodule-annotations': {
-        'source_filenames': [
-            'css/vendor/ova/annotator.css',
-            'css/vendor/ova/edx-annotator.css',
-            'css/vendor/ova/video-js.min.css',
-            'css/vendor/ova/rangeslider.css',
-            'css/vendor/ova/share-annotator.css',
-            'css/vendor/ova/richText-annotator.css',
-            'css/vendor/ova/tags-annotator.css',
-            'css/vendor/ova/flagging-annotator.css',
-            'css/vendor/ova/diacritic-annotator.css',
-            'css/vendor/ova/grouping-annotator.css',
-            'css/vendor/ova/ova.css',
-            'js/vendor/ova/catch/css/main.css'
-        ],
-        'output_filename': 'css/lms-style-xmodule-annotations.css',
-    },
     FOOTER_CSS['openedx']['ltr']: {
         'source_filenames': [
             'css/lms-footer.css',
@@ -2179,7 +2158,7 @@ INSTALLED_APPS = [
     'enrollment',
 
     # Entitlement API
-    'entitlements',
+    'entitlements.apps.EntitlementsConfig',
 
     # Bulk Enrollment API
     'bulk_enroll',
@@ -2892,6 +2871,7 @@ OPTIONAL_APPS = [
     ('integrated_channels.integrated_channel', None),
     ('integrated_channels.degreed', None),
     ('integrated_channels.sap_success_factors', None),
+    ('integrated_channels.xapi', None),
 
     # Required by the Enterprise App
     ('django_object_actions', None),  # https://github.com/crccheck/django-object-actions
@@ -3471,7 +3451,6 @@ FERNET_KEYS = [
 ############### Settings for user-state-client ##################
 # Maximum number of rows to fetch in XBlockUserStateClient calls. Adjust for performance
 USER_STATE_BATCH_SIZE = 5000
-
 
 ############## Plugin Django Apps #########################
 

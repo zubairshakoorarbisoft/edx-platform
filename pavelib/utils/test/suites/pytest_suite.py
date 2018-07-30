@@ -7,7 +7,6 @@ from pavelib.utils.test import utils as test_utils
 from pavelib.utils.test.suites.suite import TestSuite
 from pavelib.utils.envs import Env
 
-
 __test__ = False  # do not collect
 
 
@@ -112,12 +111,30 @@ class SystemTestSuite(PytestSuite):
         self.processes = kwargs.get('processes', None)
         self.randomize = kwargs.get('randomize', None)
         self.settings = kwargs.get('settings', Env.TEST_SETTINGS)
+        self.xdist_ip_addresses = kwargs.get('xdist_ip_addresses', None)
 
         if self.processes is None:
             # Don't use multiprocessing by default
             self.processes = 0
 
         self.processes = int(self.processes)
+
+    def _under_coverage_cmd(self, cmd):
+        """
+        If self.run_under_coverage is True, it returns the arg 'cmd'
+        altered to be run under coverage. It returns the command
+        unaltered otherwise.
+        """
+        if self.run_under_coverage:
+            if self.xdist_ip_addresses:
+                for module in Env.covered_modules():
+                    cmd.append('--cov')
+                    cmd.append(module)
+            else:
+                cmd.append('--cov')
+            cmd.append('--cov-report=')
+
+        return cmd
 
     @property
     def cmd(self):
@@ -142,12 +159,21 @@ class SystemTestSuite(PytestSuite):
         if self.disable_capture:
             cmd.append("-s")
 
-        if self.processes == -1:
-            cmd.append('-n auto')
+        if self.xdist_ip_addresses:
             cmd.append('--dist=loadscope')
-        elif self.processes != 0:
-            cmd.append('-n {}'.format(self.processes))
-            cmd.append('--dist=loadscope')
+            for ip in self.xdist_ip_addresses.split(' '):
+                xdist_string = '--tx ssh=ubuntu@{}//python="source /edx/app/edxapp/edxapp_env; ' \
+                               'python"//chdir="/edx/app/edxapp/edx-platform"'.format(ip)
+                cmd.append(xdist_string)
+            for rsync_dir in Env.rsync_dirs():
+                cmd.append('--rsyncdir {}'.format(rsync_dir))
+        else:
+            if self.processes == -1:
+                cmd.append('-n auto')
+                cmd.append('--dist=loadscope')
+            elif self.processes != 0:
+                cmd.append('-n {}'.format(self.processes))
+                cmd.append('--dist=loadscope')
 
         if not self.randomize:
             cmd.append('-p no:randomly')
@@ -212,6 +238,7 @@ class LibTestSuite(PytestSuite):
         self.append_coverage = kwargs.get('append_coverage', False)
         self.test_id = kwargs.get('test_id', self.root)
         self.eval_attr = kwargs.get('eval_attr', None)
+        self.xdist_ip_addresses = kwargs.get('xdist_ip_addresses', None)
 
     @property
     def cmd(self):
@@ -235,8 +262,19 @@ class LibTestSuite(PytestSuite):
             cmd.append("--verbose")
         if self.disable_capture:
             cmd.append("-s")
+
+        if self.xdist_ip_addresses:
+            cmd.append('--dist=loadscope')
+            for ip in self.xdist_ip_addresses.split(' '):
+                xdist_string = '--tx ssh=ubuntu@{}//python="source /edx/app/edxapp/edxapp_env; ' \
+                               'python"//chdir="/edx/app/edxapp/edx-platform"'.format(ip)
+                cmd.append(xdist_string)
+            for rsync_dir in Env.rsync_dirs():
+                cmd.append('--rsyncdir {}'.format(rsync_dir))
+
         if self.eval_attr:
             cmd.append("-a '{}'".format(self.eval_attr))
+
         cmd.append(self.test_id)
 
         return self._under_coverage_cmd(cmd)
@@ -248,7 +286,12 @@ class LibTestSuite(PytestSuite):
         unaltered otherwise.
         """
         if self.run_under_coverage:
-            cmd.append('--cov')
+            if self.xdist_ip_addresses:
+                for module in Env.covered_modules():
+                    cmd.append('--cov')
+                    cmd.append(module)
+            else:
+                cmd.append('--cov')
             if self.append_coverage:
                 cmd.append('--cov-append')
             cmd.append('--cov-report=')
