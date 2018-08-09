@@ -13,6 +13,11 @@ from onelogin.saml2.settings import OneLogin_Saml2_Settings
 from six import text_type
 from social_core.backends.saml import OID_EDU_PERSON_ENTITLEMENT, SAMLAuth, SAMLIdentityProvider
 from social_core.exceptions import AuthForbidden
+from enterprise.models import (
+    EnterpriseCustomerUser,
+    EnterpriseCustomerIdentityProvider,
+    PendingEnterpriseCustomerUser
+)
 
 from openedx.core.djangoapps.theming.helpers import get_current_request
 
@@ -109,6 +114,31 @@ class SAMLAuthBackend(SAMLAuth):  # pylint: disable=abstract-method
             raise Http404
 
         return super(SAMLAuthBackend, self).auth_url()
+
+    def disconnect(self, *args, **kwargs):
+        """
+        Override of SAMLAuth.disconnect to unlink the learner from enterprise customer if associated.
+        """
+        from . import pipeline, provider
+        running_pipeline = pipeline.get(self.strategy.request)
+        provider_id = provider.Registry.get_from_pipeline(running_pipeline).provider_id
+        user_email = self.strategy.request.user.email
+        try:
+            enterprise_customer_idp = EnterpriseCustomerIdentityProvider.objects.get(provider_id=provider_id)
+        except EnterpriseCustomerIdentityProvider.DoesNotExist:
+            enterprise_customer_idp = None
+
+        import pdb; pdb.set_trace()
+        if enterprise_customer_idp:
+            try:
+                # Unlink user email from Enterprise Customer.
+                EnterpriseCustomerUser.objects.unlink_user(
+                    enterprise_customer=enterprise_customer_idp.enterprise_customer, user_email=user_email
+                )
+            except (EnterpriseCustomerUser.DoesNotExist, PendingEnterpriseCustomerUser.DoesNotExist):
+                pass
+
+        return super(SAMLAuthBackend, self).disconnect(*args, **kwargs)
 
     def _check_entitlements(self, idp, attributes):
         """

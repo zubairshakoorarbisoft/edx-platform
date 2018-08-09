@@ -8,6 +8,7 @@ import httpretty
 import json
 import logging
 from mock import patch
+import mock
 from freezegun import freeze_time
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
@@ -18,6 +19,14 @@ from third_party_auth.tasks import fetch_saml_metadata
 from third_party_auth.tests import testutil
 
 from .base import IntegrationTestMixin
+from third_party_auth.tests.specs import base
+from third_party_auth import middleware, pipeline
+from social_core import actions, exceptions
+from social_django import views as social_views
+from student import views as student_views
+from student_account.views import account_settings_context
+from django.contrib import auth
+from django.contrib.auth import models as auth_models
 
 
 TESTSHIB_ENTITY_ID = 'https://idp.testshib.org/idp/shibboleth'
@@ -90,13 +99,14 @@ class SamlIntegrationTestUtilities(object):
         kwargs.setdefault('name', self.PROVIDER_NAME)
         kwargs.setdefault('enabled', True)
         kwargs.setdefault('visible', True)
+        kwargs.setdefault("backend_name", "tpa-saml")
         kwargs.setdefault('slug', self.PROVIDER_IDP_SLUG)
         kwargs.setdefault('entity_id', TESTSHIB_ENTITY_ID)
         kwargs.setdefault('metadata_source', TESTSHIB_METADATA_URL)
         kwargs.setdefault('icon_class', 'fa-university')
         kwargs.setdefault('attr_email', 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6')  # eduPersonPrincipalName
         kwargs.setdefault('max_session_length', None)
-        self.configure_saml_provider(**kwargs)
+        saml_provider = self.configure_saml_provider(**kwargs)
 
         if fetch_metadata:
             self.assertTrue(httpretty.is_enabled())
@@ -108,6 +118,7 @@ class SamlIntegrationTestUtilities(object):
                 self.assertEqual(num_updated, 1)
                 self.assertEqual(num_failed, 0)
                 self.assertEqual(len(failure_messages), 0)
+        return saml_provider
 
     def do_provider_login(self, provider_redirect_url):
         """ Mocked: the user logs in to TestShib and then gets redirected back """
@@ -539,3 +550,87 @@ class SuccessFactorsIntegrationTest(SamlIntegrationTestUtilities, IntegrationTes
     @skip('Test not necessary for this subclass')
     def test_register(self):
         pass
+
+@ddt.ddt
+@unittest.skipUnless(testutil.AUTH_FEATURE_ENABLED, testutil.AUTH_FEATURES_KEY + ' not enabled')
+class TestShibIntegrationTestASAD(SamlIntegrationTestUtilities, base.SamlIntegrationTest, testutil.SAMLTestCase):
+    def setUp(self):
+        super(TestShibIntegrationTestASAD, self).setUp()
+        self.provider = self._configure_testshib_provider()
+
+    TOKEN_RESPONSE_DATA = {
+        'access_token': 'access_token_value',
+        'expires_in': 'expires_in_value',
+    }
+    USER_RESPONSE_DATA = {
+        'lastName': 'lastName_value',
+        'id': 'id_value',
+        'firstName': 'firstName_value',
+        'idp_name': 'testshib',
+        'attributes': {u'urn:oid:1.3.6.1.4.1.5923.1.1.1.9': [u'Member@testshib.org', u'Staff@testshib.org'], u'urn:oid:2.5.4.42': [u'Me Myself'], u'urn:oid:0.9.2342.19200300.100.1.1': [u'myself'], u'urn:oid:1.3.6.1.4.1.5923.1.1.1.1': [u'Member', u'Staff'], u'urn:oid:1.3.6.1.4.1.5923.1.1.1.10': [{u'NameID': {u'value': u'uJ4gM4NoVMUAwfe16VxPYEVyfj0=', u'NameQualifier': u'https://idp.testshib.org/idp/shibboleth', u'Format': u'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'}}], u'urn:oid:1.3.6.1.4.1.5923.1.1.1.7': [u'urn:mace:dir:entitlement:common-lib-terms'], u'urn:oid:2.5.4.4': [u'And I'], u'urn:oid:2.5.4.3': [u'Me Myself And I'], u'urn:oid:2.5.4.20': [u'555-5555'], u'name_id': u'_37f8251113491e2cd666495938ccf270', u'auth_time': 1533812317, u'urn:oid:1.3.6.1.4.1.5923.1.1.1.6': [u'myself@testshib.org']}
+    }
+
+    def test_full_pipeline_succeeds_for_unlinking_account_asad(self):
+
+        # First, create, the request and strategy that store pipeline state,
+        # configure the backend, and mock out wire traffic.
+        import pdb; pdb.set_trace()
+        from openedx.features.enterprise_support.tests.factories import EnterpriseCustomerFactory
+        from enterprise.models import EnterpriseCustomerUser
+
+
+        import pdb; pdb.set_trace()
+        request, strategy = self.get_request_and_strategy(
+            auth_entry=pipeline.AUTH_ENTRY_LOGIN, redirect_uri='social:complete')
+        request.backend.auth_complete = mock.MagicMock(return_value=self.fake_auth_complete(strategy))
+        user = self.create_user_models_for_existing_account(
+            strategy, 'user@example.com', 'password', self.get_username())
+        self.assert_social_auth_exists_for_user(user, strategy)
+
+        # We're already logged in, so simulate that the cookie is set correctly
+        self.set_logged_in_cookies(request)
+
+
+        #import pdb; pdb.set_trace()
+        enterprise_customer = EnterpriseCustomerFactory()
+        assert EnterpriseCustomerUser.objects.count() == 0, "Precondition check: no link records should exist"
+        #import pdb; pdb.set_trace()
+        EnterpriseCustomerUser.objects.link_user(enterprise_customer, user.email)
+        EnterpriseCustomerUser.objects.filter(enterprise_customer=enterprise_customer, user_id=user.id)
+        #import pdb; pdb.set_trace()
+        #assert actual_records.count() == 1
+
+        # Instrument the pipeline to get to the dashboard with the full
+        # expected state.
+        self.client.get(
+            pipeline.get_login_url(self.provider.provider_id, pipeline.AUTH_ENTRY_LOGIN))
+        actions.do_complete(request.backend, social_views._do_login,  # pylint: disable=protected-access
+                            request=request)
+
+        with self._patch_edxmako_current_request(strategy.request):
+            student_views.signin_user(strategy.request)
+            student_views.login_user(strategy.request)
+            actions.do_complete(request.backend, social_views._do_login, user=user,  # pylint: disable=protected-access
+                                request=request)
+
+        # # First we expect that we're in the linked state, with a backend entry.
+        # self.assert_account_settings_context_looks_correct(account_settings_context(request), linked=True)
+        # self.assert_social_auth_exists_for_user(request.user, strategy)
+
+        # Fire off the disconnect pipeline to unlink.
+        self.assert_redirect_to_dashboard_looks_correct(
+            actions.do_disconnect(
+                request.backend,
+                request.user,
+                None,
+                redirect_field_name=auth.REDIRECT_FIELD_NAME
+            )
+        )
+        import pdb; pdb.set_trace()
+        # Now we expect to be in the unlinked state, with no backend entry.
+        self.assert_account_settings_context_looks_correct(account_settings_context(request), linked=False)
+        self.assert_social_auth_does_not_exist_for_user(user, strategy)
+
+    def get_username(self):
+        response_data = self.get_response_data()
+        return response_data.get('idp_name')
