@@ -21,7 +21,8 @@ def display(message):
             print '\t{}: {}'.format(k, event[k])
     print
 
-while 1:
+
+while 0:
     line = sys.stdin.readline()
     if not line:
         break

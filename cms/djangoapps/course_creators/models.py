@@ -19,8 +19,10 @@ send_user_notification = Signal(providing_args=["user", "state"])
 
 
 class CourseCreator(models.Model):
-    """
+    """!@addtogroup pii
     Creates the database table model.
+
+    .. pii:: Contains learner data course creators
     """
     UNREQUESTED = 'unrequested'
     PENDING = 'pending'
@@ -51,6 +53,8 @@ class CourseCreator(models.Model):
 def post_init_callback(sender, **kwargs):
     """
     Extend to store previous state.
+
+    .. pii:: Contains learner data creators callback
     """
     instance = kwargs['instance']
     instance.orig_state = instance.state

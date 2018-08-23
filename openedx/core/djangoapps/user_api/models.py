@@ -29,11 +29,16 @@ from util.model_utils import emit_setting_changed_event, get_changed_fields_dict
 
 
 class RetirementStateError(Exception):
+    """
+    Raised when a retirement is set to a non-existent or invalid state
+    """
     pass
 
 
 class UserPreference(models.Model):
-    """A user's preference, stored as generic text to be processed by client"""
+    """
+    A user's preference, stored as generic text to be processed by client
+    """
     KEY_REGEX = r"[-_a-zA-Z0-9]+"
     user = models.ForeignKey(User, db_index=True, related_name="preferences", on_delete=models.CASCADE)
     key = models.CharField(max_length=255, db_index=True, validators=[RegexValidator(KEY_REGEX)])
@@ -128,6 +133,7 @@ class UserOrgTag(TimeStampedModel, DeletableByUserValue):  # pylint: disable=mod
 
     Allows settings to be configured at an organization level.
 
+    .. pii:: Contains learner data
     """
     user = models.ForeignKey(User, db_index=True, related_name="+", on_delete=models.CASCADE)
     key = models.CharField(max_length=255, db_index=True)

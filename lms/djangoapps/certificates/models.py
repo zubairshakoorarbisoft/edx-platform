@@ -211,8 +211,10 @@ class EligibleCertificateManager(models.Manager):
 
 
 class GeneratedCertificate(models.Model):
-    """
+    """!@defgroup pii PII Items containing personally identifying information
     Base model for generated certificates
+
+    .. pii:: Contains learner data certificates
     """
     # Import here instead of top of file since this module gets imported before
     # the course_modes app is loaded, resulting in a Django deprecation warning.
@@ -265,7 +267,9 @@ class GeneratedCertificate(models.Model):
 
     @classmethod
     def course_ids_with_certs_for_user(cls, user):
-        """
+        """!@addtogroup pii
+        .. pii:: Contains learner data certificates number 2
+
         Return a set of CourseKeys for which the user has certificates.
 
         Sometimes we just want to check if a user has already been issued a

@@ -87,6 +87,8 @@ class AuthNotConfigured(SocialAuthBaseException):
 class ProviderConfig(ConfigurationModel):
     """
     Abstract Base Class for configuring a third_party_auth provider
+
+    .. pii:: Contains learner data third party auth
     """
     KEY_FIELDS = ('slug',)
 

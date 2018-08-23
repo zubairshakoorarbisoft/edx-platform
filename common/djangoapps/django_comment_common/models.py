@@ -64,6 +64,9 @@ def assign_role(course_id, user, rolename):
 
 
 class Role(models.Model):
+    """!@addtogroup pii
+    .. pii:: Contains learner data third party auth
+    """
 
     objects = NoneToEmptyManager()
 

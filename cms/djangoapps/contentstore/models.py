@@ -1,5 +1,7 @@
-"""
+"""!@addtogroup pii
 Models for contentstore
+
+.. pii:: Contains learner data third party auth
 """
 
 from config_models.models import ConfigurationModel

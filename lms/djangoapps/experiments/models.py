@@ -23,6 +23,7 @@ class ExperimentData(TimeStampedModel):
 
 
 class ExperimentKeyValue(TimeStampedModel):
+    """!@addtogroup pii"""
     experiment_id = models.PositiveSmallIntegerField(
         null=False, blank=False, db_index=True, verbose_name='Experiment ID'
     )

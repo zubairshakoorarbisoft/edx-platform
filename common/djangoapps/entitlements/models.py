@@ -146,6 +146,8 @@ class CourseEntitlementPolicy(models.Model):
 class CourseEntitlement(TimeStampedModel):
     """
     Represents a Student's Entitlement to a Course Run for a given Course.
+
+    .. pii:: Contains learner data entitlements
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     uuid = models.UUIDField(default=uuid_tools.uuid4, editable=False, unique=True)
