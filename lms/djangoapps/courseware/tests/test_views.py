@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from HTMLParser import HTMLParser
 from urllib import quote, urlencode
 from uuid import uuid4
+from crum import set_current_request
 
 from completion.test_utils import CompletionWaffleTestMixin
 import ddt
@@ -1326,6 +1327,7 @@ class ProgressPageTests(ProgressPageBaseTests):
         resp = self._get_progress_page()
         self.assertNotContains(resp, 'Request Certificate')
 
+    @patch('lms.djangoapps.certificates.api.get_active_web_certificate', PropertyMock(return_value=True))
     @patch.dict('django.conf.settings.FEATURES', {'CERTIFICATES_HTML_VIEW': True})
     def test_view_certificate_link(self):
         """
@@ -1389,9 +1391,10 @@ class ProgressPageTests(ProgressPageBaseTests):
                 resp = self._get_progress_page()
                 self.assertNotContains(resp, u"View Your Certificate")
                 self.assertNotContains(resp, u"You can now view your certificate")
-                self.assertContains(resp, "working on it...")
-                self.assertContains(resp, "creating your certificate")
+                self.assertContains(resp, "Your certificate is available")
+                self.assertContains(resp, "earned a certificate for this course.")
 
+    @patch('lms.djangoapps.certificates.api.get_active_web_certificate', PropertyMock(return_value=True))
     @patch.dict('django.conf.settings.FEATURES', {'CERTIFICATES_HTML_VIEW': False})
     def test_view_certificate_link_hidden(self):
         """
@@ -1458,6 +1461,7 @@ class ProgressPageTests(ProgressPageBaseTests):
                 ), check_mongo_calls(1):
                     self._get_progress_page()
 
+    @patch('lms.djangoapps.certificates.api.get_active_web_certificate', PropertyMock(return_value=True))
     @ddt.data(
         *itertools.product(
             (
@@ -1589,6 +1593,7 @@ class ProgressPageTests(ProgressPageBaseTests):
                 self.assertContains(resp, u"View Certificate")
                 self.assert_invalidate_certificate(generated_certificate)
 
+    @patch('lms.djangoapps.certificates.api.get_active_web_certificate', PropertyMock(return_value=True))
     def test_page_with_invalidated_certificate_with_pdf(self):
         """
         Verify that for pdf certs if certificate is marked as invalidated than
@@ -1613,6 +1618,7 @@ class ProgressPageTests(ProgressPageBaseTests):
                 self.assert_invalidate_certificate(generated_certificate)
 
     @patch('courseware.views.views.is_course_passed', PropertyMock(return_value=True))
+    @patch('lms.djangoapps.certificates.api.get_active_web_certificate', PropertyMock(return_value=True))
     def test_message_for_audit_mode(self):
         """ Verify that message appears on progress page, if learner is enrolled
          in audit mode.
@@ -1634,6 +1640,7 @@ class ProgressPageTests(ProgressPageBaseTests):
             )
 
     @patch('courseware.views.views.is_course_passed', PropertyMock(return_value=True))
+    @patch('lms.djangoapps.certificates.api.get_active_web_certificate', PropertyMock(return_value=True))
     def test_message_for_honor_mode(self):
         """ Verify that message appears on progress page, if learner is enrolled
          in honor mode.
@@ -1869,6 +1876,7 @@ class ProgressPageShowCorrectnessTests(ProgressPageBaseTests):
             self.course,
             depth=2
         )
+        self.addCleanup(set_current_request, None)
         # pylint: disable=protected-access
         module = get_module(
             self.user,
@@ -2332,6 +2340,7 @@ class TestIndexView(ModuleStoreTestCase):
         with self.store.bulk_operations(course.id):
             chapter = ItemFactory(parent=course, category='chapter')
             section = ItemFactory(parent=chapter, category='sequential')
+            ItemFactory.create(parent=section, category='vertical', display_name="Vertical")
 
         url = reverse(
             'courseware_section',
@@ -2348,6 +2357,16 @@ class TestIndexView(ModuleStoreTestCase):
         with override_waffle_flag(waffle_flag, active=True):
             response = self.client.get(url, follow=False)
             assert response.status_code == 200
+            self.assertIn('data-save-position="false"', response.content)
+            self.assertIn('data-show-completion="false"', response.content)
+
+        user = UserFactory()
+        CourseEnrollmentFactory(user=user, course_id=course.id)
+        self.assertTrue(self.client.login(username=user.username, password='test'))
+        response = self.client.get(url, follow=False)
+        assert response.status_code == 200
+        self.assertIn('data-save-position="true"', response.content)
+        self.assertIn('data-show-completion="true"', response.content)
 
 
 @attr(shard=5)

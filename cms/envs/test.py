@@ -13,11 +13,6 @@ sessions. Assumes structure:
 # want to import all variables from base settings files
 # pylint: disable=wildcard-import, unused-wildcard-import
 
-# Pylint gets confused by path.py instances, which report themselves as class
-# objects. As a result, pylint applies the wrong regex in validating names,
-# and throws spurious errors. Therefore, we disable invalid-name checking.
-# pylint: disable=invalid-name
-
 from .common import *
 import os
 from path import Path as path
@@ -90,10 +85,10 @@ update_module_store_settings(
         'fs_root': TEST_ROOT / "data",
     },
     doc_store_settings={
-        'db': 'test_xmodule',
+        'db': 'test_xmodule_{}'.format(THIS_UUID),
         'host': MONGO_HOST,
         'port': MONGO_PORT_NUM,
-        'collection': 'test_modulestore{0}'.format(THIS_UUID),
+        'collection': 'test_modulestore',
     },
 )
 

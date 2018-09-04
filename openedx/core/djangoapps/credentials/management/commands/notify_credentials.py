@@ -24,6 +24,7 @@ from pytz import UTC
 
 from lms.djangoapps.certificates.models import GeneratedCertificate
 from lms.djangoapps.grades.models import PersistentCourseGrade
+from openedx.core.djangoapps.credentials.models import NotifyCredentialsConfig
 from openedx.core.djangoapps.credentials.signals import handle_cert_change, send_grade_if_interesting
 from openedx.core.djangoapps.programs.signals import handle_course_cert_changed
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
@@ -134,8 +135,33 @@ class Command(BaseCommand):
             default=100,
             help="Number of items to query at once.",
         )
+        parser.add_argument(
+            '--args-from-database',
+            action='store_true',
+            help='Use arguments from the NotifyCredentialsConfig model instead of the command line.',
+        )
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            help='Run grade/cert change signal in verbose mode',
+        )
+
+    def get_args_from_database(self):
+        """ Returns an options dictionary from the current NotifyCredentialsConfig model. """
+        config = NotifyCredentialsConfig.current()
+        if not config.enabled:
+            raise CommandError('NotifyCredentialsConfig is disabled, but --args-from-database was requested.')
+
+        # We don't need fancy shell-style whitespace/quote handling - none of our arguments are complicated
+        argv = config.arguments.split()
+
+        parser = self.create_parser('manage.py', 'notify_credentials')
+        return parser.parse_args(argv).__dict__   # we want a dictionary, not a non-iterable Namespace object
 
     def handle(self, *args, **options):
+        if options['args_from_database']:
+            options = self.get_args_from_database()
+
         log.info(
             "notify_credentials starting, dry-run=%s, site=%s, delay=%d seconds",
             options['dry_run'],
@@ -177,11 +203,12 @@ class Command(BaseCommand):
             self.send_notifications(certs, grades,
                                     site_config=site_config,
                                     delay=options['delay'],
-                                    page_size=options['page_size'])
+                                    page_size=options['page_size'],
+                                    verbose=options['verbose'])
 
         log.info('notify_credentials finished')
 
-    def send_notifications(self, certs, grades, site_config=None, delay=0, page_size=0):
+    def send_notifications(self, certs, grades, site_config=None, delay=0, page_size=0, verbose=False):
         """ Run actual handler commands for the provided certs and grades. """
 
         # First, do certs
@@ -201,6 +228,7 @@ class Command(BaseCommand):
                 'course_key': cert.course_id,
                 'mode': cert.mode,
                 'status': cert.status,
+                'verbose': verbose,
             }
             handle_course_cert_changed(**signal_args)
             handle_cert_change(**signal_args)
@@ -217,7 +245,15 @@ class Command(BaseCommand):
             )
 
             user = User.objects.get(id=grade.user_id)
-            send_grade_if_interesting(user, grade.course_id, None, None, grade.letter_grade, grade.percent_grade)
+            send_grade_if_interesting(
+                user,
+                grade.course_id,
+                None,
+                None,
+                grade.letter_grade,
+                grade.percent_grade,
+                verbose=verbose
+            )
 
     def get_course_keys(self, courses):
         """

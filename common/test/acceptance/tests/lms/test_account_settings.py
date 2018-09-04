@@ -29,7 +29,6 @@ class AccountSettingsTestMixin(EventsTestMixin, AcceptanceTest):
         Visit the account settings page for the current user, and store the page instance
         as self.account_settings_page.
         """
-        # pylint: disable=attribute-defined-outside-init
         self.account_settings_page = AccountSettingsPage(self.browser)
         self.account_settings_page.visit()
         self.account_settings_page.wait_for_ajax()
@@ -457,28 +456,6 @@ class AccountSettingsPageTest(AccountSettingsTestMixin, AcceptanceTest):
         abbr = time_zone.strftime('%Z')
         offset = time_zone.strftime('%z')
         return abbr, offset
-
-    def test_preferred_language_field(self):
-        """
-        Test behaviour of "Preferred Language" field.
-        """
-        self._test_dropdown_field(
-            u'language_proficiencies',
-            u'Preferred Language',
-            u'',
-            [u'Pushto', u''],
-        )
-
-        actual_events = self.wait_for_events(event_filter=self.settings_changed_event_filter, number_of_matches=2)
-        self.assert_events_match(
-            [
-                self.expected_settings_changed_event(
-                    'language_proficiencies', [], [{'code': 'ps'}], table='student_languageproficiency'),
-                self.expected_settings_changed_event(
-                    'language_proficiencies', [{'code': 'ps'}], [], table='student_languageproficiency'),
-            ],
-            actual_events
-        )
 
     def test_social_links_field(self):
         """

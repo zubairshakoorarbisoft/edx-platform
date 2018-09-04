@@ -17,6 +17,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import get_language_bidi
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods
+from edx_django_utils.monitoring import function_trace
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import status
 from web_fragments.fragment import Fragment
@@ -44,7 +45,6 @@ from django_comment_client.utils import (
 from django_comment_common.models import CourseDiscussionSettings
 from django_comment_common.utils import ThreadContext, get_course_discussion_settings, set_course_discussion_settings
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
-from openedx.core.djangoapps.monitoring_utils import function_trace
 from student.models import CourseEnrollment
 from util.json_request import JsonResponse, expect_json
 from xmodule.modulestore.django import modulestore
@@ -180,7 +180,7 @@ def use_bulk_ops(view_func):
     the request uri to a CourseKey before passing to the view.
     """
     @wraps(view_func)
-    def wrapped_view(request, course_id, *args, **kwargs):  # pylint: disable=missing-docstring
+    def wrapped_view(request, course_id, *args, **kwargs):
         course_key = CourseKey.from_string(course_id)
         with modulestore().bulk_operations(course_key):
             return view_func(request, course_key, *args, **kwargs)
