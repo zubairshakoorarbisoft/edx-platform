@@ -472,9 +472,6 @@ XQUEUE_INTERFACE = {
 MIDDLEWARE_CLASSES = [
     'crum.CurrentRequestUserMiddleware',
 
-    # Deprecated, but well entrenched RequestCache
-    'openedx.core.djangoapps.request_cache.middleware.RequestCache',
-
     # A newer and safer request cache.
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'edx_django_utils.monitoring.middleware.MonitoringMemoryMiddleware',
@@ -1510,6 +1507,9 @@ COURSEGRAPH_JOB_QUEUE = LOW_PRIORITY_QUEUE
 
 ########## Settings for video transcript migration tasks ############
 VIDEO_TRANSCRIPT_MIGRATIONS_JOB_QUEUE = LOW_PRIORITY_QUEUE
+
+########## Settings youtube thumbnails scraper tasks ############
+SCRAPE_YOUTUBE_THUMBNAILS_JOB_QUEUE = LOW_PRIORITY_QUEUE
 
 ###################### VIDEO IMAGE STORAGE ######################
 

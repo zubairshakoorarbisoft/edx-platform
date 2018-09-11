@@ -21,13 +21,11 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from edx_django_utils.cache import RequestCache
 
-from openedx.core.djangoapps.request_cache.middleware import RequestCache as DeprecatedRequestCache
-
 
 class CacheIsolationMixin(object):
     """
     This class can be used to enable specific django caches for
-    specific the TestCase that it's mixed into.
+    the specific TestCase that it's mixed into.
 
     Usage:
 
@@ -120,7 +118,6 @@ class CacheIsolationMixin(object):
         # Clear that.
         sites.models.SITE_CACHE.clear()
 
-        DeprecatedRequestCache.clear_request_cache()
         RequestCache.clear_all_namespaces()
 
 
