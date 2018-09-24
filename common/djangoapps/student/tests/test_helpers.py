@@ -77,7 +77,6 @@ class TestLoginHelper(TestCase):
         next_page = get_next_url_for_login_page(req)
         self.assertEqual(next_page, expected_url)
 
-
     @ddt.data(
         ('/dashboard', 'testserver', True),
         ('https://edx.org/courses', 'edx.org', True),
@@ -92,7 +91,6 @@ class TestLoginHelper(TestCase):
         req = self.request.get(reverse("login"), HTTP_HOST=host)
         actual_is_safe = is_safe_redirect(req, url)
         self.assertEqual(actual_is_safe, expected_is_safe)
-
 
     @patch('student.helpers.third_party_auth.pipeline.get')
     @ddt.data(

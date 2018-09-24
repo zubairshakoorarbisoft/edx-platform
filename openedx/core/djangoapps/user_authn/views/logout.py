@@ -12,6 +12,7 @@ from provider.oauth2.models import Client
 from openedx.core.djangoapps.user_authn.cookies import delete_logged_in_cookies
 from student.helpers import is_safe_redirect
 
+
 class LogoutView(TemplateView):
     """
     Logs out user and redirects.

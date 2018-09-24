@@ -81,19 +81,19 @@ class LogoutTests(TestCase):
         client = self.create_oauth_client()
         response = self.assert_session_logged_out(client)
         expected = {
-            'logout_uris': [client.logout_uri + '?no_redirect=1'],  # pylint: disable=no-member
+            'logout_uris': [client.logout_uri + '?no_redirect=1'],
             'target': '/',
         }
-        self.assertDictContainsSubset(expected, response.context_data)  # pylint: disable=no-member
+        self.assertDictContainsSubset(expected, response.context_data)
 
     def test_filter_referring_service(self):
         """ Verify that, if the user is directed to the logout page from a service, that service's logout URL
         is not included in the context sent to the template.
         """
         client = self.create_oauth_client()
-        response = self.assert_session_logged_out(client, HTTP_REFERER=client.logout_uri)  # pylint: disable=no-member
+        response = self.assert_session_logged_out(client, HTTP_REFERER=client.logout_uri)
         expected = {
             'logout_uris': [],
             'target': '/',
         }
-        self.assertDictContainsSubset(expected, response.context_data)  # pylint: disable=no-member
+        self.assertDictContainsSubset(expected, response.context_data)
