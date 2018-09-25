@@ -52,7 +52,7 @@ class TestLoginHelper(TestCase):
          "Redirect to url path with specified filed type 'image/png' not allowed: u'" + static_url + "dummy.png" + "'"),
     )
     @ddt.unpack
-    def test_unsafe_next(self, log_level, log_name, unsafe_url, http_accept, user_agent, expected_log):
+    def test_next_failures(self, log_level, log_name, unsafe_url, http_accept, user_agent, expected_log):
         """ Test unsafe next parameter """
         with LogCapture(LOGGER_NAME, level=log_level) as logger:
             req = self.request.get(reverse("login") + "?next={url}".format(url=unsafe_url))
@@ -64,23 +64,24 @@ class TestLoginHelper(TestCase):
             )
 
     @ddt.data(
-        ('/dashboard', 'testserver', '/dashboard'),
-        ('https://edx.org/courses', 'edx.org', 'https://edx.org/courses'),
-        ('https://test.edx.org/courses', 'edx.org', 'https://test.edx.org/courses'),
-        ('https://test.edx.org/courses', 'courses.edx.org', 'https://test.edx.org/courses'),
+        ('/dashboard', 'testserver'),
+        ('https://edx.org/courses', 'edx.org'),
+        ('https://test.edx.org/courses', 'edx.org'),
+        ('https://test.edx.org/courses', 'courses.edx.org'),
     )
     @ddt.unpack
-    def test_safe_next(self, url, host, expected_url):
+    def test_next_success(self, next_url, host):
         """ Test safe next parameter """
-        req = self.request.get(reverse("login") + "?next={url}".format(url=url), HTTP_HOST=host)
+        req = self.request.get(reverse("login") + "?next={url}".format(url=next_url), HTTP_HOST=host)
         req.META["HTTP_ACCEPT"] = "text/html"  # pylint: disable=no-member
         next_page = get_next_url_for_login_page(req)
-        self.assertEqual(next_page, expected_url)
+        self.assertEqual(next_page, next_url)
 
     @ddt.data(
         ('/dashboard', 'testserver', True),
         ('https://edx.org/courses', 'edx.org', True),
         ('https://test.edx.org/courses', 'edx.org', True),
+        ('https://test.edx.org/courses', 'courses.edx.org', True),
         ('https://www.amazon.org', 'edx.org', False),
         ('http://edx.org/courses', 'edx.org', False),
         ('http:///edx.org/courses', 'edx.org', False),  # Django's is_safe_url protects against "///"

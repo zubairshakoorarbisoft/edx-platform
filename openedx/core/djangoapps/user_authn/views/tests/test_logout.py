@@ -3,6 +3,7 @@ Tests for logout
 """
 import unittest
 
+import ddt
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
@@ -15,6 +16,7 @@ from student.tests.factories import UserFactory
 
 
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
+@ddt.ddt
 class LogoutTests(TestCase):
     """ Tests for the logout functionality. """
 
@@ -24,15 +26,15 @@ class LogoutTests(TestCase):
         self.user = UserFactory()
         self.client.login(username=self.user.username, password='test')
 
-    def create_oauth_client(self):
+    def _create_oauth_client(self):
         """ Creates a trusted OAuth client. """
         client = ClientFactory(logout_uri='https://www.example.com/logout/')
         TrustedClientFactory(client=client)
         return client
 
-    def assert_session_logged_out(self, oauth_client, **logout_headers):
+    def _assert_session_logged_out(self, oauth_client, **logout_headers):
         """ Authenticates a user via OAuth 2.0, logs out, and verifies the session is logged out. """
-        self.authenticate_with_oauth(oauth_client)
+        self._authenticate_with_oauth(oauth_client)
 
         # Logging out should remove the session variables, and send a list of logout URLs to the template.
         # The template will handle loading those URLs and redirecting the user. That functionality is not tested here.
@@ -42,7 +44,7 @@ class LogoutTests(TestCase):
 
         return response
 
-    def authenticate_with_oauth(self, oauth_client):
+    def _authenticate_with_oauth(self, oauth_client):
         """ Perform an OAuth authentication using the current web client.
 
         This should add an AUTHORIZED_CLIENTS_SESSION_KEY entry to the current session.
@@ -56,30 +58,44 @@ class LogoutTests(TestCase):
         self.client.post(reverse('oauth2:capture'), data, follow=True)
         self.assertListEqual(self.client.session[AUTHORIZED_CLIENTS_SESSION_KEY], [oauth_client.client_id])
 
-    def assert_logout_redirects_to_root(self):
-        """ Verify logging out redirects the user to the homepage. """
-        response = self.client.get(reverse('logout'))
+    @ddt.data(
+        ('/courses', 'testserver'),
+        ('https://edx.org/courses', 'edx.org'),
+        ('https://test.edx.org/courses', 'edx.org'),
+        ('https://test.edx.org/courses', 'courses.edx.org'),
+    )
+    @ddt.unpack
+    def test_logout_redirect_success(self, redirect_url, host):
+        url = '{logout_path}?redirect_url={redirect_url}'.format(
+            logout_path=reverse('logout'),
+            redirect_url=redirect_url
+        )
+        response = self.client.get(url, HTTP_HOST=host)
+        self.assertRedirects(response, redirect_url, fetch_redirect_response=False)
+
+    def test_no_redirect_supplied(self):
+        response = self.client.get(reverse('logout'), HTTP_HOST='testserver')
         self.assertRedirects(response, '/', fetch_redirect_response=False)
 
-    def assert_logout_redirects_with_target(self):
-        """ Verify logging out with a redirect_url query param redirects the user to the target. """
-        url = '{}?{}'.format(reverse('logout'), 'redirect_url=/courses')
-        response = self.client.get(url)
-        self.assertRedirects(response, '/courses', fetch_redirect_response=False)
-
-    def test_without_session_value(self):
-        """ Verify logout works even if the session does not contain an entry with
-        the authenticated OpenID Connect clients."""
-        self.assert_logout_redirects_to_root()
-        self.assert_logout_redirects_with_target()
+    @ddt.data(
+        ('https://www.amazon.org', 'edx.org'),
+    )
+    @ddt.unpack
+    def test_logout_redirect_failure(self, redirect_url, host):
+        url = '{logout_path}?redirect_url={redirect_url}'.format(
+            logout_path=reverse('logout'),
+            redirect_url=redirect_url
+        )
+        response = self.client.get(url, HTTP_HOST=host)
+        self.assertRedirects(response, '/', fetch_redirect_response=False)
 
     def test_client_logout(self):
         """ Verify the context includes a list of the logout URIs of the authenticated OpenID Connect clients.
 
         The list should only include URIs of the clients for which the user has been authenticated.
         """
-        client = self.create_oauth_client()
-        response = self.assert_session_logged_out(client)
+        client = self._create_oauth_client()
+        response = self._assert_session_logged_out(client)
         expected = {
             'logout_uris': [client.logout_uri + '?no_redirect=1'],
             'target': '/',
@@ -90,8 +106,8 @@ class LogoutTests(TestCase):
         """ Verify that, if the user is directed to the logout page from a service, that service's logout URL
         is not included in the context sent to the template.
         """
-        client = self.create_oauth_client()
-        response = self.assert_session_logged_out(client, HTTP_REFERER=client.logout_uri)
+        client = self._create_oauth_client()
+        response = self._assert_session_logged_out(client, HTTP_REFERER=client.logout_uri)
         expected = {
             'logout_uris': [],
             'target': '/',
