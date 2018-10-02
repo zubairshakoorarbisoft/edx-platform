@@ -14,6 +14,8 @@ from .transformers import (
     visibility,
     load_override_data,
 )
+from openedx.features.content_type_gating.block_transformers import ContentTypeGateTransformer
+
 from .usage_info import CourseUsageInfo
 
 INDIVIDUAL_STUDENT_OVERRIDE_PROVIDER = (
@@ -42,6 +44,7 @@ def get_course_block_access_transformers(user):
     course_block_access_transformers = [
         library_content.ContentLibraryTransformer(),
         start_date.StartDateTransformer(),
+        ContentTypeGateTransformer(),
         user_partitions.UserPartitionTransformer(),
         visibility.VisibilityTransformer(),
     ]

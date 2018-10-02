@@ -6,9 +6,16 @@ of audit learners.
 """
 
 import logging
+import textwrap
 
+import crum
+from django.apps import apps
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+import waffle
 
+from web_fragments.fragment import Fragment
+from lms.djangoapps.commerce.utils import EcommerceService
 from lms.djangoapps.courseware.masquerade import (
     get_course_masquerade,
     is_masquerading_as_specific_student,
@@ -71,7 +78,96 @@ def create_content_gating_partition(course):
 
 
 class ContentTypeGatingPartition(UserPartition):
-    pass
+
+    def access_denied_fragment(self, block, user, user_group, allowed_groups):
+        ecomm_service = EcommerceService()
+        ecommerce_checkout = ecomm_service.is_enabled(user)
+        ecommerce_checkout_link = ''
+        ecommerce_bulk_checkout_link = ''
+        verified_mode = None
+        CourseMode = apps.get_model('course_modes.CourseMode')
+        modes = CourseMode.modes_for_course_dict(block.scope_ids.usage_id.course_key)
+        verified_mode = modes.get(CourseMode.VERIFIED, '')
+
+        if ecommerce_checkout and verified_mode.sku:
+            ecommerce_checkout_link = ecomm_service.get_checkout_page_url(verified_mode.sku)
+
+        if verified_mode is None:
+            return None
+
+        request = crum.get_current_request()
+        if 'org.edx.mobile' in request.META.get('HTTP_USER_AGENT', ''):
+            upsell = ''
+        else:
+            upsell = textwrap.dedent("""\
+                <span class="certDIV_1" style="">
+                    <a href="{ecommerce_checkout_link}" class="certA_2">
+                        Upgrade to unlock  (${min_price})
+                    </a>
+                </span>
+            """.format(
+                ecommerce_checkout_link=ecommerce_checkout_link,
+                # TODO: Does this need i18n?
+                min_price=verified_mode.min_price,
+            ))
+
+        frag = Fragment(textwrap.dedent(u"""\
+            <div class=".content-paywall">
+                <div>
+                    <h3>
+                        <span class="fa fa-lock" aria-hidden="true"></span>
+                        Verified Track Access
+                    </h3>
+                    <span style=" padding: 10px 0;">
+                        Graded assessments are available to Verified Track learners.
+                    </span>
+                    {upsell}
+                </div>
+                <img src="https://courses.edx.org/static/images/edx-verified-mini-cert.png">
+            </div>
+        """.format(
+            upsell=upsell,
+        )))
+        frag.add_css(textwrap.dedent("""\
+            .content-paywall {
+                margin-top: 10px;
+                border-radius: 5px 5px 5px 5px;
+                display: flex;
+                justify-content: space-between;
+                border: lightgrey 1px solid;
+                padding: 15px 20px;
+            }
+
+            .content-paywall h3 {
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+
+            .content-paywall .fa-lock {
+                color: black;
+                margin-right: 10px;
+                font-size: 24px;
+                margin-left: 5px;
+            }
+
+            .content-paywall .certDIV_1 {
+                color: rgb(25, 125, 29);
+                height: 20px;
+                width: 300px;
+                font: normal normal 600 normal 14px / 20px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            }
+
+            .content-paywall .certA_2 {
+                text-decoration: underline !important;
+                color: rgb(0, 117, 180);
+                font: normal normal 400 normal 16px / 25.6px 'Open Sans';
+            }
+
+            .content-paywall img {
+                height: 60px;
+            }
+        """))
+        return frag
 
 
 class ContentTypeGatingPartitionScheme(object):
@@ -100,9 +196,44 @@ class ContentTypeGatingPartitionScheme(object):
         if get_course_masquerade(user, course_key) and not is_masquerading_as_specific_student(user, course_key):
             return get_masquerading_user_group(course_key, user, user_partition)
 
-        # For now, treat everyone as a Full-access user, until we have the rest of the
-        # feature gating logic in place.
-        return cls.FULL_ACCESS
+        CourseMode = apps.get_model('course_modes.CourseMode')
+        modes = CourseMode.modes_for_course_dict(course_key)
+
+        # If there is no verified mode, all users are considered FULL_ACCESS
+        if not CourseMode.has_verified_mode(modes):
+            return cls.FULL_ACCESS
+
+        CourseEnrollment = apps.get_model('student.CourseEnrollment')
+
+        enrollment = CourseEnrollment.get_enrollment(user, course_key)
+        if not CONTENT_TYPE_GATING_FLAG.is_enabled():
+            return cls.FULL_ACCESS
+
+        mode_slug, is_active = CourseEnrollment.enrollment_mode_for_user(user, course_key)
+
+        if mode_slug and is_active:
+            course_mode = CourseMode.mode_for_course(
+                course_key,
+                mode_slug,
+                modes=CourseMode.modes_for_course(course_key, include_expired=True, only_selectable=False),
+            )
+            if course_mode is None:
+                LOG.error(
+                    "User %s is in an unknown CourseMode '%s' for course %s. Unlocking content for this user",
+                    user.username,
+                    mode_slug,
+                    course_key,
+                )
+                return cls.FULL_ACCESS
+
+            if mode_slug == CourseMode.AUDIT:
+                # Check the user email exceptions here:
+                return cls.LIMITED_ACCESS
+            else:
+                return cls.FULL_ACCESS
+        else:
+            # Unenrolled users don't get gated content
+            return cls.LIMITED_ACCESS
 
     @classmethod
     def create_user_partition(cls, id, name, description, groups=None, parameters=None, active=True):  # pylint: disable=redefined-builtin, invalid-name, unused-argument
