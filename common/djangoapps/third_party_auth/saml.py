@@ -219,7 +219,7 @@ class EdXSAMLIdentityProvider(SAMLIdentityProvider):
         another attribute to use.
         """
         key = self.conf.get(conf_key, default_attribute)
-        default = self.conf['attr_defaults'].get(conf_key)
+        default = self.conf['attr_defaults'].get(conf_key) or None
         return attributes[key][0] if key in attributes else default
 
     @property

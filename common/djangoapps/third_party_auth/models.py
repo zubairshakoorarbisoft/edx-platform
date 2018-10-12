@@ -672,10 +672,13 @@ class SAMLProviderConfig(ProviderConfig):
         for field in attrs:
             field_name = attr_defaults.get(field)
             val = getattr(self, field)
-            default = getattr(self, field_name) if field_name else None
             if val:
                 conf[field] = val
-                conf['attr_defaults'][field] = default
+
+            # Default values for SAML attributes
+            default = getattr(self, field_name) if field_name else None
+            conf['attr_defaults'][field] = default
+
         # Now get the data fetched automatically from the metadata.xml:
         data = SAMLProviderData.current(self.entity_id)
         if not data or not data.is_valid():
