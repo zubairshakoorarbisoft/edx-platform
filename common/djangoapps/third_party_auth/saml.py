@@ -211,6 +211,17 @@ class EdXSAMLIdentityProvider(SAMLIdentityProvider):
         })
         return details
 
+    def get_attr(self, attributes, conf_key, default_attribute):
+        """
+        Internal helper method.
+        Get the attribute 'default_attribute' out of the attributes,
+        unless self.conf[conf_key] overrides the default by specifying
+        another attribute to use.
+        """
+        key = self.conf.get(conf_key, default_attribute)
+        default = self.conf['attr_defaults'].get(conf_key)
+        return attributes[key][0] if key in attributes else default
+
     @property
     def saml_sp_configuration(self):
         """Get the SAMLConfiguration for this IdP"""
