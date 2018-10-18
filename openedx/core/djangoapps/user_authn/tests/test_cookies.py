@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.test import RequestFactory, TestCase
 
+from edx_rest_framework_extensions.auth.jwt.decoder import jwt_decode_handler
 from edx_rest_framework_extensions.auth.jwt.middleware import JwtAuthCookieMiddleware
 from openedx.core.djangoapps.user_authn import cookies as cookies_api
 from openedx.core.djangoapps.user_authn.tests.utils import setup_login_oauth_client
@@ -57,8 +58,10 @@ class CookieTests(TestCase):
 
     def _assert_recreate_jwt_from_cookies(self, response, can_recreate):
         """
-        Verifies that a JWT can be properly recreated from the 2 separate
-        JWT-related cookies using the JwtAuthCookieMiddleware middleware.
+        If can_recreate is True, verifies that a JWT can be properly recreated
+        from the 2 separate JWT-related cookies using the 
+        JwtAuthCookieMiddleware middleware and returns the recreated JWT.
+        If can_recreate is False, verifies that a JWT cannot be recreated.
         """
         self._copy_cookies_to_request(response, self.request)
         JwtAuthCookieMiddleware().process_request(self.request)
@@ -66,6 +69,10 @@ class CookieTests(TestCase):
             cookies_api.jwt_cookies.jwt_cookie_name() in self.request.COOKIES,
             can_recreate,
         )
+        if can_recreate:
+            jwt_string = self.request.COOKIES[cookies_api.jwt_cookies.jwt_cookie_name()]
+            jwt = jwt_decode_handler(jwt_string)
+            self.assertEqual(jwt['scopes'], ['email', 'profile'])
 
     def _assert_cookies_present(self, response, expected_cookies):
         """ Verify all expected_cookies are present in the response. """
@@ -116,8 +123,10 @@ class CookieTests(TestCase):
         self.assertFalse(cookies_api.is_logged_in_cookie_set(self.request))
 
     def test_refresh_jwt_cookies(self):
+        refresh_cookie_name = cookies_api.jwt_cookies.jwt_refresh_cookie_name()
+
         def _get_refresh_token_value(response):
-            return response.cookies[cookies_api.jwt_cookies.jwt_refresh_cookie_name()].value
+            return response.cookies[refresh_cookie_name].value
 
         setup_login_oauth_client()
         with cookies_api.JWT_COOKIES_FLAG.override(True):
@@ -126,6 +135,8 @@ class CookieTests(TestCase):
 
             new_response = cookies_api.refresh_jwt_cookies(self.request, HttpResponse())
             self._assert_recreate_jwt_from_cookies(new_response, can_recreate=True)
+
+            # refresh token changes
             self.assertNotEqual(
                 _get_refresh_token_value(response),
                 _get_refresh_token_value(new_response),
