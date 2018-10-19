@@ -108,7 +108,7 @@ class AccessError(AccessResponse):
             error_code (String): unique identifier for the specific type of
             error developer_message (String): message to show the developer
             user_message (String): message to show the user
-            additional_context_user_message (String): message to show user with additional context like the course name
+            additional_context_user_message (String): message to show the user with additional context like the course name
             user_fragment (:py:class:`~web_fragments.fragment.Fragment`): HTML to show the user
 
         """
