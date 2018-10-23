@@ -19,6 +19,9 @@ from courseware.model_data import FieldDataCache
 from courseware.module_render import get_module_for_descriptor
 from courseware.views.index import save_positions_recursively_up
 from experiments.models import ExperimentData, ExperimentKeyValue
+from lms.djangoapps.courseware.access_utils import ACCESS_GRANTED
+from openedx.features.course_duration_limits.access import check_course_expired
+from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
 from student.models import CourseEnrollment, User
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import ItemNotFoundError
@@ -209,6 +212,10 @@ class UserCourseEnrollmentsList(generics.ListAPIView):
         Get information about the courses that the currently signed in user is
         enrolled in.
 
+        Courses that have expired, due to content gating rules,
+        will not be returned in the result set. Use the v1 version of the API to get all
+        enrollments including expired ones.
+
     **Example Request**
 
         GET /api/mobile/v0.5/users/{username}/course_enrollments/
@@ -323,7 +330,9 @@ class UserCourseEnrollmentsList(generics.ListAPIView):
             enrollment for enrollment in enrollments
             if enrollment.course_overview and self.is_org(org, enrollment.course_overview.org) and
             is_mobile_available_for_user(self.request.user, enrollment.course_overview) and
-            not self.hide_course_for_enrollment_fee_experiment(self.request.user, enrollment)
+            not self.hide_course_for_enrollment_fee_experiment(self.request.user, enrollment) and
+            not CONTENT_TYPE_GATING_FLAG.is_enabled() or
+            check_course_expired(self.request.user, enrollment.course) == ACCESS_GRANTED
         ]
 
 

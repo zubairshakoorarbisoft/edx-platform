@@ -148,6 +148,7 @@ urlpatterns = [
 if settings.FEATURES.get('ENABLE_MOBILE_REST_API'):
     urlpatterns += [
         url(r'^api/mobile/v0.5/', include('mobile_api.urls')),
+        url(r'^api/mobile/v1/', include('mobile_api.v1.urls')),
     ]
 
 if settings.FEATURES.get('ENABLE_OPENBADGES'):
