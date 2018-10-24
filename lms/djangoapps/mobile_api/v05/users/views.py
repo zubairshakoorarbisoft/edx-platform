@@ -1,13 +1,14 @@
 """
-Views for user API
+Views for user v0.5 API
 """
-
 from courseware.access import is_mobile_available_for_user
+from lms.djangoapps.courseware.access_utils import ACCESS_GRANTED
 from openedx.features.course_duration_limits.access import check_course_expired
+from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
 
 from mobile_api.decorators import mobile_view
-from mobile_api.v1.users.serializers import CourseEnrollmentSerializer
 from mobile_api.users.views import UserCourseEnrollmentsList as UserCourseEnrollmentsListBase
+from mobile_api.v05.users.serializers import CourseEnrollmentSerializer
 
 
 @mobile_view(is_user=True)
@@ -18,14 +19,13 @@ class UserCourseEnrollmentsList(UserCourseEnrollmentsListBase):
         Get information about the courses that the currently signed in user is
         enrolled in.
 
-        This differs from v0.5 version by returning ALL enrollments for
-        a user rather than only the enrollments the user has access to (that haven't expired).
-        An additional attribute "expiration" has been added to the response, which lists the date
-        when access to the course will expire or null if it doesn't expire.
+        Courses that have expired, due to content gating rules,
+        will not be returned in the result set. Use the v1 version of the API to get all
+        enrollments including expired ones.
 
     **Example Request**
 
-        GET /api/mobile/v1/users/{username}/course_enrollments/
+        GET /api/mobile/v0.5/users/{username}/course_enrollments/
 
     **Response Values**
 
@@ -34,8 +34,6 @@ class UserCourseEnrollmentsList(UserCourseEnrollmentsListBase):
 
         The HTTP 200 response has the following values.
 
-        * expiration: The course expiration date for given user course pair
-          or null if the course does not expire.
         * certificate: Information about the user's earned certificate in the
           course.
         * course: A collection of the following data about the course.
@@ -84,5 +82,8 @@ class UserCourseEnrollmentsList(UserCourseEnrollmentsListBase):
         return [
             enrollment for enrollment in enrollments
             if enrollment.course_overview and self.is_org(org, enrollment.course_overview.org) and
-            is_mobile_available_for_user(self.request.user, enrollment.course_overview)
+            is_mobile_available_for_user(self.request.user, enrollment.course_overview) and
+            not self.hide_course_for_enrollment_fee_experiment(self.request.user, enrollment) and
+            not CONTENT_TYPE_GATING_FLAG.is_enabled() or
+            check_course_expired(self.request.user, enrollment.course) == ACCESS_GRANTED
         ]

@@ -1,12 +1,12 @@
 """
-URLs for user v1 API
+URLs for user v0.5 API
 """
 
 from django.conf import settings
 from django.conf.urls import url
 
 from mobile_api.users.views import UserCourseStatus, UserDetail
-from mobile_api.v1.users.views import UserCourseEnrollmentsList
+from mobile_api.v05.users.views import UserCourseEnrollmentsList
 
 urlpatterns = [
     url('^' + settings.USERNAME_PATTERN + '$', UserDetail.as_view(), name='user-detail'),
