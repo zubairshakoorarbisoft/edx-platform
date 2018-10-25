@@ -13,7 +13,7 @@ urlpatterns = [
     url(
         '^' + settings.USERNAME_PATTERN + '/course_enrollments/$',
         UserCourseEnrollmentsList.as_view(),
-        name='courseenrollment-detail'
+        name='courseenrollment-detail-v05'
     ),
     url('^{}/course_status_info/{}'.format(settings.USERNAME_PATTERN, settings.COURSE_ID_PATTERN),
         UserCourseStatus.as_view(),

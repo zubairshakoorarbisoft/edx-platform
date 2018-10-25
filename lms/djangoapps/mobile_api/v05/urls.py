@@ -1,5 +1,5 @@
 """
-URLs for mobile API
+URLs for mobile v0.5 API
 """
 
 from django.conf.urls import include, url

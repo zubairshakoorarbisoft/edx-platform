@@ -206,7 +206,7 @@ class TestVideoAPIMixin(object):
 @attr(shard=9)
 class TestNonStandardCourseStructure(MobileAPITestCase, TestVideoAPIMixin, MilestonesTestCaseMixin):
     """
-    Tests /api/mobile/v0.5/video_outlines/courses/{course_id} with no course set
+    Tests /api/mobile/v1/video_outlines/courses/{course_id} with no course set
     """
     REVERSE_INFO = {'name': 'video-summary-list', 'params': ['course_id']}
 
@@ -418,7 +418,7 @@ class TestNonStandardCourseStructure(MobileAPITestCase, TestVideoAPIMixin, Miles
 class TestVideoSummaryList(TestVideoAPITestCase, MobileAuthTestMixin, MobileCourseAccessTestMixin,
                            TestVideoAPIMixin, MilestonesTestCaseMixin):
     """
-    Tests for /api/mobile/v0.5/video_outlines/courses/{course_id}..
+    Tests for /api/mobile/v1/video_outlines/courses/{course_id}..
     """
     REVERSE_INFO = {'name': 'video-summary-list', 'params': ['course_id']}
 
@@ -505,7 +505,7 @@ class TestVideoSummaryList(TestVideoAPITestCase, MobileAuthTestMixin, MobileCour
             'video_url': self.video_url_high,
             'duration': 12.0,
             'transcripts': {
-                'en': 'http://testserver/api/mobile/v0.5/video_outlines/transcripts/{}/testing_mobile_high_video/en'.format(self.course.id)  # pylint: disable=line-too-long
+                'en': 'http://testserver/api/mobile/v1/video_outlines/transcripts/{}/testing_mobile_high_video/en'.format(self.course.id)  # pylint: disable=line-too-long
             },
             'only_on_web': False,
             'encoded_videos': {
@@ -544,7 +544,6 @@ class TestVideoSummaryList(TestVideoAPITestCase, MobileAuthTestMixin, MobileCour
         expected_output['encoded_videos'].pop('mobile_high')
         expected_output['video_url'] = self.youtube_url
         expected_output['size'] = 2222
-
         course_outline[0]['summary'].pop("id")
         self.assertEqual(course_outline[0]['summary'], expected_output)
 
@@ -584,7 +583,7 @@ class TestVideoSummaryList(TestVideoAPITestCase, MobileAuthTestMixin, MobileCour
             'video_url': self.video_url_low,
             'duration': None,
             'transcripts': {
-                'en': 'http://testserver/api/mobile/v0.5/video_outlines/transcripts/{}/testing_html5_sources/en'.format(self.course.id)  # pylint: disable=line-too-long
+                'en': 'http://testserver/api/mobile/v1/video_outlines/transcripts/{}/testing_html5_sources/en'.format(self.course.id)  # pylint: disable=line-too-long
             },
             'only_on_web': False,
             'encoded_videos': None,
@@ -947,7 +946,7 @@ class TestVideoSummaryList(TestVideoAPITestCase, MobileAuthTestMixin, MobileCour
 class TestTranscriptsDetail(TestVideoAPITestCase, MobileAuthTestMixin, MobileCourseAccessTestMixin,
                             TestVideoAPIMixin, MilestonesTestCaseMixin):
     """
-    Tests for /api/mobile/v0.5/video_outlines/transcripts/{course_id}..
+    Tests for /api/mobile/v1/video_outlines/transcripts/{course_id}..
     """
     REVERSE_INFO = {'name': 'video-transcripts-detail', 'params': ['course_id']}
 

@@ -84,6 +84,6 @@ class UserCourseEnrollmentsList(UserCourseEnrollmentsListBase):
             if enrollment.course_overview and self.is_org(org, enrollment.course_overview.org) and
             is_mobile_available_for_user(self.request.user, enrollment.course_overview) and
             not self.hide_course_for_enrollment_fee_experiment(self.request.user, enrollment) and
-            not CONTENT_TYPE_GATING_FLAG.is_enabled() or
-            check_course_expired(self.request.user, enrollment.course) == ACCESS_GRANTED
+            (not CONTENT_TYPE_GATING_FLAG.is_enabled() or
+            check_course_expired(self.request.user, enrollment.course) == ACCESS_GRANTED)
         ]
