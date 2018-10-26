@@ -145,10 +145,22 @@ urlpatterns = [
     url(r'^api/experiments/', include('experiments.urls', namespace='api_experiments')),
 ]
 
+# API_VERSION = r'(?P<api_version>v[0-9.]+)'
+API_VERSION = r'(?P<api_version>v(1|0.5))'
 if settings.FEATURES.get('ENABLE_MOBILE_REST_API'):
+    # urlpatterns += [
+    #     url(r'^api/mobile/v0.5/', include('mobile_api.v05.urls')),
+    #     url(r'^api/mobile/v1/', include('mobile_api.urls')),
+    # ]
     urlpatterns += [
-        url(r'^api/mobile/v0.5/', include('mobile_api.v05.urls')),
-        url(r'^api/mobile/v1/', include('mobile_api.urls')),
+        # url(
+	    #     '^api/mobile/v0.5/users/' + settings.USERNAME_PATTERN + '/course_enrollments/$',
+	    #     UserCourseEnrollmentsListv05.as_view(),
+    	# 	name='courseenrollment-detail-v05'
+	    # ),
+        # url(r'^api/mobile/(?P<api_version>v(1|0.5))/', include('mobile_api.urls')),
+        # url(r'^api/mobile/v[0-9.]+/', include('mobile_api.urls')),
+        url(r'^api/mobile/{}/'.format(API_VERSION), include('mobile_api.urls')),
     ]
 
 if settings.FEATURES.get('ENABLE_OPENBADGES'):

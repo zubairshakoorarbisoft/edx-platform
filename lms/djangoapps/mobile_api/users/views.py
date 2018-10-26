@@ -5,6 +5,7 @@ Views for user API
 import json
 from django.shortcuts import redirect
 from django.utils import dateparse
+
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import UsageKey
 from rest_framework import generics, views
@@ -19,13 +20,17 @@ from courseware.model_data import FieldDataCache
 from courseware.module_render import get_module_for_descriptor
 from courseware.views.index import save_positions_recursively_up
 from experiments.models import ExperimentData, ExperimentKeyValue
+from lms.djangoapps.courseware.access_utils import ACCESS_GRANTED
+from openedx.features.course_duration_limits.access import check_course_expired
+from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
 from student.models import CourseEnrollment, User
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import ItemNotFoundError
 
 from .. import errors
 from ..decorators import mobile_course_access, mobile_view
-from .serializers import CourseEnrollmentSerializer, UserSerializer
+from .serializers import CourseEnrollmentSerializer, CourseEnrollmentSerializerv05, UserSerializer
+# from .serializers import CourseEnrollmentSerializer, UserSerializer
 
 
 @mobile_view(is_user=True)
@@ -265,8 +270,9 @@ class UserCourseEnrollmentsList(generics.ListAPIView):
         * url: URL to the downloadable version of the certificate, if exists.
     """
     queryset = CourseEnrollment.objects.all()
-    serializer_class = CourseEnrollmentSerializer
+    # serializer_class = CourseEnrollmentSerializer
     lookup_field = 'username'
+    # api_version = 'unknown'
 
     # In Django Rest Framework v3, there is a default pagination
     # class that transmutes the response data into a dictionary
@@ -320,18 +326,40 @@ class UserCourseEnrollmentsList(generics.ListAPIView):
 
         return False
 
+    def get(self, request, *args, **kwargs):
+        self.api_version = kwargs.pop('api_version', 'v0.5')
+        return super(UserCourseEnrollmentsList, self).get(request, *args, **kwargs)
+    
+    def get_serializer_class(self):
+        if self.api_version == 'v0.5':
+            return CourseEnrollmentSerializerv05
+        return CourseEnrollmentSerializer
+
     def get_queryset(self):
         enrollments = self.queryset.filter(
             user__username=self.kwargs['username'],
             is_active=True
         ).order_by('created').reverse()
         org = self.request.query_params.get('org', None)
-        return [
-            enrollment for enrollment in enrollments
-            if enrollment.course_overview and self.is_org(org, enrollment.course_overview.org) and
-            is_mobile_available_for_user(self.request.user, enrollment.course_overview)
-        ]
-
+        
+        if self.api_version == 'v0.5':
+            # for v0.5 don't return expired courses
+            return [
+                enrollment for enrollment in enrollments
+                if enrollment.course_overview and self.is_org(org, enrollment.course_overview.org) and
+                is_mobile_available_for_user(self.request.user, enrollment.course_overview) and
+                not self.hide_course_for_enrollment_fee_experiment(self.request.user, enrollment) and
+                (not CONTENT_TYPE_GATING_FLAG.is_enabled() or
+                check_course_expired(self.request.user, enrollment.course) == ACCESS_GRANTED)
+            ]
+        else:
+            # return all courses, with associated expiration
+            return [
+                enrollment for enrollment in enrollments
+                if enrollment.course_overview and self.is_org(org, enrollment.course_overview.org) and
+                is_mobile_available_for_user(self.request.user, enrollment.course_overview)
+            ]
+        
 
 @api_view(["GET"])
 @mobile_view()

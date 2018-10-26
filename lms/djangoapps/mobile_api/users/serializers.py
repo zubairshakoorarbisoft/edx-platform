@@ -16,6 +16,9 @@ class CourseOverviewField(serializers.RelatedField):
     """
     Custom field to wrap a CourseOverview object. Read-only.
     """
+    def __init__(self, **kwargs):
+        self.api_version = kwargs.pop('api_version')
+        super(CourseOverviewField, self).__init__(**kwargs)
 
     def to_representation(self, course_overview):
         course_id = unicode(course_overview.id)
@@ -57,12 +60,12 @@ class CourseOverviewField(serializers.RelatedField):
             'course_sharing_utm_parameters': get_encoded_course_sharing_utm_params(),
             'course_updates': reverse(
                 'course-updates-list',
-                kwargs={'course_id': course_id},
+                kwargs={'api_version': self.api_version, 'course_id': course_id},
                 request=request,
             ),
             'course_handouts': reverse(
                 'course-handouts-list',
-                kwargs={'course_id': course_id},
+                kwargs={'api_version': self.api_version, 'course_id': course_id},
                 request=request,
             ),
             'discussion_url': reverse(
@@ -73,7 +76,7 @@ class CourseOverviewField(serializers.RelatedField):
 
             'video_outline': reverse(
                 'video-summary-list',
-                kwargs={'course_id': course_id},
+                kwargs={'api_version': self.api_version, 'course_id': course_id},
                 request=request,
             ),
         }
@@ -83,7 +86,7 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
     """
     Serializes CourseEnrollment models
     """
-    course = CourseOverviewField(source="course_overview", read_only=True)
+    course = CourseOverviewField(source="course_overview", read_only=True, api_version='v1')
     certificate = serializers.SerializerMethodField()
     expiration = serializers.SerializerMethodField()
 
@@ -108,6 +111,19 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = CourseEnrollment
         fields = ('expiration', 'created', 'mode', 'is_active', 'course', 'certificate')
+        lookup_field = 'username'
+
+
+class CourseEnrollmentSerializerv05(CourseEnrollmentSerializer):
+    """
+    Serializes CourseEnrollment models for v0.5 api
+    Does not include 'expiration' field that is present in v1 api
+    """
+    course = CourseOverviewField(source="course_overview", read_only=True, api_version='v0.5')
+    
+    class Meta(object):
+        model = CourseEnrollment
+        fields = ('created', 'mode', 'is_active', 'course', 'certificate')
         lookup_field = 'username'
 
 
