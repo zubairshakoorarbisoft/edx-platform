@@ -75,6 +75,7 @@ urlpatterns = [
     # spoc gradebook
     url(r'^gradebook$', gradebook_api.spoc_gradebook, name='spoc_gradebook'),
     url(r'^writable_gradebook$', writable_gradebook_api.writable_gradebook, name='writable_gradebook'),
+    url(r'^editable_gradebook$', writable_gradebook_api.editable_gradebook, name='editable_gradebook'),
 
     url(r'^gradebook/(?P<offset>[0-9]+)$', gradebook_api.spoc_gradebook, name='spoc_gradebook'),
 

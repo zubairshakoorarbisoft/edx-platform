@@ -47,3 +47,24 @@ def writable_gradebook(request, course_id):
         'staff_access': True,
         'ordered_grades': sorted(course.grade_cutoffs.items(), key=lambda i: i[1], reverse=True),
     })
+
+
+
+@transaction.non_atomic_requests
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
+@require_level('staff')
+def editable_gradebook(request, course_id):
+    """
+    Show the reactjs version of the editable gradebook for this course:
+    - Only displayed to course staff
+    """
+    course_key = CourseKey.from_string(course_id)
+    if not waffle_flags()[WRITABLE_GRADEBOOK].is_enabled(course_key):
+        return HttpResponseNotFound()
+
+    course = get_course_with_access(request.user, 'load', course_key)
+    return render_to_response('instructor/editable_gradebook.html', {
+        'course': course,
+        'course_id': course_key,
+        'staff_access': True,
+    })

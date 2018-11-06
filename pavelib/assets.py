@@ -68,6 +68,7 @@ NPM_INSTALLED_LIBRARIES = [
     'underscore.string/dist/underscore.string.js',
     'underscore/underscore.js',
     '@edx/studio-frontend/dist/',
+    '@edx/gradebook/dist/',
     'which-country/index.js'
 ]
 
