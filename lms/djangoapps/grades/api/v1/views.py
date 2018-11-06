@@ -24,7 +24,12 @@ from lms.djangoapps.grades.constants import ScoreDatabaseTableEnum
 from lms.djangoapps.grades.course_data import CourseData
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
 from lms.djangoapps.grades.events import SUBSECTION_GRADE_CALCULATED, subsection_grade_calculated
-from lms.djangoapps.grades.models import PersistentSubsectionGrade, PersistentSubsectionGradeOverride
+from lms.djangoapps.grades.models import (
+    PersistentSubsectionGrade,
+    PersistentSubsectionGradeOverride,
+    bulk_course_grade_context,
+    bulk_subsection_grade_context
+)
 from lms.djangoapps.grades.subsection_grade import CreateSubsectionGrade
 from lms.djangoapps.grades.tasks import recalculate_subsection_grade_v3, are_grades_frozen
 from opaque_keys import InvalidKeyError
@@ -243,11 +248,12 @@ class GradeViewMixin(DeveloperErrorViewMixin):
             enrollments_in_course = enrollments_in_course.select_related(*related_models)
 
         paged_enrollments = self.paginate_queryset(enrollments_in_course)
-        users = (enrollment.user for enrollment in paged_enrollments)
-        grades = CourseGradeFactory().iter(users, course_key=course_key)
+        users = [enrollment.user for enrollment in paged_enrollments]
 
-        for user, course_grade, exc in grades:
-            yield user, course_grade, exc
+        with bulk_course_grade_context(course_key, users), bulk_subsection_grade_context(course_key, users):
+            grades = CourseGradeFactory().iter(users, course_key=course_key)
+            for user, course_grade, exc in grades:
+                yield user, course_grade, exc
 
     def _serialize_user_grade(self, user, course_key, course_grade):
         """
