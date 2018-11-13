@@ -40,6 +40,11 @@ from submissions import api as submissions_api
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
 from xmodule.partitions.partitions import Group, UserPartition
+from django.test.utils import override_settings
+from openedx.core.djangoapps.waffle_utils.testutils import override_waffle_flag
+from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
+from student.tests.factories import AdminFactory, CourseEnrollmentFactory, UserFactory
+from student.tests.factories import TEST_PASSWORD
 
 
 class ProblemSubmissionTestMixin(TestCase):
@@ -152,6 +157,9 @@ class TestSubmittingProblems(ModuleStoreTestCase, LoginEnrollmentTestCase, Probl
 
         # create a test student
         self.course = CourseFactory.create(display_name=self.COURSE_NAME, number=self.COURSE_SLUG)
+        from course_modes.tests.factories import CourseModeFactory
+        CourseModeFactory.create(course_id=self.course.id, mode_slug='audit')
+        CourseModeFactory.create(course_id=self.course.id, mode_slug='verified')
         self.student = 'view@test.com'
         self.password = 'foo'
         self.create_account('u1', self.student, self.password)
@@ -308,6 +316,27 @@ class TestCourseGrades(TestSubmittingProblems):
         super(TestCourseGrades, self).setUp()
         self.homework = self.add_graded_section_to_course('homework')
         self.problem = self.add_dropdown_to_section(self.homework.location, 'p1', 1)
+
+    @override_waffle_flag(CONTENT_TYPE_GATING_FLAG, True)
+    @override_settings(FIELD_OVERRIDE_PROVIDERS=(
+        'openedx.features.content_type_gating.field_override.ContentTypeGatingFieldOverride',
+    ))
+    def test_xblock_handlers(self):
+        self.graded_problem = ItemFactory.create(
+            parent_location=self.homework.location,
+            category='problem',
+            display_name='p2',
+            graded=True,
+        )
+        url = reverse('xblock_handler', kwargs={'course_id': unicode(self.course.id), 'usage_id': quote_slashes(unicode(self.graded_problem.scope_ids.usage_id)), 'handler': 'xmodule_handler', 'suffix': 'problem_show',})
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)
+
+        self.verified_user = UserFactory.create()
+        CourseEnrollmentFactory.create(user=self.verified_user, course_id=self.course.id, mode='verified')
+        self.client.login(username=self.verified_user.username, password=TEST_PASSWORD)
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)
 
     def _submit_correct_answer(self):
         """
