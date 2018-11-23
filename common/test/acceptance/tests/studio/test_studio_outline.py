@@ -1934,6 +1934,7 @@ class InstructorPacedToSelfPacedOutlineTest(CourseOutlineTest):
                 'value': True
             }
         })
+
     def test_due_dates_not_shown(self):
         """
         Scenario: Ensure that due dates for timed exams
