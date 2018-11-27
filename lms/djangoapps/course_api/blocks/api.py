@@ -10,6 +10,7 @@ from .serializers import BlockDictSerializer, BlockSerializer
 from .transformers.blocks_api import BlocksAPITransformer
 from .transformers.block_completion import BlockCompletionTransformer
 from .transformers.milestones import MilestonesAndSpecialExamsTransformer
+from .transformers.block_short_label import BlockShortLabelTransformer
 
 
 def get_blocks(
@@ -57,6 +58,7 @@ def get_blocks(
     include_completion = 'completion' in requested_fields
     include_special_exams = 'special_exam_info' in requested_fields
     include_gated_sections = 'show_gated_sections' in requested_fields
+    include_short_label = 'short_label' in requested_fields
 
     if user is not None:
         transformers += course_blocks_api.get_course_block_access_transformers(user)
@@ -75,6 +77,9 @@ def get_blocks(
 
     if include_completion:
         transformers += [BlockCompletionTransformer()]
+
+    if include_short_label:
+        transformers += [BlockShortLabelTransformer()]
 
     # transform
     blocks = course_blocks_api.get_course_blocks(user, usage_key, transformers)

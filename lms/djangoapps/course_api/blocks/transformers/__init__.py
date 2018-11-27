@@ -6,6 +6,7 @@ from lms.djangoapps.course_blocks.transformers.visibility import VisibilityTrans
 from .student_view import StudentViewTransformer
 from .block_completion import BlockCompletionTransformer
 from .block_counts import BlockCountsTransformer
+from .block_short_label import BlockShortLabelTransformer
 from .navigation import BlockNavigationTransformer
 from .milestones import MilestonesAndSpecialExamsTransformer
 
@@ -69,5 +70,6 @@ SUPPORTED_FIELDS = [
         BlockCompletionTransformer.COMPLETION,
         BlockCompletionTransformer,
         'completion'
-    )
+    ),
+    SupportedFieldType('short_label', BlockShortLabelTransformer, 'short_label')
 ]
