@@ -393,7 +393,6 @@ module.exports = Merge.smart({
         target: 'webworker',
         context: __dirname,
         entry: {
-            mockprock: './node_modules/@edx/mockprock/static/index.js'
         },
         output: {
             filename: '[name].js',
