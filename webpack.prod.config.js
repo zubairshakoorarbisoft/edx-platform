@@ -31,7 +31,13 @@ var optimizedConfig = Merge.smart(commonConfig, {
             minChunks: 3
         })
     ]
-}});
+  },
+  webworker: {
+    output: {
+      filename: '[name].[chunkhash].js'
+    }
+  }
+});
 
 // requireCompatConfig only exists so that you can use RequireJS to require a
 // Webpack bundle (but try not to do that if you can help it). RequireJS knows
