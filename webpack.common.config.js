@@ -393,7 +393,7 @@ module.exports = Merge.smart({
         target: 'webworker',
         context: __dirname,
         entry: {
-            edx_proctoring_proctortrack: './node_modules/edx-proctoring-proctortrack/edx_proctoring_proctortrack/static/proctortrack_custom.js'
+            edxproctoringproctortrack: './node_modules/edx-proctoring-proctortrack/edx_proctoring_proctortrack/static/proctortrack_custom.js'
         },
         output: {
             filename: '[name].js',
