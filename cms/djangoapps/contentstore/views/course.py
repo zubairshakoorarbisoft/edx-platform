@@ -1193,21 +1193,20 @@ def grading_handler(request, course_key_string, grader_index=None):
     course_key = CourseKey.from_string(course_key_string)
     with modulestore().bulk_operations(course_key):
         course_module = get_course_and_check_access(course_key, request.user)
-
+        # import pudb; pu.db
         if 'text/html' in request.META.get('HTTP_ACCEPT', '') and request.method == 'GET':
             course_details = CourseGradingModel.fetch(course_key)
-            # import pudb; pu.db
             return render_to_response('settings_graders.html', {
                 'available_proctoring_providers': _get_available_proctoring_providers(),
                 'context_course': course_module,
                 'course_locator': course_key,
                 'course_details': course_details,
-                'default_proctoring_provider': settings.PROCTORING_BACKENDS.get('DEFAULT', ''),
+                'create_zendesk_tickets': getattr(course_module, 'create_zendesk_tickets', ''),
+                'default_proctoring_provider': getattr(settings, 'PROCTORING_BACKENDS', {}).get('DEFAULT', ''),
                 'grading_url': reverse_course_url('grading_handler', course_key),
                 'is_credit_course': is_credit_course(course_key),
-                # todo, revisit this once I can be on dahlia/proctoring-master; setting this to mockprock for testing
-                'selected_proctoring_provider': 'mockprock',
-                # 'selected_proctoring_provider': course_module.proctoring_provider or 'mockprock'
+                'selected_proctoring_provider': getattr(course_module, 'proctoring_provider', ''),
+                'user_is_staff': request.user.is_staff,
             })
         elif 'application/json' in request.META.get('HTTP_ACCEPT', ''):
             if request.method == 'GET':
@@ -1240,7 +1239,15 @@ def grading_handler(request, course_key_string, grader_index=None):
                 return JsonResponse()
 
 def _get_available_proctoring_providers():
-    return ['software_secure', 'proctortrack', 'mockprock']
+    proctoring_backend_settings = getattr(
+        settings,
+        'PROCTORING_BACKENDS',
+        {}
+    )
+
+    available_providers = [provider for provider in proctoring_backend_settings if provider != 'DEFAULT']
+    available_providers.sort()
+    return available_providers
 
 def _refresh_course_tabs(request, course_module):
     """
