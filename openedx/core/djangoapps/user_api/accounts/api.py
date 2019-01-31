@@ -52,7 +52,7 @@ visible_fields = _visible_fields
 
 
 @helpers.intercept_errors(errors.UserAPIInternalError, ignore_errors=[errors.UserAPIRequestError])
-def get_account_settings(request, usernames=None, configuration=None, view=None):
+def get_account_settings(request, usernames=None, emails=None, configuration=None, view=None):
     """Returns account information for a user serialized as JSON.
 
     Note:
@@ -82,9 +82,13 @@ def get_account_settings(request, usernames=None, configuration=None, view=None)
 
     """
     requesting_user = request.user
-    usernames = usernames or [requesting_user.username]
 
-    requested_users = User.objects.select_related('profile').filter(username__in=usernames)
+    if emails:
+        requested_users = User.objects.select_related('profile').filter(email__in=emails)
+    else:
+        usernames = usernames or [requesting_user.username]
+        requested_users = User.objects.select_related('profile').filter(username__in=usernames)
+
     if not requested_users:
         raise errors.UserNotFound()
 
