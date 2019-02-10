@@ -1141,6 +1141,19 @@ class CertificateTemplateAsset(TimeStampedModel):
         app_label = "certificates"
 
 
+class CertificateUserPreference(TimeStampedModel):
+    """
+    Preferences for certificates for each user.
+    """
+    VISIBILITIES = Choices('private', 'all_users')
+
+    user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE)
+    visibility = models.CharField(max_length=32, choices=VISIBILITIES, default=VISIBILITIES.private)
+
+    class Meta(object):
+        app_label = "certificates"
+
+
 @receiver(COURSE_CERT_AWARDED, sender=GeneratedCertificate)
 # pylint: disable=unused-argument
 def create_course_badge(sender, user, course_key, status, **kwargs):
