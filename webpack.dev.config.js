@@ -59,5 +59,10 @@ module.exports = _.values(Merge.smart(commonConfig, {
         watchOptions: {
             ignored: [/node_modules/, /\.git/]
         }
+    },
+    webworker: {
+        output: {
+            publicPath: 'http://localhost:18000/static/'
+        }
     }
 }));
