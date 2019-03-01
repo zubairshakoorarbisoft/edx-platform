@@ -873,17 +873,6 @@ class DiscussionCommentEditTest(BaseDiscussionTestCase):
         page.submit_comment_edit(comment_id, new_comment)
 
     @attr(shard=2)
-    def test_edit_comment_as_student(self):
-        self.setup_user()
-        self.setup_view()
-        page = self.create_single_thread_page("comment_edit_test_thread")
-        page.visit()
-        self.assertTrue(page.is_comment_editable("comment_self_author"))
-        self.assertTrue(page.is_comment_visible("comment_other_author"))
-        self.assertFalse(page.is_comment_editable("comment_other_author"))
-        self.edit_comment(page, "comment_self_author")
-
-    @attr(shard=2)
     def test_edit_comment_as_moderator(self):
         self.setup_user(roles=["Moderator"])
         self.setup_view()
