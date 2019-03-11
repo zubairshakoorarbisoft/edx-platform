@@ -202,8 +202,18 @@ class CourseMode(models.Model):
             raise ValidationError(
                 _(u"Professional education modes are not allowed to have expiration_datetime set.")
             )
-        if self.is_verified_slug(self.mode_slug) and self.min_price <= 0:
-            raise ValidationError(_(u"Verified modes cannot be free."))
+
+        mode_config = settings.COURSE_ENROLLMENT_MODES.get(self.mode_slug, {})
+        min_price_for_mode = mode_config.get('min_price', 0)
+        if self.min_price < min_price_for_mode:
+            mode_display_name = mode_config.get('display_name', self.mode_slug)
+            raise ValidationError(
+                _(
+                    u"The {course_mode} course mode has a minimum price of {min_price}. You must set a price greater than or equal to {min_price}.".format(
+                        course_mode=mode_display_name, min_price=min_price_for_mode
+                    )
+                )
+            )
 
     def save(self, force_insert=False, force_update=False, using=None):
         # Ensure currency is always lowercase.
@@ -475,7 +485,7 @@ class CourseMode(models.Model):
     @classmethod
     def min_course_price_for_verified_for_currency(cls, course_id, currency):  # pylint: disable=invalid-name
         """
-        Returns the minimum price of the course int he appropriate currency over all the
+        Returns the minimum price of the course in the appropriate currency over all the
         course's *verified*, non-expired modes.
 
         Assuming all verified courses have a minimum price of >0, this value should always

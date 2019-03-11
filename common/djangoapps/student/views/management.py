@@ -46,7 +46,7 @@ import track.views
 from course_modes.models import CourseMode
 from edx_ace import ace
 from edx_ace.recipient import Recipient
-from edxmako.shortcuts import render_to_response, render_to_string
+from edxmako.shortcuts import render_to_response, render_to_string, marketing_link
 from entitlements.models import CourseEntitlement
 
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
@@ -72,7 +72,7 @@ from student.helpers import (
     cert_info,
     generate_activation_email_context,
 )
-from student.message_types import EmailChange, PasswordReset, RecoveryEmailCreate
+from student.message_types import EmailChange, EmailChangeConfirmation, PasswordReset, RecoveryEmailCreate
 from student.models import (
     AccountRecovery,
     CourseEnrollment,
@@ -123,7 +123,7 @@ def csrf_token(context):
     if token == 'NOTPROVIDED':
         return ''
     return (HTML(u'<div style="display:none"><input type="hidden"'
-            ' name="csrfmiddlewaretoken" value="{}" /></div>').format(token))
+                 ' name="csrfmiddlewaretoken" value="{}" /></div>').format(Text(token)))
 
 
 # NOTE: This view is not linked to directly--it is called from
@@ -134,8 +134,7 @@ def index(request, extra_context=None, user=AnonymousUser()):
     """
     Render the edX main page.
 
-    extra_context is used to allow immediate display of certain modal windows, eg signup,
-    as used by external_auth.
+    extra_context is used to allow immediate display of certain modal windows, eg signup.
     """
     if extra_context is None:
         extra_context = {}
@@ -986,8 +985,9 @@ def validate_secondary_email(account_recovery, new_email):
     """
     Enforce valid email addresses.
     """
+
     from openedx.core.djangoapps.user_api.accounts.api import get_email_validation_error, \
-        get_email_existence_validation_error, get_secondary_email_validation_error
+        get_secondary_email_validation_error
 
     if get_email_validation_error(new_email):
         raise ValueError(_('Valid e-mail address required.'))
@@ -999,10 +999,13 @@ def validate_secondary_email(account_recovery, new_email):
     if new_email == account_recovery.user.email:
         raise ValueError(_('Cannot be same as your sign in email address.'))
 
-    # Make sure that secondary email address is not same as any of the primary emails.
-    message = get_email_existence_validation_error(new_email)
-    if message:
-        raise ValueError(message)
+    # Make sure that secondary email address is not same as any of the primary emails currently in use or retired
+    if email_exists_or_retired(new_email):
+        raise ValueError(
+            _("It looks like {email} belongs to an existing account. Try again with a different email address.").format(
+                email=new_email
+            )
+        )
 
     message = get_secondary_email_validation_error(new_email)
     if message:
@@ -1139,9 +1142,31 @@ def confirm_email_change(request, key):  # pylint: disable=unused-argument
             transaction.set_rollback(True)
             return response
 
-        subject = render_to_string('emails/email_change_subject.txt', address_context)
-        subject = ''.join(subject.splitlines())
-        message = render_to_string('emails/confirm_email_change.txt', address_context)
+        use_https = request.is_secure()
+        if settings.FEATURES['ENABLE_MKTG_SITE']:
+            contact_link = marketing_link('CONTACT')
+        else:
+            contact_link = '{protocol}://{site}{link}'.format(
+                protocol='https' if use_https else 'http',
+                site=configuration_helpers.get_value('SITE_NAME', settings.SITE_NAME),
+                link=reverse('contact'),
+            )
+
+        site = Site.objects.get_current()
+        message_context = get_base_template_context(site)
+        message_context.update({
+            'old_email': user.email,
+            'new_email': pec.new_email,
+            'contact_link': contact_link,
+            'from_address': configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL),
+        })
+
+        msg = EmailChangeConfirmation().personalize(
+            recipient=Recipient(user.username, user.email),
+            language=preferences_api.get_user_preference(user, LANGUAGE_KEY),
+            user_context=message_context,
+        )
+
         u_prof = UserProfile.objects.get(user=user)
         meta = u_prof.get_meta()
         if 'old_emails' not in meta:
@@ -1151,11 +1176,7 @@ def confirm_email_change(request, key):  # pylint: disable=unused-argument
         u_prof.save()
         # Send it to the old email...
         try:
-            user.email_user(
-                subject,
-                message,
-                configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
-            )
+            ace.send(msg)
         except Exception:    # pylint: disable=broad-except
             log.warning('Unable to send confirmation email to old address', exc_info=True)
             response = render_to_response("email_change_failed.html", {'email': user.email})
@@ -1166,12 +1187,9 @@ def confirm_email_change(request, key):  # pylint: disable=unused-argument
         user.save()
         pec.delete()
         # And send it to the new email...
+        msg.recipient = Recipient(user.username, pec.new_email)
         try:
-            user.email_user(
-                subject,
-                message,
-                configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
-            )
+            ace.send(msg)
         except Exception:  # pylint: disable=broad-except
             log.warning('Unable to send confirmation email to new address', exc_info=True)
             response = render_to_response("email_change_failed.html", {'email': pec.new_email})

@@ -108,19 +108,6 @@ FEATURES = {
 
     'DISABLE_LOGIN_BUTTON': False,  # used in systems where login is automatic, eg MIT SSL
 
-    # extrernal access methods
-    'AUTH_USE_OPENID': False,
-    'AUTH_USE_CERTIFICATES': False,
-    'AUTH_USE_OPENID_PROVIDER': False,
-    # Even though external_auth is in common, shib assumes the LMS views / urls, so it should only be enabled
-    # in LMS
-    'AUTH_USE_SHIB': False,
-    'AUTH_USE_CAS': False,
-
-    # This flag disables the requirement of having to agree to the TOS for users registering
-    # with Shib.  Feature was requested by Stanford's office of general counsel
-    'SHIB_DISABLE_TOS': False,
-
     # Toggles OAuth2 authentication provider
     'ENABLE_OAUTH2_PROVIDER': False,
 
@@ -136,9 +123,6 @@ FEATURES = {
 
     # Set to hide the courses list on the Learner Dashboard if they are not enrolled in any courses yet.
     'HIDE_DASHBOARD_COURSES_UNTIL_ACTIVATED': False,
-
-    # Enables ability to restrict enrollment in specific courses by the user account login method
-    'RESTRICT_ENROLL_BY_REG_METHOD': False,
 
     # enable analytics server.
     # WARNING: THIS SHOULD ALWAYS BE SET TO FALSE UNDER NORMAL
@@ -2068,10 +2052,6 @@ INSTALLED_APPS = [
     # Student support tools
     'support',
 
-    # External auth (OpenID, shib)
-    'openedx.core.djangoapps.external_auth',
-    'django_openid_auth',
-
     # django-oauth2-provider (deprecated)
     'provider',
     'provider.oauth2',
@@ -2473,19 +2453,6 @@ if FEATURES.get('CLASS_DASHBOARD'):
 ################ Enable credit eligibility feature ####################
 ENABLE_CREDIT_ELIGIBILITY = True
 FEATURES['ENABLE_CREDIT_ELIGIBILITY'] = ENABLE_CREDIT_ELIGIBILITY
-
-######################## CAS authentication ###########################
-
-if FEATURES.get('AUTH_USE_CAS'):
-    CAS_SERVER_URL = 'https://provide_your_cas_url_here'
-    AUTHENTICATION_BACKENDS = [
-        'django.contrib.auth.backends.ModelBackend',
-        'django_cas.backends.CASBackend',
-    ]
-
-    INSTALLED_APPS.append('django_cas')
-
-    MIDDLEWARE_CLASSES.append('django_cas.middleware.CASMiddleware')
 
 ############# Cross-domain requests #################
 
@@ -2979,6 +2946,7 @@ ACCOUNT_VISIBILITY_CONFIGURATION = {
 ACCOUNT_VISIBILITY_CONFIGURATION["shareable_fields"] = (
     ACCOUNT_VISIBILITY_CONFIGURATION["public_fields"] + [
         'bio',
+        'course_certificates',
         'country',
         'date_joined',
         'language_proficiencies',
@@ -3347,48 +3315,52 @@ ENTERPRISE_CUSTOMER_COOKIE_NAME = 'enterprise_customer_uuid'
 BASE_COOKIE_DOMAIN = 'localhost'
 
 ############## Settings for Course Enrollment Modes ######################
+# The min_price key refers to the minimum price allowed for an instance
+# of a particular type of course enrollment mode. This is not to be confused
+# with the min_price field of the CourseMode model, which refers to the actual
+# price of the CourseMode.
 COURSE_ENROLLMENT_MODES = {
     "audit": {
         "id": 1,
         "slug": "audit",
         "display_name": _("Audit"),
-        "min_price": 0
+        "min_price": 0,
     },
     "verified": {
         "id": 2,
         "slug": "verified",
         "display_name": _("Verified"),
-        "min_price": 0
+        "min_price": 1,
     },
     "professional": {
         "id": 3,
         "slug": "professional",
         "display_name": _("Professional"),
-        "min_price": 0
+        "min_price": 1,
     },
     "no-id-professional": {
         "id": 4,
         "slug": "no-id-professional",
         "display_name": _("No-Id-Professional"),
-        "min_price": 0
+        "min_price": 0,
     },
     "credit": {
         "id": 5,
         "slug": "credit",
         "display_name": _("Credit"),
-        "min_price": 0
+        "min_price": 0,
     },
     "honor": {
         "id": 6,
         "slug": "honor",
         "display_name": _("Honor"),
-        "min_price": 0
+        "min_price": 0,
     },
     "masters": {
         "id": 7,
         "slug": "masters",
         "display_name": _("Master's"),
-        "min_price": 0
+        "min_price": 0,
     },
 }
 

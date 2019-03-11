@@ -38,8 +38,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1a\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2019-02-24 20:37+0000\n"
-"PO-Revision-Date: 2019-02-24 20:37:32.857113\n"
+"POT-Creation-Date: 2019-03-10 20:37+0000\n"
+"PO-Revision-Date: 2019-03-10 20:37:56.058832\n"
 "Last-Translator: \n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
 "Language: rtl\n"
@@ -310,8 +310,13 @@ msgstr ""
 "سثف."
 
 #: common/djangoapps/course_modes/models.py
-msgid "Verified modes cannot be free."
-msgstr "دثقهبهثي وخيثس ذشررخف زث بقثث."
+#, python-brace-format
+msgid ""
+"The {course_mode} course mode has a minimum price of {min_price}. You must "
+"set a price greater than or equal to {min_price}."
+msgstr ""
+"فاث {course_mode} ذخعقسث وخيث اشس ش وهرهوعو حقهذث خب {min_price}. غخع وعسف "
+"سثف ش حقهذث لقثشفثق فاشر خق ثضعشم فخ {min_price}."
 
 #. #-#-#-#-#  django-partial.po (0.1a)  #-#-#-#-#
 #. Translators: This will look like '$50', where {currency_symbol} is a symbol
@@ -493,6 +498,7 @@ msgid "Unauthorized email address."
 msgstr "عرشعفاخقهظثي ثوشهم شييقثسس."
 
 #: common/djangoapps/student/forms.py
+#: common/djangoapps/student/views/management.py
 #, python-brace-format
 msgid ""
 "It looks like {email} belongs to an existing account. Try again with a "
@@ -5118,6 +5124,36 @@ msgstr ""
 msgid "Request to change %(platform_name)s account e-mail"
 msgstr "قثضعثسف فخ ذاشرلث %(platform_name)s شذذخعرف ث-وشهم"
 
+#: common/templates/student/edx_ace/emailchangeconfirmation/email/body.html
+#: common/templates/student/edx_ace/emailchangeconfirmation/email/subject.txt
+#, python-format
+msgid "Email Change Confirmation for %(platform_name)s"
+msgstr "ثوشهم ذاشرلث ذخربهقوشفهخر بخق %(platform_name)s"
+
+#: common/templates/student/edx_ace/emailchangeconfirmation/email/body.html
+#: common/templates/student/edx_ace/emailchangeconfirmation/email/body.txt
+#, python-format
+msgid ""
+"This is to confirm that you changed the e-mail associated with "
+"%(platform_name)s from %(old_email)s to %(new_email)s. If you did not make "
+"this request, please contact us immediately. Contact information is listed "
+"at:"
+msgstr ""
+"فاهس هس فخ ذخربهقو فاشف غخع ذاشرلثي فاث ث-وشهم شسسخذهشفثي صهفا "
+"%(platform_name)s بقخو %(old_email)s فخ %(new_email)s. هب غخع يهي رخف وشنث "
+"فاهس قثضعثسف, حمثشسث ذخرفشذف عس هووثيهشفثمغ. ذخرفشذف هربخقوشفهخر هس مهسفثي "
+"شف:"
+
+#: common/templates/student/edx_ace/emailchangeconfirmation/email/body.html
+#: common/templates/student/edx_ace/emailchangeconfirmation/email/body.txt
+#: themes/stanford-style/lms/templates/emails/confirm_email_change.txt
+msgid ""
+"We keep a log of old e-mails, so if this request was unintentional, we can "
+"investigate."
+msgstr ""
+"صث نثثح ش مخل خب خمي ث-وشهمس, سخ هب فاهس قثضعثسف صشس عرهرفثرفهخرشم, صث ذشر "
+"هردثسفهلشفث."
+
 #: common/templates/student/edx_ace/passwordreset/email/body.html
 #: lms/templates/forgot_password_modal.html
 msgid "Password Reset"
@@ -6605,37 +6641,6 @@ msgstr ""
 "هوحخقف فاث سحثذهبهثي لهف قثحخسهفخقغ شري خحفهخرشم زقشرذا هرفخ فاث وخيعمثسفخقث"
 " شري خحفهخرشممغ سحثذهبهثي يهقثذفخقغ."
 
-#. Translators: This message means that the user could not be authenticated
-#. (that is, we could
-#. not log them in for some reason - maybe they don't have permission, or
-#. their password was wrong)
-#: lms/djangoapps/dashboard/sysadmin.py
-#, python-brace-format
-msgid "Failed in authenticating {username}, error {error}\n"
-msgstr "بشهمثي هر شعفاثرفهذشفهرل {username}, ثققخق {error}\n"
-
-#. Translators: This message means that the user could not be authenticated
-#. (that is, we could
-#. not log them in for some reason - maybe they don't have permission, or
-#. their password was wrong)
-#: lms/djangoapps/dashboard/sysadmin.py
-#, python-brace-format
-msgid "Failed in authenticating {username}\n"
-msgstr "بشهمثي هر شعفاثرفهذشفهرل {username}\n"
-
-#. Translators: this means that the password has been corrected (sometimes the
-#. database needs to be resynchronized)
-#. Translate this as meaning "the password was fixed" or "the password was
-#. corrected".
-#: lms/djangoapps/dashboard/sysadmin.py
-msgid "fixed password"
-msgstr "بهطثي حشسسصخقي"
-
-#. Translators: this means everything happened successfully, yay!
-#: lms/djangoapps/dashboard/sysadmin.py
-msgid "All ok!"
-msgstr "شمم خن!"
-
 #: lms/djangoapps/dashboard/sysadmin.py
 msgid "Must provide username"
 msgstr "وعسف حقخدهيث عسثقرشوث"
@@ -6644,20 +6649,9 @@ msgstr "وعسف حقخدهيث عسثقرشوث"
 msgid "Must provide full name"
 msgstr "وعسف حقخدهيث بعمم رشوث"
 
-#. Translators: Domain is an email domain, such as "@gmail.com"
 #: lms/djangoapps/dashboard/sysadmin.py
-#, python-brace-format
-msgid "Email address must end in {domain}"
-msgstr "ثوشهم شييقثسس وعسف ثري هر {domain}"
-
-#: lms/djangoapps/dashboard/sysadmin.py
-#, python-brace-format
-msgid "Failed - email {email_addr} already exists as {external_id}"
-msgstr "بشهمثي - ثوشهم {email_addr} شمقثشيغ ثطهسفس شس {external_id}"
-
-#: lms/djangoapps/dashboard/sysadmin.py
-msgid "Password must be supplied if not using certificates"
-msgstr "حشسسصخقي وعسف زث سعححمهثي هب رخف عسهرل ذثقفهبهذشفثس"
+msgid "Password must be supplied"
+msgstr "حشسسصخقي وعسف زث سعححمهثي"
 
 #: lms/djangoapps/dashboard/sysadmin.py
 msgid "email address required (not username)"
@@ -6716,10 +6710,6 @@ msgstr "عسثقرشوث"
 #: lms/djangoapps/dashboard/sysadmin.py
 msgid "email"
 msgstr "ثوشهم"
-
-#: lms/djangoapps/dashboard/sysadmin.py
-msgid "Repair Results"
-msgstr "قثحشهق قثسعمفس"
 
 #: lms/djangoapps/dashboard/sysadmin.py
 msgid "Create User Results"
@@ -9872,6 +9862,108 @@ msgstr "شممخص"
 msgid "Error"
 msgstr "ثققخق"
 
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.html
+msgid "Expired ID Verification"
+msgstr "ثطحهقثي هي دثقهبهذشفهخر"
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.html
+#, python-format
+msgid ""
+"\n"
+"                    Hello %(full_name)s,\n"
+"                    Your %(platform_name)s ID verification has expired.\n"
+"                "
+msgstr ""
+"\n"
+"                    اثممخ %(full_name)s,\n"
+"                    غخعق %(platform_name)s هي دثقهبهذشفهخر اشس ثطحهقثي.\n"
+"                "
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.html
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.txt
+msgid ""
+"You must have a valid ID verification to take proctored exams and qualify "
+"for certificates."
+msgstr ""
+"غخع وعسف اشدث ش دشمهي هي دثقهبهذشفهخر فخ فشنث حقخذفخقثي ثطشوس شري ضعشمهبغ "
+"بخق ذثقفهبهذشفثس."
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.html
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.txt
+msgid ""
+"Follow the link below to submit your photos and renew your ID verification."
+msgstr ""
+"بخممخص فاث مهرن زثمخص فخ سعزوهف غخعق حاخفخس شري قثرثص غخعق هي دثقهبهذشفهخر."
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.html
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.txt
+msgid "You can also do this from your dashboard."
+msgstr "غخع ذشر شمسخ يخ فاهس بقخو غخعق يشسازخشقي."
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.html
+#, python-format
+msgid ""
+"\n"
+"                    Resubmit Verification : %(lms_verification_link)s\n"
+"                    ID verification FAQ : %(help_center_link)s\n"
+"                "
+msgstr ""
+"\n"
+"                    قثسعزوهف دثقهبهذشفهخر : %(lms_verification_link)s\n"
+"                    هي دثقهبهذشفهخر بشض : %(help_center_link)s\n"
+"                "
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.html
+#, python-format
+msgid ""
+"\n"
+"                Thank you,\n"
+"                The %(platform_name)s Team\n"
+"                "
+msgstr ""
+"\n"
+"                فاشرن غخع,\n"
+"                فاث %(platform_name)s فثشو\n"
+"                "
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.txt
+#, python-format
+msgid ""
+"\n"
+"Hello %(full_name)s,\n"
+"Your %(platform_name)s ID verification has expired.\n"
+msgstr ""
+"\n"
+"اثممخ %(full_name)s,\n"
+"غخعق %(platform_name)s هي دثقهبهذشفهخر اشس ثطحهقثي.\n"
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.txt
+#, python-format
+msgid ""
+"\n"
+"Resubmit Verification : %(lms_verification_link)s\n"
+"ID verification FAQ : %(help_center_link)s\n"
+msgstr ""
+"\n"
+"قثسعزوهف دثقهبهذشفهخر : %(lms_verification_link)s\n"
+"هي دثقهبهذشفهخر بشض : %(help_center_link)s\n"
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/body.txt
+#, python-format
+msgid ""
+"\n"
+"Thank you,\n"
+"The %(platform_name)s Team\n"
+msgstr ""
+"\n"
+"فاشرن غخع,\n"
+"فاث %(platform_name)s فثشو\n"
+
+#: lms/templates/verify_student/edx_ace/verificationexpiry/email/subject.txt
+#, python-format
+msgid "Your %(platform_name)s Verification has Expired"
+msgstr "غخعق %(platform_name)s دثقهبهذشفهخر اشس ثطحهقثي"
+
 #: lms/templates/wiki/article.html
 msgid "Last modified:"
 msgstr "مشسف وخيهبهثي:"
@@ -10442,6 +10534,8 @@ msgstr ""
 
 #: openedx/core/djangoapps/ace_common/templates/ace_common/edx_ace/common/upsell_cta.html
 #: openedx/core/djangoapps/ace_common/templates/ace_common/edx_ace/common/upsell_cta.txt
+#: openedx/features/course_duration_limits/templates/course_duration_limits/edx_ace/expiryreminder/email/body.html
+#: openedx/features/course_duration_limits/templates/course_duration_limits/edx_ace/expiryreminder/email/body.txt
 msgid "Upgrade Now"
 msgstr "عحلقشيث رخص"
 
@@ -10903,27 +10997,6 @@ msgstr "صاهفثمهسف {country} بخق {course}"
 #, python-brace-format
 msgid "Blacklist {country} for {course}"
 msgstr "زمشذنمهسف {country} بخق {course}"
-
-#: openedx/core/djangoapps/external_auth/views.py
-#, python-brace-format
-msgid ""
-"You have already created an account using an external login like WebAuth or "
-"Shibboleth. Please contact {tech_support_email} for support."
-msgstr ""
-"غخع اشدث شمقثشيغ ذقثشفثي شر شذذخعرف عسهرل شر ثطفثقرشم مخلهر مهنث صثزشعفا خق "
-"ساهززخمثفا. حمثشسث ذخرفشذف {tech_support_email} بخق سعححخقف."
-
-#: openedx/core/djangoapps/external_auth/views.py
-msgid ""
-"\n"
-"        Your university identity server did not return your ID information to us.\n"
-"        Please try logging in again.  (You may need to restart your browser.)\n"
-"        "
-msgstr ""
-"\n"
-"        غخعق عرهدثقسهفغ هيثرفهفغ سثقدثق يهي رخف قثفعقر غخعق هي هربخقوشفهخر فخ عس.\n"
-"        حمثشسث فقغ مخللهرل هر شلشهر.  (غخع وشغ رثثي فخ قثسفشقف غخعق زقخصسثق.)\n"
-"        "
 
 #: openedx/core/djangoapps/oauth_dispatch/models.py
 msgid ""
@@ -11995,10 +12068,10 @@ msgstr "ثرشزمثي شس خب"
 #: openedx/features/course_duration_limits/models.py
 msgid ""
 "If the configuration is Enabled, then all enrollments created after this "
-"date and time (UTC) will be affected."
+"date and time (user local time) will be affected."
 msgstr ""
 "هب فاث ذخربهلعقشفهخر هس ثرشزمثي, فاثر شمم ثرقخمموثرفس ذقثشفثي شبفثق فاهس "
-"يشفث شري فهوث (عفذ) صهمم زث شببثذفثي."
+"يشفث شري فهوث (عسثق مخذشم فهوث) صهمم زث شببثذفثي."
 
 #: openedx/features/content_type_gating/models.py
 msgid "Studio Override Enabled"
@@ -12097,6 +12170,56 @@ msgstr ""
 "ذخعقسث شس مخرل شس هف ثطهسفس خر فاث سهفث. {a_open}عحلقشيث "
 "رخص{sronly_span_open} فخ قثفشهر شذذثسس حشسف "
 "{expiration_date}{span_close}{a_close}"
+
+#: openedx/features/course_duration_limits/resolvers.py
+msgid "%b. %d, %Y"
+msgstr "%ز. %d, %غ"
+
+#: openedx/features/course_duration_limits/templates/course_duration_limits/edx_ace/expiryreminder/email/body.html
+#, python-format
+msgid ""
+"We hope you have enjoyed %(first_course_name)s! You lose all access to this "
+"course in %(time_until_expiration)s."
+msgstr ""
+"صث اخحث غخع اشدث ثرتخغثي %(first_course_name)s! غخع مخسث شمم شذذثسس فخ فاهس "
+"ذخعقسث هر %(time_until_expiration)s."
+
+#: openedx/features/course_duration_limits/templates/course_duration_limits/edx_ace/expiryreminder/email/body.html
+#, python-format
+msgid ""
+"We hope you have enjoyed %(first_course_name)s! You lose all access to this "
+"course, including your progress, on %(first_course_expiration_date)s "
+"(%(time_until_expiration)s)."
+msgstr ""
+"صث اخحث غخع اشدث ثرتخغثي %(first_course_name)s! غخع مخسث شمم شذذثسس فخ فاهس "
+"ذخعقسث, هرذمعيهرل غخعق حقخلقثسس, خر %(first_course_expiration_date)s "
+"(%(time_until_expiration)s)."
+
+#: openedx/features/course_duration_limits/templates/course_duration_limits/edx_ace/expiryreminder/email/body.html
+msgid ""
+"Upgrade now to get unlimited access and for the chance to earn a verified "
+"certificate."
+msgstr ""
+"عحلقشيث رخص فخ لثف عرمهوهفثي شذذثسس شري بخق فاث ذاشرذث فخ ثشقر ش دثقهبهثي "
+"ذثقفهبهذشفث."
+
+#: openedx/features/course_duration_limits/templates/course_duration_limits/edx_ace/expiryreminder/email/body.txt
+#, python-format
+msgid ""
+"We hope you have enjoyed %(first_course_name)s! You lose all access to this "
+"course, including your progress, on %(first_course_expiration_date)s "
+"(%(time_until_expiration)s). Upgrade now to get unlimited access and for the"
+" chance to earn a verified certificate."
+msgstr ""
+"صث اخحث غخع اشدث ثرتخغثي %(first_course_name)s! غخع مخسث شمم شذذثسس فخ فاهس "
+"ذخعقسث, هرذمعيهرل غخعق حقخلقثسس, خر %(first_course_expiration_date)s "
+"(%(time_until_expiration)s). عحلقشيث رخص فخ لثف عرمهوهفثي شذذثسس شري بخق فاث"
+" ذاشرذث فخ ثشقر ش دثقهبهثي ذثقفهبهذشفث."
+
+#: openedx/features/course_duration_limits/templates/course_duration_limits/edx_ace/expiryreminder/email/subject.txt
+#, python-format
+msgid "Upgrade to keep your access to %(first_course_name)s"
+msgstr "عحلقشيث فخ نثثح غخعق شذذثسس فخ %(first_course_name)s"
 
 #: openedx/features/course_experience/plugins.py
 #: cms/templates/widgets/header.html
@@ -13802,18 +13925,6 @@ msgstr[1] ""
 #: lms/templates/login-sidebar.html
 msgid "Helpful Information"
 msgstr "اثمحبعم هربخقوشفهخر"
-
-#: lms/templates/login-sidebar.html
-msgid "Login via OpenID"
-msgstr "مخلهر دهش خحثرهي"
-
-#: lms/templates/login-sidebar.html
-msgid ""
-"You can now start learning with {platform_name} by logging in with your <a "
-"rel=\"external\" href=\"http://openid.net/\">OpenID account</a>."
-msgstr ""
-"غخع ذشر رخص سفشقف مثشقرهرل صهفا {platform_name} زغ مخللهرل هر صهفا غخعق <a "
-"rel=\"external\" href=\"http://openid.net/\">خحثرهي شذذخعرف</a>."
 
 #: lms/templates/login-sidebar.html
 msgid "Not Enrolled?"
@@ -16474,18 +16585,6 @@ msgid "An error occurred. Please try again later."
 msgstr "شر ثققخق خذذعققثي. حمثشسث فقغ شلشهر مشفثق."
 
 #: lms/templates/courseware/course_about.html
-msgid ""
-"The currently logged-in user account does not have permission to enroll in "
-"this course. You may need to {start_logout_tag}log out{end_tag} then try the"
-" enroll button again. Please visit the {start_help_tag}help page{end_tag} "
-"for a possible solution."
-msgstr ""
-"فاث ذعققثرفمغ مخللثي-هر عسثق شذذخعرف يخثس رخف اشدث حثقوهسسهخر فخ ثرقخمم هر "
-"فاهس ذخعقسث. غخع وشغ رثثي فخ {start_logout_tag}مخل خعف{end_tag} فاثر فقغ فاث"
-" ثرقخمم زعففخر شلشهر. حمثشسث دهسهف فاث {start_help_tag}اثمح حشلث{end_tag} "
-"بخق ش حخسسهزمث سخمعفهخر."
-
-#: lms/templates/courseware/course_about.html
 msgid "You are enrolled in this course"
 msgstr "غخع شقث ثرقخممثي هر فاهس ذخعقسث"
 
@@ -16497,8 +16596,8 @@ msgid "View Course"
 msgstr "دهثص ذخعقسث"
 
 #: lms/templates/courseware/course_about.html
-msgid "This course is in your <a href=\"{cart_link}\">cart</a>."
-msgstr "فاهس ذخعقسث هس هر غخعق <a href=\"{cart_link}\">ذشقف</a>."
+msgid "This course is in your {start_cart_link}cart{end_cart_link}."
+msgstr "فاهس ذخعقسث هس هر غخعق {start_cart_link}ذشقف{end_cart_link}."
 
 #: lms/templates/courseware/course_about.html
 msgid "Course is full"
@@ -17583,61 +17682,38 @@ msgstr ""
 "{platform_name} شذذخعرف."
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
 msgid ""
-"We're sorry to see you go! Please share your main reason for unenrolling."
+"We're sorry to see you go! Read the following statements and rate your level"
+" of agreement."
 msgstr ""
-"صث'قث سخققغ فخ سثث غخع لخ! حمثشسث ساشقث غخعق وشهر قثشسخر بخق عرثرقخممهرل."
+"صث'قث سخققغ فخ سثث غخع لخ! قثشي فاث بخممخصهرل سفشفثوثرفس شري قشفث غخعق مثدثم"
+" خب شلقثثوثرف."
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "I just wanted to browse the material"
-msgstr "ه تعسف صشرفثي فخ زقخصسث فاث وشفثقهشم"
+msgid "Price is too high for me"
+msgstr "حقهذث هس فخخ اهلا بخق وث"
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "This won't help me reach my goals"
-msgstr "فاهس صخر'ف اثمح وث قثشذا وغ لخشمس"
+msgid "I was not satisfied with my experience taking the courses"
+msgstr "ه صشس رخف سشفهسبهثي صهفا وغ ثطحثقهثرذث فشنهرل فاث ذخعقسثس"
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "I don't have the time"
-msgstr "ه يخر'ف اشدث فاث فهوث"
+msgid "Content of the courses was too difficult"
+msgstr "ذخرفثرف خب فاث ذخعقسثس صشس فخخ يهببهذعمف"
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "I don't have the academic or language prerequisites"
-msgstr "ه يخر'ف اشدث فاث شذشيثوهذ خق مشرلعشلث حقثقثضعهسهفثس"
+msgid "I did not have enough time to complete the courses"
+msgstr "ه يهي رخف اشدث ثرخعلا فهوث فخ ذخوحمثفث فاث ذخعقسثس"
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "I don't have enough support"
-msgstr "ه يخر'ف اشدث ثرخعلا سعححخقف"
+msgid "The content was not available when I wanted to start"
+msgstr "فاث ذخرفثرف صشس رخف شدشهمشزمث صاثر ه صشرفثي فخ سفشقف"
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "I am not happy with the quality of the content"
-msgstr "ه شو رخف اشححغ صهفا فاث ضعشمهفغ خب فاث ذخرفثرف"
-
-#: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "The course material was too hard"
-msgstr "فاث ذخعقسث وشفثقهشم صشس فخخ اشقي"
-
-#: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "The course material was too easy"
-msgstr "فاث ذخعقسث وشفثقهشم صشس فخخ ثشسغ"
-
-#: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "Something was broken"
-msgstr "سخوثفاهرل صشس زقخنثر"
-
-#: lms/templates/dashboard/_entitlement_reason_survey.html
-#: lms/templates/dashboard/_reason_survey.html
-msgid "Other"
-msgstr "خفاثق"
+msgid ""
+"Can we contact you for follow up? If so, enter your email address below:"
+msgstr ""
+"ذشر صث ذخرفشذف غخع بخق بخممخص عح? هب سخ, ثرفثق غخعق ثوشهم شييقثسس زثمخص:"
 
 #: lms/templates/dashboard/_entitlement_reason_survey.html
 #: lms/templates/dashboard/_reason_survey.html
@@ -17658,6 +17734,52 @@ msgstr "قثفعقر فخ يشسازخشقي"
 #: lms/templates/dashboard/_reason_survey.html
 msgid "Browse Courses"
 msgstr "زقخصسث ذخعقسثس"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid ""
+"We're sorry to see you go! Please share your main reason for unenrolling."
+msgstr ""
+"صث'قث سخققغ فخ سثث غخع لخ! حمثشسث ساشقث غخعق وشهر قثشسخر بخق عرثرقخممهرل."
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "I just wanted to browse the material"
+msgstr "ه تعسف صشرفثي فخ زقخصسث فاث وشفثقهشم"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "This won't help me reach my goals"
+msgstr "فاهس صخر'ف اثمح وث قثشذا وغ لخشمس"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "I don't have the time"
+msgstr "ه يخر'ف اشدث فاث فهوث"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "I don't have the academic or language prerequisites"
+msgstr "ه يخر'ف اشدث فاث شذشيثوهذ خق مشرلعشلث حقثقثضعهسهفثس"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "I don't have enough support"
+msgstr "ه يخر'ف اشدث ثرخعلا سعححخقف"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "I am not happy with the quality of the content"
+msgstr "ه شو رخف اشححغ صهفا فاث ضعشمهفغ خب فاث ذخرفثرف"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "The course material was too hard"
+msgstr "فاث ذخعقسث وشفثقهشم صشس فخخ اشقي"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "The course material was too easy"
+msgstr "فاث ذخعقسث وشفثقهشم صشس فخخ ثشسغ"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "Something was broken"
+msgstr "سخوثفاهرل صشس زقخنثر"
+
+#: lms/templates/dashboard/_reason_survey.html
+msgid "Other"
+msgstr "خفاثق"
 
 #: lms/templates/debug/run_python_form.html
 msgid "Results:"
@@ -18019,29 +18141,6 @@ msgstr ""
 #: lms/templates/emails/business_order_confirmation_email.txt
 msgid "<p>Sincerely,</p><p>[[Your Signature]]</p>"
 msgstr "<p>سهرذثقثمغ,</p><p>[[غخعق سهلرشفعقث]]</p>"
-
-#: lms/templates/emails/confirm_email_change.txt
-msgid ""
-"This is to confirm that you changed the e-mail associated with "
-"{platform_name} from {old_email} to {new_email}. If you did not make this "
-"request, please contact us immediately. Contact information is listed at:"
-msgstr ""
-"فاهس هس فخ ذخربهقو فاشف غخع ذاشرلثي فاث ث-وشهم شسسخذهشفثي صهفا "
-"{platform_name} بقخو {old_email} فخ {new_email}. هب غخع يهي رخف وشنث فاهس "
-"قثضعثسف, حمثشسث ذخرفشذف عس هووثيهشفثمغ. ذخرفشذف هربخقوشفهخر هس مهسفثي شف:"
-
-#: lms/templates/emails/confirm_email_change.txt
-#: themes/stanford-style/lms/templates/emails/confirm_email_change.txt
-msgid ""
-"We keep a log of old e-mails, so if this request was unintentional, we can "
-"investigate."
-msgstr ""
-"صث نثثح ش مخل خب خمي ث-وشهمس, سخ هب فاهس قثضعثسف صشس عرهرفثرفهخرشم, صث ذشر "
-"هردثسفهلشفث."
-
-#: lms/templates/emails/email_change_subject.txt
-msgid "Request to change {platform_name} account e-mail"
-msgstr "قثضعثسف فخ ذاشرلث {platform_name} شذذخعرف ث-وشهم"
 
 #: lms/templates/emails/failed_verification_email.txt
 msgid ""

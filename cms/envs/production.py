@@ -6,16 +6,40 @@ This is the default template for our main set of AWS servers.
 # want to import all variables from base settings files
 # pylint: disable=wildcard-import, unused-wildcard-import
 
-import json
+import codecs
 import os
+import yaml
 
 from path import Path as path
 from xmodule.modulestore.modulestore_settings import convert_module_store_setting_if_needed
+from openedx.core.djangoapps.plugins import plugin_settings, constants as plugin_constants
+from django.core.exceptions import ImproperlyConfigured
 
 from .common import *
 
 from openedx.core.lib.derived import derive_settings  # pylint: disable=wrong-import-order
 from openedx.core.lib.logsettings import get_logger_config  # pylint: disable=wrong-import-order
+
+
+def get_env_setting(setting):
+    """ Get the environment setting or return exception """
+    try:
+        return os.environ[setting]
+    except KeyError:
+        error_msg = u"Set the %s env variable" % setting
+        raise ImproperlyConfigured(error_msg)
+
+# A file path to a YAML file from which to load all the configuration for the edx platform
+CONFIG_FILE = get_env_setting('STUDIO_CFG')
+
+with codecs.open(CONFIG_FILE, encoding='utf-8') as f:
+    __config__ = yaml.safe_load(f)
+
+    # ENV_TOKENS and AUTH_TOKENS are included for reverse compatability.
+    # Removing them may break plugins that rely on them.
+    ENV_TOKENS = __config__
+    AUTH_TOKENS = __config__
+
 
 # SERVICE_VARIANT specifies name of the variant used, which decides what JSON
 # configuration files are read during startup.
@@ -81,11 +105,6 @@ CELERY_QUEUES = {
 }
 
 CELERY_ROUTES = "{}celery.Router".format(QUEUE_VARIANT)
-
-############# NON-SECURE ENV CONFIG ##############################
-# Things like server locations, ports, etc.
-with open(CONFIG_ROOT / CONFIG_PREFIX + "env.json") as env_file:
-    ENV_TOKENS = json.load(env_file)
 
 # Do NOT calculate this dynamically at startup with git because it's *slow*.
 EDX_PLATFORM_REVISION = ENV_TOKENS.get('EDX_PLATFORM_REVISION', EDX_PLATFORM_REVISION)
@@ -244,6 +263,8 @@ LANGUAGE_COOKIE = ENV_TOKENS.get('LANGUAGE_COOKIE', LANGUAGE_COOKIE)
 USE_I18N = ENV_TOKENS.get('USE_I18N', USE_I18N)
 ALL_LANGUAGES = ENV_TOKENS.get('ALL_LANGUAGES', ALL_LANGUAGES)
 
+DEFAULT_COURSE_LANGUAGE = ENV_TOKENS.get('DEFAULT_COURSE_LANGUAGE', DEFAULT_COURSE_LANGUAGE)
+
 ENV_FEATURES = ENV_TOKENS.get('FEATURES', {})
 for feature, value in ENV_FEATURES.items():
     FEATURES[feature] = value
@@ -277,26 +298,6 @@ HEARTBEAT_CHECKS = ENV_TOKENS.get('HEARTBEAT_CHECKS', HEARTBEAT_CHECKS)
 HEARTBEAT_EXTENDED_CHECKS = ENV_TOKENS.get('HEARTBEAT_EXTENDED_CHECKS', HEARTBEAT_EXTENDED_CHECKS)
 HEARTBEAT_CELERY_TIMEOUT = ENV_TOKENS.get('HEARTBEAT_CELERY_TIMEOUT', HEARTBEAT_CELERY_TIMEOUT)
 
-# Django CAS external authentication settings
-CAS_EXTRA_LOGIN_PARAMS = ENV_TOKENS.get("CAS_EXTRA_LOGIN_PARAMS", None)
-if FEATURES.get('AUTH_USE_CAS'):
-    CAS_SERVER_URL = ENV_TOKENS.get("CAS_SERVER_URL", None)
-    AUTHENTICATION_BACKENDS = [
-        'django.contrib.auth.backends.ModelBackend',
-        'django_cas.backends.CASBackend',
-    ]
-
-    INSTALLED_APPS.append('django_cas')
-
-    MIDDLEWARE_CLASSES.append('django_cas.middleware.CASMiddleware')
-    CAS_ATTRIBUTE_CALLBACK = ENV_TOKENS.get('CAS_ATTRIBUTE_CALLBACK', None)
-    if CAS_ATTRIBUTE_CALLBACK:
-        import importlib
-        CAS_USER_DETAILS_RESOLVER = getattr(
-            importlib.import_module(CAS_ATTRIBUTE_CALLBACK['module']),
-            CAS_ATTRIBUTE_CALLBACK['function']
-        )
-
 # Specific setting for the File Upload Service to store media in a bucket.
 FILE_UPLOAD_STORAGE_BUCKET_NAME = ENV_TOKENS.get('FILE_UPLOAD_STORAGE_BUCKET_NAME', FILE_UPLOAD_STORAGE_BUCKET_NAME)
 FILE_UPLOAD_STORAGE_PREFIX = ENV_TOKENS.get('FILE_UPLOAD_STORAGE_PREFIX', FILE_UPLOAD_STORAGE_PREFIX)
@@ -304,11 +305,6 @@ FILE_UPLOAD_STORAGE_PREFIX = ENV_TOKENS.get('FILE_UPLOAD_STORAGE_PREFIX', FILE_U
 # Zendesk
 ZENDESK_URL = ENV_TOKENS.get('ZENDESK_URL', ZENDESK_URL)
 ZENDESK_CUSTOM_FIELDS = ENV_TOKENS.get('ZENDESK_CUSTOM_FIELDS', ZENDESK_CUSTOM_FIELDS)
-
-################ SECURE AUTH ITEMS ###############################
-# Secret things: passwords, access keys, etc.
-with open(CONFIG_ROOT / CONFIG_PREFIX + "auth.json") as auth_file:
-    AUTH_TOKENS = json.load(auth_file)
 
 ############### XBlock filesystem field config ##########
 if 'DJFS' in AUTH_TOKENS and AUTH_TOKENS['DJFS'] is not None:
@@ -597,8 +593,14 @@ COURSE_ENROLLMENT_MODES = ENV_TOKENS.get('COURSE_ENROLLMENT_MODES', COURSE_ENROL
 ####################### Plugin Settings ##########################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
-from openedx.core.djangoapps.plugins import plugin_settings, constants as plugin_constants  # pylint: disable=wrong-import-order, wrong-import-position
-plugin_settings.add_plugins(__name__, plugin_constants.ProjectType.CMS, plugin_constants.SettingsType.AWS)
+
+# Load aws.py in plugins for reverse compatibility.  This can be removed after aws.py
+# is officially removed.
+plugin_settings.add_plugins(__name__, plugin_constants.ProjectType.CMS,
+                            plugin_constants.SettingsType.AWS)
+
+# We continue to load production.py over aws.py
+plugin_settings.add_plugins(__name__, plugin_constants.ProjectType.CMS, plugin_constants.SettingsType.PRODUCTION)
 
 ########################## Derive Any Derived Settings  #######################
 
