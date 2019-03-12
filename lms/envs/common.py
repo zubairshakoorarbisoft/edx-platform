@@ -434,7 +434,7 @@ node_paths = [
 NODE_PATH = ':'.join(node_paths)
 
 # For geolocation ip database
-GEOIP_PATH = REPO_ROOT / "common/static/data/geoip/GeoLite2-Country.mmdb"
+GEOIP_PATH = REPO_ROOT / "common/static/data/geoip/"
 # Where to look for a status message
 STATUS_MESSAGE_PATH = ENV_ROOT / "status_message.json"
 
@@ -2265,6 +2265,9 @@ INSTALLED_APPS = [
 
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
+
+    # geopip Update
+    # 'geoipdb_loader',  # Enables automatic update for maxmind geoip database
 ]
 
 ######################### CSRF #########################################
