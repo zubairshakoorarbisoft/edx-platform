@@ -98,6 +98,7 @@ class CourseSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         """Update course modes for an existing course. """
+        import pdb; pdb.set_trace()
         validated_data["modes"] = self._new_course_mode_models(validated_data["modes"])
 
         instance.update(validated_data)
