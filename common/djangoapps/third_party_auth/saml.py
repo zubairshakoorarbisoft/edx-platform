@@ -490,7 +490,7 @@ class SapSuccessFactorsIdentityProvider(EdXSAMLIdentityProvider):
         )
         if self.invalid_configuration():
             return basic_details
-        user_id = basic_details['username']
+        user_id = basic_details.pop('username')
         fields = ','.join(self.field_mappings)
         endpoint_url = '{root_url}User(userId=\'{user_id}\')?$select={fields}'.format(
             root_url=self.odata_api_root_url,
