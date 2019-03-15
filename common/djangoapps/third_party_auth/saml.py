@@ -278,6 +278,7 @@ class SapSuccessFactorsIdentityProvider(EdXSAMLIdentityProvider):
         """
         Get a dictionary mapping registration field names to default values.
         """
+        log.info('SapSuccessFactorsIdentityProvider::get_registration_fields - response: {}'.format(response))
         field_mapping = self.field_mappings
         value_defaults = self.conf.get('attr_defaults', {})
         value_defaults = {key: value_defaults.get(value, '') for key, value in self.defaults_value_mapping.items()}
@@ -289,6 +290,10 @@ class SapSuccessFactorsIdentityProvider(EdXSAMLIdentityProvider):
         for field, value in registration_fields.items():
             if field in value_mapping and value in value_mapping[field]:
                 registration_fields[field] = value_mapping[field][value]
+        log.info(
+            'SapSuccessFactorsIdentityProvider::get_registration_fields - registration fields: {}'.format(
+                registration_fields
+            ))
         return registration_fields
 
     @property
@@ -480,6 +485,9 @@ class SapSuccessFactorsIdentityProvider(EdXSAMLIdentityProvider):
         returning the basic user details we're able to extract from just the SAML response.
         """
         basic_details = super(SapSuccessFactorsIdentityProvider, self).get_user_details(attributes)
+        log.info(
+            'starting SapSuccessFactorsIdentityProvider::get_user_details - basic details: {}'.format(basic_details)
+        )
         if self.invalid_configuration():
             return basic_details
         user_id = basic_details['username']

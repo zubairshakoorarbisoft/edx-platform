@@ -444,6 +444,8 @@ def parse_query_params(strategy, response, *args, **kwargs):
     """Reads whitelisted query params, transforms them into pipeline args."""
     # If auth_entry is not in the session, we got here by a non-standard workflow.
     # We simply assume 'login' in that case.
+    logger.info('parse_query_params, strategy: {}, response: {}, args: {}, kwargs: {}'.format(
+        strategy, response, args, kwargs))
     auth_entry = strategy.request.session.get(AUTH_ENTRY_KEY, AUTH_ENTRY_LOGIN)
     if auth_entry not in _AUTH_ENTRY_CHOICES:
         raise AuthEntryError(strategy.request.backend, 'auth_entry invalid')
@@ -545,6 +547,7 @@ def ensure_user_information(strategy, auth_entry, backend=None, user=None, socia
         return (current_provider and
                 (current_provider.skip_email_verification or current_provider.send_to_registration_first))
 
+    logger.info('ensure_user_information, details: {}, auth_entry: {}'.format(details, auth_entry))
     if not user:
         if user_exists(details or {}):
             # User has not already authenticated and the details sent over from
@@ -707,6 +710,7 @@ def user_details_force_sync(auth_entry, strategy, details, user=None, *args, **k
     This step is controlled by the `sync_learner_profile_data` flag on the provider's configuration.
     """
     current_provider = provider.Registry.get_from_pipeline({'backend': strategy.request.backend.name, 'kwargs': kwargs})
+    logger.info('user_details_force_sync, current_provider: {}, details: {}'.format(current_provider, details))
     if user and current_provider.sync_learner_profile_data:
         # Keep track of which incoming values get applied.
         changed = {}
