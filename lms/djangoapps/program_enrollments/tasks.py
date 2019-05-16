@@ -1,8 +1,9 @@
 """ Tasks for program enrollments """
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 from celery import task
 from celery_utils.logged_task import LoggedTask
+from django.utils import timezone
 
 from lms.djangoapps.program_enrollments.models import ProgramEnrollment
 
@@ -15,7 +16,7 @@ def expire_waiting_enrollments(expiration_days):
     Remove all program_enrollments and related program_course_enrollments for enrollments
     that have not been modified in <expiration_days>
     """
-    expiry_date = datetime.now() - timedelta(days=expiration_days)
+    expiry_date = timezone.now() - timedelta(days=expiration_days)
 
     program_enrollments = ProgramEnrollment.objects.filter(
         user=None,
