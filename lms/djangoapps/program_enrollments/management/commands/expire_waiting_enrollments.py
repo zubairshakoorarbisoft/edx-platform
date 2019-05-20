@@ -29,4 +29,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         expiration_days = options.get('expiration_days')
         logger.info(u'Deleting waiting enrollments unmodified for %s days', expiration_days)
-        tasks.expire_waiting_enrollments.apply_async(args=[expiration_days])
+        task = tasks.expire_waiting_enrollments.apply_async(args=[expiration_days])
+        task.get()  # wait for task to complete before exiting
