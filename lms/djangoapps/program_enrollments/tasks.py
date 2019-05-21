@@ -18,6 +18,9 @@ def expire_waiting_enrollments(expiration_days):
     """
     expiry_date = timezone.now() - timedelta(days=expiration_days)
 
+    log.info('preparing to explode')
+    raise Exception('kaboom')
+
     program_enrollments = ProgramEnrollment.objects.filter(
         user=None,
         modified__lte=expiry_date
