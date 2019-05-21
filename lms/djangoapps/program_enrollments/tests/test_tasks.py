@@ -9,7 +9,9 @@ from testfixtures import LogCapture
 import pytest
 from lms.djangoapps.program_enrollments.models import ProgramEnrollment, ProgramCourseEnrollment
 from lms.djangoapps.program_enrollments.tasks import expire_waiting_enrollments, log
-from lms.djangoapps.program_enrollments.tests.factories import ProgramCourseEnrollmentFactory, ProgramEnrollmentFactory
+from lms.djangoapps.program_enrollments.api.v1.tests.factories import (
+    ProgramCourseEnrollmentFactory, ProgramEnrollmentFactory
+)
 from student.tests.factories import UserFactory
 
 
