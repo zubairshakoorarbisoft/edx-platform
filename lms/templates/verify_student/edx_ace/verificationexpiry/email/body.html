@@ -37,7 +37,7 @@
             <p>
                 {% trans "Thank you," %}
                 <br />
-                {% filter force_escape as tmsg %}{{ tmsg | force_escape }}
+                {% filter force_escape %}
                 {% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
                 {% endfilter %}
             </p>
