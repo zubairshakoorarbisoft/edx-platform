@@ -176,15 +176,14 @@ class TransExpression(Expression):
 
         # check escape expression has the right variable and its escaped properly
         # with force_escape filter
-        if '|' not in escape_expr \
-            or len(escape_expr.split('|')) != 2:
+        if '|' not in escape_expr or len(escape_expr.split('|')) != 2:
             _add_violations(self.results,
                             self.ruleset.django_trans_invalid_escape_filter,
                             self)
             return
 
-        escape_expr_var_used, escape_filter = escape_expr.split('|')[0].strip(' '), \
-                                              escape_expr.split('|')[1].strip(' ')
+        escape_expr_var_used, escape_filter = \
+            escape_expr.split('|')[0].strip(' '), escape_expr.split('|')[1].strip(' ')
         if trans_var_name_used != escape_expr_var_used:
             _add_violations(self.results,
                             self.ruleset.django_trans_escape_variable_mismatch,
@@ -305,7 +304,7 @@ class BlockTransExpression(Expression):
     def _extract_translation_msg(self, template_file):
 
         endblocktrans = re.compile(r'{%\s*endblocktrans.*?%}').search(template_file,
-                                                                       self.end_index)
+                                                                      self.end_index)
         if not endblocktrans.start():
             _add_violations(self.results,
                             self.ruleset.django_blocktrans_parse_error,

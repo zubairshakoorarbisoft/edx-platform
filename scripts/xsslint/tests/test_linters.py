@@ -1451,6 +1451,7 @@ class TestMakoTemplateLinter(TestLinter):
             end_inner_index = parse_string.end_index - parse_string.quote_length
             self.assertEqual(data['template'][start_inner_index:end_inner_index], parse_string.string_inner)
 
+
 @ddt
 class TestDjangoTemplateLinter(TestLinter):
     """
@@ -1486,7 +1487,7 @@ class TestDjangoTemplateLinter(TestLinter):
         {'expression': """
         {% trans "{span_start} whatever {span_end}" as tmsg %}
         {% interpolate_html tmsg user_name=user_data.name start_span='<span class="a">'|safe end_span='</span>'|safe %}
-        """,'rule': None},
+        """, 'rule': None},
 
         {'expression': """
             {% trans "{span_start} whatever {span_end}" as tmsg %}
@@ -1505,7 +1506,7 @@ class TestDjangoTemplateLinter(TestLinter):
 
         {'expression': """
                     {% trans "<span 'a'='b' 'c'='d'> whatever </span>" as tmsg %}
-        """,'rule': ruleset.django_html_interpolation_missing},
+        """, 'rule': ruleset.django_html_interpolation_missing},
 
         {'expression': """
                         {% trans "<span 'a'='b' 'c'='d'> whatever </span>" %}
