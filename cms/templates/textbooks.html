@@ -1,3 +1,4 @@
+<%page expression_filter="h"/>
 <%inherit file="base.html" />
 <%def name="online_help_token()"><% return "textbooks" %></%def>
 <%namespace name='static' file='static_content.html'/>
@@ -21,9 +22,9 @@ from openedx.core.djangolib.js_utils import dump_js_escaped_json
 <script type="text/javascript">
 window.CMS = window.CMS || {};
 CMS.URL = CMS.URL || {};
-CMS.URL.UPLOAD_ASSET = "${upload_asset_url}"
-CMS.URL.TEXTBOOKS = "${textbook_url}"
-CMS.URL.LMS_BASE = "${settings.LMS_BASE}"
+CMS.URL.UPLOAD_ASSET = "${upload_asset_url}"  // xss-lint: disable=mako-invalid-js-filter
+CMS.URL.TEXTBOOKS = "${textbook_url}"  // xss-lint: disable=mako-invalid-js-filter
+CMS.URL.LMS_BASE = "${settings.LMS_BASE}"  // xss-lint: disable=mako-invalid-js-filter
 </script>
 </%block>
 

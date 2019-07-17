@@ -13,8 +13,8 @@ from django.utils.translation import ugettext as _
 <%block name="js_extra">
 <%static:require_module module_name="js/api_admin/catalog_preview_factory" class_name="CatalogPreviewFactory">
 CatalogPreviewFactory({
-  previewUrl: "${preview_url}",
-  catalogApiUrl: "${catalog_api_url}",
+  previewUrl: "${preview_url}", // xss-lint: disable=mako-invalid-js-filter
+  catalogApiUrl: "${catalog_api_url}", // xss-lint: disable=mako-invalid-js-filter
 });
 </%static:require_module>
 </%block>
@@ -38,7 +38,7 @@ CatalogPreviewFactory({
     <div class="api-form-container">
       <form class="api-form" id="catalog-create" action="${reverse('api_admin:catalog-list', args={'username': username})}" method="post">
         <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
-        ${form.as_p() | n}
+        ${form.as_p() | n, decode.utf8}
         <input id="catalog-create-submit" type="submit" value="${_('Create Catalog')}"/>
       </form>
     </div>

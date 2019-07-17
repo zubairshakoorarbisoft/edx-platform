@@ -134,8 +134,7 @@
                 render: function(html) {
                     var fields = html || '',
                         formErrorsTitle = gettext('An error occurred.');
-
-                    $(this.el).html(_.template(this.tpl)({
+                    edx.HtmlUtils.setHtml($(this.el), edx.HtmlUtils.HTML(_.template(this.tpl))({
                     /* We pass the context object to the template so that
                      * we can perform variable interpolation using sprintf
                      */
