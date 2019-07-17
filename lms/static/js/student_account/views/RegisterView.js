@@ -134,23 +134,23 @@
                 render: function(html) {
                     var fields = html || '',
                         formErrorsTitle = gettext('An error occurred.'),
-                        render_html = _.template(this.tpl)({
+                        renderHtml = _.template(this.tpl)({
                             /* We pass the context object to the template so that
                              * we can perform variable interpolation using sprintf
                              */
-                                context: {
-                                    fields: fields,
-                                    currentProvider: this.currentProvider,
-                                    syncLearnerProfileData: this.syncLearnerProfileData,
-                                    providers: this.providers,
-                                    hasSecondaryProviders: this.hasSecondaryProviders,
-                                    platformName: this.platformName,
-                                    autoRegisterWelcomeMessage: this.autoRegisterWelcomeMessage,
-                                    registerFormSubmitButtonText: this.registerFormSubmitButtonText
-                                }
-                            });
+                            context: {
+                                fields: fields,
+                                currentProvider: this.currentProvider,
+                                syncLearnerProfileData: this.syncLearnerProfileData,
+                                providers: this.providers,
+                                hasSecondaryProviders: this.hasSecondaryProviders,
+                                platformName: this.platformName,
+                                autoRegisterWelcomeMessage: this.autoRegisterWelcomeMessage,
+                                registerFormSubmitButtonText: this.registerFormSubmitButtonText
+                            }
+                        });
 
-                    HtmlUtils.setHtml($(this.el), HtmlUtils.HTML(render_html));
+                    HtmlUtils.setHtml($(this.el), HtmlUtils.HTML(renderHtml));
 
                     this.postRender();
 
