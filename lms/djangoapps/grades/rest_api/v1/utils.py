@@ -3,6 +3,7 @@ Define some view level utility functions here that multiple view modules will sh
 """
 from __future__ import absolute_import
 
+from collections import OrderedDict
 from contextlib import contextmanager
 
 from django.contrib.auth import get_user_model
@@ -39,6 +40,21 @@ class CourseEnrollmentPagination(CursorPagination):
             pass
 
         return self.page_size
+
+    def get_paginated_response(self, data, **kwargs):  # pylint: disable=arguments-differ
+        """
+        Return a response given serialized page data and kwargs. Each key-value pair is added to the response.
+        """
+        resp = OrderedDict([
+            ('next', self.get_next_link()),
+            ('previous', self.get_previous_link()),
+            ('results', data)
+        ])
+
+        for (key, value) in kwargs.items():
+            resp[key] = value
+
+        return Response(resp)
 
 
 class GradeViewMixin(DeveloperErrorViewMixin):

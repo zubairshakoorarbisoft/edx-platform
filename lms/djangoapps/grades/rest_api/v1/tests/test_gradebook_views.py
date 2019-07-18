@@ -738,6 +738,12 @@ class GradebookViewTest(GradebookViewTestBase):
                 self.assertIsNone(actual_data['previous'])
                 self.assertEqual(expected_results, actual_data['results'])
 
+                # the number/type of users in a course depends on the login_method
+                expected_total_users = 4 if login_method == 'login_staff' else 5
+                self.assertEqual(actual_data['total_users_count'], expected_total_users)
+
+                self.assertEqual(actual_data['filtered_users_count'], 2)
+
     @ddt.data(
         'login_staff',
         'login_course_admin',
@@ -782,6 +788,12 @@ class GradebookViewTest(GradebookViewTestBase):
                 self.assertIsNone(actual_data['previous'])
                 self.assertEqual(expected_results, actual_data['results'])
 
+                # the number/type of users in a course depends on the login_method
+                expected_total_users = 4 if login_method == 'login_staff' else 5
+                self.assertEqual(actual_data['total_users_count'], expected_total_users)
+
+                self.assertEqual(actual_data['filtered_users_count'], 2)
+
     @ddt.data(
         'login_staff',
         'login_course_admin',
@@ -815,6 +827,12 @@ class GradebookViewTest(GradebookViewTestBase):
                 self.assertIsNone(actual_data['next'])
                 self.assertIsNone(actual_data['previous'])
                 self.assertEqual(expected_results, actual_data['results'])
+
+                # the number/type of users in a course depends on the login_method
+                expected_total_users = 4 if login_method == 'login_staff' else 5
+                self.assertEqual(actual_data['total_users_count'], expected_total_users)
+
+                self.assertEqual(actual_data['filtered_users_count'], 1)
 
     @ddt.data(
         'login_staff',
@@ -858,8 +876,13 @@ class GradebookViewTest(GradebookViewTestBase):
                 actual_data = dict(resp.data)
                 self.assertIsNone(actual_data['next'])
                 self.assertIsNone(actual_data['previous'])
-                #self.assertEqual(expected_results, actual_data['results'])
-                assert expected_results == actual_data['results']
+                self.assertEqual(expected_results, actual_data['results'])
+
+                # the number/type of users in a course depends on the login_method
+                expected_total_users = 4 if login_method == 'login_staff' else 5
+                self.assertEqual(actual_data['total_users_count'], expected_total_users)
+
+                self.assertEqual(actual_data['filtered_users_count'], 2)
 
     @ddt.data(
         'login_staff',
@@ -914,6 +937,12 @@ class GradebookViewTest(GradebookViewTestBase):
                 self.assertIsNone(actual_data['previous'])
                 self.assertEqual(expected_results, actual_data['results'])
 
+                # the number/type of users in a course depends on the login_method
+                expected_total_users = 4 if login_method == 'login_staff' else 5
+                self.assertEqual(actual_data['total_users_count'], expected_total_users)
+
+                self.assertEqual(actual_data['filtered_users_count'], 1)
+
     @ddt.data(
         'login_staff',
         'login_course_admin',
@@ -959,6 +988,14 @@ class GradebookViewTest(GradebookViewTestBase):
                 )
 
                 self._assert_data_all_users(resp)
+                actual_data = dict(resp.data)
+
+                # the number/type of users in a course depends on the login_method
+                expected_total_users = 5 if login_method == 'login_staff' else 6
+                self.assertEqual(actual_data['total_users_count'], expected_total_users)
+
+                expected_total_users = 3 if login_method == 'login_staff' else 4
+                self.assertEqual(actual_data['filtered_users_count'], expected_total_users)
 
     @ddt.data(
         'login_staff',
