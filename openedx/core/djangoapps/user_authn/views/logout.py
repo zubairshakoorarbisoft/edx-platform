@@ -49,7 +49,7 @@ class LogoutView(TemplateView):
         for uri in context.get('logout_uris', []):
             log.info("calling the logout for {uri}".format(uri=uri))
             uri = uri.replace('logout/', '')
-            api_client = logout_api_client(context.get('user', request.user), url=uri)
+            api_client = logout_api_client(context.get('user', request.user), url=uri, session=request.session)
             r = api_client.logout.post()
             log.info("Response {r} for logout {uri}".format(r=r, uri=uri))
 
