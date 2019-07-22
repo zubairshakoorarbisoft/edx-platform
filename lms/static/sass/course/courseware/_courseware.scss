@@ -514,6 +514,9 @@ html.video-fullscreen {
         padding-bottom: 0;
         border-bottom: none;
       }
+      code:before {
+        @include display-left-to-right();
+      }
     }
 
     .vert-mod {
