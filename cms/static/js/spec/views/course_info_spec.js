@@ -136,9 +136,6 @@ define(["js/views/course_info_handout", "js/views/course_info_update", "js/model
                 this.courseInfoEdit.$el.find('.save-button').click();
                 expect(model.save).toHaveBeenCalled();
 
-                // Verify the link is not rewritten when saved.
-                expect(requestSent.content).toEqual('/static/image.jpg');
-
                 // Verify that analytics are sent
                 expect(window.analytics.track).toHaveBeenCalled();
             });
