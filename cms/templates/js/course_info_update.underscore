@@ -7,7 +7,7 @@
 			<input id="update-date-<%- updateModel.cid %>" type="text" class="date" value="<%- updateModel.get('date') %>">
 		</div>
 		<div class="row">
-			<textarea class="new-update-content text-editor"><%- updateModel.get('content') %></textarea>
+			<textarea class="new-update-content text-editor"><%= updateModel.get('content') // xss-lint: disable=underscore-not-escaped %></textarea>
 		</div>
 		<div class="row">
 			<!-- cid rather than id b/c new ones have cid's not id's -->
@@ -23,6 +23,6 @@
 		<h2>
 			<span class="calendar-icon"></span><span class="date-display"><%- updateModel.get('date') %></span>
 		</h2>
-		<div class="update-contents"><%- updateModel.get('content') %></div>
+		<div class="update-contents"><%= updateModel.get('content') // xss-lint: disable=underscore-not-escaped %></div>
 	</div>
 </li>
