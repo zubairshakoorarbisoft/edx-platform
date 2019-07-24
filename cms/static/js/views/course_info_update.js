@@ -39,7 +39,6 @@ define(['codemirror',
                         try {
                             CourseInfoHelper.changeContentToPreview(
                                 update, 'content', self.options.base_asset_url);
-                            // push notification is always disabled for existing updates
                             HtmlUtils.append(
                                 updateList,
                                 HtmlUtils.HTML(self.template({updateModel: update}))

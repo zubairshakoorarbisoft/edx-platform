@@ -25,7 +25,7 @@ define(["js/views/course_info_handout", "js/views/course_info_update", "js/model
             delete window.course_location_analytics;
         });
 
-        describe("Course Updates without Push notifications", function() {
+        describe("Course Updates without Push notification", function() {
             const courseInfoTemplate = readFixtures('course_info_update.underscore');
 
             beforeEach(function() {
