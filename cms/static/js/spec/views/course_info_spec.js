@@ -25,7 +25,7 @@ define(["js/views/course_info_handout", "js/views/course_info_update", "js/model
             delete window.course_location_analytics;
         });
 
-        describe("Course Updates", function() {
+        describe("Course Updates without Push notifications", function() {
             const courseInfoTemplate = readFixtures('course_info_update.underscore');
 
             beforeEach(function() {
@@ -135,6 +135,10 @@ define(["js/views/course_info_handout", "js/views/course_info_update", "js/model
                 // Click the "Save button."
                 this.courseInfoEdit.$el.find('.save-button').click();
                 expect(model.save).toHaveBeenCalled();
+
+                const requestSent = JSON.parse(requests[requests.length - 1].requestBody);
+                // Verify the link is not rewritten when saved.
+                expect(requestSent.content).toEqual('/static/image.jpg');
 
                 // Verify that analytics are sent
                 expect(window.analytics.track).toHaveBeenCalled();
