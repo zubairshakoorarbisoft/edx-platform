@@ -143,6 +143,8 @@ urlpatterns = [
 
     url(r'^dashboard/', include('learner_dashboard.urls')),
     url(r'^api/experiments/', include('experiments.urls', namespace='api_experiments')),
+
+    url(r'^api/edly/', include('openedx.features.edly.urls', namespace='edly_api')),
 ]
 
 if settings.FEATURES.get('ENABLE_MOBILE_REST_API'):
