@@ -8,7 +8,7 @@ class SessionCookieMiddleware(object):
     """
 
     def process_response(self, request, response):
-        if not request.user.is_authenticated:
+        if hasattr(request, 'user') and not request.user.is_authenticated:
             delete_logged_in_cookies(response)
 
         return response
