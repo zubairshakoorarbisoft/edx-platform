@@ -8,6 +8,10 @@ define([
             name: gettext('All Rights Reserved'),
             tooltip: gettext('You reserve all rights for your work')
         },
+        'mixed-license': {
+            name: gettext('Mixed License'),
+            tooltip: gettext('You reserve all rights for your work unless otherwise indicated within the course.')
+        },
         'creative-commons': {
             name: gettext('Creative Commons'),
             tooltip: gettext('You waive some rights for your work, such that others can use it too'),

@@ -1,3 +1,7 @@
 @import 'bourbon/bourbon';
 @import 'vendor/bi-app/bi-app-rtl'; // set the layout for right to left languages
 @import 'build-course'; // shared app style assets/rendering
+
+.content-wrapper .course-license {
+    text-align: center;
+}

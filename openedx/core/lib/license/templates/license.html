@@ -5,6 +5,7 @@ from django.utils.translation import ugettext as _
 
 def parse_license(lic):
     """
+
     Returns a two-tuple: license type, and options.
     """
     if not lic:
@@ -26,6 +27,11 @@ def parse_license(lic):
 <% license_type, license_options = parse_license(license) %>
 % if license_type == "all-rights-reserved":
     © <span class="license-text">${_("All Rights Reserved")}</span>
+% elif license_type == "mixed-license":
+    © <span class="license-text">
+        ${_("All content is All Rights reserved unless otherwise indicated within the course.")}
+        ${_(" Other license types will have an indication at the start and end of where the license applies within the course material.")}
+    </span>
 % elif license_type == "creative-commons":
     <%
     possible = ["by", "nc", "nd", "sa"]
