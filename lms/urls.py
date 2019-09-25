@@ -99,6 +99,9 @@ urlpatterns = [
     # Entitlement API RESTful endpoints
     url(r'^api/entitlements/', include('entitlements.api.urls', namespace='entitlements_api')),
 
+    # Edly Panel API RESTful endpoints
+    url(r'^api/monthly_active_users/', include('openedx.features.edly_panel.api.urls', namespace='edly_panel_api')),
+
     # Courseware search endpoints
     url(r'^search/', include('search.urls')),
 
