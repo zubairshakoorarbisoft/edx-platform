@@ -865,6 +865,7 @@ def student_dashboard(request):
         'empty_dashboard_message': empty_dashboard_message,
         'recovery_email_message': recovery_email_message,
         'recovery_email_activation_message': recovery_email_activation_message,
+        'pending_upgrade_course_name': "test_course_id"
     }
 
     # Retrieve pendingTransactionCourse cookie to show waiting alert to the learner. It conatain encrypted
