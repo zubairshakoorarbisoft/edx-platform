@@ -8,6 +8,9 @@ This is the default template for our main set of AWS servers.
 
 import json
 import os
+import platform
+import logging
+import sys
 
 from path import Path as path
 from xmodule.modulestore.modulestore_settings import convert_module_store_setting_if_needed
@@ -17,7 +20,6 @@ from django.core.urlresolvers import reverse_lazy
 from .common import *
 
 from openedx.core.lib.derived import derive_settings  # pylint: disable=wrong-import-order
-from openedx.core.lib.logsettings import get_logger_config  # pylint: disable=wrong-import-order
 
 # SERVICE_VARIANT specifies name of the variant used, which decides what JSON
 # configuration files are read during startup.
@@ -256,9 +258,63 @@ for app in ENV_TOKENS.get('ADDL_INSTALLED_APPS', []):
 
 WIKI_ENABLED = ENV_TOKENS.get('WIKI_ENABLED', WIKI_ENABLED)
 
-LOGGING = get_logger_config(LOG_DIR,
-                            logging_env=ENV_TOKENS['LOGGING_ENV'],
-                            service_variant=SERVICE_VARIANT)
+# Logging settings taken from https://github.com/openfun/openedx-docker/. Modified for Edly needs.
+standard_format = "%(asctime)s %(levelname)s %(process)d [%(name)s] %(filename)s:%(lineno)d - %(message)s"
+syslog_format = (
+    "[variant:cms][%(name)s][env:sandbox] %(levelname)s "
+    "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] - %(message)s"
+).format(hostname=platform.node().split(".")[0])
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "local": {
+            "formatter": "syslog_format",
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+            "level": "INFO",
+        },
+        "tracking": {
+            "formatter": "raw",
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+        },
+        "console": {
+            "formatter": "standard",
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+            "level": "INFO",
+        },
+    },
+    "formatters": {
+        "raw": {"format": "%(message)s"},
+        "syslog_format": {"format": syslog_format},
+        "standard": {"format": standard_format},
+    },
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse"
+        }
+    },
+    "loggers": {
+        "": {
+            "level": "INFO",
+            "propagate": False,
+            "handlers": ["console", "local"]
+        },
+        "tracking": {
+            "level": "DEBUG",
+            "propagate": False,
+            "handlers": ["tracking"]
+        },
+        # requests is so loud at INFO (logs every connection) that we
+        # force it to warn by default.
+        'requests.packages.urllib3': {
+            'level': 'INFO'
+        }
+    }
+}
 
 #theming start:
 

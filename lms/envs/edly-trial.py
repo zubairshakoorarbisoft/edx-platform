@@ -19,6 +19,9 @@ Common traits:
 
 import datetime
 import json
+import platform
+import logging
+import sys
 
 import os
 import dateutil
@@ -30,7 +33,6 @@ from openedx.core.djangoapps.plugins import plugin_settings, constants as plugin
 
 from .common import *
 from openedx.core.lib.derived import derive_settings  # pylint: disable=wrong-import-order
-from openedx.core.lib.logsettings import get_logger_config  # pylint: disable=wrong-import-order
 
 
 # SERVICE_VARIANT specifies name of the variant used, which decides what JSON
@@ -340,10 +342,63 @@ local_loglevel = ENV_TOKENS.get('LOCAL_LOGLEVEL', 'INFO')
 LOG_DIR = ENV_TOKENS['LOG_DIR']
 DATA_DIR = path(ENV_TOKENS.get('DATA_DIR', DATA_DIR))
 
-LOGGING = get_logger_config(LOG_DIR,
-                            logging_env=ENV_TOKENS['LOGGING_ENV'],
-                            local_loglevel=local_loglevel,
-                            service_variant=SERVICE_VARIANT)
+# Logging settings taken from https://github.com/openfun/openedx-docker/. Modified for Edly needs.
+standard_format = "%(asctime)s %(levelname)s %(process)d [%(name)s] %(filename)s:%(lineno)d - %(message)s"
+syslog_format = (
+    "[variant:lms][%(name)s][env:sandbox] %(levelname)s "
+    "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] - %(message)s"
+).format(hostname=platform.node().split(".")[0])
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "local": {
+            "formatter": "syslog_format",
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+            "level": "INFO",
+        },
+        "tracking": {
+            "formatter": "raw",
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+        },
+        "console": {
+            "formatter": "standard",
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+            "level": "INFO",
+        },
+    },
+    "formatters": {
+        "raw": {"format": "%(message)s"},
+        "syslog_format": {"format": syslog_format},
+        "standard": {"format": standard_format},
+    },
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse"
+        }
+    },
+    "loggers": {
+        "": {
+            "level": "INFO",
+            "propagate": False,
+            "handlers": ["console", "local"]
+        },
+        "tracking": {
+            "level": "DEBUG",
+            "propagate": False,
+            "handlers": ["tracking"]
+        },
+        # requests is so loud at INFO (logs every connection) that we
+        # force it to warn by default.
+        'requests.packages.urllib3': {
+            'level': 'INFO'
+        }
+    }
+}
 
 COURSE_LISTINGS = ENV_TOKENS.get('COURSE_LISTINGS', {})
 COMMENTS_SERVICE_URL = ENV_TOKENS.get("COMMENTS_SERVICE_URL", '')
