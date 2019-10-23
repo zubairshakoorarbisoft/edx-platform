@@ -8,11 +8,18 @@ from urlparse import urljoin
 from django.conf import settings
 import requests
 from rest_framework import status
+from openedx.core.djangoapps.ace_common.message import BaseMessageType
+from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
+from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
+from edx_ace.recipient import Recipient
+from edx_ace import ace
 
 log = logging.getLogger(__name__)
 
+class ContactUsNotification(BaseMessageType):
+    pass
 
-def create_zendesk_ticket(requester_name, requester_email, subject, body, custom_fields=None, uploads=None, tags=None):
+def create_zendesk_ticket(requester_name, requester_email, subject, body, custom_fields=None, uploads=None, tags=None, request=None):
     """
     Create a Zendesk ticket via API.
 
@@ -29,6 +36,7 @@ def create_zendesk_ticket(requester_name, requester_email, subject, body, custom
         tags = list(set(tags))
 
     data = {
+        'subject': subject,
         'ticket': {
             'requester': {
                 'name': requester_name,
@@ -46,6 +54,14 @@ def create_zendesk_ticket(requester_name, requester_email, subject, body, custom
 
     # Encode the data to create a JSON payload
     payload = json.dumps(data)
+
+    message = ContactUsNotification().personalize(
+        recipient=Recipient("tehreem", "tehreem.sadat@arbisoft.com"),
+        language=get_user_preference(request.user, LANGUAGE_KEY),
+        user_context=data,
+    )
+    log.info('Sending contact us support email notification with context %s', payload)
+    ace.send(message)
 
     if not (settings.ZENDESK_URL and settings.ZENDESK_OAUTH_ACCESS_TOKEN):
         log.error(_std_error_message("zendesk not configured", payload))

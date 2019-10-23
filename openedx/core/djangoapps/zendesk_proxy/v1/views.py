@@ -53,13 +53,17 @@ class ZendeskPassthroughView(APIView):
         }
         """
         try:
+            custom_fields = request.data['custom_fields']
+            phone_number = request.data['phone_number']
+            custom_fields.append({'phone_number': phone_number })
             proxy_status = create_zendesk_ticket(
                 requester_name=request.data['requester']['name'],
                 requester_email=request.data['requester']['email'],
                 subject=request.data['subject'],
                 body=request.data['comment']['body'],
-                custom_fields=request.data['custom_fields'],
-                tags=request.data['tags']
+                custom_fields=custom_fields,
+                tags=request.data['tags'],
+                request=request
             )
         except KeyError:
             return Response(status=status.HTTP_400_BAD_REQUEST)

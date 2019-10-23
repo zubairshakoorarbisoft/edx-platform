@@ -39,6 +39,7 @@ class RenderForm extends React.Component {
       $course = $('#course'),
       data = {
         subject: $('#subject').val(),
+        phone_number: $('#phone-number').val(),
         comment: {
           body: $('#message').val(),
         },
@@ -93,6 +94,21 @@ class RenderForm extends React.Component {
     $('.form-group').removeClass('has-error');
   }
 
+  validatePhoneNumber(number, errors)
+  {
+    let is_valid_phone_number = true
+    let pattern = new RegExp("^03[0-9]{2}-[0-9]{7}$")
+    if (!number) {
+      errors.push(gettext('Enter your phone number for your support request.'));
+      is_valid_phone_number = false
+    }
+    else if (!pattern.test(number)){
+      errors.push(gettext('Enter a valid phone number in format 03**-****.'));
+      is_valid_phone_number = false
+    }
+    return is_valid_phone_number
+  }
+
   validateData(data, errors) {
     if (!data.subject) {
       errors.push(gettext('Enter a subject for your support request.'));
@@ -102,7 +118,10 @@ class RenderForm extends React.Component {
       errors.push(gettext('Enter some details for your support request.'));
       $('#message').closest('.form-group').addClass('has-error');
     }
-
+    let is_valid_phone_number = this.validatePhoneNumber(data.phone_number, errors)
+    if (!is_valid_phone_number){
+      $('#phone-number').closest('.form-group').addClass('has-error');
+    }
     if (!errors.length) {
       return true;
     }
