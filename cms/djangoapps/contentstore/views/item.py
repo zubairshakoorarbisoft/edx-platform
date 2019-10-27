@@ -52,6 +52,7 @@ from openedx.core.djangoapps.schedules.config import COURSE_UPDATE_WAFFLE_FLAG
 from openedx.core.djangoapps.waffle_utils import WaffleSwitch
 from openedx.core.lib.gating import api as gating_api
 from openedx.core.lib.xblock_utils import request_token, wrap_xblock, wrap_xblock_aside
+from openedx.features.edly.utils import notify_students_about_xblock_changes
 from static_replace import replace_static_urls
 from student.auth import has_studio_read_access, has_studio_write_access
 from util.date_utils import get_default_time_display
@@ -639,7 +640,6 @@ def _save_xblock(user, xblock, data=None, children_strings=None, metadata=None, 
                     prereq_min_score,
                     prereq_min_completion
                 )
-
         # If publish is set to 'republish' and this item is not in direct only categories and has previously been
         # published, then this item should be republished. This is used by staff locking to ensure that changing the
         # draft value of the staff lock will also update the published version, but only at the unit level.
@@ -651,6 +651,8 @@ def _save_xblock(user, xblock, data=None, children_strings=None, metadata=None, 
         # Used by Bok Choy tests and by republishing of staff locks.
         if publish == 'make_public':
             modulestore().publish(xblock.location, user.id)
+
+        notify_students_about_xblock_changes(xblock, publish)
 
         # Note that children aren't being returned until we have a use case.
         return JsonResponse(result, encoder=EdxJSONEncoder)
