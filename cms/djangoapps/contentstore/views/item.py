@@ -652,7 +652,7 @@ def _save_xblock(user, xblock, data=None, children_strings=None, metadata=None, 
         if publish == 'make_public':
             modulestore().publish(xblock.location, user.id)
 
-        notify_students_about_xblock_changes(xblock, publish)
+        notify_students_about_xblock_changes(xblock, publish, old_content)
 
         # Note that children aren't being returned until we have a use case.
         return JsonResponse(result, encoder=EdxJSONEncoder)

@@ -5,5 +5,6 @@
 {% blocktrans %}Your can see the {{ change_type }} changes here: {{ change_url }}{% endblocktrans %}
 
 ----
-{% blocktrans %}This email was automatically sent from {{ site_name }} to {{ full_name }}{% endblocktrans %}
+{% blocktrans %}Thanks,{% endblocktrans %}
+{% blocktrans %}LUMS ELM training team{% endblocktrans %}
 {% endautoescape %}

@@ -8,7 +8,7 @@
         <td>
             <h1>
                 {% blocktrans %}
-                    Your course {{ course_name }} on {{ site_name }} has been updated
+                    Hi {{full_name}},
                 {% endblocktrans %}
             </h1>
 
@@ -23,7 +23,13 @@
             </p>
 
             <p style="color: rgba(0,0,0,.75);">
-                {% blocktrans %}This email was automatically sent from {{ site_name }} to {{ full_name }}{% endblocktrans %}
+                {% blocktrans %}
+                    Thanks,
+                {% endblocktrans %}
+                <br/>
+                {% blocktrans %}
+                    LUMS ELM training team
+                {% endblocktrans %}
                 <br />
             </p>
         </td>

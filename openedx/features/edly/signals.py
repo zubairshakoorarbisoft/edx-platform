@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from lms.djangoapps.instructor.enrollment import get_email_params
-from openedx.features.edly.utils import send_course_enrollment_mail
+from openedx.features.edly.tasks import send_course_enrollment_mail
 from student.models import CourseEnrollment
 
 

@@ -1,35 +1,33 @@
 import logging
+import re
 
 from courseware.courses import get_course_by_id
 from django.conf import settings
-from edx_ace import ace
-from celery.task import task
-from edx_ace.recipient import Recipient
-from lms.djangoapps.instructor.enrollment import send_mail_to_student
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
-from openedx.features.edly.message_types import ChangesEmail
+from openedx.features.edly.tasks import send_bulk_mail_to_students
 from student.models import CourseEnrollment
+from xmodule.contentstore.content import StaticContent
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import InvalidLocationError, ItemNotFoundError
 
 log = logging.getLogger(__name__)
-TASK_LOG = logging.getLogger(__name__)
 
 COURSE_OUTLINE_CATEGORIES = ['vertical', 'sequential', 'chapter']
 
 
-def notify_students_about_xblock_changes(xblock, publish):
+def notify_students_about_xblock_changes(xblock, publish, old_content):
     """
     This function is responsible for calling the related function by checking the xblock category.
 
     :param xblock: Block of courses which has been published.
     :param publish: Param to check if xblock is going to be published.
+    :param old_content: Old data of xblock before updating.
     """
     if (publish == 'make_public' and xblock.category in COURSE_OUTLINE_CATEGORIES
-            and not xblock.visible_to_staff_only):
+        and not xblock.visible_to_staff_only):
         _handle_section_publish(xblock)
-    elif xblock.category == 'handout':
-        _handle_handout_changes(xblock)
+    elif xblock.category == 'course_info' and xblock.location.block_id == 'handouts':
+        _handle_handout_changes(xblock, old_content)
 
 
 def get_email_params(xblock):
@@ -42,6 +40,7 @@ def get_email_params(xblock):
     """
     email_params = {}
     course = get_course_by_id(xblock.location.course_key)
+    email_params['course_url'] = _get_course_url(xblock.location.course_key)
     email_params['course_name'] = course.display_name_with_default
     email_params['display_name'] = xblock.display_name
     email_params['site_name'] = configuration_helpers.get_value(
@@ -49,6 +48,10 @@ def get_email_params(xblock):
         settings.SITE_NAME
     )
     return email_params
+
+
+def _get_course_url(course_key):
+    return '{}/courses/{}'.format(settings.LMS_ROOT_URL, course_key)
 
 
 def _handle_section_publish(xblock):
@@ -81,11 +84,116 @@ def _handle_section_publish(xblock):
         )
         email_params['change_type'] = 'Section'
         email_params['change_url'] = section_url
-    send_bulk_mail_to_students.delay(students, email_params)
+    send_bulk_mail_to_students.delay(students, email_params, 'outline_changes')
 
 
-def _handle_handout_changes(xblock):
-    pass
+def _handle_handout_changes(xblock, old_content):
+    """
+    This function is responsible for generating email data for any type of handout changes and will send the email to
+    enrolled students.
+
+    :param xblock: Update handouts xblock
+    :param old_content: Old content of the handout xblock
+    """
+    # Operations for New Xblock Data
+    relative_urls_of_new_data = _get_relative_urls(xblock.data)
+    relative_urls_of_new_data, absolute_urls_of_new_data = _create_absolute_urls(xblock.location.course_key,
+                                                                                 relative_urls_of_new_data)
+    new_content_with_absolute_urls = _replace_relative_urls_with_absolute_urls(xblock.data,
+                                                                               relative_urls_of_new_data,
+                                                                               absolute_urls_of_new_data)
+
+    # Operations for old xblock data
+    relative_urls_of_old_data = _get_relative_urls(old_content.get('data', []))
+    relative_urls_of_old_data, absolute_urls_of_old_data = _create_absolute_urls(xblock.location.course_key,
+                                                                                 relative_urls_of_old_data)
+    old_content_with_absolute_urls = _replace_relative_urls_with_absolute_urls(old_content.get('data'),
+                                                                               relative_urls_of_old_data,
+                                                                               absolute_urls_of_old_data)
+
+    email_params = get_email_params(xblock)
+    email_params['old_content'] = old_content_with_absolute_urls
+    email_params['new_content'] = new_content_with_absolute_urls
+    students = get_course_enrollments(xblock.location.course_key)
+    send_bulk_mail_to_students.delay(students, email_params, 'handout_changes')
+
+
+def _replace_relative_urls_with_absolute_urls(content, relative_urls, absolute_urls):
+    """
+    This function will replace the all relative url from the given content to the absolute urls
+
+    :param content: Content to be changed
+    :param relative_urls: List of relative urls to change from content
+    :param absolute_urls: List of absolute urls to change with relative urls.
+    :return: Updated content contains all absolute urls.
+    """
+    relative_urls = ['"{path}"'.format(path=path) for path in relative_urls]
+    absolute_urls = ['"{path}"'.format(path=path) for path in absolute_urls]
+    for x in range(0, len(relative_urls)):
+        content = content.replace(relative_urls[x], absolute_urls[x])
+    return content
+
+
+def _get_relative_urls(content):
+    """
+    This function will extract the relative urls from content
+
+    :param content: String from which we have to extract the relative imports
+    :return: List of relative urls
+    """
+    pattern = r'href' '*=' '*("/[:.A-z0-9/+@-]*")'
+    try:
+        relative_urls = re.findall(pattern, content)
+        relative_urls = [url.replace('"', '') for url in relative_urls]
+    except TypeError:
+        # If new course created the old_content will be None or Empty
+        return []
+    return relative_urls
+
+
+def _create_absolute_urls(course_key, relative_urls):
+    """
+    This function will make the absolute urls of the given relative urls
+
+    :param course_key: Course key for the assets
+    :param relative_urls: list of relative urls
+    :return: list of absolute urls
+    """
+    absolute_urls = []
+    for relative_url in relative_urls:
+        if _is_static_path(relative_url):
+            absolute_url = _generate_absolute_url_from_static_path(course_key, relative_url)
+            absolute_url = absolute_url.replace('block@', 'block/')
+            absolute_urls.append(absolute_url)
+        elif _is_canonicalized_asset_path(relative_url):
+            absolute_url = relative_url.replace('block@', 'block/')
+            absolute_urls.append(absolute_url)
+        else:
+            # This url doesn't belong to the course we are not changing it.
+            relative_urls.remove(relative_url)
+    absolute_urls = ["{lms_base_url}{path}".format(lms_base_url=settings.LMS_ROOT_URL, path=path)
+                     for path in absolute_urls]
+    return relative_urls, absolute_urls
+
+
+def _is_static_path(path):
+    return path.startswith('/static/')
+
+
+def _is_canonicalized_asset_path(path):
+    return path.startswith('/asset')
+
+
+def _generate_absolute_url_from_static_path(course_key, path):
+    """
+    This function will generate the exact path of the given static path.
+
+    :param course_key: Course for which we have to create the static assets path.
+    :param path: Static path of asset.
+    :return: Absolute path of the static asset.
+    """
+    absolute_url = StaticContent.get_canonicalized_asset_path(course_key, path, "", {})
+    return absolute_url
 
 
 def get_xblock(usage_key):
@@ -135,39 +243,6 @@ def _get_published_unit_url(xblock):
     return published_unit_url
 
 
-@task(bind=True)
-def send_bulk_mail_to_students(students, param_dict):
-    """
-    This task is responsible for sending the email to all of the students using the ChangesEmail Message type.
-
-    :param students: List of enrolled students to whom we want to send email.
-    :param param_dict: Parameters to pass to the email template.
-    """
-    for student in students:
-        param_dict['full_name'] = student.profile.name
-        message = ChangesEmail().personalize(
-            recipient=Recipient(username='', email_address=student.email),
-            language='en',
-            user_context=param_dict,
-        )
-
-        try:
-            TASK_LOG.info(u'Attempting to send %s changes email to: %s, for course: %s',
-                          param_dict['change_type'],
-                          student.email,
-                          param_dict['course_name'])
-            ace.send(message)
-            TASK_LOG.info(u'Success: Task sending email for %s change to: %s , For course: %s',
-                          param_dict['change_type'],
-                          student.email,
-                          param_dict['course_name'])
-        except:
-            TASK_LOG.info(u'Failure: Task sending email for %s change to: %s , For course: %s',
-                          param_dict['change_type'],
-                          student.email,
-                          param_dict['course_name'])
-
-
 def get_course_enrollments(course_id):
     """
     This function will get all of the students enrolled in the specific course.
@@ -178,16 +253,3 @@ def get_course_enrollments(course_id):
     course_enrollments = CourseEnrollment.objects.filter(course_id=course_id)
     students = [enrollment.user for enrollment in course_enrollments]
     return students
-
-
-@task(bind=True)
-def send_course_enrollment_mail(user_email, email_params):
-    try:
-        TASK_LOG.info(u'Attempting to send course enrollment email to: %s, for course: %s',
-                      user_email, email_params['course_name'])
-        send_mail_to_student(user_email, email_params)
-        TASK_LOG.info(u'Success: Task sending email to: %s , For course: %s',
-                      user_email, email_params['course_name'])
-    except:
-        TASK_LOG.info(u'Failure: Task sending email tos: %s , For course: %s',
-                      user_email, email_params['course_name'])
