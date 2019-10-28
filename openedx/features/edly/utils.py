@@ -13,6 +13,12 @@ from xmodule.contentstore.content import StaticContent
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import InvalidLocationError, ItemNotFoundError
 
+from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
+from django.contrib.auth.models import User
+from lms.djangoapps.discussion.tasks import _get_thread_url
+from edx_ace.utils import date
+ENABLE_FORUM_NOTIFICATIONS_FOR_SITE_KEY = 'enable_forum_notifications'
+
 log = logging.getLogger(__name__)
 
 COURSE_OUTLINE_CATEGORIES = ['vertical', 'sequential', 'chapter']
@@ -266,3 +272,53 @@ def check_students_permission(xblock, students):
         if has_access(student, 'load', xblock, xblock.location.course_key):
             students_has_permission.append(student)
     return students_has_permission
+
+def update_context_with_thread(context, thread):
+    context.update({
+        'thread_id': thread.id,
+        'thread_title': thread.title,
+        'thread_author_id': thread.user_id,
+        'thread_created_at': thread.created_at,  # comment_client models dates are already serialized
+        'thread_commentable_id': thread.commentable_id,
+        'thread_body':thread.body,
+    })
+
+def update_context_with_comment(context, comment):
+    context.update({
+        'comment_id': comment.id,
+        'comment_body': comment.body,
+        'comment_author_id': comment.user_id,
+        'comment_created_at': comment.created_at,
+    })
+
+def build_message_context(context, is_comment):
+    message_context = get_base_template_context(context['site'])
+    message_context.update(context)
+    thread_author = User.objects.get(id=context['thread_author_id'])
+    message_context.update({
+        'thread_username': thread_author.username,
+        'post_link': _get_thread_url(context),
+        'thread_created_at': date.deserialize(context['thread_created_at'])
+    })
+    if is_comment:
+        comment_author = User.objects.get(id=context['comment_author_id'])
+        message_context.update({
+            'comment_username': comment_author.username,
+            'comment_created_at': date.deserialize(context['comment_created_at']),
+        })
+    return message_context
+
+def is_notification_configured_for_site(site, post_id):
+    if site is None:
+        log.info('Discussion: No current site, not sending notification about new thread: %s.', post_id)
+        return False
+    try:
+        if not site.configuration.get_value(ENABLE_FORUM_NOTIFICATIONS_FOR_SITE_KEY, False):
+            log_message = 'Discussion: notifications not enabled for site: %s. Not sending message about new thread: %s.'
+            log.info(log_message, site, post_id)
+            return False
+    except SiteConfiguration.DoesNotExist:
+        log_message = 'Discussion: No SiteConfiguration for site %s. Not sending message about new thread: %s.'
+        log.info(log_message, site, post_id)
+        return False
+    return True

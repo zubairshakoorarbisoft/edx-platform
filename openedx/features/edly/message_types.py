@@ -13,3 +13,14 @@ class HandoutChangesNotification(BaseMessageType):
     A message for notifying user about new changes in the course handouts.
     """
     pass
+
+class CommentVoteNotification(BaseMessageType):
+    pass
+
+
+class ThreadCreateNotification(BaseMessageType):
+    pass
+
+
+class ThreadVoteNotification(BaseMessageType):
+    pass

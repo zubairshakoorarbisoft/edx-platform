@@ -1,3 +1,19 @@
+import logging
+from celery import task
+from celery_utils.logged_task import LoggedTask
+from openedx.features.edly.message_types import OutlineChangesNotification, HandoutChangesNotification
+from opaque_keys.edx.keys import CourseKey
+from django.conf import settings
+from django.contrib.sites.models import Site
+from celery.utils.log import get_task_logger
+from django.contrib.auth.models import User
+from openedx.core.lib.celery.task_utils import emulate_http_request
+from lms.djangoapps.instructor.enrollment import send_mail_to_student
+from openedx.features.edly.utils import build_message_context
+from edx_ace import ace
+from edx_ace.recipient import Recipient
+from lms.djangoapps.discussion.tasks import _get_course_language
+
 from django.conf import settings
 
 from celery.task import task
