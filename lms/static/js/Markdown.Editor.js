@@ -33,22 +33,24 @@
         linkDefaultText = 'http://'; // The default text that appears in input
 
     // The text that appears on the dialog box when entering Images.
-    var imageDialogText = gettext('Insert Image (upload file or type URL)'),
-        imageUrlHelpText = gettext("Type in a URL or use the \"Choose File\" button to upload a file from your machine. (e.g. 'http://example.com/img/clouds.jpg')"),  // eslint-disable-line max-len
-        imageDescriptionLabel = gettext('Image Description'),
+    var imageDialogText = gettext('Upload file, insert Image or type URL'),
+        imageUrlHelpText = gettext("Type in a URL or use the \"Choose File\" button to upload a file (supported files extensions: '.jpg', '.jpeg', '.gif', '.bmp', '.png', '.tiff', '.pdf', '.doc', '.docx') from your machine. (e.g. 'http://example.com/img/clouds.jpg')"),  // eslint-disable-line max-len
+        imageDescriptionLabel = gettext('File/Image Description.'),
         imageDefaultText = 'http://', // The default text that appears in input
-        imageDescError = gettext('Please describe this image or agree that it has no contextual value by checking the checkbox.'),  // eslint-disable-line max-len
-        imageDescriptionHelpText = gettext("e.g. 'Sky with clouds'. The description is helpful for users who cannot see the image."),  // eslint-disable-line max-len
+        imageDescError = gettext('Please describe this file'),  // eslint-disable-line max-len
+        imageDescriptionHelpText = gettext("e.g. 'Sky with clouds'. The description is helpful for users who cannot see the image (for image files) and for showing link text."),  // eslint-disable-line max-len
         imageDescriptionHelpLink = {
             href: 'http://www.w3.org/TR/html5/embedded-content-0.html#alt',
             text: gettext('How to create useful text alternatives.')
         },
-        imageIsDecorativeLabel = gettext('This image is for decorative purposes only and does not require a description.');  // eslint-disable-line max-len
+        imageIsDecorativeLabel = gettext('Insert this file/image as a link.');  // eslint-disable-line max-len
 
     // Text that is shared between both link and image dialog boxes.
     var defaultHelpHoverTitle = gettext('Markdown Editing Help'),
         urlLabel = gettext('URL'),
         urlError = gettext('Please provide a valid URL.');
+
+    var insertFileAsLink = false;
 
     // -------------------------------------------------------------------
     //  END OF YOUR CHANGES
@@ -1145,7 +1147,7 @@
                     return false;
                 };
                 document.getElementById('img-is-decorative').onchange = function() {
-                    descInput.required = !descInput.required;
+                    insertFileAsLink = document.getElementById('img-is-decorative').checked;
                 };
             }
 
@@ -1454,7 +1456,7 @@
             }), -1);
             buttons.quote = makeButton('wmd-quote-button', gettext('Blockquote (Ctrl+Q)'), '-60px', bindCommand('doBlockquote'), -1);
             buttons.code = makeButton('wmd-code-button', gettext('Code Sample (Ctrl+K)'), '-80px', bindCommand('doCode'), -1);
-            buttons.image = makeButton('wmd-image-button', gettext('Image (Ctrl+G)'), '-100px', bindCommand(function(chunk, postProcessing) {
+            buttons.image = makeButton('wmd-image-button', gettext('Image/File (Ctrl+G)'), '-100px', bindCommand(function(chunk, postProcessing) {
                 return this.doLinkOrImage(chunk, postProcessing, true, imageUploadHandler);
             }), -1);
             makeSpacer(2);
@@ -1727,8 +1729,11 @@
                     var linkDef = ' [999]: ' + properlyEncoded(link);
 
                     var num = that.addLinkDef(chunk, linkDef);
-                    chunk.startTag = isImage ? '![' : '[';
+                    chunk.startTag = isImage && !insertFileAsLink ? '![' : '[';
                     chunk.endTag = '][' + num + ']';
+
+                    // Reset "insertFileAsLink" to false for new files
+                    insertFileAsLink = false;
 
                     if (!chunk.selection) {
                         if (isImage) {
