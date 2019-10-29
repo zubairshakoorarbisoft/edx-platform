@@ -2,10 +2,10 @@ from django.conf import settings
 
 from celery.task import task
 from celery.utils.log import get_task_logger
-from courseware.access import has_access
 from edx_ace import ace
 from edx_ace.recipient import Recipient
 from lms.djangoapps.instructor.enrollment import send_mail_to_student
+from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.edly.message_types import HandoutChangesNotification, OutlineChangesNotification
 
 TASK_LOG = get_task_logger(__name__)
@@ -33,22 +33,23 @@ def send_bulk_mail_to_students(students, param_dict, message_type):
             language='en',
             user_context=param_dict,
         )
-        # noinspection PyBroadException
-        try:
-            TASK_LOG.info(u'Attempting to send %s changes email to: %s, for course: %s',
-                          message_type,
-                          student.email,
-                          param_dict['course_name'])
-            ace.send(message)
-            TASK_LOG.info(u'Success: Task sending email for %s change to: %s , For course: %s',
-                          message_type,
-                          student.email,
-                          param_dict['course_name'])
-        except Exception:
-            TASK_LOG.info(u'Failure: Task sending email for %s change to: %s , For course: %s',
-                          message_type,
-                          student.email,
-                          param_dict['course_name'])
+        with emulate_http_request(site=param_dict['site'], user=student):
+            # noinspection PyBroadException
+            try:
+                TASK_LOG.info(u'Attempting to send %s changes email to: %s, for course: %s',
+                              message_type,
+                              student.email,
+                              param_dict['course_name'])
+                ace.send(message)
+                TASK_LOG.info(u'Success: Task sending email for %s change to: %s , For course: %s',
+                              message_type,
+                              student.email,
+                              param_dict['course_name'])
+            except Exception:
+                TASK_LOG.info(u'Failure: Task sending email for %s change to: %s , For course: %s',
+                              message_type,
+                              student.email,
+                              param_dict['course_name'])
 
 
 @task(routing_key=ROUTING_KEY)

@@ -6,6 +6,7 @@ from django.conf import settings
 from courseware.access import has_access
 from courseware.courses import get_course_by_id
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.features.edly.tasks import send_bulk_mail_to_students
 from student.models import CourseEnrollment
 from xmodule.contentstore.content import StaticContent
@@ -41,6 +42,7 @@ def get_email_params(xblock):
     """
     email_params = {}
     course = get_course_by_id(xblock.location.course_key)
+    email_params['site'] = get_current_site()
     email_params['course_url'] = _get_course_url(xblock.location.course_key)
     email_params['course_name'] = course.display_name_with_default
     email_params['display_name'] = xblock.display_name

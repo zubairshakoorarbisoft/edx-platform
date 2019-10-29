@@ -1,1 +1,1 @@
-default_app_config='openedx.features.edly.apps.EdlyConfig'
+default_app_config = 'openedx.features.edly.apps.EdlyConfig'
