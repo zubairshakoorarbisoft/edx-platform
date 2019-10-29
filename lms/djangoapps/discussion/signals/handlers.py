@@ -12,7 +12,7 @@ from opaque_keys.edx.locator import LibraryLocator
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from xmodule.modulestore.django import SignalHandler
-
+from openedx.features.edly.utils import send_comments_reply_email_to_comment_owner
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ def update_discussions_on_course_publish(sender, course_key, **kwargs):  # pylin
 
 @receiver(signals.comment_created)
 def send_discussion_email_notification(sender, user, post, **kwargs):
+    import pdb; pdb.set_trace()
     current_site = get_current_site()
     if current_site is None:
         log.info('Discussion: No current site, not sending notification about post: %s.', post.id)
@@ -75,3 +76,6 @@ def send_message(comment, site):
         'site_id': site.id
     }
     tasks.send_ace_message.apply_async(args=[context])
+    if comment.parent_id:
+        context.update({'site': site})
+        send_comments_reply_email_to_comment_owner(comment, context)

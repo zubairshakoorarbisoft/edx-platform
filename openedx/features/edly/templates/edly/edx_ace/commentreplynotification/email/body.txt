@@ -2,7 +2,7 @@
 
 {% block content %}
 {% blocktrans trimmed %}
-    {{ comment_voter_name }} gives you thumbs up on your following comment of post <b>{{ thread_title }}</b>:
+    {{ comment_username }} replies to your comment on post <b>{{ thread_title }}</b>:
 {% endblocktrans %}
 
 

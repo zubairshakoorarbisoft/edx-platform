@@ -1,26 +1,22 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django_comment_common import signals as forum_signals
 
 from lms.djangoapps.instructor.enrollment import get_email_params
+from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.theming.helpers import get_current_site
+from openedx.features.edly.tasks import send_bulk_mail_to_students, send_course_enrollment_mail
 from openedx.features.edly.utils import (
-    send_course_enrollment_mail,
+    build_message_context,
+    get_course_enrollments,
     is_notification_configured_for_site,
-    update_context_with_thread,
-    update_context_with_comment
+    update_context_with_comment,
+    update_context_with_thread
 )
-from openedx.features.edly.tasks import send_course_enrollment_mail
 from student.models import CourseEnrollment
 
-from openedx.features.edly.message_types import (
-    CommentVoteNotification,
-    ThreadCreateNotification,
-    ThreadVoteNotification
-)
-from openedx.features.edly.tasks import send_ace_message
-from django_comment_common import signals as forum_signals
-from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-from openedx.core.djangoapps.theming.helpers import get_current_site
 
 @receiver(post_save, sender=CourseEnrollment)
 def handle_user_enrollment(sender, instance, **kwargs):
@@ -56,35 +52,36 @@ def send_thread_create_email_notification(sender, user, post, **kwargs):
     current_site = get_current_site()
     if not is_notification_configured_for_site(current_site, post.id):
         return
+    course_key = CourseKey.from_string(post.course_id)
     context = {
-        'site_id': current_site.id,
-        'course_id': unicode(post.course_id)
+        'site': current_site,
+        'course_id': course_key
     }
     update_context_with_thread(context, post)
-    receipients = [user.id] #THIS NEED TO BE CHANGED
-    send_ace_message.apply_async(args=[context, ThreadCreateNotification(), receipients, False])
+    message_context = build_message_context(context)
+    receipients = get_course_enrollments(course_key)
+    send_bulk_mail_to_students.delay(receipients, message_context, 'new_thread')
 
 
 @receiver(forum_signals.thread_voted)
 def send_vote_email_notification(sender, user, post, **kwargs):
-    import pdb; pdb.set_trace()
     current_site = get_current_site()
     if not is_notification_configured_for_site(current_site, post.id):
         return
+    course_key = CourseKey.from_string(post.course_id)
     context = {
-        'site_id': current_site.id,
-        'course_id': unicode(post.course_id),
+        'site': current_site,
+        'course_id': course_key,
         'voter_name': user.username,
         'voter_email': user.email
     }
-    is_comment = False
-    notification_object = ThreadVoteNotification()
-    receipients = [post.user_id] #########################################
+    notification_object_type = "thread_vote"
+    receipients = [User.objects.get(id=post.user_id)]
     if post.type == "comment":
-        is_comment = True
         update_context_with_thread(context, post.thread)
-        update_context_with_comment(context,  post)
-        notification_object = CommentVoteNotification()
+        update_context_with_comment(context, post)
+        notification_object = "comment_vote"
     else:
         update_context_with_thread(context, post)
-    send_ace_message.apply_async(args=[context, notification_object, receipients, is_comment])
+    message_context = build_message_context(context)
+    send_bulk_mail_to_students.delay(receipients, message_context, notification_object_type)
