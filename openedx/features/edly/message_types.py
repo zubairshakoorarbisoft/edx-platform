@@ -26,5 +26,6 @@ class ThreadCreateNotification(BaseMessageType):
 class ThreadVoteNotification(BaseMessageType):
     pass
 
+
 class CommentReplyNotification(BaseMessageType):
     pass

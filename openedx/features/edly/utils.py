@@ -1,25 +1,24 @@
 import logging
 import re
 
+from courseware.access import has_access
+from courseware.courses import get_course_by_id
 from django.conf import settings
 from django.contrib.auth.models import User
 from edx_ace.utils import date
 from lms.djangoapps.discussion.tasks import _get_thread_url
+from lms.lib.comment_client.comment import Comment
+from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-
-from courseware.access import has_access
-from courseware.courses import get_course_by_id
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.features.edly.tasks import send_bulk_mail_to_students
 from student.models import CourseEnrollment
 from xmodule.contentstore.content import StaticContent
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import InvalidLocationError, ItemNotFoundError
-from opaque_keys.edx.keys import CourseKey
-from lms.lib.comment_client.comment import Comment
-from openedx.core.djangoapps.theming.helpers import get_current_site
 
 log = logging.getLogger(__name__)
 ENABLE_FORUM_NOTIFICATIONS_FOR_SITE_KEY = 'enable_forum_notifications'
@@ -275,6 +274,7 @@ def check_students_permission(xblock, students):
             students_has_permission.append(student)
     return students_has_permission
 
+
 def update_context_with_thread(context, thread):
     thread_author = User.objects.get(id=thread.user_id)
     context.update({
@@ -317,7 +317,7 @@ def is_notification_configured_for_site(site, post_id):
         return False
     try:
         if not site.configuration.get_value(ENABLE_FORUM_NOTIFICATIONS_FOR_SITE_KEY, False):
-            log_message = 'Discussion: notifications not enabled for site: %s. Not sending message about new thread: %s.'
+            log_message = 'Discussion: notifications not enabled for site: %s. Not sending message about new thread: %s'
             log.info(log_message, site, post_id)
             return False
     except SiteConfiguration.DoesNotExist:
@@ -335,5 +335,6 @@ def send_comments_reply_email_to_comment_owner(comment, context):
     update_context_with_comment(context, comment)
     message_context = build_message_context(context)
     parent_comment = Comment(id=comment.parent_id).retrieve()
-    receipients = [User.objects.get(id=parent_comment.user_id)]
-    send_bulk_mail_to_students.delay(receipients, message_context, 'comment_reply')
+    if parent_comment.user_id != comment.thread.user_id and parent_comment.user_id != comment.user_id:
+        receipients = [User.objects.get(id=parent_comment.user_id)]
+        send_bulk_mail_to_students.delay(receipients, message_context, 'comment_reply')
