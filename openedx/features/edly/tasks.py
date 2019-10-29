@@ -2,6 +2,7 @@ from django.conf import settings
 
 from celery.task import task
 from celery.utils.log import get_task_logger
+from courseware.access import has_access
 from edx_ace import ace
 from edx_ace.recipient import Recipient
 from lms.djangoapps.instructor.enrollment import send_mail_to_student

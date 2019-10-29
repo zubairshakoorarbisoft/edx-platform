@@ -3,6 +3,7 @@ import re
 
 from django.conf import settings
 
+from courseware.access import has_access
 from courseware.courses import get_course_by_id
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.edly.tasks import send_bulk_mail_to_students
@@ -63,6 +64,7 @@ def _handle_section_publish(xblock):
     """
     email_params = get_email_params(xblock)
     students = get_course_enrollments(xblock.location.course_key)
+    students = check_students_permission(xblock, students)
 
     if xblock.category == 'vertical':
         published_unit_url = _get_published_unit_url(xblock)
@@ -115,6 +117,7 @@ def _handle_handout_changes(xblock, old_content):
     email_params['old_content'] = old_content_with_absolute_urls
     email_params['new_content'] = new_content_with_absolute_urls
     students = get_course_enrollments(xblock.location.course_key)
+    students = check_students_permission(xblock, students)
     send_bulk_mail_to_students.delay(students, email_params, 'handout_changes')
 
 
@@ -253,3 +256,11 @@ def get_course_enrollments(course_id):
     course_enrollments = CourseEnrollment.objects.filter(course_id=course_id)
     students = [enrollment.user for enrollment in course_enrollments]
     return students
+
+
+def check_students_permission(xblock, students):
+    students_has_permission = []
+    for student in students:
+        if has_access(student, 'load', xblock, xblock.location.course_key):
+            students_has_permission.append(student)
+    return students_has_permission
