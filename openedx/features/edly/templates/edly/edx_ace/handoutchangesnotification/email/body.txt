@@ -2,7 +2,7 @@
 
 {% blocktrans %}Handouts of course {{ course_name }} has been updated.{% endblocktrans %}
 
-{% blocktrans %}Your can see the changes here: {{ course_url }}{% endblocktrans %}
+{% blocktrans %}You can view the changes here: {{ course_url }}{% endblocktrans %}
 
 ----
 {% blocktrans %}Thanks,{% endblocktrans %}

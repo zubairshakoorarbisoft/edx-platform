@@ -1,8 +1,9 @@
 import logging
 import re
 
-from courseware.courses import get_course_by_id
 from django.conf import settings
+
+from courseware.courses import get_course_by_id
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.edly.tasks import send_bulk_mail_to_students
 from student.models import CourseEnrollment
@@ -24,7 +25,7 @@ def notify_students_about_xblock_changes(xblock, publish, old_content):
     :param old_content: Old data of xblock before updating.
     """
     if (publish == 'make_public' and xblock.category in COURSE_OUTLINE_CATEGORIES
-        and not xblock.visible_to_staff_only):
+            and not xblock.visible_to_staff_only):
         _handle_section_publish(xblock)
     elif xblock.category == 'course_info' and xblock.location.block_id == 'handouts':
         _handle_handout_changes(xblock, old_content)
@@ -32,8 +33,7 @@ def notify_students_about_xblock_changes(xblock, publish, old_content):
 
 def get_email_params(xblock):
     """
-    This function is responsible for generating the email_params which we are
-    going to send to students for any changes in course.
+    Generates the email params for any changes in course
 
     :param xblock: xblock which is modified/created
     :return: Dict containing the data for email.
@@ -163,7 +163,6 @@ def _create_absolute_urls(course_key, relative_urls):
     for relative_url in relative_urls:
         if _is_static_path(relative_url):
             absolute_url = _generate_absolute_url_from_static_path(course_key, relative_url)
-            absolute_url = absolute_url.replace('block@', 'block/')
             absolute_urls.append(absolute_url)
         elif _is_canonicalized_asset_path(relative_url):
             absolute_url = relative_url.replace('block@', 'block/')
@@ -193,6 +192,7 @@ def _generate_absolute_url_from_static_path(course_key, path):
     :return: Absolute path of the static asset.
     """
     absolute_url = StaticContent.get_canonicalized_asset_path(course_key, path, "", {})
+    absolute_url = absolute_url.replace('block@', 'block/')
     return absolute_url
 
 
@@ -235,11 +235,11 @@ def _get_published_unit_url(xblock):
                 section_url_name = section_xblock.url_name
                 published_unit_url = '{lms_base_url}/courses/{course_id}/courseware/{section_url_name}/' \
                                      '{subsection_url_name}/?activate_block_id={unit_usage_key}'.format(
-                    lms_base_url=settings.LMS_ROOT_URL,
-                    course_id=xblock.location.course_key,
-                    section_url_name=section_url_name,
-                    subsection_url_name=subsection_url_name,
-                    unit_usage_key=xblock.location)
+                                        lms_base_url=settings.LMS_ROOT_URL,
+                                        course_id=xblock.location.course_key,
+                                        section_url_name=section_url_name,
+                                        subsection_url_name=subsection_url_name,
+                                        unit_usage_key=xblock.location)
     return published_unit_url
 
 

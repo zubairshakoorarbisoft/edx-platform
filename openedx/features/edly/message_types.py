@@ -3,23 +3,13 @@ from openedx.core.djangoapps.ace_common.message import BaseMessageType
 
 class OutlineChangesNotification(BaseMessageType):
     """
-    A message for notifying user about new changes in course.
-
+    A message for notifying user about new changes in the course outline.
     """
-    APP_LABEL = 'edly'
-
-    def __init__(self, *args, **kwargs):
-        super(OutlineChangesNotification, self).__init__(*args, **kwargs)
-        self.options['transactional'] = True
+    pass
 
 
 class HandoutChangesNotification(BaseMessageType):
     """
-    A message for notifying user about new changes in course.
-
+    A message for notifying user about new changes in the course handouts.
     """
-    APP_LABEL = 'edly'
-
-    def __init__(self, *args, **kwargs):
-        super(HandoutChangesNotification, self).__init__(*args, **kwargs)
-        self.options['transactional'] = True
+    pass

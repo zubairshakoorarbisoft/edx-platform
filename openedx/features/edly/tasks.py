@@ -1,11 +1,11 @@
-from edx_ace import ace
-from celery.task import task
-from celery.utils.log import get_task_logger
-from edx_ace.recipient import Recipient
-from openedx.features.edly.message_types import OutlineChangesNotification, HandoutChangesNotification
-from lms.djangoapps.instructor.enrollment import send_mail_to_student
 from django.conf import settings
 
+from celery.task import task
+from celery.utils.log import get_task_logger
+from edx_ace import ace
+from edx_ace.recipient import Recipient
+from lms.djangoapps.instructor.enrollment import send_mail_to_student
+from openedx.features.edly.message_types import HandoutChangesNotification, OutlineChangesNotification
 
 TASK_LOG = get_task_logger(__name__)
 ROUTING_KEY = getattr(settings, 'ACE_ROUTING_KEY')
@@ -32,32 +32,33 @@ def send_bulk_mail_to_students(students, param_dict, message_type):
             language='en',
             user_context=param_dict,
         )
-
+        # noinspection PyBroadException
         try:
             TASK_LOG.info(u'Attempting to send %s changes email to: %s, for course: %s',
                           message_type,
                           student.email,
-                          param_dict['display_name'])
+                          param_dict['course_name'])
             ace.send(message)
             TASK_LOG.info(u'Success: Task sending email for %s change to: %s , For course: %s',
                           message_type,
                           student.email,
-                          param_dict['display_name'])
-        except:
+                          param_dict['course_name'])
+        except Exception:
             TASK_LOG.info(u'Failure: Task sending email for %s change to: %s , For course: %s',
                           message_type,
                           student.email,
-                          param_dict['display_name'])
+                          param_dict['course_name'])
 
 
 @task(routing_key=ROUTING_KEY)
 def send_course_enrollment_mail(user_email, email_params):
+    # noinspection PyBroadException
     try:
         TASK_LOG.info(u'Attempting to send course enrollment email to: %s, for course: %s',
                       user_email, email_params['display_name'])
         send_mail_to_student(user_email, email_params)
         TASK_LOG.info(u'Success: Task sending email to: %s , For course: %s',
                       user_email, email_params['display_name'])
-    except:
+    except Exception:
         TASK_LOG.info(u'Failure: Task sending email tos: %s , For course: %s',
                       user_email, email_params['display_name'])

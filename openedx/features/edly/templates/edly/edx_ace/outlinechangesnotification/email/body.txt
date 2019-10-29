@@ -2,7 +2,7 @@
 
 {% blocktrans %}{{ change_type }}: {{ display_name }} has been updated in {{ course_name }}.{% endblocktrans %}
 
-{% blocktrans %}Your can see the {{ change_type }} changes here: {{ change_url }}{% endblocktrans %}
+{% blocktrans %}You can view the {{ change_type }} changes here: {{ change_url }}{% endblocktrans %}
 
 ----
 {% blocktrans %}Thanks,{% endblocktrans %}

@@ -1,14 +1,16 @@
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from lms.djangoapps.instructor.enrollment import get_email_params
 from openedx.features.edly.tasks import send_course_enrollment_mail
 from student.models import CourseEnrollment
 
 
 @receiver(post_save, sender=CourseEnrollment)
-def handle_user_enroll(sender, instance, **kwargs):
+def handle_user_enrollment(sender, instance, **kwargs):
     """
+    Handle the course enrollment and send the email to the student about enrollment.
 
     :param sender: Model from which we received signal.
     :param instance: Instance of model which has been created or updated
