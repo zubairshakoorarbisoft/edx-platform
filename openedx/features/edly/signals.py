@@ -64,6 +64,8 @@ def send_thread_create_email_notification(sender, user, post, **kwargs):
 
 @receiver(forum_signals.thread_voted)
 def send_vote_email_notification(sender, user, post, **kwargs):
+    if kwargs.get('undo_vote', False):
+        return
     current_site = get_current_site()
     if not is_notification_configured_for_site(current_site, post.id):
         return
