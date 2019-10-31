@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}{% blocktrans %}Dear {{ full_name }}{% endblocktrans %}
+
+{% blocktrans %}{{ change_type }}: {{ display_name }} has been updated in {{ course_name }}.{% endblocktrans %}
+
+{% blocktrans %}You can view the {{ change_type }} changes here: {{ change_url }}{% endblocktrans %}
+
+----
+{% blocktrans %}Thanks,{% endblocktrans %}
+{% blocktrans %}{{ platform_name }} training team{% endblocktrans %}
+{% endautoescape %}
