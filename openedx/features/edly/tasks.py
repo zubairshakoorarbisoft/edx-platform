@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 
 from celery.task import task
 from celery.utils.log import get_task_logger
@@ -27,7 +29,9 @@ def send_bulk_mail_to_students(students, param_dict, message_type):
         'handout_changes': HandoutChangeNotification
     }
     message_class = message_types[message_type]
-    for student in students:
+    param_dict['site'] = Site.objects.get(id=param_dict['site_id'])
+    for student_id in students:
+        student = User.objects.get(id=student_id)
         param_dict['full_name'] = student.profile.name
         message = message_class().personalize(
             recipient=Recipient(username='', email_address=student.email),

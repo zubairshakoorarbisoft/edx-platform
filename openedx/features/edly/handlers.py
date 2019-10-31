@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from six import text_type
 
 from lms.djangoapps.instructor.enrollment import get_email_params
 from openedx.features.edly.tasks import send_course_enrollment_mail
@@ -35,5 +36,6 @@ def handle_user_enrollment(sender, instance, **kwargs):
         email_params['email_address'] = user_email
         email_params['full_name'] = user_fullname
         email_params['enroll_by_self'] = True
+        email_params['course'] = text_type(email_params['course'])
 
         send_course_enrollment_mail.delay(user_email, email_params)

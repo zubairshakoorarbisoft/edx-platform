@@ -5,10 +5,10 @@ from django.conf import settings
 
 from contentstore.utils import get_lms_link_for_item, is_currently_visible_to_students
 from courseware.courses import get_course_by_id
-from static_replace import replace_static_urls
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.features.edly.tasks import send_bulk_mail_to_students
+from static_replace import replace_static_urls
 from student.models import CourseEnrollment
 
 log = logging.getLogger(__name__)
@@ -43,8 +43,12 @@ def get_email_params(xblock):
         Dict containing the data for email.
     """
     email_params = {}
+    site_id = ''
     course = get_course_by_id(xblock.location.course_key)
-    email_params['site'] = get_current_site()
+    site = get_current_site()
+    if site:
+        site_id = site.id
+    email_params['site_id'] = site_id
     email_params['course_url'] = _get_course_url(xblock.location.course_key)
     email_params['course_name'] = course.display_name_with_default
     email_params['display_name'] = xblock.display_name
@@ -68,10 +72,9 @@ def _handle_section_publish(xblock):
     Arguments:
         xblock: xblock which is modified/created
     """
-
     email_params = get_email_params(xblock)
     students = get_course_enrollments(xblock.location.course_key)
-    email_params['change_url'] = get_lms_link_for_item(xblock.location).strip('//')
+    email_params['change_url'] = get_xblock_lms_link(xblock.location)
     if xblock.category == 'vertical':
         email_params['change_type'] = 'Unit'
     elif xblock.category == 'sequential':
@@ -80,6 +83,12 @@ def _handle_section_publish(xblock):
         email_params['change_type'] = 'Section'
 
     send_bulk_mail_to_students.delay(students, email_params, 'outline_changes')
+
+
+def get_xblock_lms_link(usage_key):
+    lms_link = get_lms_link_for_item(usage_key).strip('//')
+    lms_link = lms_link.replace(settings.LMS_BASE, settings.LMS_ROOT_URL)
+    return lms_link
 
 
 def _handle_handout_changes(xblock, old_content):
@@ -165,5 +174,5 @@ def get_course_enrollments(course_id):
         List of the enrolled students.
     """
     course_enrollments = CourseEnrollment.objects.filter(course_id=course_id, is_active=True)
-    students = [enrollment.user for enrollment in course_enrollments]
+    students = [enrollment.user.id for enrollment in course_enrollments]
     return students
