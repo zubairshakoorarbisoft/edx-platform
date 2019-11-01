@@ -64,21 +64,24 @@ def send_bulk_mail_to_students(students, param_dict, message_type):
 
 @task(routing_key=ROUTING_KEY)
 def send_course_enrollment_mail(user_email, email_params):
-    TASK_LOG.info(
-        u'Attempting to send course enrollment email to: %s, for course: %s',
-        user_email,
-        email_params['display_name']
-    )
-    try:
-        send_mail_to_student(user_email, email_params)
+    email_params['site'] = Site.objects.get(id=email_params['site_id'])
+    student = User.objects.get(email=user_email)
+    with emulate_http_request(site=email_params['site'], user=student):
         TASK_LOG.info(
-            u'Success: Task sending email to: %s , For course: %s',
+            u'Attempting to send course enrollment email to: %s, for course: %s',
             user_email,
             email_params['display_name']
         )
-    except Exception:  # pylint: disable=broad-except
-        TASK_LOG.exception(
-            u'Failure: Task sending email tos: %s , For course: %s',
-            user_email,
-            email_params['display_name']
-        )
+        try:
+            send_mail_to_student(user_email, email_params)
+            TASK_LOG.info(
+                u'Success: Task sending email to: %s , For course: %s',
+                user_email,
+                email_params['display_name']
+            )
+        except Exception:  # pylint: disable=broad-except
+            TASK_LOG.exception(
+                u'Failure: Task sending email tos: %s , For course: %s',
+                user_email,
+                email_params['display_name']
+            )

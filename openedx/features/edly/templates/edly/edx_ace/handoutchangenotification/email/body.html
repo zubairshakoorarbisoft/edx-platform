@@ -8,9 +8,15 @@
         <td>
             <h1>
                 {% blocktrans %}
-                    Handouts of course {{ course_name }} on {{ site_name }} have been updated
+                    Hi {{full_name}},
                 {% endblocktrans %}
             </h1>
+
+            <h2>
+                {% blocktrans %}
+                    Handouts of course {{ course_name }} on {{ platform_name }} have been updated
+                {% endblocktrans %}
+            </h2>
 
             <p style="color: rgba(0,0,0,.75);">
                     <table border="1">
@@ -43,7 +49,7 @@
                 {% endblocktrans %}
                 <br/>
                 {% blocktrans %}
-                    {{ platform_name }} training team
+                    {{ platform_name }} team
                 {% endblocktrans %}
                 <br />
             </p>
