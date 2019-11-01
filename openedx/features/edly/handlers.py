@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from six import text_type
 
 from lms.djangoapps.instructor.enrollment import get_email_params
+from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.features.edly.tasks import send_course_enrollment_mail
 from student.models import CourseEnrollment
 
@@ -29,10 +30,17 @@ def handle_user_enrollment(sender, instance, **kwargs):
         else:
             return
 
+        site = get_current_site()
+        site_id = ''
+        if site:
+            site_id = site.id
+        email_params['site_id'] = site_id
+
         user_fullname = instance.user.profile.name
         user_email = instance.user.email
 
         email_params.update(get_email_params(instance.course, True, secure=False))
+        email_params['contact_mailing_address'] = settings.CONTACT_MAILING_ADDRESS
         email_params['email_address'] = user_email
         email_params['full_name'] = user_fullname
         email_params['enroll_by_self'] = True

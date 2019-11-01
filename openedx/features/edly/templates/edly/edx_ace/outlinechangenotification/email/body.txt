@@ -6,5 +6,5 @@
 
 ----
 {% blocktrans %}Thanks,{% endblocktrans %}
-{% blocktrans %}{{ platform_name }} training team{% endblocktrans %}
+{% blocktrans %}{{ platform_name }} team{% endblocktrans %}
 {% endautoescape %}

@@ -49,6 +49,7 @@ def get_email_params(xblock):
     if site:
         site_id = site.id
     email_params['site_id'] = site_id
+    email_params['contact_mailing_address'] = settings.CONTACT_MAILING_ADDRESS
     email_params['course_url'] = _get_course_url(xblock.location.course_key)
     email_params['course_name'] = course.display_name_with_default
     email_params['display_name'] = xblock.display_name
