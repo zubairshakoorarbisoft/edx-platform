@@ -1,0 +1,4 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans %}Handouts of {{ course_name }} on {{ site_name }} have been updated{% endblocktrans %}
+{% endautoescape %}

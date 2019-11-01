@@ -2283,6 +2283,7 @@ INSTALLED_APPS = [
     'openedx.features.portfolio_project',
     'openedx.features.course_duration_limits',
     'openedx.features.content_type_gating',
+    'openedx.features.lums',
 
     'experiments',
 
@@ -2294,6 +2295,8 @@ INSTALLED_APPS = [
 
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
+
+    'openedx.features.edly',
 ]
 
 ######################### CSRF #########################################
@@ -3230,7 +3233,7 @@ FINANCIAL_ASSISTANCE_MAX_LENGTH = 2500
 # need to add the model's app to the ADDL_INSTALLED_APPS array in your
 # lms.env.json file.
 
-REGISTRATION_EXTENSION_FORM = None
+REGISTRATION_EXTENSION_FORM = 'openedx.features.lums.forms.UserProfileExtensionForm'
 
 # Identifier included in the User Agent from open edX mobile apps.
 MOBILE_APP_USER_AGENT_REGEXES = [
