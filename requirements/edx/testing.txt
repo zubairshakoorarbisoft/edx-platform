@@ -30,7 +30,7 @@ git+https://github.com/edx/edx-ora2.git@2.2.0#egg=ora2==2.2.0
 -e git+https://github.com/appliedsec/pygeoip.git@95e69341cebf5a6a9fbf7c4f5439d458898bdc3b#egg=pygeoip
 -e git+https://github.com/dementrock/pystache_custom.git@776973740bdaad83a3b029f96e415a7d1e8bec2f#egg=pystache_custom-dev
 -e git+https://github.com/edx/RateXBlock.git@367e19c0f6eac8a5f002fd0f1559555f8e74bfff#egg=rate-xblock
-git+https://github.com/edx/RecommenderXBlock.git@1.4.0#egg=recommender-xblock==1.4.0
+#git+https://github.com/edx/RecommenderXBlock.git@1.4.0#egg=recommender-xblock==1.4.0
 -e common/lib/safe_lxml
 -e common/lib/sandbox-packages
 -e common/lib/symmath
@@ -275,6 +275,7 @@ pyuca==1.1
 pyyaml==3.13
 queuelib==1.5.0           # via scrapy
 radon==2.4.0
+recommender-xblock==1.4.0
 redis==2.10.6
 reportlab==3.5.13
 requests-oauthlib==1.1.0
