@@ -1,52 +1,64 @@
-# Python CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-#
 version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
-      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:2.7.15
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
+    - image: circleci/python:2.7.15
     working_directory: ~/edx-platform
-
     steps:
-      - checkout
+    - checkout
+    - run:
+        name: Prepare Environment
+        command: |
+          sudo apt-get -y install libxmlsec1-dev libxml2-dev libxslt-dev graphviz libgraphviz-dev libreadline7 libreadline-dev default-libmysqlclient-dev libsqlite3-dev build-essential libgeos-dev mongodb-server mongodb-clients
+          sudo pip install virtualenv
+          virtualenv -p python venv
+          source venv/bin/activate
+          curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          nvm install v8.9.3
+          npm install
+          pip install setuptools
+          pip install --exists-action w -r requirements/edx/paver.txt
 
-      - run:
-          name: Prepare Environment
-          command: |
-            sudo apt-get -y install libxmlsec1-dev libxml2-dev libxslt-dev graphviz libgraphviz-dev libreadline7 libreadline-dev default-libmysqlclient-dev libsqlite3-dev build-essential libgeos-dev mongodb-server mongodb-clients
-            sudo pip install virtualenv
-            virtualenv -p python venv
-            source venv/bin/activate
-            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-            nvm install v8.9.3
-            npm install
-            pip install setuptools
-            pip install --exists-action w -r requirements/edx/testing.txt
-            pip install coveralls==1.0
-            pip freeze
-      - run:
-          name: Run Tests
-          command: |
-            source venv/bin/activate
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-            sudo mongod --config /etc/mongodb.conf &
-            paver test_system -s lms --cov-args="-p"
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
+          # Mirror what paver install_prereqs does.
+          # After a successful build, CircleCI will
+          # cache the virtualenv at that state, so that
+          # the next build will not need to install them
+          # from scratch again.
 
+          # HACK: within base.txt stevedore had a
+          # dependency on a version range of pbr.
+          # Install a version which falls within that range.
+          pip install  --exists-action w pbr==0.9.0
+          pip install --exists-action w -r requirements/edx/paver.txt
+          pip install --exists-action w -r requirements/edx/testing.txt
+          pip install tox
+          pip install coveralls==1.0
+
+              # Output the installed python packages to the console to help
+              # with troubleshooting any issues with python requirements.
+          pip freeze
+    - run:
+        name: Run Tests
+        command: |
+          sudo mongod --config /etc/mongodb.conf &
+          source venv/bin/activate
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+          ./scripts/upgrade_pysqlite.sh
+          tox -e py27-django111 -- paver test_system -s lms
+          # ./scripts/all-tests.sh
+    - store_artifacts:
+        path: test-reports
+        destination: test-reports
+    environment:
+    - CIRCLE_COMPARE_URL: https://github.com/ucsd-ets/edx-platform/compare/98b218be9f50...ff78bb707430
+workflows:
+  version: 2
+  workflow:
+    jobs:
+    - build
