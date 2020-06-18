@@ -34,7 +34,7 @@ def order_history(user, **kwargs):
     order_history_list = []
     purchased_order_items = OrderItem.objects.filter(user=user, status='purchased').select_subclasses().order_by('-fulfilled_time')
     log.info('All Order Items.....................................................................')
-    log.info(OrderItem)
+    log.info(OrderItem.objects.all())
     log.info('.....................................................................................')
 
     log.info('purchased_order_items from Shopping cart API...........................................')
