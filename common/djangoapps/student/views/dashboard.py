@@ -775,7 +775,7 @@ def student_dashboard(request):
     # If there are *any* denied reverifications that have not been toggled off,
     # we'll display the banner
     denied_banner = any(item.display for item in reverifications["denied"])
-
+    
     # Populate the Order History for the side-bar.
     order_history_list = order_history(
         user,
@@ -785,7 +785,7 @@ def student_dashboard(request):
 
     log.info('order_history_list from Dashboard...........................................')
     log.info(order_history_list)
-    log.info('order_history_list from Dashboard...........................................')
+    log.info('............................................................................')
 
     # get list of courses having pre-requisites yet to be completed
     courses_having_prerequisites = frozenset(

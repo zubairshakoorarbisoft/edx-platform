@@ -22,13 +22,24 @@ def order_history(user, **kwargs):
     
     log.info('Kwargs from Shopping cart API...........................................')
     log.info(kwargs)
-    log.info('Kwargs from Shopping cart API...........................................')
+    log.info('........................................................................')
 
     course_org_filter = kwargs['course_org_filter'] if 'course_org_filter' in kwargs else None
     org_filter_out_set = kwargs['org_filter_out_set'] if 'org_filter_out_set' in kwargs else []
+    log.info('Course ORG Filters...................................................................')
+    log.info('course_org_filter : {}'.format(course_org_filter))
+    log.info('org_filter_out_set : {}'.format(org_filter_out_set))
+    log.info('.....................................................................................')
 
     order_history_list = []
     purchased_order_items = OrderItem.objects.filter(user=user, status='purchased').select_subclasses().order_by('-fulfilled_time')
+    log.info('All Order Items.....................................................................')
+    log.info(OrderItem)
+    log.info('.....................................................................................')
+
+    log.info('purchased_order_items from Shopping cart API...........................................')
+    log.info(purchased_order_items)
+    log.info('.....................................................................................')
     for order_item in purchased_order_items:
         # Avoid repeated entries for the same order id.
         if order_item.order.id not in [item['order_id'] for item in order_history_list]:
@@ -47,5 +58,5 @@ def order_history(user, **kwargs):
 
     log.info('order_history_list from Shopping cart API...........................................')
     log.info(order_history_list)
-    log.info('order_history_list from Shopping cart API...........................................')
+    log.info('.....................................................................................')
     return order_history_list
