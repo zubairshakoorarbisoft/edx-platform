@@ -1,10 +1,14 @@
 """
 API for for getting information about the user's shopping cart.
 """
+import logging
 from django.urls import reverse
 
 from shoppingcart.models import OrderItem
 from xmodule.modulestore.django import ModuleI18nService
+
+
+log = logging.getLogger(__name__)
 
 
 def order_history(user, **kwargs):
@@ -15,6 +19,11 @@ def order_history(user, **kwargs):
      course_org_filter: A list of the current Site's orgs.
      org_filter_out_set: A list of all other Sites' orgs.
     """
+    
+    log.info('Kwargs from Shopping cart API...........................................')
+    log.info(kwargs)
+    log.info('Kwargs from Shopping cart API...........................................')
+
     course_org_filter = kwargs['course_org_filter'] if 'course_org_filter' in kwargs else None
     org_filter_out_set = kwargs['org_filter_out_set'] if 'org_filter_out_set' in kwargs else []
 
@@ -35,4 +44,8 @@ def order_history(user, **kwargs):
                         'receipt_url': reverse('shoppingcart.views.show_receipt', kwargs={'ordernum': order_item.order.id}),
                         'order_date': ModuleI18nService().strftime(order_item.order.purchase_time, 'SHORT_DATE')
                     })
+
+    log.info('order_history_list from Shopping cart API...........................................')
+    log.info(order_history_list)
+    log.info('order_history_list from Shopping cart API...........................................')
     return order_history_list
