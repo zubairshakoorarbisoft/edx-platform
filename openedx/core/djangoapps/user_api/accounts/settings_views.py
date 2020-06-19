@@ -157,14 +157,26 @@ def get_user_orders(user):
     """
     user_orders = []
     commerce_configuration = CommerceConfiguration.current()
+    log.info('commerce_configuration from Student Views..........................................')
+    log.info(commerce_configuration)
+    log.info('.....................................................................................')
     user_query = {'username': user.username}
+    log.info('user_query from Student Views..........................................')
+    log.info(user_query)
+    log.info('.....................................................................................')
 
     use_cache = commerce_configuration.is_cache_enabled
     cache_key = commerce_configuration.CACHE_KEY + '.' + str(user.id) if use_cache else None
     api = ecommerce_api_client(user)
+    log.info('api from Student Views..........................................')
+    log.info(api)
+    log.info('.....................................................................................')
     commerce_user_orders = get_edx_api_data(
         commerce_configuration, 'orders', api=api, querystring=user_query, cache_key=cache_key
     )
+    log.info('commerce_user_orders from Student Views..........................................')
+    log.info(commerce_user_orders)
+    log.info('.....................................................................................')
 
     for order in commerce_user_orders:
         if order['status'].lower() == 'complete':
@@ -177,6 +189,10 @@ def get_user_orders(user):
                 'lines': order['lines'],
             }
             user_orders.append(order_data)
+
+    log.info('user_orders from Student Views..........................................')
+    log.info(user_orders)
+    log.info('.....................................................................................')
 
     return user_orders
 

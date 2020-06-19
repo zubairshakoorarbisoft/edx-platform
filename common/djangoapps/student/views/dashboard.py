@@ -783,10 +783,6 @@ def student_dashboard(request):
         org_filter_out_set=site_org_blacklist
     )
 
-    log.info('order_history_list from Dashboard...........................................')
-    log.info(order_history_list)
-    log.info('............................................................................')
-
     # get list of courses having pre-requisites yet to be completed
     courses_having_prerequisites = frozenset(
         enrollment.course_id for enrollment in course_enrollments
