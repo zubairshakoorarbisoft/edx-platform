@@ -47,6 +47,7 @@ from openedx.core.djangoapps.user_api.accounts import NAME_MIN_LENGTH
 from openedx.core.djangoapps.user_api.accounts.api import update_account_settings
 from openedx.core.djangoapps.user_api.errors import AccountValidationError, UserNotFound
 from openedx.core.lib.log_utils import audit_log
+from openedx.features.clearesult_features.magento.client import MagentoClient
 from shoppingcart.models import CertificateItem, Order
 from shoppingcart.processors import get_purchase_endpoint, get_signed_purchase_params
 from student.models import CourseEnrollment
@@ -402,6 +403,12 @@ class PayAndVerifyView(View):
 
         # Determine the photo verification status
         verification_good_until = self._verification_valid_until(request.user)
+
+        if  settings.FEATURES.get('ENABLE_MAGENTO_CHECKOUT', False):
+            magento_client = MagentoClient('student@example.com', '@edxedx123')
+            success = magento_client.add_product_to_cart(relevant_course_mode.sku)
+            if success:
+                return redirect(magento_client._REDIRECT_URL)
 
         # get available payment processors
         if relevant_course_mode.sku:
