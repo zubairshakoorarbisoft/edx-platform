@@ -934,6 +934,10 @@ MAINTENANCE_BANNER_TEXT = ENV_TOKENS.get('MAINTENANCE_BANNER_TEXT', None)
 ########################## limiting dashboard courses ######################
 DASHBOARD_COURSE_LIMIT = ENV_TOKENS.get('DASHBOARD_COURSE_LIMIT', None)
 
+########################## Magento Configurations  #######################
+MAGENTO_REDIRECT_URL = ENV_TOKENS.get('MAGENTO_REDIRECT_URL', MAGENTO_REDIRECT_URL)
+MAGENTO_BASE_API_URL = ENV_TOKENS.get('MAGENTO_BASE_API_URL', MAGENTO_BASE_API_URL)
+
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded

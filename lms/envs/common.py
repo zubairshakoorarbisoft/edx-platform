@@ -2565,6 +2565,9 @@ INSTALLED_APPS = [
     # Management of per-user schedules
     'openedx.core.djangoapps.schedules',
     'rest_framework_jwt',
+
+    #clearesult custom features
+    'openedx.features.clearesult_features',
 ]
 
 ######################### CSRF #########################################
@@ -3919,3 +3922,8 @@ GITHUB_REPO_ROOT = '/edx/var/edxapp/data'
 
 ##################### SUPPORT URL ############################
 SUPPORT_HOW_TO_UNENROLL_LINK = ''
+
+
+##################### Magento ############################
+MAGENTO_REDIRECT_URL = ''
+MAGENTO_BASE_API_URL = ''
