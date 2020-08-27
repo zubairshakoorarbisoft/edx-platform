@@ -1,14 +1,11 @@
 import logging
 
 from django.conf import settings
-from django.contrib.auth import logout
-from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect, Http404
 from django.utils.deprecation import MiddlewareMixin
 from six.moves.urllib.parse import urlencode
 
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
-from student.models import UserAttribute
 import third_party_auth
 from third_party_auth import pipeline
 
@@ -30,7 +27,6 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         '/'
     ]
 
-
     def process_request(self, request):
         """
         Django middleware hook for processing request
@@ -40,9 +36,9 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         is_allowed = is_allowed or any([request.path == path for path in self.CLEARESULT_ALLOWED_FULL_PATHS])
 
         user = request.user
-        LOGGER.info('=======================================')
+        # TODO:  Remove these logging messages after demo
+        LOGGER.info('=========================================================')
         LOGGER.info('path= {}, is_allowed= {}'.format(request.path, is_allowed))
-
 
         if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False) or is_allowed or user.is_authenticated:
             return
@@ -50,7 +46,6 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         # TODO:  allowed paths implementation
 
         return self._redirect_to_login(request)
-
 
     def _redirect_to_login(self, request):
         backend_name = 'azuread-oauth2'
@@ -76,7 +71,6 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
 
         LOGGER.error('Unable to redirect, Auth Provider is not configured properly')
         raise Http404
-
 
     def _get_request_schema(self, request):
         """
