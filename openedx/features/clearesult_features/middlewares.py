@@ -21,7 +21,8 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         '/auth/',
         '/asset',
         '/api/',
-        '/register'
+        '/register',
+        '/admin'
     ]
     CLEARESULT_ALLOWED_FULL_PATHS = [
         '/'
