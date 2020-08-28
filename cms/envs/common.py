@@ -1500,6 +1500,17 @@ INSTALLED_APPS = [
     'rest_framework_jwt',
 ]
 
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/auth/',
+    '/asset',
+    '/api/',
+    '/register',
+    '/admin',
+    '/heartbeat'
+]
+CLEARESULT_ALLOWED_FULL_PATHS = ['/']
 
 ################# EDX MARKETING SITE ##################################
 
