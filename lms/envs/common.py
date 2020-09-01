@@ -2789,6 +2789,18 @@ XDOMAIN_PROXY_CACHE_TIMEOUT = 60 * 15
 
 LOGIN_REDIRECT_WHITELIST = []
 
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/auth/',
+    '/asset',
+    '/api/',
+    '/register',
+    '/admin',
+    '/heartbeat'
+]
+CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
