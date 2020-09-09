@@ -28,6 +28,15 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         is_allowed = is_allowed or any([request.path == path for path in allowed_full_paths])
         user = request.user
 
+        reset_password_error = request.GET.get('error_description', '')
+        if (reset_password_error and
+            reset_password_error.startswith(getattr(settings,'AZUREAD_B2C_FORGET_PASSWORD_CODE', 'N/A'))):
+
+            reset_password_link = configuration_helpers.get_value('RESET_PASSWORD_LINK')
+            if reset_password_link:
+                LOGGER.info('Redirectiog to Azure AD B2C reset password link.')
+                return HttpResponseRedirect(reset_password_link)
+
         if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False) or is_allowed or user.is_authenticated:
             LOGGER.info('Leaving without redirection for {}'.format(request.path))
             return

@@ -2800,6 +2800,7 @@ CLEARESULT_ALLOWED_SUB_PATHS = [
     '/heartbeat'
 ]
 CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 
 ###################### Registration ##################################
 
