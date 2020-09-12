@@ -48,6 +48,7 @@ from openedx.core.djangoapps.user_api.accounts.api import update_account_setting
 from openedx.core.djangoapps.user_api.errors import AccountValidationError, UserNotFound
 from openedx.core.lib.log_utils import audit_log
 from openedx.features.clearesult_features.magento.client import MagentoClient
+from openedx.features.clearesult_features.magento.exceptions import MissingMagentoUserKey, InvalidMagentoResponseError
 from shoppingcart.models import CertificateItem, Order
 from shoppingcart.processors import get_purchase_endpoint, get_signed_purchase_params
 from student.models import CourseEnrollment
@@ -404,11 +405,19 @@ class PayAndVerifyView(View):
         # Determine the photo verification status
         verification_good_until = self._verification_valid_until(request.user)
 
-        if  settings.FEATURES.get('ENABLE_MAGENTO_CHECKOUT', False):
-            magento_client = MagentoClient('student@example.com', '@edxedx123')
-            success = magento_client.add_product_to_cart(relevant_course_mode.sku)
-            if success:
+        if  settings.FEATURES.get('ENABLE_MAGENTO_CHECKOUT', True):
+            try:
+                magento_client = MagentoClient(request.user.email)
+                magento_client.add_product_to_cart(relevant_course_mode.sku)
                 return redirect(magento_client._REDIRECT_URL)
+
+            except Exception:
+                context = {
+                    'payment_support_email': configuration_helpers.get_value(
+                        'payment_support_email', settings.PAYMENT_SUPPORT_EMAIL,
+                    )
+                }
+                return render_to_response("commerce/magento_cart_error.html", context)
 
         # get available payment processors
         if relevant_course_mode.sku:
