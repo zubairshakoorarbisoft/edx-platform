@@ -673,6 +673,9 @@ MIDDLEWARE = [
     # Instead of AuthenticationMiddleware, we use a cache-backed version
     'openedx.core.djangoapps.cache_toolbox.middleware.CacheBackedAuthenticationMiddleware',
 
+    # [CLEARESULT_CUSTOM]
+    'openedx.features.clearesult_features.middlewares.ClearesultAuthenticationMiddleware',
+
     'student.middleware.UserStandingMiddleware',
     'openedx.core.djangoapps.contentserver.middleware.StaticContentServer',
 
@@ -1497,6 +1500,18 @@ INSTALLED_APPS = [
     'rest_framework_jwt',
 ]
 
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/auth/',
+    '/asset',
+    '/api/',
+    '/register',
+    '/admin',
+    '/heartbeat'
+]
+CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 
 ################# EDX MARKETING SITE ##################################
 

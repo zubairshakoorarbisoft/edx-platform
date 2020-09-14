@@ -1516,6 +1516,9 @@ MIDDLEWARE = [
     #'django.contrib.auth.middleware.AuthenticationMiddleware',
     'openedx.core.djangoapps.cache_toolbox.middleware.CacheBackedAuthenticationMiddleware',
 
+    # [CLEARESULT_CUSTOM]
+    'openedx.features.clearesult_features.middlewares.ClearesultAuthenticationMiddleware',
+
     'student.middleware.UserStandingMiddleware',
     'openedx.core.djangoapps.contentserver.middleware.StaticContentServer',
 
@@ -2562,6 +2565,9 @@ INSTALLED_APPS = [
     # Management of per-user schedules
     'openedx.core.djangoapps.schedules',
     'rest_framework_jwt',
+
+    #clearesult custom features
+    'openedx.features.clearesult_features',
 ]
 
 ######################### CSRF #########################################
@@ -2782,6 +2788,19 @@ CORS_ORIGIN_ALLOW_ALL = False
 XDOMAIN_PROXY_CACHE_TIMEOUT = 60 * 15
 
 LOGIN_REDIRECT_WHITELIST = []
+
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/auth/',
+    '/asset',
+    '/api/',
+    '/register',
+    '/admin',
+    '/heartbeat'
+]
+CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 
 ###################### Registration ##################################
 
@@ -3916,3 +3935,8 @@ GITHUB_REPO_ROOT = '/edx/var/edxapp/data'
 
 ##################### SUPPORT URL ############################
 SUPPORT_HOW_TO_UNENROLL_LINK = ''
+
+
+##################### Magento ############################
+MAGENTO_REDIRECT_URL = ''
+MAGENTO_BASE_API_URL = ''

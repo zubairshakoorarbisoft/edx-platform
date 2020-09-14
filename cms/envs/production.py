@@ -531,6 +531,21 @@ RETIREMENT_SERVICE_WORKER_USERNAME = ENV_TOKENS.get(
 ############### Settings for edx-rbac  ###############
 SYSTEM_WIDE_ROLE_CLASSES = ENV_TOKENS.get('SYSTEM_WIDE_ROLE_CLASSES') or SYSTEM_WIDE_ROLE_CLASSES
 
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = ENV_TOKENS.get(
+    'CLEARESULT_ALLOWED_SUB_PATHS',
+    CLEARESULT_ALLOWED_SUB_PATHS
+)
+CLEARESULT_ALLOWED_FULL_PATHS = ENV_TOKENS.get(
+    'CLEARESULT_ALLOWED_FULL_PATHS',
+    CLEARESULT_ALLOWED_FULL_PATHS
+)
+AZUREAD_B2C_FORGET_PASSWORD_CODE = ENV_TOKENS.get(
+    'AZUREAD_B2C_FORGET_PASSWORD_CODE',
+    AZUREAD_B2C_FORGET_PASSWORD_CODE
+)
+
 ####################### Plugin Settings ##########################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
