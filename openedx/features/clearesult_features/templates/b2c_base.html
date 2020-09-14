@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/x-icon" href="{{ favicon }}">
+        <title>{{ platform_name }}</title>
+        <style type="text/css">
+            /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+            /* Document
+            ========================================================================== */
+            /**
+            * 1. Correct the line height in all browsers.
+            * 2. Prevent adjustments of font size after orientation changes in iOS.
+            */
+            html {
+            line-height: 1.15; /* 1 */
+            -webkit-text-size-adjust: 100%; /* 2 */
+            }
+            /* Sections
+            ========================================================================== */
+            /**
+            * Remove the margin in all browsers.
+            */
+            body {
+            margin: 0;
+            }
+            /**
+            * Render the `main` element consistently in IE.
+            */
+            main {
+            display: block;
+            }
+            /**
+            * Correct the font size and margin on `h1` elements within `section` and
+            * `article` contexts in Chrome, Firefox, and Safari.
+            */
+            h1 {
+            font-size: 2em;
+            margin: 0.67em 0;
+            }
+            /* Text-level semantics
+            ========================================================================== */
+            /**
+            * Remove the gray background on active links in IE 10.
+            */
+            a {
+            background-color: transparent;
+            color: #337db4;
+            }
+            /**
+            * Add the correct font weight in Chrome, Edge, and Safari.
+            */
+            b,
+            strong {
+            font-weight: bolder;
+            }
+            /* Embedded content
+            ========================================================================== */
+            /**
+            * Remove the border on images inside links in IE 10.
+            */
+            img {
+            border-style: none;
+            }
+            /* Forms
+            ========================================================================== */
+            /**
+            * 1. Change the font styles in all browsers.
+            * 2. Remove the margin in Firefox and Safari.
+            */
+            button,
+            input,
+            optgroup,
+            select,
+            textarea {
+            font-family: inherit; /* 1 */
+            font-size: 100%; /* 1 */
+            line-height: 1.15; /* 1 */
+            margin: 0; /* 2 */
+            }
+            /**
+            * Show the overflow in IE.
+            * 1. Show the overflow in Edge.
+            */
+            button,
+            input { /* 1 */
+            overflow: visible;
+            }
+            /**
+            * Remove the inheritance of text transform in Edge, Firefox, and IE.
+            * 1. Remove the inheritance of text transform in Firefox.
+            */
+            button,
+            select { /* 1 */
+            text-transform: none;
+            }
+            /**
+            * Correct the inability to style clickable types in iOS and Safari.
+            */
+            button,
+            [type="button"],
+            [type="reset"],
+            [type="submit"] {
+            -webkit-appearance: button;
+            }
+            /**
+            * Remove the inner border and padding in Firefox.
+            */
+            button::-moz-focus-inner,
+            [type="button"]::-moz-focus-inner,
+            [type="reset"]::-moz-focus-inner,
+            [type="submit"]::-moz-focus-inner {
+            border-style: none;
+            padding: 0;
+            }
+            /**
+            * Restore the focus styles unset by the previous rule.
+            */
+            button:-moz-focusring,
+            [type="button"]:-moz-focusring,
+            [type="reset"]:-moz-focusring,
+            [type="submit"]:-moz-focusring {
+            outline: 1px dotted ButtonText;
+            }
+            /**
+            * Remove the default vertical scrollbar in IE 10+.
+            */
+            textarea {
+            overflow: auto;
+            }
+            /**
+            * 1. Add the correct box sizing in IE 10.
+            * 2. Remove the padding in IE 10.
+            */
+            [type="checkbox"],
+            [type="radio"] {
+            box-sizing: border-box; /* 1 */
+            padding: 0; /* 2 */
+            }
+            /**
+            * Add the correct display in IE 10.
+            */
+            [hidden] {
+            display: none;
+            }
+            html {
+            box-sizing: border-box;
+            }
+            *,
+            *:after,
+            *:before {
+            box-sizing: inherit;
+            }
+            html,
+            body {
+            background: #fff;
+            color: #4d4d4d;
+            }
+            body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            }
+            .wrapper {
+            padding: 50px 0;
+            }
+            .logo {
+            max-width: 250px;
+            margin: 0 auto 40px;
+            display: block;
+            }
+            .cr-forms {
+            background: #f1f1f1;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .25);
+            }
+            .cr-forms label {
+            display: inline-block;
+            vertical-align: top;
+            }
+            .cr-forms ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            }
+            .cr-forms .intro p,
+            .cr-forms .intro h2 {
+            font-size: 25px;
+            font-weight: 600;
+            margin: 0 0 30px;
+            }
+            .cr-forms .attrEntry,
+            .cr-forms .entry-item {
+            margin-bottom: 20px;
+            }
+            .cr-forms .attrEntry:after {
+            content: '';
+            display: block;
+            clear: both;
+            }
+            .cr-forms .attrEntry label,
+            .cr-forms .entry-item label {
+            margin-bottom: 5px;
+            }
+            .cr-forms .password-label:after {
+            content: '';
+            display: block;
+            clear: both;
+            }
+            .cr-forms .attrEntry .helpLink,
+            .cr-forms .password-label #forgotPassword {
+            float: right;
+            font-size: 12px;
+            font-weight: bold;
+            }
+            .cr-forms .attrEntry .helpLink {
+            margin-top: 5px;
+            }
+            .cr-forms .buttons {
+            text-align: center;
+            }
+            .cr-forms button {
+            height: 32px;
+            font-size: 14px;
+            line-height: 20px;
+            border: 0;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 3px;
+            }
+            .cr-forms button[type="submit"],
+            .cr-forms button[type="button"] {
+            background: #f11817;
+            color: #fff;
+            }
+            .cr-forms button[type="submit"]:hover,
+            .cr-forms button[type="submit"]:focus,
+            .cr-forms button[type="button"]:hover,
+            .cr-forms button[type="button"]:focus {
+            background: #bd0909;
+            outline-color: #bd0909;
+            }
+            .cr-forms button[type="submit"]:disabled,
+            .cr-forms button[type="button"]:disabled {
+            background: #ccc;
+            color: #fff;
+            cursor: default;
+            }
+            .cr-forms button#cancel {
+            border: 1px solid;
+            }
+            .cr-forms button#cancel:hover {
+            border-color: #f11817;
+            }
+            .cr-forms button#next {
+            display: block;
+            width: 100%;
+            margin: 0 auto;
+            }
+            .cr-forms input[type="text"],
+            .cr-forms input[type="email"],
+            .cr-forms input[type="password"] {
+            display: block;
+            height: 32px;
+            width: 100%;
+            font-size: 14px;
+            line-height: 20px;
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            border-radius: 3px;
+            }
+            .cr-forms input[type="text"]:focus,
+            .cr-forms input[type="email"]:focus,
+            .cr-forms input[type="password"]:focus {
+            border-color: #BD0909;
+            outline-color: #BD0909;
+            }
+            .cr-forms .verificationInfoText {
+            color: #0f63a0;
+            }
+            .cr-forms .verificationSuccessText {
+            color: #298657;
+            }
+            .error {
+            font-weight: 300;
+            color: #bd0909;
+            margin-bottom: 10px;
+            }
+            .cr-forms .verificationInfoText,
+            .cr-forms .verificationSuccessText {
+            font-size: 15px;
+            font-weight: 300;
+            margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        {% include "b2c_header.html" %}
+        {% block main %}
+        {% endblock %}
+        {% include "b2c_footer.html" %}
+    </body>
+</html>
