@@ -29,6 +29,7 @@ def _get_context_data(base_url, context):
     context['favicon'] = '{}{}'.format(base_url, configuration_helpers.get_value('FAVICON'))
     context['logo'] = '{}{}'.format(base_url, configuration_helpers.get_value('LOGO'))
     context['platform_name'] = configuration_helpers.get_value('PLATFORM_NAME')
+    context['style_sheet_path'] = '{}{}'.format(base_url, configuration_helpers.get_value('STYLE_SHEET_PATH'))
     trade_ally_urls = configuration_helpers.get_value('TRADE_ALLY_URLS', {})
     context['ta_home'] = trade_ally_urls.get('HOME', '')
     context['ta_contact_us'] = trade_ally_urls.get('CONTACT_US', '')
