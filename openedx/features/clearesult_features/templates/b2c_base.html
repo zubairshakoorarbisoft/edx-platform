@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/x-icon" href="{{ favicon }}">
+        <title>{{ platform_name }}</title>
+        <link rel="stylesheet" href="{{ style_sheet_path }}">
+    </head>
+    <body>
+        <div class="wrapper">
+            {% include "b2c_header.html" %}
+            <div class="main-banner">
+                <img src="{{ banner_image }}" alt="">
+            </div>
+            <div class="main">
+                <div class="container">
+                    {% block main %}
+                    {% endblock %}
+                </div>
+            </div>
+            {% include "b2c_footer.html" %}
+        </div>
+    </body>
+</html>
