@@ -1,40 +1,42 @@
 <header class="header">
     <strong class="logo">
-        <a href="#"><img src="{{ logo }}" alt=""></a>
+        <img src="{{ logo }}" alt="{{ platform_name }}">
     </strong>
     <div class="nav-holder">
         <ul class="header-btns">
-            <li><a href="#" class="btn btn-primary">Become a Trade Ally</a></li>
-            <li><a href="#" class="btn btn-primary-outline">Sign in to Portal</a></li>
+            <li><a href="{{ ta_become_ally }}" class="btn btn-primary">Become a Trade Ally</a></li>
+            {% if not '/login' in request.path %}
+                <li><a href="{{ ta_login }}" class="btn btn-primary-outline">Sign in to Portal</a></li>
+            {% endif %}
         </ul>
         <nav class="nav">
             <ul class="main-menu">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Program Resources</a>
+                <li><a href="{{ ta_home }}">Home</a></li>
+                <li><a href="{{ ta_programe_resources }}">Program Resources</a>
                     <div class="dropdown">
                         <div class="container">
                             <ul>
                                 <li>
                                     <strong class="title">
-                                        <a href="#">Program Announcements</a>
+                                        <a href="{{ ta_program_announcements }}">Program Announcements</a>
                                     </strong>
                                     <p>View Announcement, Program statuses and general announcements.</p>
                                 </li>
                                 <li>
                                     <strong class="title">
-                                        <a href="#">News</a>
+                                        <a href="{{ ta_news }}">News</a>
                                     </strong>
                                     <p>View Latest news, webinars, trade shows, lunch-and-learns and more</p>
                                 </li>
                                 <li>
                                     <strong class="title">
-                                        <a href="#">Events</a>
+                                        <a href="{{ ta_events }}">Events</a>
                                     </strong>
                                     <p>Loren ipsum content</p>
                                 </li>
                                 <li>
                                     <strong class="title">
-                                        <a href="#">Resource</a>
+                                        <a href="{{ ta_resource }}">Resource</a>
                                     </strong>
                                     <p>View Trade Ally Resources</p>
                                 </li>
@@ -42,9 +44,9 @@
                         </div>
                     </div>
                 </li>
-                <li><a href="#">Training</a></li>
-                <li><a href="#">FAQs</a></li>
-                <li class="active"><a href="#">Contact Us</a></li>
+                <li><a href="{{ ta_training }}">Training</a></li>
+                <li><a href="{{ ta_faqs }}">FAQs</a></li>
+                <li><a href="{{ ta_contact_us }}">Contact Us</a></li>
             </ul>
         </nav>
     </div>

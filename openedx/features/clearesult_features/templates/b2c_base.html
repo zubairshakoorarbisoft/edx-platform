@@ -5,13 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" type="image/x-icon" href="{{ favicon }}">
         <title>{{ platform_name }}</title>
-        <link rel="stylesheet" href="http://localhost:18000/static/georgia_power/css/style-b2c.css">
+        <link rel="stylesheet" href="{{ style_sheet_path }}">
     </head>
     <body>
         <div class="wrapper">
             {% include "b2c_header.html" %}
             <div class="main-banner">
-                <img src="https://c90079daas001drupal.azurewebsites.net/sites/default/files/styles/trade_ally_banner/public/2020-07/gp_contact.png" alt="">
+                <img src="{{ banner_image }}" alt="">
             </div>
             <div class="main">
                 <div class="container">
