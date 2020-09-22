@@ -14,7 +14,7 @@
 -e .  # via -r requirements/edx/local.in
 -e git+https://github.com/dementrock/pystache_custom.git@776973740bdaad83a3b029f96e415a7d1e8bec2f#egg=pystache_custom-dev  # via -r requirements/edx/github.in
 -e git+https://github.com/edx/RateXBlock.git@2.0#egg=rate-xblock  # via -r requirements/edx/github.in
--e git+https://github.com/raccoongang/edx_xblock_scorm.git@v1.0.3#egg=edx_xblock_scorm==v1.0.3
+-e git+https://github.com/edly-io/edx_xblock_scorm.git@master
 -e common/lib/safe_lxml  # via -r requirements/edx/local.in
 -e common/lib/sandbox-packages  # via -r requirements/edx/local.in
 -e git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/edx/github.in
