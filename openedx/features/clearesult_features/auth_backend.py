@@ -35,6 +35,6 @@ class ClearesultAzureADOAuth2(AzureADB2COAuth2):
 
         if not domain:
             LOGGER.exception("Domain not found in request attributes")
-            raise AuthException("Colaraz", "Error while authentication")
+            raise AuthException("Clearesult", "Error while authentication")
 
         return "{}://{}/auth/complete/{}".format(schema, domain, self.name)
