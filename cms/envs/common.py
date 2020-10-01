@@ -1498,6 +1498,9 @@ INSTALLED_APPS = [
     # Management of per-user schedules
     'openedx.core.djangoapps.schedules',
     'rest_framework_jwt',
+
+     #clearesult custom features
+    'openedx.features.clearesult_features'
 ]
 
 ################### CLEARESULT SETTINGS ###############################
@@ -2273,3 +2276,5 @@ DISABLE_DEPRECATED_SIGNIN_URL = False
 # .. toggle_tickets: ARCH-1253
 # .. toggle_status: supported
 DISABLE_DEPRECATED_SIGNUP_URL = False
+
+FEATURES['ENABLE_DEFAULT_COURSE_MODE_CREATION'] = True
