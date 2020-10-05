@@ -3940,6 +3940,9 @@ SUPPORT_HOW_TO_UNENROLL_LINK = ''
 ##################### Magento ############################
 MAGENTO_REDIRECT_URL = ''
 MAGENTO_BASE_API_URL = ''
+MAGENTO_LMS_INTEGRATION_TOKEN = ''
+
+##################### Clearesult ############################
 
 # To disable account verification for clearesult user
 FEATURES['ENABLE_AUTOMATIC_ACCOUNT_VERIFICATION'] = True

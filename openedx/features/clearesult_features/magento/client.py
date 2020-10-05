@@ -3,6 +3,7 @@ import json
 import logging
 import requests
 from django.conf import settings
+from openedx.features.clearesult_features.magento.exceptions import MissingMagentoUserKey, InvalidMagentoResponseError
 
 logger = logging.getLogger(__name__)
 
@@ -15,19 +16,18 @@ class MagentoClient(object):
     _GET_METHOD = 'GET'
     _CONTENT_TYPE = 'application/json'
 
-    def __init__(self, username, password, access_token=None):
+    def __init__(self, email):
         """
         Constructs a new instance of the Magento client.
         """
         self._BASE_API_END_POINT = settings.MAGENTO_BASE_API_URL
         self._REDIRECT_URL = settings.MAGENTO_REDIRECT_URL
+        self._MAGENTO_LMS_INTEGRATION_TOKEN = settings.MAGENTO_LMS_INTEGRATION_TOKEN
+        self._MAGENTO_USER_KEY = None
 
-        self._AUTHORIZATION_KEY = None
-        if not access_token and (username and password):
-            self.generate_customer_token(username, password)
-            if self._AUTHORIZATION_KEY:
-                return
-        raise Exception("test")
+        self.generate_costomer_token(email)
+        if not self._MAGENTO_USER_KEY:
+            raise MissingMagentoUserKey("Magento Client Error: Unable to get User Key from Magento.")
 
     def get_url(self, path):
         """
@@ -38,15 +38,14 @@ class MagentoClient(object):
             url += path
         return url
 
-    def get_headers(self):
+    def get_headers(self, token=None):
         """
         Returns Request Header required to send Paystack API.
         """
         headers = { 'Content-Type': self._CONTENT_TYPE}
-        if self._AUTHORIZATION_KEY:
-            headers.update({'Authorization': 'Bearer ' + self._AUTHORIZATION_KEY})
+        if token:
+            headers.update({'Authorization': 'Bearer ' + token})
         return headers
-
 
     def parse_response(self, response):
         """
@@ -66,10 +65,12 @@ class MagentoClient(object):
             logger.error("Magento API return Error response: %s.", json.dumps(data))
             return False, data
 
-    def handle_request(self, path, method, data=None):
+    def handle_request(self, path, method, headers=None, data=None):
         """
         Handles all Magento API calls.
         """
+        if not headers:
+            headers = self.get_headers()
 
         method_map = {
             self._GET_METHOD: requests.get,
@@ -84,20 +85,11 @@ class MagentoClient(object):
             logger.error("Request method not recognised or implemented.")
 
         logger.info("Sending Magento %s request on URL: %s.", method, url)
-        response = request(url=url, headers=self.get_headers(), data=payload)
+        response = request(url=url, headers=headers, data=payload)
         return self.parse_response(response)
 
-    def generate_customer_token(self, username, password):
-        data = {
-            'username': username,
-            'password': password
-        }
-        success, data = self.handle_request('integration/customer/token', self._POST_METHOD, data)
-        if success:
-            self._AUTHORIZATION_KEY = data
-
     def get_customer_cart(self):
-        success, cart_id = self.handle_request('carts/mine', self._POST_METHOD)
+        success, cart_id = self.handle_request('carts/mine', self._POST_METHOD, self.get_headers(self._MAGENTO_USER_KEY))
         if success:
             return cart_id;
 
@@ -111,5 +103,15 @@ class MagentoClient(object):
                     'quote_id': cart_id
                 }
             }
-            success, data = self.handle_request('carts/mine/items', self._POST_METHOD, data)
-            return success
+            success, data = self.handle_request('carts/mine/items', self._POST_METHOD, self.get_headers(self._MAGENTO_USER_KEY), data)
+            if success:
+                return
+        raise InvalidMagentoResponseError("Unable to add product in Magento user cart.")
+
+    def generate_costomer_token(self, user_email):
+        data = {
+            'email': user_email
+        }
+        success, data = self.handle_request('costomer/token/getUserToken', self._POST_METHOD, self.get_headers(self._MAGENTO_LMS_INTEGRATION_TOKEN), data)
+        if success:
+            self._MAGENTO_USER_KEY = data
