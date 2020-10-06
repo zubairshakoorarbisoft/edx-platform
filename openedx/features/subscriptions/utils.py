@@ -14,15 +14,9 @@ def track_subscription_enrollment(subscription_id, user, course_id):
     """
     Add user enrollment to valid subscription.
     """
-    logger.warning('subscription id is %s', subscription_id)
-    logger.warning('user id is %s', user)
-    logger.warning('course_id id is %s', str(course_id))
-
     if subscription_id:
         enrollment = api.get_enrollment(user.username, course_id)
-        valid_user_subscription = UserSubscription.get_valid_subscriptions(user.id).first()
-        logger.warning('enrollment id is %s', str(enrollment.__dict__))
-        logger.warning('user subscription is %s', str(valid_user_subscription.__dict__))
+        valid_user_subscription = UserSubscription.get_valid_subscriptions(user.username).first()
         if valid_user_subscription and valid_user_subscription.subscription_id == subscription_id:
             valid_user_subscription.course_enrollments.add(enrollment)
 

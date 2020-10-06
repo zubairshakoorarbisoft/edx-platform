@@ -795,7 +795,6 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
                     enrollment_attributes=enrollment_attributes
                 )
 
-            log.warning('entering track subscription')
             track_subscription_enrollment(subscription_id, user, unicode(course_id))
             cohort_name = request.data.get('cohort')
             if cohort_name is not None:
