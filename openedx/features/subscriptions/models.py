@@ -84,7 +84,7 @@ class UserSubscription(TimeStampedModel):
             return self.expiration_date >= date.today() and course_enrollments_count < self.max_allowed_courses
 
     @classmethod
-    def get_valid_subscriptions(self, user_id=None):
+    def get_valid_subscriptions(self, user=None):
         """
         Get valid subscriptions of a user.
 
@@ -92,8 +92,8 @@ class UserSubscription(TimeStampedModel):
             queryset: Returns latest valid user subscription.
         """
         filter_params = dict()
-        if user_id:
-            filter_params['user'] = user_id
+        if user:
+            filter_params['user__username'] = user
 
         user_subscriptions = self.objects.filter(**filter_params)
         valid_user_subscriptions = filter(lambda subscription: subscription.is_valid, user_subscriptions)

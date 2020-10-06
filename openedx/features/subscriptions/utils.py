@@ -6,13 +6,12 @@ from enrollment import api
 from enrollment.data import get_course_enrollment
 
 
-def track_subscription_enrollment(subscription_id, username, course_id):
+def track_subscription_enrollment(subscription_id, user, course_id):
     """
     Add user enrollment to valid subscription.
     """
     if subscription_id:
-        enrollment = api.get_enrollment(username, course_id)
-        user = User.objects.get(username=username)
+        enrollment = api.get_enrollment(user.username, course_id)
         valid_user_subscription = UserSubscription.get_valid_subscriptions(user.id).first()
         if valid_user_subscription and valid_user_subscription.subscription_id == subscription_id:
             valid_user_subscription.course_enrollments.add(enrollment)
