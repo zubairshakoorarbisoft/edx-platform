@@ -1715,6 +1715,14 @@ ADVANCED_PROBLEM_TYPES = [
     {
         'component': 'staffgradedxblock',
         'boilerplate_name': None
+    },
+    {
+        'component': 'survey',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'scorm',
+        'boilerplate_name': None
     }
 ]
 
