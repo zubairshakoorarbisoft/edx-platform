@@ -1208,7 +1208,7 @@ def settings_handler(request, course_key_string):
                     course_credit = ClearesultCourseCredit(
                         course_id=course_key_string,
                         credit_type=provider,
-                        credit_value=int(credit.get('credits'))
+                        credit_value=float(credit.get('credits'))
                     )
                     course_credit.save()
 

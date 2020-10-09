@@ -23,7 +23,7 @@ class ClearesultCourseCredit(models.Model):
         )
 
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
-    credit_value = models.IntegerField(default=0)
+    credit_value = models.DecimalField(decimal_places=1, max_digits=2)
     course_id = CourseKeyField(max_length=255, db_index=True)
 
 
@@ -37,3 +37,4 @@ class UserCreditsProfile(models.Model):
     user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE)
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
     credit_id = models.CharField(max_length=255)
+    earned_course_credits = models.ManyToManyField('ClearesultCourseCredit', related_name='earned_credits', blank=True)

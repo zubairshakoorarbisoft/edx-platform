@@ -3,6 +3,7 @@ Admin registration for Clearesult.
 """
 
 from django.contrib import admin
+from openedx.features.clearesult_features.forms import UserCreditsProfileAdminForm
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCredit,
     ClearesultCreditProvider,
@@ -28,6 +29,7 @@ class UserCreditsProfileAdmin(admin.ModelAdmin):
     """
     Admin config for user credit ids.
     """
+    form = UserCreditsProfileAdminForm
     list_display = ('user', 'credit_type', 'credit_id')
 
 
