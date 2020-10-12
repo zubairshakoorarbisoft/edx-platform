@@ -317,23 +317,26 @@ CMS.URL.UPLOAD_ASSET = '${upload_asset_url | n, js_escaped_string}'
           </ol>
           % endif
         </div>
+        <hr class="divide" />
 
-        <div class="group-settings" id="course-credits">
+        <div class="group-settings course-credits" id="course-credits">
             <header>
-                <h2 class="title-2">${_('Cours Credits')}</h2>
+                <h2 class="title-2">${_('Course Credits')}</h2>
                 <span class="tip">${_('Asssociate credits with the course.')}</span>
             </header>
+            <span class="tip tip-stacked">${_("Number more than two decimal places will be rounded off like 2.56 will be changed to 2.6")}</span>
+            <div class="course-credits-header">
+                <button class="button new-button add-course-credits-field">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                    <span>${_("Add Credits")}</span>
+                </button>
+            </div>
             <table class="table table-striped" id="credits-div">
                 <thead >
                     <tr>
-                        <th class="credit-label">${_("Credit Type")}</th>
-                        <th class="credit-label">${_("Credits")}</th>
-                        <th>
-                            <button class="add-course-credits-field">
-                                <span>${_("Add Credits")}</span>
-                                <i class="fa fa-plus" aria-hidden="true"></i>
-                            </button>
-                        </th>
+                        <th class="credit-label type">${_("Credit Type")}</th>
+                        <th class="credit-label number">${_("Credits")}</th>
+                        <th class="credit-label action"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -355,12 +358,10 @@ CMS.URL.UPLOAD_ASSET = '${upload_asset_url | n, js_escaped_string}'
                   </tr>
                 % endfor
                 </tbody>
-                <span class="tip tip-stacked">${_("Number more than two decimal places will be rounded off like 2.56 will be changed to 2.6")}</span>
             </table>
             <span id="clearesult-credit-error-no-provider" class="message-error" style='display:None'>No more credit providers have been registered.</span>
             <span id="clearesult-credit-error-range-value" class="message-error" style='display:None'>Credit value should be in range (0.1 to 20.0).</span>
         </div>
-
         % if about_page_editable:
         <div class="group-settings course_details">
           <header>
