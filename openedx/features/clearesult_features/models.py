@@ -1,3 +1,7 @@
+"""
+Clearesult Models.
+"""
+
 from django.db import models
 from opaque_keys.edx.django.models import CourseKeyField
 from django.core.exceptions import ValidationError
@@ -6,7 +10,7 @@ from django.contrib.auth.models import User
 
 class ClearesultCreditProvider(models.Model):
     class Meta:
-        app_label = "clearesult_features"
+        app_label = 'clearesult_features'
 
     name = models.CharField(max_length=255, unique=True)
     short_code = models.CharField(max_length=25, unique=True)
@@ -17,9 +21,9 @@ class ClearesultCreditProvider(models.Model):
 
 class ClearesultCourseCredit(models.Model):
     class Meta:
-        app_label = "clearesult_features"
+        app_label = 'clearesult_features'
         unique_together = (
-            ("credit_type", "course_id")
+            ('credit_type', 'course_id')
         )
 
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
@@ -29,9 +33,9 @@ class ClearesultCourseCredit(models.Model):
 
 class UserCreditsProfile(models.Model):
     class Meta:
-        app_label = "clearesult_features"
+        app_label = 'clearesult_features'
         unique_together = (
-            ("user", "credit_type")
+            ('user', 'credit_type')
         )
 
     user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE)

@@ -1,3 +1,7 @@
+"""
+Helper functions for Clearesult credits.
+"""
+
 from openedx.features.clearesult_features.models import ClearesultCreditProvider, ClearesultCourseCredit
 
 

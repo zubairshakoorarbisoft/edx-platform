@@ -191,13 +191,13 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
 
                check_clearesult_credits_value_range_error: function()
                {
-                    var is_value_range_error = false
+                    var is_value_range_error = false;
                     document.querySelectorAll('.group-settings .credit-value').forEach(function(credit){
                         if (credit.value == null || credit.value == "" || credit.value<0.1 || credit.value>20.0)
                         {
-                            is_value_range_error = true
+                            is_value_range_error = true;
                         }
-                    })
+                    });
 
                     if (is_value_range_error)
                     {
@@ -208,20 +208,20 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                         $("#clearesult-credit-error-range-value").hide();
                     }
 
-                    return is_value_range_error
+                    return is_value_range_error;
                },
 
                check_clearesult_credits_no_provider_error: function()
                {
-                    available_course_credits = this.model.get('available_clearesult_providers')
+                    var available_course_credits = this.model.get('available_clearesult_providers');
                     if (available_course_credits.length)
                     {
                         $("#clearesult-credit-error-no-provider").hide();
-                        return false
+                        return false;
                     }
                     else {
                         $("#clearesult-credit-error-no-provider").show();
-                        return true
+                        return true;
                     }
                },
 
@@ -229,82 +229,83 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                {
                    if (this.check_clearesult_credits_value_range_error())
                    {
-                       this.handleValidationError()
-                       return true
+                       this.handleValidationError();
+                       return true;
                    }
-                   this.clearValidationErrors()
-                   return false
+                   this.clearValidationErrors();
+                   return false;
 
                },
 
                get_credit_dropdown_options: function() {
-                    var select_list = ''
+                    var select_list = '';
+                    var available_course_credits = this.model.get('available_clearesult_providers');
                     available_course_credits.forEach((course_credit) => {
-                        select_list += `<option value='${course_credit.short_code}'>${course_credit.name}</option>`
+                        select_list += "<option value=\"" + course_credit.short_code + "\">" + course_credit.name + "</option>";
                     });
-                    return select_list
+                    return select_list;
                 },
 
                addCourseCreditsFields: function(event)
                {
                     this.showNotificationBar();
-                    event.preventDefault()
+                    event.preventDefault();
 
-                    available_course_credits = this.model.get('available_clearesult_providers')
+                    var available_course_credits = this.model.get('available_clearesult_providers');
+                    available_course_credits = this.model.get('available_clearesult_providers');
                     if (!this.check_clearesult_credits_no_provider_error() && !this.check_clearesult_credits_error() && available_course_credits.length)
                     {
                         document.querySelectorAll('.group-settings .credit-type').forEach(function(a){
                             a.disabled=true;
-                        })
+                        });
 
-                        var new_credits_row = `
-                        <tr class="course-credit-row">
-                                <td class="credit-type-td">
-                                    <select class="credit-type" name="credit-type">
-                            `
+                        var new_credits_row = "<tr class=\"course-credit-row\"> \
+                                <td class=\"credit-type-td\"> \
+                                    <select class=\"credit-type\" name=\"credit-type\"> \
+                            "
                             +
                             this.get_credit_dropdown_options()
                             +
-                            `        </select>
-                                </td>
-                                <td class="credit-td">
-                                    <input type="number" class="credit-value" name="credit-value" min="0.1" max="20" value="0.5" step="0.1">
-                                </td>
-                                <td>
-                                    <button class="remove-course-credits-field">
-                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `
-                        $tableBody = this.$el.find('tbody');
-                        $tableBody.append(new_credits_row)
+                            "        </select> \
+                                </td> \
+                                <td class=\"credit-td\"> \
+                                    <input type=\"number\" class=\"credit-value\" name=\"credit-value\" min=\"0.1\" max=\"20\" value=\"0.5\" step=\"0.1\"> \
+                                </td> \
+                                <td> \
+                                    <button class=\"remove-course-credits-field\"> \
+                                        <i class=\"fa fa-trash\" aria-hidden=\"true\"></i> \
+                                    </button> \
+                                </td> \
+                            </tr> \
+                        ";
+                        var $tableBody = this.$el.find('tbody');
+                        $tableBody.append(new_credits_row);
                     }
                     if (!this.check_clearesult_credits_error())
                     {
-                        this.updateModel(event)
+                        this.updateModel(event);
                     }
                },
 
                removeCourseCreditsField: function(event)
                {
-                    event.preventDefault()
-                    table_row = event.target.closest ('tr')
+                    event.preventDefault();
+                    var table_row = event.target.closest ('tr');
                     var available_course_credits = this.model.get('available_clearesult_providers');
                     available_course_credits.push(
                         {
                             'name': table_row.getElementsByClassName('credit-type')[0].selectedOptions[0].text,
                             'short_code': table_row.getElementsByClassName('credit-type')[0].value
                         }
-                    )
+                    );
                     this.model.set('available_clearesult_providers', available_course_credits);
                     table_row.remove();
 
-                    this.check_clearesult_credits_no_provider_error()
+                    this.check_clearesult_credits_no_provider_error();
 
                     if (!this.check_clearesult_credits_error())
                     {
-                        this.updateModel(event)
+                        this.updateModel(event);
                     }
                },
 
@@ -349,20 +350,20 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
 
                updateAvailableCreditProvidersList: function()
                {
-                    var available_credits_providers = []
+                    var available_credits_providers = [];
                     var all_credit_providers = this.model.get('all_clearesult_providers');
                     var used_course_credits = this.model.get('course_credits');
 
-                    all_credit_providers.forEach((provider) => {
-                        is_found = false;
-                        used_course_credits.forEach((used_credit) => {
+                    all_credit_providers.forEach(function(provider) {
+                        var is_found = false;
+                        used_course_credits.forEach(function(used_credit) {
                             if (used_credit.credit_type_code == provider.short_code)
                             {
                                 is_found = true;
                             }
                         });
                         if (!is_found){
-                            available_credits_providers.push(provider)
+                            available_credits_providers.push(provider);
                         }
                     });
                     this.model.set('available_clearesult_providers', available_credits_providers);
@@ -372,15 +373,19 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                {
                     var credit_rows = $('.course-credit-row');
                     if (credit_rows.length) {
-                        var data = []
-                        $.each(credit_rows, (index, form) => {
+                        var data = [];
+                        $.each(credit_rows, function(index, form) {
                             data.push({
                                 'credit_type_name': form.getElementsByClassName('credit-type')[0].selectedOptions[0].text,
                                 'credit_type_code': form.getElementsByClassName('credit-type')[0].value,
                                 'credits':form.getElementsByClassName('credit-value')[0].value
-                            })
+                            });
                         });
                         this.model.set('course_credits', data);
+                    }
+                    else
+                    {
+                        this.model.set('course_credits', []);
                     }
                },
 
@@ -388,8 +393,8 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
 
                     if (!this.check_clearesult_credits_error())
                     {
-                        this.updateModelCourseCredits()
-                        this.updateAvailableCreditProvidersList()
+                        this.updateModelCourseCredits();
+                        this.updateAvailableCreditProvidersList();
                         this.showNotificationBar();
                     }
 

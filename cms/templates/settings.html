@@ -318,50 +318,6 @@ CMS.URL.UPLOAD_ASSET = '${upload_asset_url | n, js_escaped_string}'
           % endif
         </div>
         <hr class="divide" />
-
-        <div class="group-settings course-credits" id="course-credits">
-            <header>
-                <h2 class="title-2">${_('Course Credits')}</h2>
-                <span class="tip">${_('Asssociate credits with the course.')}</span>
-            </header>
-            <span class="tip tip-stacked">${_("Number more than two decimal places will be rounded off like 2.56 will be changed to 2.6")}</span>
-            <div class="course-credits-header">
-                <button class="button new-button add-course-credits-field">
-                    <i class="fa fa-plus" aria-hidden="true"></i>
-                    <span>${_("Add Credits")}</span>
-                </button>
-            </div>
-            <table class="table table-striped" id="credits-div">
-                <thead >
-                    <tr>
-                        <th class="credit-label type">${_("Credit Type")}</th>
-                        <th class="credit-label number">${_("Credits")}</th>
-                        <th class="credit-label action"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                % for credit in course_credits:
-                  <tr class="course-credit-row" >
-                        <td class="credit-type-td">
-                            <select class="credit-type" name="credit-type" disabled>
-                                <option value="${credit.get('credit_type_code')}" selected>${credit.get('credit_type_name')}</option>
-                            </select>
-                        </td>
-                        <td class="credit-td">
-                            <input type="number" value="${credit.get('credits')}" class="credit-value" name="credit-value" min="0.1" max="20" step="0.1">
-                        </td>
-                        <td>
-                            <button class="remove-course-credits-field">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </td>
-                  </tr>
-                % endfor
-                </tbody>
-            </table>
-            <span id="clearesult-credit-error-no-provider" class="message-error" style='display:None'>No more credit providers have been registered.</span>
-            <span id="clearesult-credit-error-range-value" class="message-error" style='display:None'>Credit value should be in range (0.1 to 20.0).</span>
-        </div>
         % if about_page_editable:
         <div class="group-settings course_details">
           <header>

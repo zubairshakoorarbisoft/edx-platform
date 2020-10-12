@@ -15,12 +15,12 @@ class ClearesultCreditProviderAdmin(admin.ModelAdmin):
     """
     Admin config clearesult credit providers.
     """
-    list_display = ['name', 'short_code']
+    list_display = ('name', 'short_code')
 
 
 class ClearesultCourseCreditsAdmin(admin.ModelAdmin):
     """
-    Admin config for clearesult course credits.
+    Admin config for clearesult credits offered by the courses.
     """
     list_display = ('course_id', 'credit_type', 'credit_value')
 
