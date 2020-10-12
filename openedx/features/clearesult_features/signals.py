@@ -11,6 +11,16 @@ from course_modes.models import CourseMode
 from lms.djangoapps.verify_student.models import ManualVerification
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import UserProfile
+from openedx.core.djangoapps.signals.signals import (
+    COURSE_GRADE_NOW_PASSED,
+    COURSE_GRADE_CHANGED
+)
+from openedx.features.clearesult_features.credits.utils import gennerate_user_course_credits
+from openedx.features.clearesult_features.models import (
+    ClearesultCourseCredit,
+    ClearesultCreditProvider,
+    UserCreditsProfile
+)
 
 logger = getLogger(__name__)
 
@@ -58,3 +68,11 @@ def generate_manual_verification_for_user(sender, instance, created, **kwargs):
         )
     except Exception:  # pylint: disable=broad-except
         logger.error('Error while generating ManualVerification for user: %s', instance.user.email, exc_info=True)
+
+
+@receiver(COURSE_GRADE_NOW_PASSED)
+def genrate_user_credits(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
+    """
+    Listen for a learner passing a course, update user credits.
+    """
+    gennerate_user_course_credits(course_id, user)

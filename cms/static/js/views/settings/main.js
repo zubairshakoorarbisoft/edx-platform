@@ -193,7 +193,7 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                {
                     var is_value_range_error = false;
                     document.querySelectorAll('.group-settings .credit-value').forEach(function(credit){
-                        if (credit.value == null || credit.value == "" || credit.value<0.1 || credit.value>20.0)
+                        if (credit.value == null || credit.value == "" || credit.value < 0.1 || credit.value > 10.0)
                         {
                             is_value_range_error = true;
                         }
@@ -269,7 +269,7 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                             "        </select> \
                                 </td> \
                                 <td class=\"credit-td\"> \
-                                    <input type=\"number\" class=\"credit-value\" name=\"credit-value\" min=\"0.1\" max=\"20\" value=\"0.5\" step=\"0.1\"> \
+                                    <input type=\"number\" class=\"credit-value\" name=\"credit-value\" min=\"0.1\" max=\"10.0\" value=\"0.5\" step=\"0.1\"> \
                                 </td> \
                                 <td> \
                                     <button class=\"remove-course-credits-field\"> \

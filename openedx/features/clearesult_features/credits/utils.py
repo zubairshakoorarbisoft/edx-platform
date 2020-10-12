@@ -2,7 +2,15 @@
 Helper functions for Clearesult credits.
 """
 
-from openedx.features.clearesult_features.models import ClearesultCreditProvider, ClearesultCourseCredit
+from logging import getLogger
+
+from openedx.features.clearesult_features.models import (
+    ClearesultCourseCredit,
+    ClearesultCreditProvider,
+    UserCreditsProfile
+)
+
+logger = getLogger(__name__)
 
 
 def get_available_credits_provider_list(course_key):
@@ -36,3 +44,26 @@ def get_all_credits_provider_list():
             'short_code': provider.short_code,
         })
     return all_providers_list
+
+
+def gennerate_user_course_credits(course_id, user):
+    course_credits = ClearesultCourseCredit.objects.filter(course_id=course_id)
+    user_credits = UserCreditsProfile.objects.filter(user=user)
+    logger.info('=> Generating Course credits for user: {} and course: {}'.format(user.email, course_id._to_string()))
+
+    for user_credit in user_credits:
+        for course_credit in course_credits:
+            if user_credit.credit_type == course_credit.credit_type and not course_credit in user_credit.earned_course_credits.all():
+                user_credit.earned_course_credits.add(course_credit)
+                logger.info(
+                    '{} credits from credit_provider: {} have been added for user: {}.'.format(course_credit.credit_value, course_credit.credit_type.name, user.email))
+
+
+def get_user_course_earned_credits(course_id, user):
+    result = ClearesultCourseCredit.objects.none()
+    user_credits = UserCreditsProfile.objects.filter(user=user)
+
+    for user_credit in user_credits:
+        result = result.union(user_credit.earned_course_credits.filter(course_id=course_id))
+
+    return [{'name': r.credit_type.name, 'code': r.credit_type.short_code, 'credits': r.credit_value} for r in result]

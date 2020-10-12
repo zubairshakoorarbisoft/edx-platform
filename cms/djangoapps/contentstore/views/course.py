@@ -1201,16 +1201,39 @@ def settings_handler(request, course_key_string):
                     elif not entrance_exam_enabled and course_entrance_exam_present:
                         delete_entrance_exam(request, course_key)
 
-                ClearesultCourseCredit.objects.filter(course_id=course_key_string).delete()
                 new_credits_values = request.json.get('course_credits') or []
-                for credit in new_credits_values:
-                    provider = ClearesultCreditProvider.objects.get(short_code=credit.get('credit_type_code'))
-                    course_credit = ClearesultCourseCredit(
-                        course_id=course_key_string,
-                        credit_type=provider,
-                        credit_value=float(credit.get('credits'))
-                    )
-                    course_credit.save()
+                old_credits_values = ClearesultCourseCredit.objects.filter(course_id=course_key_string)
+
+                # if provider exists => old credit values and new credit values both contain specific provider then
+                # update old provider credits with the new values.
+                if len(old_credits_values) > 0 and len(new_credits_values) > 0:
+                    for old_credit in old_credits_values:
+                        for new_credit in new_credits_values:
+                            if (
+                                new_credit.get('credit_type_code') == old_credit.credit_type.short_code and
+                                float(new_credit.get('credits')) != old_credit.credit_value
+                            ):
+                                old_credit.credit_value = float(new_credit.get('credits'))
+                                old_credit.save()
+                                old_credits_values = old_credits_values.exclude(pk=old_credit.pk)
+                                new_credits_values.remove(new_credit)
+                                break
+
+                # Delete existing old credits values.
+                if len(old_credits_values) > 0:
+                    old_credits_short_code = [credit.credit_type.short_code for credit in old_credits_values]
+                    ClearesultCourseCredit.objects.filter(course_id=course_key_string, credit_type__short_code__in=old_credits_short_code).delete()
+
+                # Add new credits values.
+                if len(new_credits_values) > 0:
+                    for new_credit in new_credits_values:
+                        provider = ClearesultCreditProvider.objects.get(short_code=new_credit.get('credit_type_code'))
+                        course_credit = ClearesultCourseCredit(
+                            course_id=course_key_string,
+                            credit_type=provider,
+                            credit_value=float(new_credit.get('credits'))
+                        )
+                        course_credit.save()
 
                 # Perform the normal update workflow for the CourseDetails model
                 return JsonResponse(
