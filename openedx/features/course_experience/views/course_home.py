@@ -44,6 +44,7 @@ from .. import (
     USE_BOOTSTRAP_FLAG
 )
 from ..utils import get_course_outline_block_tree, get_resume_block
+from .course_credits import CourseCreditsFragmentView
 from .course_dates import CourseDatesFragmentView
 from .course_home_messages import CourseHomeMessageFragmentView
 from .course_outline import CourseOutlineFragmentView
@@ -127,6 +128,7 @@ class CourseHomeFragmentView(EdxFragmentView):
 
         # Render the course dates as a fragment
         dates_fragment = CourseDatesFragmentView().render_to_fragment(request, course_id=course_id, **kwargs)
+        credits_fragment = CourseCreditsFragmentView().render_to_fragment(request, course_id=course_id, **kwargs)
 
         # Render the full content to enrolled users, as well as to course and global staff.
         # Unenrolled users who are not course or global staff are given only a subset.
@@ -264,6 +266,7 @@ class CourseHomeFragmentView(EdxFragmentView):
             'upgrade_url': upgrade_url,
             'has_discount': has_discount,
             'show_search': show_search,
+            'credits_fragment': credits_fragment
         }
         html = render_to_string('course_experience/course-home-fragment.html', context)
         return Fragment(html)

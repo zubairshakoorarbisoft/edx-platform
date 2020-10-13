@@ -46,6 +46,7 @@ from openedx.core.djangoapps.certificates.api import certificates_viewable_for_c
 from openedx.core.djangoapps.lang_pref.api import get_closest_released_language
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.lib.courses import course_image_url
+from openedx.features.clearesult_features.credits.utils import get_user_course_earned_credits
 from student.models import LinkedInAddToProfileConfiguration
 from util import organizations_helpers as organization_api
 from util.date_utils import strftime_localized
@@ -580,6 +581,9 @@ def render_html_view(request, user_id, course_id):
 
         # Append/Override the existing view context values with certificate specific values
         _update_certificate_context(context, course, user_certificate, platform_name)
+
+        # Append user earned credits in this course
+        context.update({'earned_credits': get_user_course_earned_credits(course.id, user)})
 
         # Append badge info
         _update_badge_context(context, course, user)

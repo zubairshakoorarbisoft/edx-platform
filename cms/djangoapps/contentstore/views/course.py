@@ -68,6 +68,12 @@ from openedx.core.djangoapps.waffle_utils import WaffleSwitchNamespace
 from openedx.core.djangolib.js_utils import dump_js_escaped_json
 from openedx.core.lib.course_tabs import CourseTabPluginManager
 from openedx.core.lib.courses import course_image_url
+from openedx.features.clearesult_features.models import ClearesultCourseCredit, ClearesultCreditProvider
+from openedx.features.clearesult_features.credits.utils import (
+    get_all_credits_provider_list,
+    get_available_credits_provider_list,
+    get_course_credits_list
+)
 from openedx.features.content_type_gating.models import ContentTypeGatingConfig
 from openedx.features.content_type_gating.partitions import CONTENT_TYPE_GATING_SCHEME
 from openedx.features.course_experience.waffle import ENABLE_COURSE_ABOUT_SIDEBAR_HTML
@@ -1105,6 +1111,8 @@ def settings_handler(request, course_key_string):
                 'is_entrance_exams_enabled': is_entrance_exams_enabled(),
                 'enable_extended_course_details': enable_extended_course_details,
                 'upgrade_deadline': upgrade_deadline,
+                'available_clearesult_providers': get_available_credits_provider_list(course_key_string),
+                'course_credits': get_course_credits_list(course_key_string)
             }
             if is_prerequisite_courses_enabled():
                 courses, in_process_course_actions = get_courses_accessible_to_user(request)
@@ -1139,11 +1147,14 @@ def settings_handler(request, course_key_string):
         elif 'application/json' in request.META.get('HTTP_ACCEPT', ''):
             if request.method == 'GET':
                 course_details = CourseDetails.fetch(course_key)
-                return JsonResponse(
-                    course_details,
-                    # encoder serializes dates, old locations, and instances
-                    encoder=CourseSettingsEncoder
-                )
+                data = course_details.__dict__
+
+                data.update({
+                    'available_clearesult_providers': get_available_credits_provider_list(course_key_string),
+                    'course_credits': get_course_credits_list(course_key_string),
+                    'all_clearesult_providers': get_all_credits_provider_list(),
+                })
+                return JsonResponse(data)
             # For every other possible method type submitted by the caller...
             else:
                 # if pre-requisite course feature is enabled set pre-requisite course
@@ -1189,6 +1200,40 @@ def settings_handler(request, course_key_string):
                     # and the course has an entrance exam attached...
                     elif not entrance_exam_enabled and course_entrance_exam_present:
                         delete_entrance_exam(request, course_key)
+
+                new_credits_values = request.json.get('course_credits') or []
+                old_credits_values = ClearesultCourseCredit.objects.filter(course_id=course_key_string)
+
+                # if provider exists => old credit values and new credit values both contain specific provider then
+                # update old provider credits with the new values.
+                if len(old_credits_values) > 0 and len(new_credits_values) > 0:
+                    for old_credit in old_credits_values:
+                        for new_credit in new_credits_values:
+                            if (
+                                new_credit.get('credit_type_code') == old_credit.credit_type.short_code and
+                                float(new_credit.get('credits')) != old_credit.credit_value
+                            ):
+                                old_credit.credit_value = float(new_credit.get('credits'))
+                                old_credit.save()
+                                old_credits_values = old_credits_values.exclude(pk=old_credit.pk)
+                                new_credits_values.remove(new_credit)
+                                break
+
+                # Delete existing old credits values.
+                if len(old_credits_values) > 0:
+                    old_credits_short_code = [credit.credit_type.short_code for credit in old_credits_values]
+                    ClearesultCourseCredit.objects.filter(course_id=course_key_string, credit_type__short_code__in=old_credits_short_code).delete()
+
+                # Add new credits values.
+                if len(new_credits_values) > 0:
+                    for new_credit in new_credits_values:
+                        provider = ClearesultCreditProvider.objects.get(short_code=new_credit.get('credit_type_code'))
+                        course_credit = ClearesultCourseCredit(
+                            course_id=course_key_string,
+                            credit_type=provider,
+                            credit_value=float(new_credit.get('credits'))
+                        )
+                        course_credit.save()
 
                 # Perform the normal update workflow for the CourseDetails model
                 return JsonResponse(

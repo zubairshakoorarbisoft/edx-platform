@@ -35,7 +35,10 @@ define(['backbone', 'underscore', 'gettext', 'js/models/validation_helpers', 'js
                 entrance_exam_minimum_score_pct: '50',
                 learning_info: [],
                 instructor_info: {},
-                self_paced: null
+                self_paced: null,
+                course_credits: [],
+                available_clearesult_providers: [],
+                all_clearesult_providers: []
             },
 
             validate: function(newattrs) {
