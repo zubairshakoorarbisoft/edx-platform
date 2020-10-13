@@ -51,6 +51,7 @@ def apply_settings(django_settings):
         'third_party_auth.pipeline.parse_query_params',
         'social_core.pipeline.social_auth.social_details',
         'social_core.pipeline.social_auth.social_uid',
+        'openedx.features.clearesult_features.auth_pipeline.replace_old_clearesult_app_uid',
         'social_core.pipeline.social_auth.auth_allowed',
         'social_core.pipeline.social_auth.social_user',
         'third_party_auth.pipeline.associate_by_email_if_login_api',

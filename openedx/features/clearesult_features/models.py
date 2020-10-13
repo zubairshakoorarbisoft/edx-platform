@@ -1,17 +1,20 @@
 """
 Clearesult Models.
 """
-
 from django.db import models
 from opaque_keys.edx.django.models import CourseKeyField
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from openedx.features.clearesult_features.validators import validate_csv_extension
+
+APP_LABEL = 'clearesult_features'
+
 
 class ClearesultCreditProvider(models.Model):
     class Meta:
-        app_label = 'clearesult_features'
+        app_label = APP_LABEL
 
     name = models.CharField(max_length=255, unique=True)
     short_code = models.CharField(max_length=25, unique=True)
@@ -22,7 +25,7 @@ class ClearesultCreditProvider(models.Model):
 
 class ClearesultCourseCredit(models.Model):
     class Meta:
-        app_label = 'clearesult_features'
+        app_label = APP_LABEL
         unique_together = (
             ('credit_type', 'course_id')
         )
@@ -37,7 +40,7 @@ class ClearesultCourseCredit(models.Model):
 
 class UserCreditsProfile(models.Model):
     class Meta:
-        app_label = 'clearesult_features'
+        app_label = APP_LABEL
         unique_together = (
             ('user', 'credit_type')
         )
@@ -49,3 +52,35 @@ class UserCreditsProfile(models.Model):
 
     def __str__(self):
             return str(self.user.username) + ' ' + str(self.credit_type.short_code) + ' ' + str(self.credit_id)
+
+
+class ClearesultUsersImport(models.Model):
+    class Meta:
+        app_label = APP_LABEL
+
+    user_accounts_file = models.FileField(
+        upload_to='clearesult_features/user_accounts_file',
+        null=True,
+        validators=[validate_csv_extension]
+    )
+    description = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.description
+
+
+class ClearesultUserProfile(models.Model):
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult user profiles'
+
+    user = models.OneToOneField(User, unique=True, db_index=True,
+                                related_name='clearesult_profile', on_delete=models.CASCADE)
+    job_title = models.CharField(max_length=25, blank=True)
+    company = models.CharField(max_length=25, blank=True)
+    state_or_province = models.CharField(max_length=25, blank=True)
+    postal_code = models.CharField(max_length=25, blank=True)
+
+
+    def __str__(self):
+    	return 'Clearesult user profile for {}.'.format(self.user.username)
