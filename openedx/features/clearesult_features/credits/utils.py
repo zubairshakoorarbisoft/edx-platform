@@ -1,8 +1,7 @@
 """
 Helper functions for Clearesult credits.
 """
-
-from logging import getLogger
+import logging
 
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCredit,
@@ -10,7 +9,7 @@ from openedx.features.clearesult_features.models import (
     UserCreditsProfile
 )
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_available_credits_provider_list(course_key):
@@ -67,3 +66,11 @@ def get_user_course_earned_credits(course_id, user):
         result = result.union(user_credit.earned_course_credits.filter(course_id=course_id))
 
     return [{'name': r.credit_type.name, 'code': r.credit_type.short_code, 'credits': r.credit_value} for r in result]
+
+
+def get_credit_provider_by_short_code(short_code):
+    try:
+        return ClearesultCreditProvider.objects.get(short_code=short_code)
+    except ClearesultCreditProvider.DoesNotExist:
+        return None
+

@@ -1517,6 +1517,14 @@ CLEARESULT_ALLOWED_SUB_PATHS = [
 
 CLEARESULT_ALLOWED_FULL_PATHS = ['/']
 AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
+CLEARESULT_CREDIT_PROVIDERS = [
+    'BPI',
+    'NATE',
+    'RESNET HERS Rater',
+    'AIA',
+    'AEE',
+    'LEED'
+]
 
 ################# EDX MARKETING SITE ##################################
 
