@@ -1,5 +1,5 @@
 """
-Django admin command to manually verify the users
+Django admin command to manually verify the users.
 """
 from logging import getLogger
 

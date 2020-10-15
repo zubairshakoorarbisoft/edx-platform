@@ -1,3 +1,6 @@
+"""
+Auth pipeline to modify authentication behavior
+"""
 import logging
 
 from django.contrib.auth import get_user_model
@@ -11,8 +14,10 @@ User = get_user_model()
 
 def replace_old_clearesult_app_uid(backend, uid, details, response, *args, **kwargs):
     """
-    When uid of the user social auth account available in edX, just get that account using the
-    email coming from IdP and then set it's uid according to the uid coming from IdP.
+    When uid of the user social auth account available in edX and the user account coming from
+    IdP doesn't match but they have same email address, get edX user account using email
+    instead of uid and set it's uid value to the uid value that is coming from IdP so that
+    both of these accounts are linked to each other.
     """
     if backend.name == ClearesultAzureADOAuth2.name:
         email = details.get('email')

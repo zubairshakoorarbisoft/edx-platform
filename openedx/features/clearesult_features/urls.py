@@ -1,9 +1,9 @@
 """
 URLs for clearesult app.
 """
-from django.conf.urls import include, url
+from django.conf.urls import url
 
-from  openedx.features.clearesult_features.views import LoginView, ResetPasswordView
+from openedx.features.clearesult_features.views import LoginView, ResetPasswordView
 
 app_name = 'clearesult_features'
 urlpatterns = (

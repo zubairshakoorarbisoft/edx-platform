@@ -3,11 +3,8 @@ Clearesult Models.
 """
 from django.db import models
 from opaque_keys.edx.django.models import CourseKeyField
-from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
-
-from openedx.features.clearesult_features.validators import validate_csv_extension
 
 APP_LABEL = 'clearesult_features'
 
@@ -31,7 +28,8 @@ class ClearesultCourseCredit(models.Model):
         )
 
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
-    credit_value = models.DecimalField(decimal_places=1, max_digits=3, validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+    credit_value = models.DecimalField(decimal_places=1, max_digits=3,
+                                       validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     course_id = CourseKeyField(max_length=255, db_index=True)
 
     def __str__(self):
@@ -51,22 +49,7 @@ class UserCreditsProfile(models.Model):
     earned_course_credits = models.ManyToManyField(ClearesultCourseCredit, related_name='earned_credits', blank=True)
 
     def __str__(self):
-            return str(self.user.username) + ' ' + str(self.credit_type.short_code) + ' ' + str(self.credit_id)
-
-
-class ClearesultUsersImport(models.Model):
-    class Meta:
-        app_label = APP_LABEL
-
-    user_accounts_file = models.FileField(
-        upload_to='clearesult_features/user_accounts_file',
-        null=True,
-        validators=[validate_csv_extension]
-    )
-    description = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.description
+        return str(self.user.username) + ' ' + str(self.credit_type.short_code) + ' ' + str(self.credit_id)
 
 
 class ClearesultUserProfile(models.Model):
@@ -81,6 +64,5 @@ class ClearesultUserProfile(models.Model):
     state_or_province = models.CharField(max_length=25, blank=True)
     postal_code = models.CharField(max_length=25, blank=True)
 
-
     def __str__(self):
-    	return 'Clearesult user profile for {}.'.format(self.user.username)
+        return 'Clearesult user profile for {}.'.format(self.user.username)

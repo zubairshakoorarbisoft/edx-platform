@@ -7,8 +7,7 @@ from openedx.features.clearesult_features.forms import UserCreditsProfileAdminFo
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCredit,
     ClearesultCreditProvider,
-    UserCreditsProfile,
-    ClearesultUsersImport
+    UserCreditsProfile
 )
 
 
@@ -37,4 +36,3 @@ class UserCreditsProfileAdmin(admin.ModelAdmin):
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
 admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
-admin.site.register(ClearesultUsersImport)
