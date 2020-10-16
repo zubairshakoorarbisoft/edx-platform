@@ -11,8 +11,11 @@ from course_modes.models import CourseMode
 from lms.djangoapps.verify_student.models import ManualVerification
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import UserProfile
-from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED
-from openedx.features.clearesult_features.credits.utils import gennerate_user_course_credits
+from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, COURSE_GRADE_NOW_FAILED
+from openedx.features.clearesult_features.credits.utils import (
+    generate_user_course_credits,
+    remove_user_cousre_credits_if_exist
+)
 
 logger = getLogger(__name__)
 
@@ -65,6 +68,14 @@ def generate_manual_verification_for_user(sender, instance, created, **kwargs):
 @receiver(COURSE_GRADE_NOW_PASSED)
 def genrate_user_credits(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
     """
-    Listen for a learner passing a course, update user credits.
+    Listen for a learner passing a course and update user credits.
     """
-    gennerate_user_course_credits(course_id, user)
+    generate_user_course_credits(course_id, user)
+
+
+@receiver(COURSE_GRADE_NOW_FAILED)
+def remove_user_cousre_credits(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
+    """
+    Listen for a learner failing a course and update user credits.
+    """
+    remove_user_cousre_credits_if_exist(course_id, user)

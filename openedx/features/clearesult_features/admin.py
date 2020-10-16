@@ -30,7 +30,7 @@ class UserCreditsProfileAdmin(admin.ModelAdmin):
     Admin config for user credit ids.
     """
     form = UserCreditsProfileAdminForm
-    list_display = ('user', 'credit_type', 'credit_id')
+    list_display = ('user', 'credit_type', 'credit_id', 'courses', 'earned_credits', 'total_credits')
 
 
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)

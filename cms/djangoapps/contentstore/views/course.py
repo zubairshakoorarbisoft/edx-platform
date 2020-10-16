@@ -1209,15 +1209,17 @@ def settings_handler(request, course_key_string):
                 if len(old_credits_values) > 0 and len(new_credits_values) > 0:
                     for old_credit in old_credits_values:
                         for new_credit in new_credits_values:
-                            if (
-                                new_credit.get('credit_type_code') == old_credit.credit_type.short_code and
-                                float(new_credit.get('credits')) != old_credit.credit_value
-                            ):
-                                old_credit.credit_value = float(new_credit.get('credits'))
-                                old_credit.save()
+                            if (new_credit.get('credit_type_code') == old_credit.credit_type.short_code):
+                                is_updated = False
+                                if float(new_credit.get('credits')) != old_credit.credit_value:
+                                    old_credit.credit_value = float(new_credit.get('credits'))
+                                    old_credit.save()
+                                    is_updated = True
+
                                 old_credits_values = old_credits_values.exclude(pk=old_credit.pk)
                                 new_credits_values.remove(new_credit)
-                                break
+                                if is_updated:
+                                    break
 
                 # Delete existing old credits values.
                 if len(old_credits_values) > 0:
