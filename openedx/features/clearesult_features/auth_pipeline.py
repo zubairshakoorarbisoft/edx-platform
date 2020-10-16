@@ -4,7 +4,11 @@ Auth pipeline to modify authentication behavior
 import logging
 
 from django.contrib.auth import get_user_model
+from django.urls import reverse
+from django.shortcuts import redirect
 from social_django.models import UserSocialAuth
+
+from third_party_auth import pipeline
 
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
 
@@ -34,3 +38,11 @@ def replace_old_clearesult_app_uid(backend, uid, details, response, *args, **kwa
                 logger.info('Could not find user or social_auth_user with email: {}.'.format(email))
         else:
             logger.info('Could not fetch email from facebook against uid: {}.'.format(uid))
+
+
+def redirect_to_continuing_education(new_association, auth_entry, *_, **__):
+    """
+    Redirect a new registered user to "Continuing Education" page.
+    """
+    if new_association and auth_entry == pipeline.AUTH_ENTRY_REGISTER:
+        return redirect(reverse('clearesult_features:continuing_education'))
