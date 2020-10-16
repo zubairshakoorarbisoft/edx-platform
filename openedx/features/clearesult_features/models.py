@@ -59,10 +59,10 @@ class ClearesultUserProfile(models.Model):
 
     user = models.OneToOneField(User, unique=True, db_index=True,
                                 related_name='clearesult_profile', on_delete=models.CASCADE)
-    job_title = models.CharField(max_length=25, blank=True)
-    company = models.CharField(max_length=25, blank=True)
-    state_or_province = models.CharField(max_length=25, blank=True)
-    postal_code = models.CharField(max_length=25, blank=True)
+    job_title = models.CharField(max_length=255, blank=True)
+    company = models.CharField(max_length=255, blank=True)
+    state_or_province = models.CharField(max_length=255, blank=True)
+    postal_code = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return 'Clearesult user profile for {}.'.format(self.user.username)
