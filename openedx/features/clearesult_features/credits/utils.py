@@ -14,7 +14,11 @@ logger = logging.getLogger(__name__)
 
 def get_available_credits_provider_list(course_key):
     available_providers_list = []
-    used_course_providers_short_codes = [used_credit.credit_type.short_code for used_credit in ClearesultCourseCredit.objects.filter(course_id=course_key)]
+    used_course_providers_short_codes = [
+        used_credit.credit_type.short_code for used_credit in ClearesultCourseCredit.objects.filter(
+                course_id=course_key
+            )
+    ]
     available_providers = ClearesultCreditProvider.objects.exclude(short_code__in=used_course_providers_short_codes)
     for provider in available_providers:
         available_providers_list.append({
@@ -52,10 +56,14 @@ def gennerate_user_course_credits(course_id, user):
 
     for user_credit in user_credits:
         for course_credit in course_credits:
-            if user_credit.credit_type == course_credit.credit_type and not course_credit in user_credit.earned_course_credits.all():
+            if (user_credit.credit_type == course_credit.credit_type and
+                    course_credit not in user_credit.earned_course_credits.all()):
                 user_credit.earned_course_credits.add(course_credit)
                 logger.info(
-                    '{} credits from credit_provider: {} have been added for user: {}.'.format(course_credit.credit_value, course_credit.credit_type.name, user.email))
+                    '{} credits from credit_provider: {} have been added for user: {}.'.format(
+                        course_credit.credit_value, course_credit.credit_type.name, user.email
+                    )
+                )
 
 
 def get_user_course_earned_credits(course_id, user):
@@ -73,4 +81,3 @@ def get_credit_provider_by_short_code(short_code):
         return ClearesultCreditProvider.objects.get(short_code=short_code)
     except ClearesultCreditProvider.DoesNotExist:
         return None
-

@@ -30,7 +30,7 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
 
         reset_password_error = request.GET.get('error_description', '')
         if (reset_password_error and
-            reset_password_error.startswith(getattr(settings,'AZUREAD_B2C_FORGET_PASSWORD_CODE', 'N/A'))):
+                reset_password_error.startswith(getattr(settings, 'AZUREAD_B2C_FORGET_PASSWORD_CODE', 'N/A'))):
 
             reset_password_link = configuration_helpers.get_value('RESET_PASSWORD_LINK')
             if reset_password_link:

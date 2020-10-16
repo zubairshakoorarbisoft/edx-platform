@@ -3,7 +3,7 @@ Helper functions for clearesult_features app.
 """
 import io
 import logging
-from csv import reader, Sniffer
+from csv import Error, DictReader, Sniffer
 
 logger = logging.getLogger(__name__)
 
@@ -38,3 +38,34 @@ def get_file_encoding(file_path):
     except IOError as error:
         logger.exception('({}) --- {}'.format(error.filename, error.strerror))
         return None
+
+
+def get_csv_file_control(file_path):
+    """
+    Returns opened file and dict_reader object of the given file path.
+    """
+    csv_file = None
+    dialect = None
+    try:
+        encoding = get_file_encoding(file_path)
+        if not encoding:
+            logger.exception('Because of invlid file encoding format, user creation process is aborted.')
+            return
+
+        csv_file = io.open(file_path, 'r', encoding=encoding)
+        try:
+            dialect = Sniffer().sniff(csv_file.readline())
+        except Error:
+            logger.exception('Could not determine delimiter in the file.')
+            csv_file.close()
+            return
+
+        csv_file.seek(0)
+    except IOError as error:
+        logger.exception('({}) --- {}'.format(error.filename, error.strerror))
+        return
+
+    dict_reader = DictReader(csv_file, delimiter=dialect.delimiter if dialect else ',')
+    csv_reader = (dict((k.strip(), v.strip() if v else v) for k, v in row.items()) for row in dict_reader)
+
+    return {'csv_file': csv_file, 'csv_reader': csv_reader}

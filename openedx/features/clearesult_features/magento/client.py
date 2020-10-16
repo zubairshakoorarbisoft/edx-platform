@@ -1,4 +1,6 @@
-""" Client to handle Magento requests. """
+"""
+Client to handle Magento requests.
+"""
 import json
 import logging
 import requests
@@ -42,7 +44,7 @@ class MagentoClient(object):
         """
         Returns Request Header required to send Paystack API.
         """
-        headers = { 'Content-Type': self._CONTENT_TYPE}
+        headers = {'Content-Type': self._CONTENT_TYPE}
         if token:
             headers.update({'Authorization': 'Bearer ' + token})
         return headers
@@ -89,21 +91,25 @@ class MagentoClient(object):
         return self.parse_response(response)
 
     def get_customer_cart(self):
-        success, cart_id = self.handle_request('carts/mine', self._POST_METHOD, self.get_headers(self._MAGENTO_USER_KEY))
+        success, cart_id = self.handle_request(
+            'carts/mine', self._POST_METHOD, self.get_headers(self._MAGENTO_USER_KEY)
+        )
         if success:
-            return cart_id;
+            return cart_id
 
     def add_product_to_cart(self, product_sku, quantity=1):
         cart_id = self.get_customer_cart()
         if cart_id:
-            data= {
+            data = {
                 'cartItem': {
                     'sku': product_sku,
                     'qty': quantity,
                     'quote_id': cart_id
                 }
             }
-            success, data = self.handle_request('carts/mine/items', self._POST_METHOD, self.get_headers(self._MAGENTO_USER_KEY), data)
+            success, data = self.handle_request(
+                'carts/mine/items', self._POST_METHOD, self.get_headers(self._MAGENTO_USER_KEY), data
+            )
             if success:
                 return
         raise InvalidMagentoResponseError("Unable to add product in Magento user cart.")
@@ -112,6 +118,11 @@ class MagentoClient(object):
         data = {
             'email': user_email
         }
-        success, data = self.handle_request('costomer/token/getUserToken', self._POST_METHOD, self.get_headers(self._MAGENTO_LMS_INTEGRATION_TOKEN), data)
+        success, data = self.handle_request(
+            'costomer/token/getUserToken',
+            self._POST_METHOD,
+            self.get_headers(self._MAGENTO_LMS_INTEGRATION_TOKEN),
+            data
+        )
         if success:
             self._MAGENTO_USER_KEY = data

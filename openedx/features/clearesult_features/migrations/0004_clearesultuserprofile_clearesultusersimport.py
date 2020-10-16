@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import openedx.features.clearesult_features.validators
 
 
 class Migration(migrations.Migration):
@@ -18,7 +17,7 @@ class Migration(migrations.Migration):
             name='ClearesultUsersImport',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user_accounts_file', models.FileField(null=True, upload_to='clearesult_features/user_accounts_file', validators=[openedx.features.clearesult_features.validators.validate_csv_extension])),
+                ('user_accounts_file', models.FileField(null=True, upload_to='clearesult_features/user_accounts_file')),
                 ('description', models.CharField(max_length=100)),
             ],
         ),
