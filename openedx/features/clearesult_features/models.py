@@ -49,7 +49,19 @@ class UserCreditsProfile(models.Model):
     earned_course_credits = models.ManyToManyField(ClearesultCourseCredit, related_name='earned_credits', blank=True)
 
     def __str__(self):
-        return str(self.user.username) + ' ' + str(self.credit_type.short_code) + ' ' + str(self.credit_id)
+            return str(self.user.username) + ' ' + str(self.credit_type.short_code) + ' ' + str(self.credit_id)
+
+    def courses(self):
+        return [credit.course_id for credit in self.earned_course_credits.all()]
+
+    def earned_credits(self):
+        return [credit.credit_value for credit in self.earned_course_credits.all()]
+
+    def total_credits(self):
+        total = 0.0
+        for credit in self.earned_course_credits.all():
+            total = total + float(credit.credit_value)
+        return total
 
 
 class ClearesultUserProfile(models.Model):
