@@ -35,6 +35,7 @@ import os
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 from path import Path as path
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from enterprise.constants import (
     ENTERPRISE_ADMIN_ROLE,
@@ -1517,7 +1518,8 @@ MIDDLEWARE = [
     'openedx.core.djangoapps.cache_toolbox.middleware.CacheBackedAuthenticationMiddleware',
 
     # [CLEARESULT_CUSTOM]
-    'openedx.features.clearesult_features.middlewares.ClearesultAuthenticationMiddleware',
+    'openedx.features.clearesult_features.middlewares.authentication.ClearesultAuthenticationMiddleware',
+    'openedx.features.clearesult_features.middlewares.site_security.SiteAuthenticationMiddleware',
 
     'student.middleware.UserStandingMiddleware',
     'openedx.core.djangoapps.contentserver.middleware.StaticContentServer',
@@ -2800,6 +2802,14 @@ CLEARESULT_ALLOWED_SUB_PATHS = [
     '/heartbeat'
 ]
 CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+
+CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
+    reverse_lazy('signin_user'),
+    reverse_lazy('register_user'),
+    reverse_lazy('clearesult_features:site_security_code'),
+    reverse_lazy('logout'),
+]
+
 AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 CLEARESULT_CREDIT_PROVIDERS = [
     'BPI',

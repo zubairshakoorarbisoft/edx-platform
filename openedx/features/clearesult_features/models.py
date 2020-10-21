@@ -1,12 +1,20 @@
 """
 Clearesult Models.
 """
+from enum import unique
+from config_models.models import ConfigurationModel
+from fernet_fields import EncryptedField
 from django.db import models
+from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 APP_LABEL = 'clearesult_features'
+
+
+class EncryptedTextField(EncryptedField, models.CharField):
+    description = "Encrypted Char Field"
 
 
 class ClearesultCreditProvider(models.Model):
@@ -49,7 +57,7 @@ class UserCreditsProfile(models.Model):
     earned_course_credits = models.ManyToManyField(ClearesultCourseCredit, related_name='earned_credits', blank=True)
 
     def __str__(self):
-            return str(self.user.username) + ' ' + str(self.credit_type.short_code) + ' ' + str(self.credit_id)
+        return str(self.user.username) + ' ' + str(self.credit_type.short_code) + ' ' + str(self.credit_id)
 
     def courses(self):
         return [credit.course_id for credit in self.earned_course_credits.all()]
@@ -78,3 +86,36 @@ class ClearesultUserProfile(models.Model):
 
     def __str__(self):
         return 'Clearesult user profile for {}.'.format(self.user.username)
+
+
+class ClearesultSiteConfiguration(ConfigurationModel):
+    KEY_FIELDS = ('site', )
+
+    site = models.ForeignKey(Site, related_name='clearesult_configuration', on_delete=models.CASCADE)
+
+    security_code_required = models.BooleanField(default=True)
+    security_code = EncryptedTextField(max_length=20, verbose_name="Site security code")
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Site Configurations'
+
+    def __str__(self):
+        return '"{}" configurations'.format(self.site)
+
+
+class ClearesultUserSiteProfile(models.Model):
+    """
+    This model saves data for a user that is only relevant to a specific
+    site.
+    """
+    user = models.ForeignKey(User, related_name='clearesult_site_profile', on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+
+    saved_security_code = EncryptedTextField(max_length=20, verbose_name='Saved site security code')
+
+    class Meta:
+        unique_together = ('user', 'site')
+
+    def __str__(self):
+        return '{} - {}'.format(self.site, self.user)
