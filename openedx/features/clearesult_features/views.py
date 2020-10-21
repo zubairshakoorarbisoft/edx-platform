@@ -1,7 +1,9 @@
 import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.views.generic.base import TemplateView
 
+from edxmako.shortcuts import render_to_response
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 
 
@@ -48,3 +50,8 @@ def _get_context_data(base_url, context):
         'banner_image': trade_ally_urls.get('BANNER_IMAGE', ''),
         'copyrights_year': datetime.datetime.now().year
     })
+
+
+@login_required
+def render_continuing_education(request):
+    return render_to_response('clearesult/continuing_education.html', {'uses_bootstrap': True})

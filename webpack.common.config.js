@@ -23,10 +23,10 @@ var defineCallFooter = /\}\)\.call\(this, ((define|require)( \|\| RequireJS\.(de
 var defineDirectFooter = /\}\(((window\.)?(RequireJS\.)?(requirejs|define|require|jQuery)(, )?)+\)\);/;
 var defineFancyFooter = /\}\).call\(\s*this(\s|.)*define(\s|.)*\);/;
 var defineFooter = new RegExp('(' + defineCallFooter.source + ')|('
-                             + defineDirectFooter.source + ')|('
-                             + defineFancyFooter.source + ')', 'm');
+    + defineDirectFooter.source + ')|('
+    + defineFancyFooter.source + ')', 'm');
 
-var workerConfig = function() {
+var workerConfig = function () {
     try {
         return {
             webworker: {
@@ -85,9 +85,9 @@ module.exports = Merge.smart({
             AlertStatusBar: './lms/static/js/accessible_components/StatusBarAlert.jsx',
             EntitlementSupportPage: './lms/djangoapps/support/static/support/jsx/entitlements/index.jsx',
             LinkProgramEnrollmentsSupportPage: './lms/djangoapps/support/static/support/jsx/' +
-                                               'program_enrollments/index.jsx',
+                'program_enrollments/index.jsx',
             ProgramEnrollmentsInspectorPage: './lms/djangoapps/support/static/support/jsx/' +
-                                               'program_enrollments/inspector.jsx',
+                'program_enrollments/inspector.jsx',
             PasswordResetConfirmation: './lms/static/js/student_account/components/PasswordResetConfirmation.jsx',
             StudentAccountDeletion: './lms/static/js/student_account/components/StudentAccountDeletion.jsx',
             StudentAccountDeletionInitializer: './lms/static/js/student_account/StudentAccountDeletionInitializer.js',
@@ -114,6 +114,10 @@ module.exports = Merge.smart({
 
             AnnouncementsView: './openedx/features/announcements/static/announcements/jsx/Announcements.jsx',
             CookiePolicyBanner: './common/static/js/src/CookiePolicyBanner.jsx',
+
+            // Clearesult
+            ContinuingEducation: './openedx/features/clearesult_features/static/' +
+                'continuing_education/jsx/ContinuingEducation.jsx',
 
             // Common
             ReactRenderer: './common/static/js/src/ReactRenderer.jsx',
@@ -185,27 +189,27 @@ module.exports = Merge.smart({
                             replacements: [
                                 {
                                     pattern: defineHeader,
-                                    replacement: function() { return ''; }
+                                    replacement: function () { return ''; }
                                 },
                                 {
                                     pattern: defineFooter,
-                                    replacement: function() { return ''; }
+                                    replacement: function () { return ''; }
                                 },
                                 {
                                     pattern: /(\/\* RequireJS) \*\//g,
-                                    replacement: function(match, p1) { return p1; }
+                                    replacement: function (match, p1) { return p1; }
                                 },
                                 {
                                     pattern: /\/\* Webpack/g,
-                                    replacement: function(match) { return match + ' */'; }
+                                    replacement: function (match) { return match + ' */'; }
                                 },
                                 {
                                     pattern: /text!(.*?\.underscore)/g,
-                                    replacement: function(match, p1) { return p1; }
+                                    replacement: function (match, p1) { return p1; }
                                 },
                                 {
                                     pattern: /RequireJS.require/g,
-                                    replacement: function() {
+                                    replacement: function () {
                                         return 'require';
                                     }
                                 }
@@ -256,31 +260,31 @@ module.exports = Merge.smart({
                             replacements: [
                                 {
                                     pattern: /\(function\(AjaxPrefix\) {/,
-                                    replacement: function() { return ''; }
+                                    replacement: function () { return ''; }
                                 },
                                 {
                                     pattern: /], function\(domReady, \$, str, Backbone, gettext, NotificationView\) {/,
-                                    replacement: function() {
+                                    replacement: function () {
                                         // eslint-disable-next-line
                                         return '], function(domReady, $, str, Backbone, gettext, NotificationView, AjaxPrefix) {';
                                     }
                                 },
                                 {
                                     pattern: /'..\/..\/common\/js\/components\/views\/feedback_notification',/,
-                                    replacement: function() {
+                                    replacement: function () {
                                         return "'../../common/js/components/views/feedback_notification'," +
-                                               "'AjaxPrefix',";
+                                            "'AjaxPrefix',";
                                     }
                                 },
                                 {
                                     pattern: /}\).call\(this, AjaxPrefix\);/,
-                                    replacement: function() { return ''; }
+                                    replacement: function () { return ''; }
                                 },
                                 {
                                     pattern: /'..\/..\/common\/js\/components\/views\/feedback_notification',/,
-                                    replacement: function() {
+                                    replacement: function () {
                                         return "'../../common/js/components/views/feedback_notification'," +
-                                               "'AjaxPrefix',";
+                                            "'AjaxPrefix',";
                                     }
                                 }
                             ]
@@ -298,7 +302,7 @@ module.exports = Merge.smart({
                 {
                     test: /xblock\/core/,
                     loader: 'exports-loader?window.XBlock!' +
-                            'imports-loader?jquery,jquery.immediateDescendents,this=>window'
+                        'imports-loader?jquery,jquery.immediateDescendents,this=>window'
                 },
                 {
                     test: /xblock\/runtime.v1/,
@@ -427,5 +431,4 @@ module.exports = Merge.smart({
         }
 
     }
-}, {web: xmoduleJS}, workerConfig());
-
+}, { web: xmoduleJS }, workerConfig());
