@@ -19,17 +19,19 @@ export default function ProviderField({ id, providerName, providerId, handleUpda
     }
 
     return (
-        <div>
+        <div className="update-block">
             <label>Provider</label>
             <input placeholder="Provider" readOnly={true} disabled value={providerName} />
             <label>ID</label>
             <input placeholder="ID" value={updatedId} onChange={handleChange}></input>
-            <button className="btn btn-primary" disabled={!canUpdate} onClick={handleClick}>
-                Update
-            </button>
-            <button className="btn btn-danger" onClick={() => handleDelete(id)}>
-                Delete
-            </button>
+            <div className="btn-holder">
+                <button className="btn btn-primary" disabled={!canUpdate} onClick={handleClick}>
+                    Update
+                </button>
+                <button className="btn btn-primary red" onClick={() => handleDelete(id)}>
+                    Delete
+                </button>
+            </div>
         </div>
     );
 }

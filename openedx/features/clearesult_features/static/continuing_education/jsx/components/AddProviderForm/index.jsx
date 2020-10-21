@@ -18,9 +18,9 @@ export default function AddProviderForm({ choices, handleAddProvider }) {
     return (
         <div>
             <h2>Add a new ID</h2>
-            <div className="row text-center">
+            <div className="form-holder">
                 {choices.length ? (
-                    <div>
+                    <div className="form-area">
                         <label>Provider</label>
                         <select
                             required
