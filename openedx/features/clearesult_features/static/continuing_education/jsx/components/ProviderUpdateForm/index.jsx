@@ -6,10 +6,9 @@ export default function ProviderUpdateForm({ profiles, handleUpdateProvider, han
         <div>
             <h2>Update existing IDs</h2>
             <div className="education-provider-ids">
-                <div className="text-center">
                     {profiles.length ? (
                         profiles.map((profile) => (
-                            <div key={profile.id} className="row m-5">
+                            <div key={profile.id} className="update-block-holder">
                                 <ProviderField
                                     id={profile.id}
                                     providerId={profile.credit_id}
@@ -22,7 +21,6 @@ export default function ProviderUpdateForm({ profiles, handleUpdateProvider, han
                     ) : (
                         <h4>No existing profiles found!</h4>
                     )}
-                </div>
             </div>
         </div>
     );

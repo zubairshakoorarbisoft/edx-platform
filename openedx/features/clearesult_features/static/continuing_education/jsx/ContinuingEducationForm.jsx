@@ -94,9 +94,9 @@ export default function ContinuingEducationForm({ context }) {
     }, []);
 
     return (
-        <div>
+        <div className="edu-holder">
             <h1>Continuing Education IDs</h1>
-            <div className="container">
+            <div className="edu-holder-container">
                 {isLoading ? (
                     <h3>Loading data...</h3>
                 ) : (
