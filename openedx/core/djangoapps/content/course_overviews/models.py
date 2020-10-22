@@ -8,7 +8,7 @@ from urlparse import urlparse, urlunparse
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q
-from django.db.models.fields import BooleanField, DateTimeField, DecimalField, TextField, IntegerField, FloatField
+from django.db.models.fields import BooleanField, DateTimeField, DecimalField, TextField, FloatField, IntegerField
 from django.db.utils import IntegrityError
 from django.template import defaultfilters
 
