@@ -55,7 +55,7 @@ var workerConfig = function () {
                     ]
                 },
                 resolve: {
-                    extensions: ['.js']
+                    extensions: ['.js', '.jsx']
                 }
             }
         };
@@ -116,8 +116,8 @@ module.exports = Merge.smart({
             CookiePolicyBanner: './common/static/js/src/CookiePolicyBanner.jsx',
 
             // Clearesult
-            ContinuingEducation: './openedx/features/clearesult_features/static/' +
-                'continuing_education/jsx/ContinuingEducation.jsx',
+            ContinuingEducation: './openedx/features/clearesult_features/static/continuing_education/jsx/' +
+                'ContinuingEducation.jsx',
 
             // Common
             ReactRenderer: './common/static/js/src/ReactRenderer.jsx',
@@ -230,7 +230,8 @@ module.exports = Merge.smart({
                 {
                     test: /\.(js|jsx)$/,
                     include: [
-                        /paragon/
+                        /paragon/,
+                        /react-toasts/
                     ],
                     use: 'babel-loader'
                 },
