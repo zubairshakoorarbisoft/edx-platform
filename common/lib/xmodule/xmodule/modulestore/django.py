@@ -13,6 +13,7 @@ from pkg_resources import resource_filename
 import re
 
 from django.conf import settings
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 
 # This configuration must be executed BEFORE any additional Django imports. Otherwise, the imports may fail due to
 # Django not being configured properly. This mostly applies to tests.
@@ -414,6 +415,12 @@ def _get_modulestore_branch_setting():
         branch = None
         hostname = get_current_request_hostname()
         if hostname:
+            preview_lms_base = configuration_helpers.get_value(
+                'PREVIEW_LMS_BASE', settings.FEATURES.get('PREVIEW_LMS_BASE')
+            )
+            if preview_lms_base == hostname:
+                return 'draft-preferred'
+
             # get mapping information which is defined in configurations
             mappings = getattr(settings, 'HOSTNAME_MODULESTORE_DEFAULT_MAPPINGS', None)
 
