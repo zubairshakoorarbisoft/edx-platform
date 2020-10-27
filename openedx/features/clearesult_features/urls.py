@@ -5,8 +5,12 @@ from django.conf.urls import url, include
 
 from openedx.features.clearesult_features.views import LoginView, ResetPasswordView, render_continuing_education
 
+from openedx.features.clearesult_features.views import LoginView, ResetPasswordView
+from openedx.features.clearesult_features.authentication.views import SiteSecurityView
+
 
 app_name = 'clearesult_features'
+
 urlpatterns = (
     url(
         r'^auth/login/$',
@@ -22,6 +26,11 @@ urlpatterns = (
         r'^continuing_education/$',
         render_continuing_education,
         name='continuing_education'
+    ),
+    url(
+        r'^site_security/$',
+        SiteSecurityView.as_view(),
+        name="site_security_code"
     ),
     url(
         r'^api/v0/',
