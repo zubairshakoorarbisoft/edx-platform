@@ -3,7 +3,10 @@ Helper functions for clearesult_features app.
 """
 import io
 import logging
+import six
 from csv import Error, DictReader, Sniffer
+
+from openedx.features.course_experience.utils import get_course_outline_block_tree
 
 logger = logging.getLogger(__name__)
 
@@ -69,3 +72,22 @@ def get_csv_file_control(file_path):
     csv_reader = (dict((k.strip(), v.strip() if v else v) for k, v in row.items()) for row in dict_reader)
 
     return {'csv_file': csv_file, 'csv_reader': csv_reader}
+
+
+def get_completed_enrolments(request, enrollments):
+    """
+    Returns user enrollment list for completed courses and incompleted courses.
+    """
+    complete_enrollments = []
+    incomplete_enrollments = [enrollment for enrollment in enrollments]
+    for enrollment in enrollments:
+        course_id_string = six.text_type(enrollment.course.id)
+        course_outline_blocks = get_course_outline_block_tree(
+            request, course_id_string, request.user
+        )
+        if course_outline_blocks:
+            if course_outline_blocks.get('complete'):
+                incomplete_enrollments.remove(enrollment)
+                complete_enrollments.append(enrollment)
+
+    return complete_enrollments, incomplete_enrollments
