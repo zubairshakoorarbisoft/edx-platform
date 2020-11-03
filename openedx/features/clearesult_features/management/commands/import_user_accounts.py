@@ -103,7 +103,7 @@ def _create_or_update_edx_users(user_info):
         user_info (dict): Dict containing the values of single row of csv file
     """
     user_data = {
-        'email': user_info.get('Email'),
+        'email': user_info.get('Email').lower(),
         'first_name': user_info.get('First Name'),
         'last_name': user_info.get('Last Name'),
         'username': user_info.get('Username'),

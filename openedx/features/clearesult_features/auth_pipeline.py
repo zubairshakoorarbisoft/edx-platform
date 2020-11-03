@@ -24,7 +24,7 @@ def replace_old_clearesult_app_uid(backend, uid, details, response, *args, **kwa
     both of these accounts are linked to each other.
     """
     if backend.name == ClearesultAzureADOAuth2.name:
-        email = details.get('email')
+        email = details.get('email').lower()
         if email:
             try:
                 user = User.objects.get(email=email)
