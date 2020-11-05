@@ -1,39 +1,57 @@
 // ------------------------------
 // Open edX Certificates: Views
-
 // About: styling for specific views.
-
 // ------------------------------
 // #BASE CERT
 // ------------------------------
-
-
 // ------------------------------
 // #DISTINCTION CERT
 // ------------------------------
-
-
 // ------------------------------
 // #INVALID
 // ------------------------------
 .wrapper-content.status-invalid {
-  @extend %layout-wrapper;
-
-  .wrapper-content-grid {
-    @extend %layout;
-  }
-
-  .content-main {
-    margin-bottom: spacing-vertical(base);
-
-    @media (min-width: $bp-screen-md) {
-      @include span(9, after);
+    @extend %layout-wrapper;
+    .wrapper-content-grid {
+        @extend %layout;
     }
-  }
-
-  .content-secondary {
-    @media (min-width: $bp-screen-md) {
-      @include span(3, before);
+    .content-main {
+        margin-bottom: spacing-vertical(base);
+        @media (min-width: $bp-screen-md) {
+            @include span(9, after);
+        }
     }
-  }
+    .content-secondary {
+        @media (min-width: $bp-screen-md) {
+            @include span(3, before);
+        }
+    }
+}
+
+.certificate .accomplishment-rendering {
+    .accomplishment-type-label {
+        font-size: 50px;
+    }
+    .accomplishment-earned-credits {
+        text-align: center;
+        float: right;
+    }
+    .wrapper-organization {
+        float: left;
+    }
+    .organization-logo {
+        max-width: 130%;
+    }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+    border: 0
 }
