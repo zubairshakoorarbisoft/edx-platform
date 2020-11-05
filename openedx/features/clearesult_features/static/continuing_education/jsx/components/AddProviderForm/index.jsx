@@ -15,6 +15,12 @@ export default function AddProviderForm({ choices, handleAddProvider }) {
         setProviderId("");
     }
 
+    function handleProviderIdChange(event) {
+        const newValue = event.target.value;
+        if (newValue.length >= 20) return;
+        setProviderId(newValue);
+    }
+
     return (
         <div>
             <h2>Add a new ID</h2>
@@ -41,7 +47,7 @@ export default function AddProviderForm({ choices, handleAddProvider }) {
                             required
                             placeholder="Provider ID"
                             value={providerId}
-                            onChange={(e) => setProviderId(e.target.value)}
+                            onChange={handleProviderIdChange}
                         ></input>
                         <button
                             disabled={choices.length === 0 || !providerId.trim()}

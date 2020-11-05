@@ -6,11 +6,13 @@ export default function ProviderField({ id, providerName, providerId, handleUpda
 
     function handleClick() {
         handleUpdate(id, updatedId);
-        setCanUpdate(true);
+        setCanUpdate(false);
     }
 
     function handleChange(event) {
-        setUpdatedId(event.target.value);
+        const newValue = event.target.value;
+        if (newValue.length >= 20) return;
+        setUpdatedId(newValue);
         if (event.target.value.trim() === "") {
             setCanUpdate(false);
         } else if (!canUpdate) {
