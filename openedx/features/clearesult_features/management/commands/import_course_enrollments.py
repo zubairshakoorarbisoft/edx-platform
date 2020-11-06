@@ -4,8 +4,8 @@ user's course related activity.
 """
 import json
 import six
-from csv import Error
 from completion.models import BlockCompletion
+from csv import Error
 from logging import getLogger
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
@@ -106,7 +106,7 @@ def _enroll_user(user, course_key):
 
 def _assign_grades_to_scorm_blocks(user, course, block_locators):
     for block_locator in block_locators:
-        if 'type@scorm+block@' in six.text_type(block_locator) and modulestore().get_item(block_locator).graded:
+        if 'type@scormxblock+block@' in six.text_type(block_locator) and modulestore().get_item(block_locator).graded:
             set_score(user.id, block_locator, 1, 1)
             block_state = {
                 'lesson_score': 1,

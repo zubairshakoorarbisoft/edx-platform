@@ -1733,6 +1733,10 @@ ADVANCED_PROBLEM_TYPES = [
     {
         'component': 'scorm',
         'boilerplate_name': None
+    },
+    {
+        'component': 'scormxblock',
+        'boilerplate_name': None
     }
 ]
 

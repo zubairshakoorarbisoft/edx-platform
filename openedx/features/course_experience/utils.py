@@ -199,6 +199,7 @@ def get_course_outline_block_tree(request, course_id, user=None, allow_start_dat
         'lti',
         'lti_consumer',
         'scorm',
+        'scormxblock',
     ]
     all_blocks = get_blocks(
         request,
