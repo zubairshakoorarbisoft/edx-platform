@@ -81,7 +81,7 @@ class Command(BaseCommand):
                             updated_count = updated_count + 1
                 except IntegrityError as error:
                     logger.exception('Error while creating/updating ({}) user and its '
-                                     'profiles with the following errors {}.'.format(row.get('Email'), error))
+                                     'profiles with the following errors {}.'.format(row.get('Email').lower(), error))
                     failure_count = failure_count + 1
                     row['Status'] = CREATION_FAILED
                     row['Error'] = error

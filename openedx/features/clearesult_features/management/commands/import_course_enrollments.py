@@ -57,7 +57,7 @@ class Command(BaseCommand):
         try:
             for row in file_controller['csv_reader']:
 
-                user = _get_user_by_email(row.get('Email'))
+                user = _get_user_by_email(row.get('Email').lower())
                 if not user:
                     continue
 
@@ -145,7 +145,6 @@ def _get_block_locators(course):
     scorm_block_locators = []
     course_data = CourseData(user=None, course=course)
     for id in course_data.collected_structure.get_block_keys():
-        # if 'type@scorm+block@' in six.text_type(id):
         scorm_block_locators.append(id)
 
     return scorm_block_locators
