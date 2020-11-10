@@ -29,6 +29,11 @@
 }
 
 .certificate .accomplishment-rendering {
+    background-image: url(https://c90081das3001edx.s3.amazonaws.com/certificate_template_assets/2/certificate_template_background2.png);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    padding: 6rem 7rem;
+    page-break-inside: avoid;
     .accomplishment-type-label {
         font-size: 50px;
     }
