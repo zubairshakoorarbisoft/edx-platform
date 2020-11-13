@@ -106,25 +106,34 @@ def _enroll_user(user, course_key):
 
 def _assign_grades_to_scorm_blocks(user, course, block_locators):
     for block_locator in block_locators:
-        if 'type@scormxblock+block@' in six.text_type(block_locator) and modulestore().get_item(block_locator).graded:
+        block = modulestore().get_item(block_locator)
+        if 'type@scormxblock+block@' in six.text_type(block_locator) and block.graded:
             set_score(user.id, block_locator, 1, 1)
             block_state = {
                 'lesson_score': 1,
                 'lesson_status': 'completed',
-                'scorm_data': {
+                'cmi.exit': 'suspend',
+                'data_scorm': {
+                    'cmi.exit': 'suspend',
+                    'cmi.session_time': 'PT0.35S',
+                    'cmi.suspend_data': '',
                     'cmi.location': 0,
                     'cmi.score.max': '100',
                     'cmi.score.min': '0',
-                    'cmi.score.scaled': 1
+                    'cmi.score.scaled': 1,
+                    'cmi.completion_status': 'completed',
+                    'cmi.success_status': 'passed',
                 },
-                'success_status': 'passed'
+                'completion_status': 'completed',
+                'success_status': 'passed',
+                'is_migrated_by_script': True
             }
+
             # # updating scorm xblock state
             student_module = StudentModule.objects.get(student=user, course_id=course.id,
                                                        module_state_key=block_locator)
             student_module.state = json.dumps(block_state)
             student_module.save()
-
         BlockCompletion.objects.submit_completion(
             user=user,
             block_key=block_locator,
