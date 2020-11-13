@@ -14,6 +14,7 @@ the marketing site and blog).
 """
 
 
+import datetime
 import logging
 
 import six
@@ -127,10 +128,10 @@ def _footer_copyright():
     return _(
         # Translators: 'edX' and 'Open edX' are trademarks of 'edX Inc.'.
         # Please do not translate any of these trademarks and company names.
-        u"\u00A9 {org_name}.  All rights reserved except where noted.  "
-        u"edX, Open edX and their respective logos are "
-        u"registered trademarks of edX Inc."
-    ).format(org_name=configuration_helpers.get_value('PLATFORM_NAME', settings.PLATFORM_NAME))
+        u"Copyright \u00A9 {year} {org_name}.  All rights reserved.  "
+        u"Do not reuse text or graphics without written permission."
+    ).format(year=datetime.datetime.now().year,
+             org_name=configuration_helpers.get_value('PLATFORM_NAME', settings.PLATFORM_NAME))
 
 
 def _footer_openedx_link():

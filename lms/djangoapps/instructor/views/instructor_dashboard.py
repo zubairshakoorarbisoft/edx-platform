@@ -700,6 +700,9 @@ def _section_data_download(course, access):
         'get_students_who_may_enroll_url': reverse(
             'get_students_who_may_enroll', kwargs={'course_id': six.text_type(course_key)}
         ),
+        'get_students_credits_url': reverse(
+            'get_students_credits', kwargs={'course_id': six.text_type(course_key)}
+        ),
         'get_anon_ids_url': reverse('get_anon_ids', kwargs={'course_id': six.text_type(course_key)}),
         'list_proctored_results_url': reverse(
             'get_proctored_exam_results', kwargs={'course_id': six.text_type(course_key)}

@@ -35,6 +35,7 @@ import os
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 from path import Path as path
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from enterprise.constants import (
     ENTERPRISE_ADMIN_ROLE,
@@ -1516,6 +1517,10 @@ MIDDLEWARE = [
     #'django.contrib.auth.middleware.AuthenticationMiddleware',
     'openedx.core.djangoapps.cache_toolbox.middleware.CacheBackedAuthenticationMiddleware',
 
+    # [CLEARESULT_CUSTOM]
+    'openedx.features.clearesult_features.middlewares.authentication.ClearesultAuthenticationMiddleware',
+    'openedx.features.clearesult_features.middlewares.site_security.SiteAuthenticationMiddleware',
+
     'student.middleware.UserStandingMiddleware',
     'openedx.core.djangoapps.contentserver.middleware.StaticContentServer',
 
@@ -2562,6 +2567,9 @@ INSTALLED_APPS = [
     # Management of per-user schedules
     'openedx.core.djangoapps.schedules',
     'rest_framework_jwt',
+
+    #clearesult custom features
+    'openedx.features.clearesult_features',
 ]
 
 ######################### CSRF #########################################
@@ -2782,6 +2790,35 @@ CORS_ORIGIN_ALLOW_ALL = False
 XDOMAIN_PROXY_CACHE_TIMEOUT = 60 * 15
 
 LOGIN_REDIRECT_WHITELIST = []
+
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/auth/',
+    '/asset',
+    '/api/',
+    '/register',
+    '/admin',
+    '/heartbeat'
+]
+CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+
+CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
+    reverse_lazy('signin_user'),
+    reverse_lazy('register_user'),
+    reverse_lazy('clearesult_features:site_security_code'),
+    reverse_lazy('logout'),
+]
+
+AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
+CLEARESULT_CREDIT_PROVIDERS = [
+    'BPI',
+    'NATE',
+    'RESNET HERS Rater',
+    'AIA',
+    'AEE',
+    'LEED'
+]
 
 ###################### Registration ##################################
 
@@ -3916,3 +3953,14 @@ GITHUB_REPO_ROOT = '/edx/var/edxapp/data'
 
 ##################### SUPPORT URL ############################
 SUPPORT_HOW_TO_UNENROLL_LINK = ''
+
+
+##################### Magento ############################
+MAGENTO_REDIRECT_URL = ''
+MAGENTO_BASE_API_URL = ''
+MAGENTO_LMS_INTEGRATION_TOKEN = ''
+
+##################### Clearesult ############################
+
+# To disable account verification for clearesult user
+FEATURES['ENABLE_AUTOMATIC_ACCOUNT_VERIFICATION'] = True

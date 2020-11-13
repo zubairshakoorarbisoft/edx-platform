@@ -670,7 +670,20 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
         """
         # Get the User, Course ID, and Mode from the request.
 
-        username = request.data.get('user', request.user.username)
+        username = request.data.get('user')
+        if not username:
+            email = request.data.get('email')
+            if email:
+                try:
+                    username = User.objects.get(email=email).username
+                except ObjectDoesNotExist:
+                    return Response(
+                        status=status.HTTP_404_NOT_FOUND,
+                        data={
+                            'message': u'The user with the given email {} does not exist.'.format(email)
+                        }
+                    )
+
         course_id = request.data.get('course_details', {}).get('course_id')
 
         if not course_id:

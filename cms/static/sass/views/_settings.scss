@@ -1178,6 +1178,59 @@
         }
       }
     }
+
+    &.course-credits {
+      .course-credits-header {
+        text-align: right;
+        padding-bottom: $baseline*.5;
+      }
+      .button.new-button {
+        @extend %btn-primary-green;
+        @extend %t-action3;
+        @extend %t-strong;
+
+        .icon {
+          @extend %t-icon5;
+
+          display: inline-block;
+          vertical-align: middle;
+          margin-top: -3px;
+        }
+      }
+      .remove-course-credits-field {
+        color: $red;
+      }
+      .table {
+        width: 100%;
+
+        th {
+          @extend %t-strong;
+          padding: $baseline*.25;
+        }
+        td {
+          border: 1px solid $gray-l3;
+          padding: $baseline*.25;
+        }
+
+        .credit-label {
+          &.type {
+            width: 750px;
+          }
+          &.number {
+            width: 80px;
+          }
+          &.action {
+            width: 25px;
+          }
+        }
+        .credit-type {
+          width: 100%;
+        }
+        .credit-value {
+          width: 70px;
+        }
+      }
+    }
   }
 
   .content-supplementary {

@@ -51,6 +51,7 @@ def apply_settings(django_settings):
         'third_party_auth.pipeline.parse_query_params',
         'social_core.pipeline.social_auth.social_details',
         'social_core.pipeline.social_auth.social_uid',
+        'openedx.features.clearesult_features.auth_pipeline.replace_old_clearesult_app_uid',
         'social_core.pipeline.social_auth.auth_allowed',
         'social_core.pipeline.social_auth.social_user',
         'third_party_auth.pipeline.associate_by_email_if_login_api',
@@ -65,6 +66,7 @@ def apply_settings(django_settings):
         'third_party_auth.pipeline.set_id_verification_status',
         'third_party_auth.pipeline.set_logged_in_cookies',
         'third_party_auth.pipeline.login_analytics',
+        'openedx.features.clearesult_features.auth_pipeline.redirect_to_continuing_education'
     ]
 
     # Add enterprise pipeline elements if the enterprise app is installed

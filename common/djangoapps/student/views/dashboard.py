@@ -44,6 +44,7 @@ from openedx.core.djangoapps.user_api.accounts.utils import is_secondary_email_f
 from openedx.core.djangoapps.util.maintenance_banner import add_maintenance_banner
 from openedx.core.djangoapps.waffle_utils import WaffleFlag, WaffleFlagNamespace
 from openedx.core.djangolib.markup import HTML, Text
+from openedx.features.clearesult_features.utils import get_completed_enrolments
 from openedx.features.enterprise_support.api import get_dashboard_consent_notification
 from shoppingcart.models import CourseRegistrationCode, DonationConfiguration
 from student.api import COURSE_DASHBOARD_PLUGIN_VIEW_NAME
@@ -600,6 +601,9 @@ def student_dashboard(request):
     site_org_whitelist, site_org_blacklist = get_org_black_and_whitelist_for_site()
     course_enrollments = list(get_course_enrollments(user, site_org_whitelist, site_org_blacklist, course_limit))
 
+    complete_enrollments, incomplete_enrollments = get_completed_enrolments(request, course_enrollments)
+    course_enrollments = incomplete_enrollments + complete_enrollments
+
     # Get the entitlements for the user and a mapping to all available sessions for that entitlement
     # If an entitlement has no available sessions, pass through a mock course overview object
     (course_entitlements,
@@ -613,9 +617,6 @@ def student_dashboard(request):
     # Record how many courses there are so that we can get a better
     # understanding of usage patterns on prod.
     monitoring_utils.accumulate('num_courses', len(course_enrollments))
-
-    # Sort the enrollment pairs by the enrollment date
-    course_enrollments.sort(key=lambda x: x.created, reverse=True)
 
     # Retrieve the course modes for each course
     enrolled_course_ids = [enrollment.course_id for enrollment in course_enrollments]
@@ -881,6 +882,8 @@ def student_dashboard(request):
         # TODO START: clean up as part of REVEM-199 (START)
         'course_info': get_dashboard_course_info(user, course_enrollments),
         # TODO START: clean up as part of REVEM-199 (END)
+        'complete_enrollments': complete_enrollments,
+        'incomplete_enrollments': incomplete_enrollments
     }
 
     context_from_plugins = get_plugins_view_context(

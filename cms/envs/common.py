@@ -673,6 +673,9 @@ MIDDLEWARE = [
     # Instead of AuthenticationMiddleware, we use a cache-backed version
     'openedx.core.djangoapps.cache_toolbox.middleware.CacheBackedAuthenticationMiddleware',
 
+    # [CLEARESULT_CUSTOM]
+    'openedx.features.clearesult_features.middlewares.authentication.ClearesultAuthenticationMiddleware',
+
     'student.middleware.UserStandingMiddleware',
     'openedx.core.djangoapps.contentserver.middleware.StaticContentServer',
 
@@ -1495,8 +1498,35 @@ INSTALLED_APPS = [
     # Management of per-user schedules
     'openedx.core.djangoapps.schedules',
     'rest_framework_jwt',
+
+     #clearesult custom features
+    'openedx.features.clearesult_features'
 ]
 
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/auth/',
+    '/asset',
+    '/api/',
+    '/register',
+    '/admin',
+    '/heartbeat'
+    '/oauth2'
+]
+
+CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+
+
+AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
+CLEARESULT_CREDIT_PROVIDERS = [
+    'BPI',
+    'NATE',
+    'RESNET HERS Rater',
+    'AIA',
+    'AEE',
+    'LEED'
+]
 
 ################# EDX MARKETING SITE ##################################
 
@@ -1694,6 +1724,14 @@ ADVANCED_PROBLEM_TYPES = [
     },
     {
         'component': 'staffgradedxblock',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'survey',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'scormxblock',
         'boilerplate_name': None
     }
 ]
@@ -2258,3 +2296,5 @@ DISABLE_DEPRECATED_SIGNIN_URL = False
 # .. toggle_tickets: ARCH-1253
 # .. toggle_status: supported
 DISABLE_DEPRECATED_SIGNUP_URL = False
+
+FEATURES['ENABLE_DEFAULT_COURSE_MODE_CREATION'] = True

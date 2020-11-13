@@ -167,6 +167,11 @@ from openedx.features.course_experience.course_tools import HttpMethod
                     ${HTML(handouts_html)}
                 </div>
             % endif
+            % if credits_fragment:
+                <div class="section section-credits">
+                    ${HTML(credits_fragment.body_html())}
+                </div>
+            % endif
         </aside>
     </div>
     % if course_sock_fragment:

@@ -613,6 +613,7 @@ if FEATURES.get('ENABLE_THIRD_PARTY_AUTH'):
         'social_core.backends.linkedin.LinkedinOAuth2',
         'social_core.backends.facebook.FacebookOAuth2',
         'social_core.backends.azuread.AzureADOAuth2',
+        'openedx.features.clearesult_features.auth_backend.ClearesultAzureADOAuth2',
         'third_party_auth.identityserver3.IdentityServer3',
         'third_party_auth.saml.SAMLAuthBackend',
         'third_party_auth.lti.LTIAuthBackend',
@@ -933,6 +934,30 @@ MAINTENANCE_BANNER_TEXT = ENV_TOKENS.get('MAINTENANCE_BANNER_TEXT', None)
 
 ########################## limiting dashboard courses ######################
 DASHBOARD_COURSE_LIMIT = ENV_TOKENS.get('DASHBOARD_COURSE_LIMIT', None)
+
+########################## Magento Configurations  #######################
+MAGENTO_REDIRECT_URL = ENV_TOKENS.get('MAGENTO_REDIRECT_URL', MAGENTO_REDIRECT_URL)
+MAGENTO_BASE_API_URL = ENV_TOKENS.get('MAGENTO_BASE_API_URL', MAGENTO_BASE_API_URL)
+MAGENTO_LMS_INTEGRATION_TOKEN = ENV_TOKENS.get('MAGENTO_LMS_INTEGRATION_TOKEN', MAGENTO_LMS_INTEGRATION_TOKEN)
+
+################### CLEARESULT SETTINGS ###############################
+
+CLEARESULT_ALLOWED_SUB_PATHS = ENV_TOKENS.get(
+    'CLEARESULT_ALLOWED_SUB_PATHS',
+    CLEARESULT_ALLOWED_SUB_PATHS
+)
+CLEARESULT_ALLOWED_FULL_PATHS = ENV_TOKENS.get(
+    'CLEARESULT_ALLOWED_FULL_PATHS',
+    CLEARESULT_ALLOWED_FULL_PATHS
+)
+AZUREAD_B2C_FORGET_PASSWORD_CODE = ENV_TOKENS.get(
+    'AZUREAD_B2C_FORGET_PASSWORD_CODE',
+    AZUREAD_B2C_FORGET_PASSWORD_CODE
+)
+CLEARESULT_CREDIT_PROVIDERS = ENV_TOKENS.get(
+    'CLEARESULT_CREDIT_PROVIDERS',
+    CLEARESULT_CREDIT_PROVIDERS
+)
 
 ############################### Plugin Settings ###############################
 

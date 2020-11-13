@@ -580,6 +580,14 @@ def get_module_system_for_user(
         Submit a grade for the block.
         """
         if not user.is_anonymous:
+            if block.__class__.__name__ == 'ScormXBlockWithMixins':
+                if (block.data_scorm.get('cmi.success_status') == 'passed'
+                        and block.data_scorm.get('cmi.suspend_data') == '' and event['value'] == 0):
+                    block.lesson_status = 'completed'
+                    block.success_status = 'passed'
+                    block.lesson_score = 1
+                    event['value'] = 1
+
             grades_signals.SCORE_PUBLISHED.send(
                 sender=None,
                 block=block,

@@ -46,6 +46,7 @@ from openedx.core.djangoapps.certificates.api import certificates_viewable_for_c
 from openedx.core.djangoapps.lang_pref.api import get_closest_released_language
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.lib.courses import course_image_url
+from openedx.features.clearesult_features.credits.utils import get_user_course_earned_credits
 from student.models import LinkedInAddToProfileConfiguration
 from util import organizations_helpers as organization_api
 from util.date_utils import strftime_localized
@@ -123,11 +124,14 @@ def _update_certificate_context(context, course, user_certificate, platform_name
     )
 
     # Translators:  This text is bound to the HTML 'title' element of the page and appears in the browser title bar
-    context['document_title'] = _(u"{partner_short_name} {course_number} Certificate | {platform_name}").format(
-        partner_short_name=context['organization_short_name'],
-        course_number=context['course_number'],
-        platform_name=platform_name
-    )
+    # context['document_title'] = _(u"{partner_short_name} {course_number} Certificate | {platform_name}").format(
+    #     partner_short_name=context['organization_short_name'],
+    #     course_number=context['course_number'],
+    #     platform_name=platform_name
+    # )
+
+    # [CLEARESULT_CUSTOM]
+    context['document_title'] = _(u"Certificate of Completion")
 
     # Translators:  This text fragment appears after the student's name (displayed in a large font) on the certificate
     # screen.  The text describes the accomplishment represented by the certificate information displayed to the user
@@ -580,6 +584,9 @@ def render_html_view(request, user_id, course_id):
 
         # Append/Override the existing view context values with certificate specific values
         _update_certificate_context(context, course, user_certificate, platform_name)
+
+        # Append user earned credits in this course
+        context.update({'earned_credits': get_user_course_earned_credits(course.id, user)})
 
         # Append badge info
         _update_badge_context(context, course, user)
