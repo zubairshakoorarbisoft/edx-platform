@@ -12,43 +12,63 @@
         </ul>
         <nav class="nav">
             <ul class="main-menu">
-                <li><a href="{{ ta_home }}">Home</a></li>
-                <li><a href="{{ ta_programe_resources }}">Program Resources</a>
-                    <button class="drop-opener"></button>
-                    <div class="dropdown">
-                        <div class="container">
-                            <ul>
-                                <li>
-                                    <strong class="title">
-                                        <a href="{{ ta_program_announcements }}">Program Announcements</a>
-                                    </strong>
-                                    <p>View Announcement, Program statuses and general announcements.</p>
-                                </li>
-                                <li>
-                                    <strong class="title">
-                                        <a href="{{ ta_news }}">News</a>
-                                    </strong>
-                                    <p>View Latest news, webinars, trade shows, lunch-and-learns and more</p>
-                                </li>
-                                <li>
-                                    <strong class="title">
-                                        <a href="{{ ta_events }}">Events</a>
-                                    </strong>
-                                    <p>Loren ipsum content</p>
-                                </li>
-                                <li>
-                                    <strong class="title">
-                                        <a href="{{ ta_resource }}">Resource</a>
-                                    </strong>
-                                    <p>View Trade Ally Resources</p>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </li>
-                <li><a href="{{ ta_training }}">Training</a></li>
-                <li><a href="{{ ta_faqs }}">FAQs</a></li>
-                <li><a href="{{ ta_contact_us }}">Contact Us</a></li>
+                {% if ta_home %}
+                    <li><a href="{{ ta_home }}">Home</a></li>
+                {% endif %}
+                {% if ta_programe_resources %}
+                    <li><a href="{{ ta_programe_resources }}">Program Resources</a>
+                        {% if ta_program_announcements or ta_news or ta_events or ta_resource %}
+                            <button class="drop-opener"></button>
+                            <div class="dropdown">
+                                <div class="container">
+                                    <ul>
+                                        {% if ta_program_announcements %}
+                                            <li>
+                                                <strong class="title">
+                                                    <a href="{{ ta_program_announcements }}">Program Announcements</a>
+                                                </strong>
+                                                <p>View Announcement, Program statuses and general announcements.</p>
+                                            </li>
+                                        {% endif %}
+                                        {% if ta_news %}
+                                            <li>
+                                                <strong class="title">
+                                                    <a href="{{ ta_news }}">News</a>
+                                                </strong>
+                                                <p>View Latest news, webinars, trade shows, lunch-and-learns and more</p>
+                                            </li>
+                                        {% endif %}
+                                        {% if ta_events %}
+                                            <li>
+                                                <strong class="title">
+                                                    <a href="{{ ta_events }}">Events</a>
+                                                </strong>
+                                                <p>Loren ipsum content</p>
+                                            </li>
+                                        {% endif %}
+                                        {% if ta_resource %}
+                                            <li>
+                                                <strong class="title">
+                                                    <a href="{{ ta_resource }}">Resource</a>
+                                                </strong>
+                                                <p>View Trade Ally Resources</p>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </li>
+                {% endif %}
+                {% if ta_training %}
+                    <li><a href="{{ ta_training }}">Training</a></li>
+                {% endif %}
+                {% if ta_faqs %}
+                    <li><a href="{{ ta_faqs }}">FAQs</a></li>
+                {% endif %}
+                {% if ta_contact_us %}
+                    <li><a href="{{ ta_contact_us }}">Contact Us</a></li>
+                {% endif %}
             </ul>
         </nav>
     </div>
