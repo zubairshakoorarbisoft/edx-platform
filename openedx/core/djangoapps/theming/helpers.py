@@ -360,9 +360,11 @@ def get_config_value_from_site_or_settings(name, site=None, site_config_name=Non
     """
     from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 
+    logger.info('Site Config Name: [%s]', site_config_name)
     if site_config_name is None:
         site_config_name = name
 
+    logger.info('Site name: [%s]', site)
     if site is None:
         site = get_current_site()
 
@@ -373,8 +375,12 @@ def get_config_value_from_site_or_settings(name, site=None, site_config_name=Non
         except SiteConfiguration.DoesNotExist:
             pass
 
+    logger.info('Site Configuration value: [%s]', site_configuration)
+
     value_from_settings = getattr(settings, name, None)
+    logger.info('Default value: [%s]', value_from_settings)
     if site_configuration is not None:
+        logger.info('Final value: [%s]', site_configuration.get_value(site_config_name, default=value_from_settings))
         return site_configuration.get_value(site_config_name, default=value_from_settings)
     else:
         return value_from_settings
