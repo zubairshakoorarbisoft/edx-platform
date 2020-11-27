@@ -18,7 +18,7 @@ class MagentoClient(object):
     _GET_METHOD = 'GET'
     _CONTENT_TYPE = 'application/json'
 
-    def __init__(self, email):
+    def __init__(self, user):
         """
         Constructs a new instance of the Magento client.
         """
@@ -27,7 +27,7 @@ class MagentoClient(object):
         self._MAGENTO_LMS_INTEGRATION_TOKEN = settings.MAGENTO_LMS_INTEGRATION_TOKEN
         self._MAGENTO_USER_KEY = None
 
-        self.generate_costomer_token(email)
+        self.generate_costomer_token(user)
         if not self._MAGENTO_USER_KEY:
             raise MissingMagentoUserKey("Magento Client Error: Unable to get User Key from Magento.")
 
@@ -114,9 +114,12 @@ class MagentoClient(object):
                 return
         raise InvalidMagentoResponseError("Unable to add product in Magento user cart.")
 
-    def generate_costomer_token(self, user_email):
+    def generate_costomer_token(self, user):
         data = {
-            'email': user_email
+            'email': user.email,
+            'firstName': user.first_name,
+            'lastName': user.last_name,
+            'username': user.username
         }
         success, data = self.handle_request(
             'costomer/token/getUserToken',

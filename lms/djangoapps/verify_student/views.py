@@ -407,7 +407,7 @@ class PayAndVerifyView(View):
 
         if  settings.FEATURES.get('ENABLE_MAGENTO_CHECKOUT', True):
             try:
-                magento_client = MagentoClient(request.user.email)
+                magento_client = MagentoClient(request.user)
                 magento_client.add_product_to_cart(relevant_course_mode.sku)
                 return redirect(magento_client._REDIRECT_URL)
 
