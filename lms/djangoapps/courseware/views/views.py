@@ -258,6 +258,9 @@ def courses(request):
         else:
             courses_list = sort_by_announcement(courses_list)
 
+    if not settings.FEATURES.get('SHOW_ARCHIVED_COURSES_IN_LISTING'):
+        courses_list = [course for course in courses_list if not course.has_ended()]
+
     # Add marketable programs to the context.
     programs_list = get_programs_with_type(request.site, include_hidden=False)
 

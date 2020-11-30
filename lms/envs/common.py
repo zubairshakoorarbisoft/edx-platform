@@ -3964,3 +3964,6 @@ MAGENTO_LMS_INTEGRATION_TOKEN = ''
 
 # To disable account verification for clearesult user
 FEATURES['ENABLE_AUTOMATIC_ACCOUNT_VERIFICATION'] = True
+
+# To hide courses from discover new tab
+FEATURES['SHOW_ARCHIVED_COURSES_IN_LISTING'] = False

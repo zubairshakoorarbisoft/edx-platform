@@ -120,6 +120,9 @@ def index(request, extra_context=None, user=AnonymousUser()):
 
     courses = get_courses(user)
 
+    if not settings.FEATURES.get('SHOW_ARCHIVED_COURSES_IN_LISTING'):
+        courses = [course for course in courses if not course.has_ended()]
+
     if configuration_helpers.get_value(
         "ENABLE_COURSE_SORTING_BY_START_DATE",
         settings.FEATURES["ENABLE_COURSE_SORTING_BY_START_DATE"],
