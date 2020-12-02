@@ -103,6 +103,8 @@ class SubscriptionRetrieveUpdateViewTests(TestCase):
         """
         Verify the view supports updating a user subscription.
         """
+        import pdb
+        pdb.set_trace()
         subscription_id = randint(10, 20)
         path = reverse('subscriptions_api:v1:retrieve-update', args=[subscription_id])
         expected_data = {
@@ -111,6 +113,7 @@ class SubscriptionRetrieveUpdateViewTests(TestCase):
             'user': self.user.id,
             'max_allowed_courses': 4,
             'subscription_type': UserSubscription.LIMITED_ACCESS,
+            # 'description': 'description text',
         }
 
         response = self.client.put(path, json.dumps(expected_data), content_type=JSON_CONTENT_TYPE, **request_kwargs)
