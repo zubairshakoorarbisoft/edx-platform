@@ -63,6 +63,10 @@ class MagentoClient(object):
             return True, data
 
         else:
+            if data and data.get('message') == 'The requested qty exceeds the maximum qty allowed in shopping cart':
+                logger.info("Max quantity allowed check failed at Magento side.")
+                return True, data
+
             logger.error("Magento API return response with status code: %s.", response.status_code)
             logger.error("Magento API return Error response: %s.", json.dumps(data))
             return False, data
