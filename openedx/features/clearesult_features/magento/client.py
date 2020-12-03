@@ -5,6 +5,7 @@ import json
 import logging
 import requests
 from django.conf import settings
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.clearesult_features.magento.exceptions import MissingMagentoUserKey, InvalidMagentoResponseError
 
 logger = logging.getLogger(__name__)
@@ -22,9 +23,9 @@ class MagentoClient(object):
         """
         Constructs a new instance of the Magento client.
         """
-        self._BASE_API_END_POINT = settings.MAGENTO_BASE_API_URL
-        self._REDIRECT_URL = settings.MAGENTO_REDIRECT_URL
-        self._MAGENTO_LMS_INTEGRATION_TOKEN = settings.MAGENTO_LMS_INTEGRATION_TOKEN
+        self._BASE_API_END_POINT = configuration_helpers.get_value('MAGENTO_BASE_API_URL', None)
+        self._REDIRECT_URL = configuration_helpers.get_value('MAGENTO_REDIRECT_URL', None)
+        self._MAGENTO_LMS_INTEGRATION_TOKEN = configuration_helpers.get_value('MAGENTO_LMS_INTEGRATION_TOKEN', None)
         self._MAGENTO_USER_KEY = None
 
         self.generate_costomer_token(user)
