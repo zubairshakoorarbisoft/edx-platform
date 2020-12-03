@@ -3954,6 +3954,11 @@ GITHUB_REPO_ROOT = '/edx/var/edxapp/data'
 ##################### SUPPORT URL ############################
 SUPPORT_HOW_TO_UNENROLL_LINK = ''
 
+##################### Magento ############################
+MAGENTO_REDIRECT_URL = ''
+MAGENTO_BASE_API_URL = ''
+MAGENTO_LMS_INTEGRATION_TOKEN = ''
+
 ##################### Clearesult ############################
 
 # To disable account verification for clearesult user
