@@ -119,3 +119,69 @@ class ClearesultUserSiteProfile(models.Model):
 
     def __str__(self):
         return '{} - {}'.format(self.site, self.user)
+
+
+class ClearesulCourse(models.Model):
+    """
+    This model saves clearesult course type.
+    Clearesult courses can have following types:
+    - Public (site value will be null)
+    - Private to specific site
+    """
+
+    course_id = CourseKeyField(max_length=255, db_index=True, unique=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Courses'
+
+    def __str__(self):
+        return '{} - {}'.format( self.course_id, self.site)
+
+
+class ClearesulCatalog(models.Model):
+    """
+    This model saves clearesult catalogs.
+    Clearesult Catalogs has following types types:
+    - Public (site value will be null, public catalog can only contain public courses)
+    - Private to specific site (can only contain local/private courses linked to that site)
+    """
+
+    name = models.CharField(max_length=255)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
+    clearesult_courses = models.ManyToManyField(ClearesulCourse, related_name='courses', blank=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Catalogs'
+        unique_together = (
+            ('name', 'site')
+        )
+
+    def __str__(self):
+        return '{} - {}'.format( self.site, self.name)
+
+
+class ClearesulGroupLinkage(models.Model):
+    """
+    This model saves clearesult user groups and catalogs assigned to that group.
+
+    Each user group will be linked to specific site and can be linked to any public catalogs
+    or local catalogs linked to it's site e.g. site_b user_groups can not be linked with site_a catalogs
+    """
+
+    name = models.CharField(max_length=255)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    users =  models.ManyToManyField(User, blank=True)
+    assigned_catalogs = models.ManyToManyField(ClearesulCatalog, related_name='catalogs', blank=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult User Groups'
+        unique_together = (
+            ('name', 'site')
+        )
+
+    def __str__(self):
+        return '{} - {}'.format( self.site, self.name)

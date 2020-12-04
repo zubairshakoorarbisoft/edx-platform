@@ -12,7 +12,10 @@ from openedx.features.clearesult_features.models import (
     UserCreditsProfile,
     ClearesultUserProfile,
     ClearesultSiteConfiguration,
-    ClearesultUserSiteProfile
+    ClearesultUserSiteProfile,
+    ClearesulGroupLinkage,
+    ClearesulCatalog,
+    ClearesulCourse
 )
 
 
@@ -51,6 +54,24 @@ class ClearesultUserSiteProfileAdmin(admin.ModelAdmin):
     """
     list_display = ('user', 'site')
 
+class ClearesulCourseAdmin(admin.ModelAdmin):
+    """
+    Admin config clearesult courses.
+    """
+    list_display = ('course_id', 'site')
+
+class ClearesulCatalogAdmin(admin.ModelAdmin):
+    """
+    Admin config clearesult credit providers.
+    """
+    list_display = ('name', 'site')
+
+class ClearesulGroupLinkageAdmin(admin.ModelAdmin):
+    """
+    Admin config clearesult credit providers.
+    """
+    list_display = ('name', 'site')
+
 
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
@@ -58,3 +79,6 @@ admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
 admin.site.register(ClearesultUserProfile)
 admin.site.register(ClearesultSiteConfiguration, ClearesultSiteConfigurationAdmin)
 admin.site.register(ClearesultUserSiteProfile, ClearesultUserSiteProfileAdmin)
+admin.site.register(ClearesulCourse, ClearesulCourseAdmin)
+admin.site.register(ClearesulCatalog, ClearesulCatalogAdmin)
+admin.site.register(ClearesulGroupLinkage, ClearesulGroupLinkageAdmin)
