@@ -130,9 +130,11 @@ def delete_all_notes_for_user(user):
     headers = {
         "x-annotator-auth-token": get_edxnotes_id_token(user),
     }
+    log.warning( "Notes Header Value: '%s'", headers )
     data = {
         "user": anonymous_id_for_user(user, None)
     }
+    log.warning( "Notes Data Value: '%s'", data )
     try:
         response = requests.post(
             url=url,
@@ -140,6 +142,7 @@ def delete_all_notes_for_user(user):
             data=data,
             timeout=(settings.EDXNOTES_CONNECT_TIMEOUT, settings.EDXNOTES_READ_TIMEOUT)
         )
+        log.warning( "Notes Response value: '%s'", response )
     except RequestException:
         log.error("Failed to connect to edx-notes-api: url=%s, params=%s", url, str(headers))
         raise EdxNotesServiceUnavailable(_("EdxNotes Service is unavailable. Please try again in a few minutes."))

@@ -263,6 +263,9 @@ class RetireUserView(APIView):
         except RetirementStateError as exc:
             return Response(text_type(exc), status=status.HTTP_405_METHOD_NOT_ALLOWED)
         except Exception as exc:  # pylint: disable=broad-except
+            log.warning(
+                "Notes Retire Exception: '%s'", exc
+            )
             return Response(text_type(exc), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
