@@ -962,6 +962,13 @@ AZURE_AD_B2C_LOGOUT_URL = ENV_TOKENS.get(
     'AZURE_AD_B2C_LOGOUT_URL',
     ''
 )
+###################### SSO Provider configurations ###################
+
+GLOBALLY_ENABLED_SSO_PROVIDERS = ENV_TOKENS.get(
+    'GLOBALLY_ENABLED_SSO_PROVIDERS',
+    GLOBALLY_ENABLED_SSO_PROVIDERS
+)
+
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded

@@ -3966,3 +3966,8 @@ FEATURES['ENABLE_AUTOMATIC_ACCOUNT_VERIFICATION'] = True
 
 # To hide courses from discover new tab
 FEATURES['SHOW_ARCHIVED_COURSES_IN_LISTING'] = False
+
+###################### SSO Provider configurations ###################
+GLOBALLY_ENABLED_SSO_PROVIDERS = [
+    'clearesult-azuread-oauth2'
+]
