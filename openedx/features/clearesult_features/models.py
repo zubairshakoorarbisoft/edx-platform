@@ -1,7 +1,9 @@
 """
 Clearesult Models.
 """
-from enum import unique
+import collections
+import logging
+
 from config_models.models import ConfigurationModel
 from fernet_fields import EncryptedField
 from django.db import models
@@ -9,6 +11,9 @@ from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from jsonfield.fields import JSONField
+
+logger = logging.getLogger(__name__)
 
 APP_LABEL = 'clearesult_features'
 
@@ -51,7 +56,7 @@ class UserCreditsProfile(models.Model):
             ('user', 'credit_type')
         )
 
-    user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE, related_name='user_credit_profile')
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
     credit_id = models.CharField(max_length=255)
     earned_course_credits = models.ManyToManyField(ClearesultCourseCredit, related_name='earned_credits', blank=True)
@@ -83,9 +88,28 @@ class ClearesultUserProfile(models.Model):
     company = models.CharField(max_length=255, blank=True)
     state_or_province = models.CharField(max_length=255, blank=True)
     postal_code = models.CharField(max_length=50, blank=True)
+    extensions = JSONField(
+        null=False,
+        blank=True,
+        default=dict,
+        load_kwargs={'object_pairs_hook': collections.OrderedDict}
+    )
 
     def __str__(self):
         return 'Clearesult user profile for {}.'.format(self.user.username)
+
+    def get_extension_value(self, name, default=None):
+        try:
+            return self.extensions.get(name, default)
+        except AttributeError as error:
+            logger.exception(u'Invalid JSON data. \n [%s]', error)
+
+    def set_extension_value(self, name, value=None):
+        try:
+            self.extensions[name] = value
+            self.save()
+        except AttributeError as error:
+            logger.exception(u'Invalid JSON data. \n [%s]', error)
 
 
 class ClearesultSiteConfiguration(ConfigurationModel):

@@ -1,10 +1,12 @@
 """
 Utilities for user authentication.
 """
+from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
+
 from logging import getLogger
 
 from openedx.features.clearesult_features.models import ClearesultUserSiteProfile, ClearesultSiteConfiguration
-
 
 LOGGER = getLogger(__name__)
 
@@ -51,3 +53,30 @@ def authenticate_site_session(request):
         ))
 
     request.session[_get_authentication_key_for_site(request)] = True
+
+
+def get_next_redirect_page_url(request):
+    user = request.user
+
+    next_url = request.GET.get('next')
+    if not next_url:
+        next_url = '/dashboard'
+
+    try:
+        clearesult_profile = user.clearesult_profile
+        has_already_visited_continuing_education = clearesult_profile.get_extension_value(
+            'has_visited_continuing_education_form', False)
+
+        if has_already_visited_continuing_education:
+            return next_url
+
+        clearesult_profile.set_extension_value('has_visited_continuing_education_form', True)
+
+    except ObjectDoesNotExist:
+        LOGGER.error('Clearesult User Profile Doesn\'t Exist for user {user}'.format(user=request.user.username))
+
+    next_url = '{url}?next={next}'.format(
+        url=reverse('clearesult_features:continuing_education'),
+        next=next_url)
+
+    return next_url

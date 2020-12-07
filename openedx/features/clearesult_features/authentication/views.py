@@ -4,7 +4,10 @@ from django.shortcuts import redirect
 from edxmako.shortcuts import render_to_response
 
 from openedx.features.clearesult_features.authentication.forms import SiteSecurityCodeForm
-from openedx.features.clearesult_features.authentication.utils import authenticate_site_session
+from openedx.features.clearesult_features.authentication.utils import (
+    authenticate_site_session,
+    get_next_redirect_page_url
+)
 from openedx.features.clearesult_features.authentication.permissions import non_site_authenticated_user_required
 
 
@@ -22,9 +25,8 @@ class SiteSecurityView(View):
 
         if form.is_valid():
             authenticate_site_session(request)
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
-            return redirect('/dashboard')
+            next_page_url = get_next_redirect_page_url(request)
+            if next_page_url:
+                return redirect(next_page_url)
 
         return render_to_response(self.template_name, {'form': form})
