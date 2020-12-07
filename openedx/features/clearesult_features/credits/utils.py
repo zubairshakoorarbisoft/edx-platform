@@ -83,11 +83,11 @@ def remove_user_cousre_credits_if_exist(course_id, user):
 
 
 def get_user_course_earned_credits(course_id, user):
-    result = ClearesultCourseCredit.objects.none()
+    result = set();
     user_credits = UserCreditsProfile.objects.filter(user=user)
 
     for user_credit in user_credits:
-        result = result.union(user_credit.earned_course_credits.filter(course_id=course_id))
+        result = result.union(set(user_credit.earned_course_credits.filter(course_id=course_id)))
 
     return [{'name': r.credit_type.name, 'code': r.credit_type.short_code, 'credits': r.credit_value} for r in result]
 
