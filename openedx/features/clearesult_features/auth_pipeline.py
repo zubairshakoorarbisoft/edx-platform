@@ -55,14 +55,18 @@ def update_clearesult_user_profile(request, response, user=None, *args, **kwargs
     """
     if user:
         try:
-            instance, _ = ClearesultUserProfile.update_or_create(
+            instance, created = ClearesultUserProfile.objects.update_or_create(
                 user=user,
                 defaults={
-                    'job_title': response.get('jobTitle'),
-                    'company': response.get('extension_Client'),
-                    'state_or_province': response.get('state'),
-                    'postal_code': response.get('postalCode')
+                    'job_title': response.get('jobTitle', ''),
+                    'company': response.get('extension_Client', ''),
+                    'state_or_province': response.get('state', ''),
+                    'postal_code': response.get('postalCode', '')
                 }
             )
+            if created:
+                logger.info('Success: The clearesult user profile has been created for user {}.'.format(user.email))
+            else:
+                logger.info('Success: The clearesult user profile has been updated for user {}.'.format(user.email))
         except AttributeError:
-            logger.error('Data provided by auth-provider is not appropriate')
+            logger.error('Failed: Could not create/update clearesult user profile.')
