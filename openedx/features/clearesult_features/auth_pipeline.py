@@ -11,6 +11,7 @@ from social_django.models import UserSocialAuth
 from third_party_auth import pipeline
 
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
+from openedx.features.clearesult_features.models import ClearesultUserProfile
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -46,3 +47,22 @@ def redirect_to_continuing_education(new_association, auth_entry, *_, **__):
     """
     if new_association and auth_entry == pipeline.AUTH_ENTRY_REGISTER:
         return redirect(reverse('clearesult_features:continuing_education'))
+
+
+def update_clearesult_user_profile(request, response, user=None, *args, **kwargs):
+    """
+    Updates clearesult user profile data coming from Azure AD B2C OAuth provider.
+    """
+    if user:
+        try:
+            instance, _ = ClearesultUserProfile.update_or_create(
+                user=user,
+                defaults={
+                    'job_title': response.get('jobTitle'),
+                    'company': response.get('extension_Client'),
+                    'state_or_province': response.get('state'),
+                    'postal_code': response.get('postalCode')
+                }
+            )
+        except AttributeError:
+            logger.error('Data provided by auth-provider is not appropriate')
