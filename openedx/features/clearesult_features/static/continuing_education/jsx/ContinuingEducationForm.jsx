@@ -89,6 +89,20 @@ export default function ContinuingEducationForm({ context }) {
         }
     }
 
+    function handleOnSkipClick() {
+        const queryParamsString = window.location.search.substr(1);
+        const queryParams = queryParamsString.split('&').reduce((accumulator, singleQueryParam) => {
+          const [key, value] = singleQueryParam.split('=');
+          accumulator[key] = value;
+          return accumulator;
+        }, {});
+        if (queryParams.next){
+            window.location.href = queryParams.next;
+        } else {
+            window.location.href = '/dashboard';
+        }
+    }
+
     useEffect(() => {
         loadInitialData();
     }, []);
@@ -101,7 +115,11 @@ export default function ContinuingEducationForm({ context }) {
                     <h3>Loading data...</h3>
                 ) : (
                     <div>
-                        <AddProviderForm choices={availableProviders} handleAddProvider={handleAddProvider} />
+                        <AddProviderForm
+                            choices={availableProviders}
+                            handleAddProvider={handleAddProvider}
+                            handleOnSkipClick={handleOnSkipClick}
+                        />
                         <ProviderUpdateForm
                             profiles={userCreditProfiles}
                             handleDeleteProvider={handleDeleteProviderProfile}

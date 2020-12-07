@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export default function AddProviderForm({ choices, handleAddProvider }) {
+export default function AddProviderForm({ choices, handleAddProvider, handleOnSkipClick }) {
     const [selected, setSelected] = useState("");
     const [providerId, setProviderId] = useState("");
 
@@ -49,13 +49,21 @@ export default function AddProviderForm({ choices, handleAddProvider }) {
                             value={providerId}
                             onChange={handleProviderIdChange}
                         ></input>
-                        <button
-                            disabled={choices.length === 0 || !providerId.trim()}
-                            className="btn btn-primary"
-                            onClick={handleOnClick}
-                        >
-                            Add
-                        </button>
+                        <div className="btn-holder">
+                            <button
+                                disabled={choices.length === 0 || !providerId.trim()}
+                                className="btn btn-primary"
+                                onClick={handleOnClick}
+                            >
+                                Add
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleOnSkipClick}
+                            >
+                                Skip and Continue
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <div>
