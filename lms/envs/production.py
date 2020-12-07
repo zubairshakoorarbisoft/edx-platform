@@ -958,7 +958,10 @@ CLEARESULT_CREDIT_PROVIDERS = ENV_TOKENS.get(
     'CLEARESULT_CREDIT_PROVIDERS',
     CLEARESULT_CREDIT_PROVIDERS
 )
-
+AZURE_AD_B2C_LOGOUT_URL = ENV_TOKENS.get(
+    'AZURE_AD_B2C_LOGOUT_URL',
+    ''
+)
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
