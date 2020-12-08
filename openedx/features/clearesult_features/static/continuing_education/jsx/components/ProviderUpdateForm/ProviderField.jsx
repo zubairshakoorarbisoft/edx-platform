@@ -22,10 +22,10 @@ export default function ProviderField({ id, providerName, providerId, handleUpda
 
     return (
         <div className="update-block">
-            <label>Provider</label>
-            <input placeholder="Provider" readOnly={true} disabled value={providerName} />
-            <label>ID</label>
-            <input placeholder="ID" value={updatedId} onChange={handleChange}></input>
+            <label>Organization</label>
+            <input placeholder="Organization" readOnly={true} disabled value={providerName} />
+            <label>Account ID</label>
+            <input placeholder="Account ID" value={updatedId} onChange={handleChange}></input>
             <div className="btn-holder">
                 <button className="btn btn-primary" disabled={!canUpdate} onClick={handleClick}>
                     Update
