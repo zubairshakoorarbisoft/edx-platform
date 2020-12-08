@@ -332,6 +332,11 @@ class ProviderConfig(ConfigurationModel):
         """
         Determines if the provider is able to be used with the current site.
         """
+        if (
+            settings.FEATURES.get('DISABLE_SITE_CHECK_FOR_SSO', True) and
+            self.slug in getattr(settings, 'GLOBALLY_ENABLED_SSO_PROVIDERS', [])
+        ):
+            return self.enabled
         return self.enabled and self.site_id == Site.objects.get_current(get_current_request()).id
 
 

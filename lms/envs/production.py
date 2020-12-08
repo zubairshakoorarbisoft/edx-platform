@@ -958,6 +958,16 @@ CLEARESULT_CREDIT_PROVIDERS = ENV_TOKENS.get(
     'CLEARESULT_CREDIT_PROVIDERS',
     CLEARESULT_CREDIT_PROVIDERS
 )
+AZURE_AD_B2C_LOGOUT_URL = ENV_TOKENS.get(
+    'AZURE_AD_B2C_LOGOUT_URL',
+    AZURE_AD_B2C_LOGOUT_URL
+)
+###################### SSO Provider configurations ###################
+
+GLOBALLY_ENABLED_SSO_PROVIDERS = ENV_TOKENS.get(
+    'GLOBALLY_ENABLED_SSO_PROVIDERS',
+    GLOBALLY_ENABLED_SSO_PROVIDERS
+)
 
 ############################### Plugin Settings ###############################
 

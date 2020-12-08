@@ -2819,7 +2819,7 @@ CLEARESULT_CREDIT_PROVIDERS = [
     'AEE',
     'LEED'
 ]
-
+AZURE_AD_B2C_LOGOUT_URL: 'https://clrdpb2c.b2clogin.com/clrdpb2c.onmicrosoft.com/{policy}/oauth2/v2.0/logout?post_logout_redirect_uri={post_logout_redirect_uri}'
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
@@ -3966,3 +3966,8 @@ FEATURES['ENABLE_AUTOMATIC_ACCOUNT_VERIFICATION'] = True
 
 # To hide courses from discover new tab
 FEATURES['SHOW_ARCHIVED_COURSES_IN_LISTING'] = False
+
+###################### SSO Provider configurations ###################
+GLOBALLY_ENABLED_SSO_PROVIDERS = [
+    'clearesult-azuread-oauth2'
+]
