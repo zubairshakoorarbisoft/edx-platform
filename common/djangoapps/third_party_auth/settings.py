@@ -63,7 +63,7 @@ def apply_settings(django_settings):
         'social_core.pipeline.social_auth.load_extra_data',
         'social_core.pipeline.user.user_details',
         'third_party_auth.pipeline.user_details_force_sync',
-        'openedx.features.clearesult_features.auth_pipeline.update_clearesult_user_profile',
+        'openedx.features.clearesult_features.auth_pipeline.update_clearesult_user_and_profile',
         'third_party_auth.pipeline.set_id_verification_status',
         'third_party_auth.pipeline.set_logged_in_cookies',
         'third_party_auth.pipeline.login_analytics',
