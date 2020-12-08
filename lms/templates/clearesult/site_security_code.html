@@ -2,17 +2,20 @@
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 from openedx.core.djangolib.js_utils import js_escaped_string, dump_js_escaped_json
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+
+contact_url = configuration_helpers.get_value('TRADE_ALLY_URLS', {}).get('CONTACT_US', '#')
 %>
 <%inherit file="../main.html"/>
 <%namespace name="static" file="../static_content.html"/>
 <%block name="title">
     <title>
-        ${_("Security validation - {platform_name}").format(platform_name=platform_name)}
+        ${_("Security Verification - {platform_name}").format(platform_name=platform_name)}
     </title>
 </%block>
 <%block name="body">
 <div class="container text-center">
-    <h3>Please enter the security code to proceed further.</h3>
+    <h3>Please enter the verification code that was provided to you. To get a verification code, <a href="${contact_url}">contact our team</a> and we'll be in touch shortly.</h3>
     <div class="container">
         <form method='POST'>
             <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}"/>
