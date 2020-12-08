@@ -551,7 +551,7 @@ CLEARESULT_CREDIT_PROVIDERS = ENV_TOKENS.get(
 )
 AZURE_AD_B2C_LOGOUT_URL = ENV_TOKENS.get(
     'AZURE_AD_B2C_LOGOUT_URL',
-    AZURE_AD_B2C_LOGOUT_URL
+    ''
 )
 ####################### Plugin Settings ##########################
 
