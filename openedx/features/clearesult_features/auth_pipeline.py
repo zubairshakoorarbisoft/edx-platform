@@ -49,12 +49,20 @@ def redirect_to_continuing_education(new_association, auth_entry, *_, **__):
         return redirect(reverse('clearesult_features:continuing_education'))
 
 
-def update_clearesult_user_profile(request, response, user=None, *args, **kwargs):
+def update_clearesult_user_and_profile(request, response, user=None, *args, **kwargs):
     """
-    Updates clearesult user profile data coming from Azure AD B2C OAuth provider.
+    Updates clearesult user and his profile data coming from Azure AD B2C OAuth provider.
     """
     if user:
         try:
+            name = response.get('name', 'N/A N/A').split(' ')
+            user.first_name = name[0]
+            if len(name) > 1:
+                user.last_name = name[1]
+            else:
+                user.last_name = 'N/A'
+            user.save()
+
             instance, created = ClearesultUserProfile.objects.update_or_create(
                 user=user,
                 defaults={
@@ -65,8 +73,8 @@ def update_clearesult_user_profile(request, response, user=None, *args, **kwargs
                 }
             )
             if created:
-                logger.info('Success: The clearesult user profile has been created for user {}.'.format(user.email))
+                logger.info('Success: The clearesult user and his profile has been created for user {}.'.format(user.email))
             else:
-                logger.info('Success: The clearesult user profile has been updated for user {}.'.format(user.email))
+                logger.info('Success: The clearesult user and his profile has been updated for user {}.'.format(user.email))
         except AttributeError:
-            logger.error('Failed: Could not create/update clearesult user profile.')
+            logger.error('Failed: Could not create/update clearesult user and his profile.')
