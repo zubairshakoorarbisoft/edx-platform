@@ -1527,7 +1527,7 @@ CLEARESULT_CREDIT_PROVIDERS = [
     'AEE',
     'LEED'
 ]
-AZURE_AD_B2C_LOGOUT_URL: 'https://clrdpb2c.b2clogin.com/clrdpb2c.onmicrosoft.com/{policy}/oauth2/v2.0/logout?post_logout_redirect_uri={post_logout_redirect_uri}'
+AZURE_AD_B2C_LOGOUT_URL = 'https://clrdpb2c.b2clogin.com/clrdpb2c.onmicrosoft.com/{policy}/oauth2/v2.0/logout?post_logout_redirect_uri={post_logout_redirect_uri}'
 ################# EDX MARKETING SITE ##################################
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'
