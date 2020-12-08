@@ -6,7 +6,9 @@ import re
 import six.moves.urllib.parse as parse  # pylint: disable=import-error
 from django.conf import settings
 from django.contrib.auth import logout
+from django.utils.decorators import method_decorator
 from django.utils.http import urlencode
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import TemplateView
 from oauth2_provider.models import Application
 from six.moves.urllib.parse import parse_qs, urlsplit, urlunsplit  # pylint: disable=import-error
@@ -15,7 +17,10 @@ from openedx.core.djangoapps.user_authn.cookies import delete_logged_in_cookies
 from openedx.core.djangoapps.user_authn.utils import is_safe_login_or_logout_redirect
 from third_party_auth import pipeline as tpa_pipeline
 
+xframe_options_exempt_m = method_decorator(xframe_options_exempt, name='dispatch')
 
+
+@xframe_options_exempt_m
 class LogoutView(TemplateView):
     """
     Logs out user and redirects.
