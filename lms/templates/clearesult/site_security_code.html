@@ -14,19 +14,25 @@ contact_url = configuration_helpers.get_value('TRADE_ALLY_URLS', {}).get('CONTAC
     </title>
 </%block>
 <%block name="body">
-<div class="container text-center">
-    <h3>Please enter the verification code that was provided to you. To get a verification code, <a href="${contact_url}">contact our team</a> and we'll be in touch shortly.</h3>
-    <div class="container">
-        <form method='POST'>
-            <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}"/>
-            <div class="container">
-                ${form.as_p()}
-            </div>
-                <div class="btn-holder">
-                    <button class="btn btn-primary red" type='submit'>Submit</button>
+<div class="contanier">
+    <div class="edu-holder">
+        <div class="edu-holder-container">
+            <p>Please enter the verification code that was provided to you. To get a verification code, <a href="${contact_url}">contact our team</a> and we'll be in touch shortly.</p>
+            <br />
+            <div class="form-holder">
+                <div class="form-area">
+                    <form method='POST'>
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}"/>
+                        <div>
+                            ${form.as_p()}
+                        </div>
+                        <div class="btn-holder">
+                            <button class="btn btn-primary" type='submit'>Submit</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
- </%block>
+</%block>

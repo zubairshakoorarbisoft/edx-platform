@@ -19,7 +19,7 @@ export default function ProviderUpdateForm({ profiles, handleUpdateProvider, han
                             </div>
                         ))
                     ) : (
-                        <h4>No existing accounts found!</h4>
+                        <p className="text-error error">No existing accounts found!</p>
                     )}
             </div>
         </div>
