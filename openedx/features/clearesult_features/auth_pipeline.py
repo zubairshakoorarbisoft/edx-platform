@@ -55,14 +55,8 @@ def update_clearesult_user_and_profile(request, response, user=None, *args, **kw
     """
     if user:
         try:
-            name = response.get('name', 'N/A N/A').split(' ')
-            user.first_name = name[0]
-            if len(name) > 1:
-                user.last_name = name[1]
-            else:
-                user.last_name = 'N/A'
-            user.save()
-
+            full_name = response.get('name', 'N/A N/A').split(' ')
+            _set_user_first_and_last_name(user, full_name)
             instance, created = ClearesultUserProfile.objects.update_or_create(
                 user=user,
                 defaults={
@@ -73,8 +67,18 @@ def update_clearesult_user_and_profile(request, response, user=None, *args, **kw
                 }
             )
             if created:
-                logger.info('Success: The clearesult user and his profile has been created for user {}.'.format(user.email))
+                logger.info('Success: The clearesult user and his profile have been created for user {}.'.format(user.email))
             else:
-                logger.info('Success: The clearesult user and his profile has been updated for user {}.'.format(user.email))
+                logger.info('Success: The clearesult user and his profile have been updated for user {}.'.format(user.email))
         except AttributeError:
             logger.error('Failed: Could not create/update clearesult user and his profile.')
+
+
+def _set_user_first_and_last_name(user, full_name):
+    if not user.first_name:
+        user.first_name = full_name[0]
+    if len(full_name) > 1 and not user.last_name:
+        user.last_name = full_name[1]
+    else:
+        user.last_name = 'N/A'
+    user.save()
