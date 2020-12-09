@@ -21,6 +21,23 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
         setProviderId(newValue);
     }
 
+    function renderButton() {
+        if (document.referrer.includes('clearesult/site_security')) {
+          return (
+            <button
+                className="btn btn-primary"
+                onClick={handleOnSkipClick}
+            >
+                Continue
+            </button>
+          );
+        } else {
+          return (
+              <div></div>
+          );
+        }
+    }
+
     return (
         <div>
             <h3><p>If you have a continuing education account, please select the name of the organization and enter your account ID, then click Add.
@@ -59,12 +76,7 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
                             >
                                 Add
                             </button>
-                            <button
-                                className="btn btn-primary"
-                                onClick={handleOnSkipClick}
-                            >
-                                Continue
-                            </button>
+                            {renderButton()}
                         </div>
                     </div>
                 ) : (
