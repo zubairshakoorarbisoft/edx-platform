@@ -25,6 +25,7 @@ import django.utils
 from django.utils.translation import get_language, to_locale
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 
+from openedx.core.djangoapps.site_configuration.helpers import get_configuration_value
 from xmodule.contentstore.django import contentstore
 from xmodule.modulestore.draft_and_published import BranchSettingMixin
 from xmodule.modulestore.mixed import MixedModuleStore
@@ -419,6 +420,10 @@ def _get_modulestore_branch_setting():
         branch = None
         hostname = get_current_request_hostname()
         if hostname:
+            # [CLEARESULT CUSTOM]
+            # Here we are checking if the request is from Preview site simply allow the draft view
+            if get_configuration_value('PREVIEW_LMS_BASE', '') == hostname:
+                return 'draft-preferred'
             # get mapping information which is defined in configurations
             mappings = getattr(settings, 'HOSTNAME_MODULESTORE_DEFAULT_MAPPINGS', None)
 

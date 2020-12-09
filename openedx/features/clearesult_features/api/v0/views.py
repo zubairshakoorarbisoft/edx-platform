@@ -50,7 +50,7 @@ class UserCreditProfileViewset(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return user.usercreditsprofile_set.all()
+        return user.user_credit_profile.all()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

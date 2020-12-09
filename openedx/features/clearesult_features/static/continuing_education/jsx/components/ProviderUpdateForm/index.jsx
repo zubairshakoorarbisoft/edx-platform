@@ -4,7 +4,7 @@ import ProviderField from "./ProviderField";
 export default function ProviderUpdateForm({ profiles, handleUpdateProvider, handleDeleteProvider }) {
     return (
         <div>
-            <h2>Update existing IDs</h2>
+            <h2>Update existing accounts</h2>
             <div className="education-provider-ids">
                     {profiles.length ? (
                         profiles.map((profile) => (
@@ -19,7 +19,7 @@ export default function ProviderUpdateForm({ profiles, handleUpdateProvider, han
                             </div>
                         ))
                     ) : (
-                        <h4>No existing profiles found!</h4>
+                        <p className="text-error error">No existing accounts found!</p>
                     )}
             </div>
         </div>

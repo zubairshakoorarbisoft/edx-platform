@@ -1,7 +1,9 @@
 """
 Clearesult Models.
 """
-from enum import unique
+import collections
+import logging
+
 from config_models.models import ConfigurationModel
 from fernet_fields import EncryptedField
 from django.db import models
@@ -9,6 +11,9 @@ from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from jsonfield.fields import JSONField
+
+logger = logging.getLogger(__name__)
 
 APP_LABEL = 'clearesult_features'
 
@@ -51,7 +56,7 @@ class UserCreditsProfile(models.Model):
             ('user', 'credit_type')
         )
 
-    user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, db_index=True, on_delete=models.CASCADE, related_name='user_credit_profile')
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
     credit_id = models.CharField(max_length=255)
     earned_course_credits = models.ManyToManyField(ClearesultCourseCredit, related_name='earned_credits', blank=True)
@@ -83,9 +88,28 @@ class ClearesultUserProfile(models.Model):
     company = models.CharField(max_length=255, blank=True)
     state_or_province = models.CharField(max_length=255, blank=True)
     postal_code = models.CharField(max_length=50, blank=True)
+    extensions = JSONField(
+        null=False,
+        blank=True,
+        default=dict,
+        load_kwargs={'object_pairs_hook': collections.OrderedDict}
+    )
 
     def __str__(self):
         return 'Clearesult user profile for {}.'.format(self.user.username)
+
+    def get_extension_value(self, name, default=None):
+        try:
+            return self.extensions.get(name, default)
+        except AttributeError as error:
+            logger.exception(u'Invalid JSON data. \n [%s]', error)
+
+    def set_extension_value(self, name, value=None):
+        try:
+            self.extensions[name] = value
+            self.save()
+        except AttributeError as error:
+            logger.exception(u'Invalid JSON data. \n [%s]', error)
 
 
 class ClearesultSiteConfiguration(ConfigurationModel):
@@ -119,3 +143,69 @@ class ClearesultUserSiteProfile(models.Model):
 
     def __str__(self):
         return '{} - {}'.format(self.site, self.user)
+
+
+class ClearesulCourse(models.Model):
+    """
+    This model saves clearesult course type.
+    Clearesult courses can have following types:
+    - Public (site value will be null)
+    - Private to specific site
+    """
+
+    course_id = CourseKeyField(max_length=255, db_index=True, unique=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Courses'
+
+    def __str__(self):
+        return '{} - {}'.format( self.course_id, self.site)
+
+
+class ClearesulCatalog(models.Model):
+    """
+    This model saves clearesult catalogs.
+    Clearesult Catalogs has following types types:
+    - Public (site value will be null, public catalog can only contain public courses)
+    - Private to specific site (can only contain local/private courses linked to that site)
+    """
+
+    name = models.CharField(max_length=255)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
+    clearesult_courses = models.ManyToManyField(ClearesulCourse, related_name='courses', blank=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Catalogs'
+        unique_together = (
+            ('name', 'site')
+        )
+
+    def __str__(self):
+        return '{} - {}'.format( self.site, self.name)
+
+
+class ClearesulGroupLinkage(models.Model):
+    """
+    This model saves clearesult user groups and catalogs assigned to that group.
+
+    Each user group will be linked to specific site and can be linked to any public catalogs
+    or local catalogs linked to it's site e.g. site_b user_groups can not be linked with site_a catalogs
+    """
+
+    name = models.CharField(max_length=255)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    users =  models.ManyToManyField(User, blank=True)
+    assigned_catalogs = models.ManyToManyField(ClearesulCatalog, related_name='catalogs', blank=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult User Groups'
+        unique_together = (
+            ('name', 'site')
+        )
+
+    def __str__(self):
+        return '{} - {}'.format( self.site, self.name)
