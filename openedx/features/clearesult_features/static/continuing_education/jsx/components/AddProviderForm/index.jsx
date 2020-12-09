@@ -40,8 +40,8 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
 
     return (
         <div>
-            <h3><p>If you have a continuing education account, please select the name of the organization and enter your account ID, then click Add.
-                You can come back to this page at any time to add or edit your continuing education account(s).</p></h3>
+            <p>If you have a continuing education account, please select the name of the organization and enter your account ID, then click Add.
+                You can come back to this page at any time to add or edit your continuing education account(s).</p>
             <br></br>
             <div className="form-holder">
                 {choices.length ? (
@@ -64,7 +64,7 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
                         <label>Account ID</label>
                         <input
                             required
-                            placeholder="Provider ID"
+                            placeholder="Account ID"
                             value={providerId}
                             onChange={handleProviderIdChange}
                         ></input>
@@ -81,7 +81,8 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
                     </div>
                 ) : (
                     <div>
-                        <h4>No new organization is available at the moment.</h4>
+                        <p className="text-error">No new organization is available at the moment.</p>
+                        <br />
                     </div>
                 )}
             </div>
