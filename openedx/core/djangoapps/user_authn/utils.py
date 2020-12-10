@@ -11,6 +11,8 @@ from django.utils import http
 from oauth2_provider.models import Application
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+
 
 def is_safe_login_or_logout_redirect(redirect_to, request_host, dot_client_id, require_https):
     """
@@ -31,7 +33,12 @@ def is_safe_login_or_logout_redirect(redirect_to, request_host, dot_client_id, r
 
     Returns: bool
     """
-    login_redirect_whitelist = set(getattr(settings, 'LOGIN_REDIRECT_WHITELIST', []))
+    login_redirect_whitelist = set(
+        configuration_helpers.get_value(
+            'LOGIN_REDIRECT_WHITELIST',
+            getattr(settings, 'LOGIN_REDIRECT_WHITELIST', [])
+        )
+    )
     login_redirect_whitelist.add(request_host)
 
     # Allow OAuth2 clients to redirect back to their site after logout.
