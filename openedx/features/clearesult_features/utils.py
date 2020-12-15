@@ -5,11 +5,11 @@ import io
 import logging
 import six
 from csv import Error, DictReader, Sniffer
-
 from django.conf import settings
 from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 
+from openedx.features.clearesult_features.models import ClearesultUserProfile
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 
 logger = logging.getLogger(__name__)
@@ -179,3 +179,27 @@ def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_U
         total_completed_blocks += completed_count
 
     return total_blocks, total_completed_blocks
+
+
+def get_site_users(site):
+    """
+    Returns users list belong to site.
+    """
+    site_users = []
+    site_name = "-".join(site.name.split('-')[:-1]).rstrip()
+
+    # Note: site name must contain "-" otherwise it will return emty string.
+    if not site_name:
+        logger.info("Site name ({}) is not in a correct format.".format(site.name))
+        logger.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")
+        return site_users
+
+    clearesult_user_profiles = ClearesultUserProfile.objects.exclude(extensions={}).select_related("user")
+
+    for profile in clearesult_user_profiles:
+        user_site_identifiers =  profile.extensions.get('site_identifier', [])
+
+        if site_name in user_site_identifiers:
+            site_users.append(profile.user)
+
+    return  site_users

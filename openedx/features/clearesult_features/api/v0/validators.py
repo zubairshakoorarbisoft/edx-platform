@@ -1,10 +1,21 @@
+import logging
+
 from django.contrib.sites.models import Site
 from django.db.models import Q
+from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
-
+from rest_framework import status
 from opaque_keys import InvalidKeyError
-from openedx.features.clearesult_features.models import ClearesultCourse, ClearesultCatalog, ClearesultLocalAdmin
+
+from openedx.features.clearesult_features.models import (
+	ClearesultCourse, ClearesultCatalog, ClearesultLocalAdmin,
+	ClearesultUserProfile
+)
+
+
+log = logging.getLogger(__name__)
+
 
 
 def validate_data_for_catalog_creation(data, user, allowed_sites):
@@ -245,3 +256,25 @@ def validate_catalog_update_deletion(user, catalog):
             status=status.HTTP_403_FORBIDDEN
         )
     return None
+
+
+def validate_user_for_site(user, site):
+    try:
+        # convert "blackhills - LMS" to "blackhills"
+        site_name = "-".join(site.name.split('-')[:-1]).rstrip()
+
+        # Note: site name must contain "-" otherwise it will return empty string.
+        if not site_name:
+            log.info("Site name ({}) is not in a correct format.".format(site.name))
+            log.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")
+            return False
+
+        user_site_identifiers = user.clearesult_profile.extensions.get('site_identifier', [])
+
+        if site_name in user_site_identifiers:
+            return True
+        log.info("user {} does not belong to site {}. ".format(user.email, site_name))
+        return False
+    except User.clearesult_profile.RelatedObjectDoesNotExist:
+        log.info("user clearesult profile does not exist for user {}.".format(user.email))
+        return False

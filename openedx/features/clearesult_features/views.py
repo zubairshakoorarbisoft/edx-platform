@@ -68,3 +68,9 @@ def render_catalogs_manager(request):
             'is_superuser': 1 if request.user.is_superuser else 0,
         }
     )
+
+
+@login_required
+@local_admin_required
+def render_groups_manager(request):
+    return render_to_response('clearesult/groups_manager.html', {'uses_bootstrap': True})
