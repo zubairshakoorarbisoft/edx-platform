@@ -145,7 +145,7 @@ class ClearesultUserSiteProfile(models.Model):
         return '{} - {}'.format(self.site, self.user)
 
 
-class ClearesulCourse(models.Model):
+class ClearesultCourse(models.Model):
     """
     This model saves clearesult course type.
     Clearesult courses can have following types:
@@ -164,7 +164,7 @@ class ClearesulCourse(models.Model):
         return '{} - {}'.format( self.course_id, self.site)
 
 
-class ClearesulCatalog(models.Model):
+class ClearesultCatalog(models.Model):
     """
     This model saves clearesult catalogs.
     Clearesult Catalogs has following types types:
@@ -174,7 +174,7 @@ class ClearesulCatalog(models.Model):
 
     name = models.CharField(max_length=255)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
-    clearesult_courses = models.ManyToManyField(ClearesulCourse, related_name='courses', blank=True)
+    clearesult_courses = models.ManyToManyField(ClearesultCourse, related_name='courses', blank=True)
 
     class Meta:
         app_label = APP_LABEL
@@ -187,7 +187,7 @@ class ClearesulCatalog(models.Model):
         return '{} - {}'.format( self.site, self.name)
 
 
-class ClearesulGroupLinkage(models.Model):
+class ClearesultGroupLinkage(models.Model):
     """
     This model saves clearesult user groups and catalogs assigned to that group.
 
@@ -198,7 +198,7 @@ class ClearesulGroupLinkage(models.Model):
     name = models.CharField(max_length=255)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     users =  models.ManyToManyField(User, blank=True)
-    assigned_catalogs = models.ManyToManyField(ClearesulCatalog, related_name='catalogs', blank=True)
+    assigned_catalogs = models.ManyToManyField(ClearesultCatalog, related_name='catalogs', blank=True)
 
     class Meta:
         app_label = APP_LABEL
