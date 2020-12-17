@@ -209,3 +209,22 @@ class ClearesultGroupLinkage(models.Model):
 
     def __str__(self):
         return '{} - {}'.format( self.site, self.name)
+
+
+class ClearesultLocalAdmin(models.Model):
+    """
+    This model saves clearesult local admin.
+    """
+
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    user =  models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Local Admin'
+        unique_together = (
+            ('site', 'user')
+        )
+
+    def __str__(self):
+        return '{} - {}'.format( self.site, self.user)
