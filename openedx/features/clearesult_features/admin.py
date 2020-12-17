@@ -15,7 +15,8 @@ from openedx.features.clearesult_features.models import (
     ClearesultUserSiteProfile,
     ClearesultGroupLinkage,
     ClearesultCatalog,
-    ClearesultCourse
+    ClearesultCourse,
+    ClearesultLocalAdmin
 )
 
 
@@ -73,6 +74,13 @@ class ClearesultGroupLinkageAdmin(admin.ModelAdmin):
     list_display = ('name', 'site')
 
 
+class ClearesultLocalAdminInterface(admin.ModelAdmin):
+    """
+    Admin config clearesult credit providers.
+    """
+    list_display = ('site', 'user')
+
+
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
 admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
@@ -82,3 +90,4 @@ admin.site.register(ClearesultUserSiteProfile, ClearesultUserSiteProfileAdmin)
 admin.site.register(ClearesultCourse, ClearesultCourseAdmin)
 admin.site.register(ClearesultCatalog, ClearesultCatalogAdmin)
 admin.site.register(ClearesultGroupLinkage, ClearesultGroupLinkageAdmin)
+admin.site.register(ClearesultLocalAdmin, ClearesultLocalAdminInterface)
