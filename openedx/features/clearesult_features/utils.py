@@ -10,12 +10,7 @@ from django.conf import settings
 from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 
-from openedx.core.djangoapps.content.block_structure.api import get_course_in_cache
-from openedx.core.djangoapps.content.block_structure.transformers import BlockStructureTransformers
 from openedx.features.course_experience.utils import get_course_outline_block_tree
-from lms.djangoapps.course_api.blocks.transformers.blocks_api import BlocksAPITransformer
-from lms.djangoapps.course_api.blocks.serializers import BlockDictSerializer
-from completion.models import BlockCompletion
 
 logger = logging.getLogger(__name__)
 
@@ -121,12 +116,15 @@ def get_courses_progress(request, course_enrollments):
         course_outline_blocks = get_course_outline_block_tree(
             request, course_id_string, request.user
         )
+
         total_blocks, total_completed_blocks = get_course_block_progress(
             course_outline_blocks,
             CORE_BLOCK_TYPES,
             FILTER_BLOCKS_IN_UNIT
         )
-        courses_progress.append(round((total_completed_blocks / total_blocks) * 100) if total_blocks else 0)
+
+        course_progress = round((total_completed_blocks / total_blocks) * 100) if total_blocks else 0
+        courses_progress.append(course_progress)
 
     return courses_progress
 
@@ -147,10 +145,13 @@ def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_U
         total_blocks: count of blocks in a root block block or child block
         total_completed_blocks: count of completed core blocks in a root block or child block
     """
+    if course_block is None:
+        return 0, 0
+
     course_block_children = course_block.get('children')
     block_type = course_block.get('type')
 
-    if course_block_children is None:
+    if not course_block_children:
         if block_type in CORE_BLOCK_TYPES:
             if course_block.get('complete'):
                 return 1, 1
@@ -161,7 +162,7 @@ def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_U
 
     total_blocks = 0
     total_completed_blocks = 0
-    is_multi_block_type = len(set([block.get('type') for block in course_block_children])) != 1
+    is_multi_block_type = len(set([block.get('type') for block in course_block_children])) > 1
     is_block_vertical = block_type == 'vertical'
 
     for block in course_block_children:
