@@ -12,6 +12,9 @@ from user_tasks.signals import user_task_stopped
 
 from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
+from openedx.core.lib.celery.task_utils import emulate_http_request
+from openedx.core.djangoapps.theming.helpers import get_current_request
+
 from .tasks import send_task_complete_email
 
 LOGGER = logging.getLogger(__name__)
@@ -34,6 +37,7 @@ def user_task_stopped_handler(sender, **kwargs):  # pylint: disable=unused-argum
         None
     """
     status = kwargs['status']
+    request = get_current_request()
 
     # Only send email when the entire task is complete, should only send when
     # a chain / chord / etc completes, not on sub-tasks.
@@ -50,6 +54,12 @@ def user_task_stopped_handler(sender, **kwargs):  # pylint: disable=unused-argum
 
         try:
             # Need to str state_text here because it is a proxy object and won't serialize correctly
-            send_task_complete_email.delay(status.name.lower(), str(status.state_text), status.user.email, detail_url)
+            with emulate_http_request(site=request.site, user=request.user):
+                send_task_complete_email.delay(
+                    status.name.lower(),
+                    str(status.state_text),
+                    status.user.email,
+                    detail_url,
+                )
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Unable to queue send_task_complete_email")
