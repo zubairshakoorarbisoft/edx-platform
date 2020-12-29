@@ -1,9 +1,12 @@
 """
 Helpers methods for site configuration.
 """
+from celery.utils.log import get_task_logger
 from django.conf import settings
 
 from microsite_configuration import microsite
+
+LOGGER = get_task_logger(__name__)
 
 
 def get_current_site_configuration():
@@ -18,12 +21,13 @@ def get_current_site_configuration():
     # Import is placed here to avoid circular import
     from openedx.core.djangoapps.theming.helpers import get_current_site
     site = get_current_site()
-
+    LOGGER.info('current site: {}'.format(site))
     # Import is placed here to avoid model import at project startup.
     from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
     try:
         return getattr(site, "configuration", None)
     except SiteConfiguration.DoesNotExist:
+        LOGGER.info('site configuration does not exist')
         return None
 
 
@@ -36,6 +40,7 @@ def is_site_configuration_enabled():
         (bool): True if SiteConfiguration is present and enabled, False otherwise
     """
     configuration = get_current_site_configuration()
+    LOGGER.info('configurations {}'.format(configuration))
     if configuration:
         return configuration.enabled
     return False
