@@ -28,7 +28,9 @@ def send_task_complete_email(self, task_name, task_state_text, dest_addr, detail
     )
     LOGGER.info('Settings Features: {}'.format(settings.FEATURES.get('DISABLE_CMS_TASK_EMAILS')))
     LOGGER.info('Configuration helper value: {}'.format(configuration_helpers.get_value('DISABLE_CMS_TASK_EMAILS')))
+    LOGGER.info('configurations enabled: {}'.format(configuration_helpers.is_site_configuration_enabled()))
     LOGGER.info('disable emails before: {}'.format(disable_emails))
+    LOGGER.info('from address: {}'.format(configuration_helpers.get_value('email_from_address')))
 
     disable_emails = True if disable_emails == 'true' else False if disable_emails == 'false' else disable_emails
 
