@@ -12,6 +12,7 @@ from user_tasks.signals import user_task_stopped
 
 from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
+from openedx.core.lib.celery.task_utils import emulate_http_request
 from .tasks import send_task_complete_email
 
 LOGGER = logging.getLogger(__name__)
@@ -50,11 +51,12 @@ def user_task_stopped_handler(sender, **kwargs):  # pylint: disable=unused-argum
 
         try:
             # Need to str state_text here because it is a proxy object and won't serialize correctly
-            send_task_complete_email(
-                status.name.lower(),
-                str(status.state_text),
-                status.user.email,
-                detail_url,
-            )
+            with emulate_http_request():
+                send_task_complete_email.delay(
+                    status.name.lower(),
+                    str(status.state_text),
+                    status.user.email,
+                    detail_url,
+                )
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Unable to queue send_task_complete_email")
