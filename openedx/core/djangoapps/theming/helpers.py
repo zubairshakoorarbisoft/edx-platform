@@ -177,10 +177,8 @@ def get_current_site():
          (django.contrib.sites.models.Site): returns current site
     """
     request = get_current_request()
-    logger.info('request object: {}'.format(request))
     if not request:
         return None
-    logger.info('request site: {}'.format(getattr(request, 'site')))
     return getattr(request, 'site', None)
 
 
