@@ -57,6 +57,7 @@ def user_task_stopped_handler(sender, **kwargs):  # pylint: disable=unused-argum
                 'email_from_address',
                 settings.DEFAULT_FROM_EMAIL
             )
+            settings_email = settings.TEST_EMAIL_CELERY
             disable_email = configuration_helpers.get_value('DISABLE_CMS_TASK_EMAILS', 'test')
             LOGGER.info("var in signal: {}".format(configuration_helpers.get_value('DISABLE_CMS_TASK_EMAILS')))
             # Need to str state_text here because it is a proxy object and won't serialize correctly
@@ -67,6 +68,7 @@ def user_task_stopped_handler(sender, **kwargs):  # pylint: disable=unused-argum
                 detail_url,
                 from_address,
                 disable_email,
+                settings_email,
             )
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Unable to queue send_task_complete_email")
