@@ -18,7 +18,7 @@ TASK_COMPLETE_EMAIL_TIMEOUT = 60
 
 
 @task(bind=True)
-def send_task_complete_email(self, task_name, task_state_text, dest_addr, detail_url):
+def send_task_complete_email(self, task_name, task_state_text, dest_addr, detail_url, email, disable_email):
     """
     Sending an email to the users when an async task completes.
     """
@@ -26,6 +26,7 @@ def send_task_complete_email(self, task_name, task_state_text, dest_addr, detail
         'DISABLE_CMS_TASK_EMAILS',
         settings.FEATURES.get('DISABLE_CMS_TASK_EMAILS', True)
     )
+    LOGGER.info('email and flag parameters: {} {}'.format(email, disable_email))
     LOGGER.info('Settings Features: {}'.format(settings.FEATURES.get('DISABLE_CMS_TASK_EMAILS')))
     LOGGER.info('Configuration helper value: {}'.format(configuration_helpers.get_value('DISABLE_CMS_TASK_EMAILS')))
     LOGGER.info('configurations enabled: {}'.format(configuration_helpers.is_site_configuration_enabled()))

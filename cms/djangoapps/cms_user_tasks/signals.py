@@ -53,6 +53,11 @@ def user_task_stopped_handler(sender, **kwargs):  # pylint: disable=unused-argum
         LOGGER.info('test variable disable emails: {}'.format(settings.TEST_EMAIL_CELERY))
         LOGGER.info("signal logs")
         try:
+            from_address = configuration_helpers.get_value(
+                'email_from_address',
+                settings.DEFAULT_FROM_EMAIL
+            )
+            disable_email = configuration_helpers.get_value('DISABLE_CMS_TASK_EMAILS', 'test')
             LOGGER.info("var in signal: {}".format(configuration_helpers.get_value('DISABLE_CMS_TASK_EMAILS')))
             # Need to str state_text here because it is a proxy object and won't serialize correctly
             send_task_complete_email.delay(
@@ -60,6 +65,8 @@ def user_task_stopped_handler(sender, **kwargs):  # pylint: disable=unused-argum
                 str(status.state_text),
                 status.user.email,
                 detail_url,
+                from_address,
+                disable_email,
             )
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("Unable to queue send_task_complete_email")
