@@ -5,6 +5,7 @@ from django.views.generic.base import TemplateView
 
 from edxmako.shortcuts import render_to_response
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+from openedx.features.clearesult_features.authentication.permissions import local_admin_required
 
 
 class LoginView(TemplateView):
@@ -55,3 +56,15 @@ def _get_context_data(base_url, context):
 @login_required
 def render_continuing_education(request):
     return render_to_response('clearesult/continuing_education.html', {'uses_bootstrap': True})
+
+
+@login_required
+@local_admin_required
+def render_catalogs_manager(request):
+    return render_to_response(
+        'clearesult/catalogs_manager.html',
+        {
+            'uses_bootstrap': True,
+            'is_superuser': 1 if request.user.is_superuser else 0,
+        }
+    )
