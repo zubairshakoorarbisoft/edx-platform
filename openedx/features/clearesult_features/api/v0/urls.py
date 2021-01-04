@@ -4,8 +4,9 @@ URLs for clearesult API v0.
 from django.conf.urls import url
 
 from openedx.features.clearesult_features.api.v0.views import (
-    ClearesultCredeitProviderListView, UserCreditProfileViewset,
-    ClearesultCatalogViewset, ClearesultCourseViewset, SiteViewset
+    ClearesultCreditProviderListView, UserCreditProfileViewset,
+    ClearesultCatalogViewset, ClearesultCourseViewset, SiteViewset,
+    SiteUsersListView, ClearesultGroupViewset
 )
 
 
@@ -30,7 +31,7 @@ urlpatterns = (
     ),
     url(
         r'^credit_providers/$',
-        ClearesultCredeitProviderListView.as_view(),
+        ClearesultCreditProviderListView.as_view(),
         name="credit_providers_list"
     ),
     url(
@@ -63,5 +64,26 @@ urlpatterns = (
             'get': 'list'
         }),
         name="clearesult_sites"
-    )
+    ),
+    url(
+        r'^site_users/(?P<site_pk>\d+)/$',
+        SiteUsersListView.as_view(),
+        name="site_users"
+    ),
+    url(
+        r'^user_groups/$',
+        ClearesultGroupViewset.as_view({
+            'get': 'list',
+            'post': 'create'
+        }),
+        name="clearesult_groups_list"
+    ),
+    url(
+        r'^user_groups/(?P<pk>\d+)/$',
+        ClearesultGroupViewset.as_view({
+            'patch': 'partial_update',
+            'delete': 'destroy'
+        }),
+        name="user_groups_detail"
+    ),
 )

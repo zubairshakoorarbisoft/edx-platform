@@ -28,10 +28,14 @@ def local_admin_required(view_fn):
     Ensures that only a user that is not authenticated for current site
     can access the view.
     """
+
     def inner(request, *args, **kwargs):
         error_response, allowed_sites = validate_sites_for_local_admin(request.user)
+
         # neither a super user nor local admin
         if error_response:
             return HttpResponseForbidden()
+
         return view_fn(request, *args, **kwargs)
+
     return inner

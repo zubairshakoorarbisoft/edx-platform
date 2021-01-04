@@ -1,6 +1,8 @@
 """
 Views for Clearesult V0 APIs
 """
+import json
+
 from django.contrib.sites.models import Site
 from django.db import IntegrityError
 from django.db.models import Q
@@ -16,16 +18,16 @@ from rest_framework.response import Response
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 
 from openedx.core.lib.api.authentication import BearerAuthentication
+from openedx.features.clearesult_features.utils import get_site_users
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
-    ClearesultCourse
+    ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage
 )
 from openedx.features.clearesult_features.api.v0.serializers import (
     UserCreditsProfileSerializer, ClearesultCreditProviderSerializer,
     ClearesultCatalogSerializer, ClearesultCourseSerializer,
-    SiteSerializer
+    UserSerializer, SiteSerializer, ClearesultGroupsSerializer
 )
-from openedx.features.clearesult_features.models import ClearesultLocalAdmin
 from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
     validate_sites_for_local_admin, validate_catalog_update_deletion
@@ -89,7 +91,7 @@ class UserCreditProfileViewset(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class ClearesultCredeitProviderListView(generics.ListAPIView):
+class ClearesultCreditProviderListView(generics.ListAPIView):
     """
     Return a list of credit providers in the following form:
 
@@ -372,3 +374,106 @@ class SiteViewset(viewsets.ViewSet):
 
         serializer = SiteSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class SiteUsersListView(generics.ListAPIView):
+    """
+    Return a list of site users:
+
+    Get /clearesult/api/v0/site_users/pk
+    ```
+    [
+        {
+            "id": "1"
+            "username": "username1",
+            "email": "username1@example.com"
+        },
+        {
+            "id": "2"
+            "username": "username2",
+            "email": "username2@example.com"
+        },
+    ]
+    ```
+    """
+
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
+    pagination_class = None
+
+    def get_queryset(self):
+        site_pk = self.kwargs.get('site_pk')
+
+        try:
+            site = Site.objects.get(id=site_pk)
+        except Site.DoesNotExist:
+            raise NotFound("error - site with id doesn't exist")
+
+        error_response, allowed_sites = validate_sites_for_local_admin(self.request.user)
+
+        if allowed_sites and site not in allowed_sites:
+            return Response(
+                {'detail': 'You are not authenticated to view users of this site.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        users = get_site_users(site)
+        return users
+
+
+class ClearesultGroupViewset(viewsets.ModelViewSet):
+    """
+    Update Groups:
+
+    Get /clearesult/api/v0/user_groups/
+    Post /clearesult/api/v0/user_groups/
+
+    Patch /clearesult/api/v0/user_groups/pk/
+    Accept:
+    ```
+    {
+        "name": "new name",
+        "users": [1,2] //user_ids
+    }
+    ```
+
+    Return:
+    ```
+    {
+        "id": 1,
+        "name": "new name",
+        "site": {
+            "id": 1,
+            "domain": "localhost:18000",
+            "name": "localhost:18000"
+        },
+        "users": [
+            {
+                "username": "ecommerce_worker",
+                "email": "ecommerce_worker@example.com",
+                "id": 1
+            }
+        ]
+    }
+    ```
+    """
+    serializer_class = ClearesultGroupsSerializer
+    pagination_class = None
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
+
+    def get_queryset(self):
+        all_groups = ClearesultGroupLinkage.objects.all()
+        error_response, allowed_sites = validate_sites_for_local_admin(self.request.user)
+
+        if allowed_sites:
+            all_groups = all_groups.filter(site__in=allowed_sites)
+
+        return all_groups
+
+    def get_serializer_context(self):
+        context = super(ClearesultGroupViewset, self).get_serializer_context()
+        error_response, allowed_sites = validate_sites_for_local_admin(self.request.user)
+        context.update({"allowed_sites": allowed_sites})
+        return context

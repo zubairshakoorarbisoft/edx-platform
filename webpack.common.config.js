@@ -120,6 +120,9 @@ module.exports = Merge.smart({
                 'ContinuingEducation.jsx',
             CatalogsManager: './openedx/features/clearesult_features/static/catalogs_manager/js/' +
             'CatalogsManager.js',
+            GroupsManager: './openedx/features/clearesult_features/static/groups_manager/js/' +
+                'GroupsManager.js',
+
             // Common
             ReactRenderer: './common/static/js/src/ReactRenderer.jsx',
             XModuleShim: 'xmodule/js/src/xmodule.js',
