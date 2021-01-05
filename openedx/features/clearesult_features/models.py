@@ -198,7 +198,8 @@ class ClearesultGroupLinkage(models.Model):
     name = models.CharField(max_length=255)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     users =  models.ManyToManyField(User, blank=True)
-    assigned_catalogs = models.ManyToManyField(ClearesultCatalog, related_name='catalogs', blank=True)
+    catalogs = models.ManyToManyField(
+        ClearesultCatalog, related_name='linked_catalogs', blank=True, through='ClearesultGroupLinkedCatalogs')
 
     class Meta:
         app_label = APP_LABEL
@@ -210,6 +211,17 @@ class ClearesultGroupLinkage(models.Model):
     def __str__(self):
         return '{} - {}'.format( self.site, self.name)
 
+
+class ClearesultGroupLinkedCatalogs(models.Model):
+    """
+    """
+    catalog = models.ForeignKey(ClearesultCatalog, on_delete=models.CASCADE)
+    group = models.ForeignKey(ClearesultGroupLinkage, on_delete=models.CASCADE)
+    mandatory = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Group Catalogs'
 
 class ClearesultLocalAdmin(models.Model):
     """
