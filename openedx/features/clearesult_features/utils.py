@@ -6,10 +6,12 @@ import logging
 import six
 from csv import Error, DictReader, Sniffer
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 
-from openedx.features.clearesult_features.models import ClearesultUserProfile
+
+from openedx.features.clearesult_features.models import ClearesultUserProfile, ClearesultCourse
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 
 logger = logging.getLogger(__name__)
@@ -203,3 +205,26 @@ def get_site_users(site):
             site_users.append(profile.user)
 
     return  site_users
+
+
+def create_clearesult_course(destination_course_key, source_course_key=None, site=None):
+    if site == 'Public':
+        site = None
+    elif site == None and source_course_key:
+        site = ClearesultCourse.objects.get(course_id=source_course_key).site
+    else:
+        site = Site.objects.get(domain=site)
+
+    ClearesultCourse.objects.create(course_id=destination_course_key, site=site)
+
+
+def get_site_for_clearesult_course(course_id):
+    try:
+        site = ClearesultCourse.objects.get(course_id=course_id).site
+        if site is None:
+            site = 'Public'
+            return site
+
+        return site.domain
+    except ClearesultCourse.DoesNotExist:
+        return None

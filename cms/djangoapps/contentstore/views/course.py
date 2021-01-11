@@ -74,6 +74,7 @@ from openedx.features.clearesult_features.credits.utils import (
     get_available_credits_provider_list,
     get_course_credits_list
 )
+from openedx.features.clearesult_features.utils import create_clearesult_course, get_site_for_clearesult_course
 from openedx.features.content_type_gating.models import ContentTypeGatingConfig
 from openedx.features.content_type_gating.partitions import CONTENT_TYPE_GATING_SCHEME
 from openedx.features.course_experience.waffle import ENABLE_COURSE_ABOUT_SIDEBAR_HTML
@@ -802,6 +803,7 @@ def _create_or_rerun_course(request):
 
     try:
         org = request.json.get('org')
+        site = request.json.get('site')
         course = request.json.get('number', request.json.get('course'))
         display_name = request.json.get('display_name')
         # force the start date for reruns and allow us to override start via the client
@@ -832,6 +834,7 @@ def _create_or_rerun_course(request):
         if source_course_key:
             source_course_key = CourseKey.from_string(source_course_key)
             destination_course_key = rerun_course(request.user, source_course_key, org, course, run, fields)
+            create_clearesult_course(destination_course_key, source_course_key, site=None)
             return JsonResponse({
                 'url': reverse_url('course_handler'),
                 'destination_course_key': six.text_type(destination_course_key)
@@ -839,6 +842,7 @@ def _create_or_rerun_course(request):
         else:
             try:
                 new_course = create_new_course(request.user, org, course, run, fields)
+                create_clearesult_course(new_course.id, site=site)
                 return JsonResponse({
                     'url': reverse_course_url('course_handler', new_course.id),
                     'course_key': six.text_type(new_course.id),
@@ -1112,7 +1116,8 @@ def settings_handler(request, course_key_string):
                 'enable_extended_course_details': enable_extended_course_details,
                 'upgrade_deadline': upgrade_deadline,
                 'available_clearesult_providers': get_available_credits_provider_list(course_key_string),
-                'course_credits': get_course_credits_list(course_key_string)
+                'course_credits': get_course_credits_list(course_key_string),
+                'course_site': get_site_for_clearesult_course(course_key)
             }
             if is_prerequisite_courses_enabled():
                 courses, in_process_course_actions = get_courses_accessible_to_user(request)
@@ -1153,6 +1158,7 @@ def settings_handler(request, course_key_string):
                     'available_clearesult_providers': get_available_credits_provider_list(course_key_string),
                     'course_credits': get_course_credits_list(course_key_string),
                     'all_clearesult_providers': get_all_credits_provider_list(),
+                    'course_site': get_site_for_clearesult_course(course_key)
                 })
                 return JsonResponse(data)
             # For every other possible method type submitted by the caller...
