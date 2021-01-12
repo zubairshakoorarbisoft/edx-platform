@@ -222,7 +222,7 @@ class ClearesultGroupLinkedCatalogs(models.Model):
 
     class Meta:
         app_label = APP_LABEL
-        verbose_name_plural = 'Clearesult Group Catalogs Mndatory Courses'
+        verbose_name_plural = 'Clearesult Group Catalogs Mandatory Courses'
 
 class ClearesultLocalAdmin(models.Model):
     """
