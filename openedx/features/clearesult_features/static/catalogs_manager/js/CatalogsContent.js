@@ -173,7 +173,7 @@ export default function CatalogsContent({context}) {
     }
 
     return (
-        <div>
+        <div className="catalogs-manager">
             <button
                 type="button"
                 className="btn btn-primary"

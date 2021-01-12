@@ -28,7 +28,7 @@ const Table = ({
                     <td>{id}</td>
                     <td>{name}</td>
                     <td>{(site === null) ? "public" : site.domain}</td>
-                    <td>
+                    <td className="button-holder">
                         <button type="button" className="btn btn-primary" className={(site === null && isSuperUser == 0) ? "disabled" : ""} data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(event)=>handleEditCatalogButton(event)} >
                             Edit
                         </button>

@@ -26,11 +26,11 @@ const Table = ({groups, handleEditClick, DeleteGroup}) => {
                     <td>{id}</td>
                     <td>{name}</td>
                     <td>{site.domain}</td>
-                    <td>
-                        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(e)=>handleEditClick(e.target.value)} >
+                    <td className="button-holder">
+                        <button type="button" data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(e)=>handleEditClick(e.target.value)} >
                             Edit
                         </button>
-                        <button type="button" className="btn btn-danger" value={id} onClick={(e)=> {if (window.confirm('Are you sure you wish to delete this item?')) DeleteGroup(e.target.value)}} >
+                        <button type="button" value={id} onClick={(e)=> {if (window.confirm('Are you sure you wish to delete this item?')) DeleteGroup(e.target.value)}} >
                             Delete
                         </button>
                     </td>
