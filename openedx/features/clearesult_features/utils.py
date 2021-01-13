@@ -11,7 +11,7 @@ from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 
 
-from openedx.features.clearesult_features.models import ClearesultUserProfile, ClearesultCourse
+from openedx.features.clearesult_features.models import ClearesultUserProfile, ClearesultCourse, ClearesultLocalAdmin
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 
 logger = logging.getLogger(__name__)
@@ -228,3 +228,11 @@ def get_site_for_clearesult_course(course_id):
         return site.domain
     except ClearesultCourse.DoesNotExist:
         return None
+
+
+def is_local_admin_or_superuser(user):
+    """
+    If user is a local admin of any site or it's a superuser return True
+    otherwise return False.
+    """
+    return user.is_superuser or ClearesultLocalAdmin.objects.filter(user=user).exists()

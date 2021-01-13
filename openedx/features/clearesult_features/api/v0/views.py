@@ -32,6 +32,7 @@ from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
     validate_sites_for_local_admin, validate_catalog_update_deletion
 )
+from openedx.features.clearesult_features.utils import is_local_admin_or_superuser
 
 class IsSelf(permissions.BasePermission):
 
@@ -58,13 +59,7 @@ class IsAdminOrLocalAdmin(permissions.BasePermission):
     message = 'You are not authorized to perform this action.'
 
     def has_permission(self, request, view):
-        if request.user.is_superuser:
-            return True
-
-        if ClearesultLocalAdmin.objects.filter(user=request.user):
-            return True
-
-        return False
+        return is_local_admin_or_superuser(request.user)
 
 
 class UserCreditProfileViewset(viewsets.ModelViewSet):
