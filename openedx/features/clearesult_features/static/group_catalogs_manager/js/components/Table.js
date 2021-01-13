@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { alertIsPresent } from 'selenium-webdriver/lib/until';
 import ToggleSwitch from '../components/ToggleSwitch';
 
 
