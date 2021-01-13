@@ -6,7 +6,9 @@ from django.conf.urls import url
 from openedx.features.clearesult_features.api.v0.views import (
     ClearesultCreditProviderListView, UserCreditProfileViewset,
     ClearesultCatalogViewset, ClearesultCourseViewset, SiteViewset,
-    SiteUsersListView, ClearesultGroupViewset
+    ClearesultGroupViewset, ClearesultGroupCatalogsViewset,
+    SiteLinkedObjectsListView, ClearesultUpdateGroupCatalogsViewset,
+    ClearesultMandatoryCoursesViewset
 )
 
 
@@ -66,9 +68,9 @@ urlpatterns = (
         name="clearesult_sites"
     ),
     url(
-        r'^site_users/(?P<site_pk>\d+)/$',
-        SiteUsersListView.as_view(),
-        name="site_users"
+        r'^site_linked_objects/(?P<type>[^/]+)/(?P<site_pk>\d+)/$',
+        SiteLinkedObjectsListView.as_view(),
+        name="site_linked_objects"
     ),
     url(
         r'^user_groups/$',
@@ -86,4 +88,33 @@ urlpatterns = (
         }),
         name="user_groups_detail"
     ),
+    url(
+        r'^mandatory_courses/$',
+        ClearesultMandatoryCoursesViewset.as_view({
+            'get': 'list',
+        }),
+        name="mandatory_courses_list"
+    ),
+    url(
+        r'^mandatory_courses/(?P<pk>\d+)/$',
+        ClearesultMandatoryCoursesViewset.as_view({
+            'patch': 'partial_update',
+            'get': 'retrieve'
+        }),
+        name="mandatory_courses_detail"
+    ),
+    url(
+        r'^group_catalogs/$',
+        ClearesultGroupCatalogsViewset.as_view({
+            'get': 'list',
+        }),
+        name="clearesult_group_catalogs_list"
+    ),
+    url(
+        r'^update_group_catalogs/$',
+        ClearesultUpdateGroupCatalogsViewset.as_view({
+            'post': 'update'
+        }),
+        name="clearesult_group_catalogs_update"
+    )
 )

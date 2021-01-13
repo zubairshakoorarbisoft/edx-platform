@@ -122,6 +122,8 @@ module.exports = Merge.smart({
             'CatalogsManager.js',
             GroupsManager: './openedx/features/clearesult_features/static/groups_manager/js/' +
                 'GroupsManager.js',
+            GroupCatalogsManager: './openedx/features/clearesult_features/static/group_catalogs_manager/js/' +
+                'GroupCatalogsManager.js',
 
             // Common
             ReactRenderer: './common/static/js/src/ReactRenderer.jsx',
