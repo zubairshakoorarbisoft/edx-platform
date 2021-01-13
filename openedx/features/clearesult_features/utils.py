@@ -9,9 +9,13 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
+from opaque_keys.edx.keys import CourseKey
 
-
-from openedx.features.clearesult_features.models import ClearesultUserProfile, ClearesultCourse, ClearesultLocalAdmin
+from openedx.features.clearesult_features.models import (
+    ClearesultUserProfile, ClearesultCourse,
+    ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
+    ClearesultLocalAdmin
+)
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 
 logger = logging.getLogger(__name__)
@@ -228,6 +232,19 @@ def get_site_for_clearesult_course(course_id):
         return site.domain
     except ClearesultCourse.DoesNotExist:
         return None
+
+
+def is_compliant_with_clearesult_un_enroll_policy(enrollment):
+    clearesult_groups = ClearesultGroupLinkage.objects.filter(users__username=enrollment.user.username)
+    clearesult_catalogs = ClearesultGroupLinkedCatalogs.objects.filter(group__in=clearesult_groups)
+    for clearesult_catalog in clearesult_catalogs:
+        if clearesult_catalog.mandatory_courses.filter(course_id=enrollment.course_id).exists():
+            return False
+
+    if not enrollment.mode in ['honor', 'audit']:
+        return False
+
+    return True
 
 
 def is_local_admin_or_superuser(user):
