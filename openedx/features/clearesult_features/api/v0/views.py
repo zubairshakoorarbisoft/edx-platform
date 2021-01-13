@@ -21,12 +21,14 @@ from openedx.core.lib.api.authentication import BearerAuthentication
 from openedx.features.clearesult_features.utils import get_site_users
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
-    ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage
+    ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage,
+    ClearesultGroupLinkedCatalogs
 )
 from openedx.features.clearesult_features.api.v0.serializers import (
     UserCreditsProfileSerializer, ClearesultCreditProviderSerializer,
     ClearesultCatalogSerializer, ClearesultCourseSerializer,
-    UserSerializer, SiteSerializer, ClearesultGroupsSerializer
+    UserSerializer, SiteSerializer, ClearesultGroupsSerializer,
+    ClearesultMandatoryCoursesSerializer
 )
 from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
@@ -371,11 +373,48 @@ class SiteViewset(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class SiteUsersListView(generics.ListAPIView):
+class SiteLinkedObjectsListView(generics.ListAPIView):
     """
-    Return a list of site users:
+    Return a list of catalogs/users/groups linked with site_id depending upon type parameter.
+    Available options for type are catalogs, groups and users
 
-    Get /clearesult/api/v0/site_users/pk
+    To get a list of groups of given site:
+    Get /clearesult/api/v0/site_linked_objects/groups/site_pk/
+    ```
+    [
+        {
+            "id": "1"
+            "name": "group1 1",
+        },
+        {
+            "id": "2"
+            "name": "group 2",
+        },
+    ]
+    ```
+
+    To get a list of catalogs of given site:
+    Get /clearesult/api/v0/site_linked_objects/catalogs/site_pk/
+    ```
+    [
+        {
+            "id": "1"
+            "name": "catalog 1",
+            "site": {
+                "id": 1,
+                "domain: "example.com"
+            }
+        },
+        {
+            "id": "2"
+            "name": "catalog 2",
+            "site": null
+        },
+    ]
+    ```
+
+    To get a list of users of given site:
+    Get /clearesult/api/v0/site_linked_objects/users/site_pk/
     ```
     [
         {
@@ -391,11 +430,26 @@ class SiteUsersListView(generics.ListAPIView):
     ]
     ```
     """
-
-    serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
     authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
     pagination_class = None
+
+    def get_serializer_class(self):
+        object_type = self.kwargs.get('type')
+        typeSerilizerMap = {
+            'users': UserSerializer,
+            'groups': ClearesultGroupsSerializer,
+            'catalogs': ClearesultCatalogSerializer
+        }
+        if object_type:
+            serializer_class = typeSerilizerMap.get(object_type)
+
+        if not object_type or not serializer_class:
+            raise NotFound(
+                "error - site linked objects of given type doesn't exist." +
+                " Available options are users, groups, catalogs")
+
+        return serializer_class
 
     def get_queryset(self):
         site_pk = self.kwargs.get('site_pk')
@@ -409,12 +463,27 @@ class SiteUsersListView(generics.ListAPIView):
 
         if allowed_sites and site not in allowed_sites:
             return Response(
-                {'detail': 'You are not authenticated to view users of this site.'},
+                {'detail': 'You are not authenticated to view groups of this site.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        users = get_site_users(site)
-        return users
+        typeObjectsQuerySetMap = {
+            'users': get_site_users(site),
+            'groups': ClearesultGroupLinkage.objects.filter(site=site),
+            'catalogs': ClearesultCatalog.objects.filter(Q(site=site) | Q(site=None)),
+        }
+        object_type = self.kwargs.get('type')
+        query_set = typeObjectsQuerySetMap.get(object_type)
+        return query_set
+
+    def get_serializer_context(self):
+        context = super(SiteLinkedObjectsListView, self).get_serializer_context()
+        object_type = self.kwargs.get('type')
+        if object_type == "groups":
+            context.update({'fields' : ['id', 'name']})
+        if object_type == "catalogs":
+            context.update({'fields' : ['id', 'name', 'site']})
+        return context
 
 
 class ClearesultGroupViewset(viewsets.ModelViewSet):
@@ -472,3 +541,271 @@ class ClearesultGroupViewset(viewsets.ModelViewSet):
         error_response, allowed_sites = validate_sites_for_local_admin(self.request.user)
         context.update({"allowed_sites": allowed_sites})
         return context
+
+
+class ClearesultMandatoryCoursesViewset(viewsets.ModelViewSet):
+    """
+
+    GET LIST clearesult/api/v0/mandatory_courses
+    [
+        {
+            "id": 221,
+            "catalog": {
+                "id": 5,
+                "clearesult_courses": [
+                    {
+                        "id": 7,
+                        "course_name": "test setttings",
+                        "site": null,
+                        "course_id": "course-v1:edX+test+test"
+                    },
+                    {
+                        "id": 8,
+                        "course_name": "test organzation name andy bug",
+                        "site": null,
+                        "course_id": "course-v1:CR+weatherization22+v1"
+                    }
+                ],
+                "site": null,
+                "name": "public catalog 1"
+            },
+            "mandatory_courses": [7]
+        }
+    ]
+
+    PATCH clearesult/api/v0/mandatory_courses/ClearesultGroupLinkedCatalogs_id/
+    {
+        mandatory_courses: [1,2,3]
+    }
+    """
+
+    serializer_class = ClearesultMandatoryCoursesSerializer
+    queryset = ClearesultGroupLinkedCatalogs.objects.all()
+    pagination_class = None
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
+
+    def get_serializer_context(self):
+        action = self.request.data.get("action")
+        context = super(ClearesultMandatoryCoursesViewset, self).get_serializer_context()
+        error_response, allowed_sites = validate_sites_for_local_admin(self.request.user)
+        context.update({"action": action, "allowed_sites": allowed_sites})
+        return context
+
+    def get_queryset(self):
+        queryset = ClearesultGroupLinkedCatalogs.objects.all()
+        error_response, allowed_sites = validate_sites_for_local_admin(self.request.user)
+        if allowed_sites:
+            queryset = queryset.filter(group__site__in=allowed_sites)
+
+        return queryset
+
+
+class ClearesultGroupCatalogsViewset(ClearesultGroupViewset):
+    """
+        GET: Just list view is being used.
+        clearesult/api/v0/group_catalogs/
+
+        [
+            {
+                "id": 30,
+                "name": "lms group 1",
+                "site": {
+                    "id": 1,
+                    "domain": "localhost:18000"
+                },
+                "catalogs": [
+                    {
+                        "id": 220,
+                        "catalog": {
+                            "id": 1,
+                            "clearesult_courses": [
+                                {
+                                    "id": 2,
+                                    "course_name": "default course 10",
+                                    "site": {
+                                        "id": 1,
+                                        "domain": "localhost:18000"
+                                    },
+                                    "course_id": "course-v1:edX+default10+default10"
+                                },
+                                {
+                                    "id": 3,
+                                    "course_name": "default course 12",
+                                    "site": {
+                                        "id": 1,
+                                        "domain": "localhost:18000"
+                                    },
+                                    "course_id": "course-v1:edX+def12+def12"
+                                },
+                                {
+                                    "id": 4,
+                                    "course_name": "default course 13",
+                                    "site": {
+                                        "id": 1,
+                                        "domain": "localhost:18000"
+                                    },
+                                    "course_id": "course-v1:edX+def13+def13"
+                                }
+                            ],
+                            "site": {
+                                "id": 1,
+                                "domain": "localhost:18000"
+                            },
+                            "name": "lms catalog 1"
+                        },
+                        "mandatory_courses": [
+                            2,
+                            4
+                        ]
+                    },
+                    {
+                        "id": 221,
+                        "catalog": {
+                            "id": 5,
+                            "clearesult_courses": [
+                                {
+                                    "id": 7,
+                                    "course_name": "test setttings",
+                                    "site": null,
+                                    "course_id": "course-v1:edX+test+test"
+                                }
+                            ],
+                            "site": null,
+                            "name": "public catalog 1"
+                        },
+                        "mandatory_courses": []
+                    }
+                ]
+            }
+        ]
+
+    """
+    def get_serializer_context(self):
+        context = super(ClearesultGroupCatalogsViewset, self).get_serializer_context()
+        context.update({"fields": ['id', 'name', 'site', 'catalogs']})
+        return context
+
+
+class ClearesultUpdateGroupCatalogsViewset(viewsets.ViewSet):
+    """
+
+    This view will do Group catalogs linkage bulk update.
+    Using this we can add, remove and set multiple catalogs to multiple groups
+
+    actions:
+    add - add catalogs to given groups
+    remove - remove linkage of given catalogs from given groups
+    update - remove all old given groups linkage and just set the given catalogs
+
+    POST: clearesult/api/v0/update_group_catalogs/
+    {
+        "action": "add/remove/update",
+        "groups": [1,3,4],
+        "catalogs" [4,5]
+    }
+
+    Note:
+    - This serailizer is not responsible to create catalogs and groups objects. It will just add already cretaed
+      catalogs to already created groups using ManyToMany relation.
+    - it will not raise error if the catalogs we are trying to add in particular groups are already there.
+    - similarly it will not raise error if the catalogs we are trying to remove in particular groups are not there.
+    """
+
+    pagination_class = None
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
+
+    def _handle_add_catalogs_action(self, groups, catalogs):
+        for group in groups:
+            for catalog in catalogs:
+                group.catalogs.add(catalog)
+
+    def _handle_remove_catalogs_action(self, groups, catalogs):
+        for group in groups:
+                group.catalogs.through.objects.filter(catalog__in=catalogs, group=group).delete()
+
+    def _handle_update_catalogs_action(self, groups, catalogs):
+        for group in groups:
+            group.catalogs.set(catalogs)
+
+    def _validate_fields(self, groups, catalogs, action):
+        if not action or action not in ["add", "update", "remove"]:
+            return 'action field is not valid, availble options are "add", "update" and "remove"'
+
+        if not groups or not(type(groups) == list):
+            return 'Required Field: "groups" is a required field, and must be a list.'
+
+        try:
+            [int(num) for num in groups]
+        except(TypeError, ValueError):
+            return 'Invalid field: "groups" must be a list of valid integers.'
+
+        if not catalogs or not(type(catalogs) == list):
+            return 'Required Field: "catalogs" is a required field, and must be a list.'
+
+        try:
+            [int(num) for num in catalogs]
+        except(TypeError, ValueError):
+            return 'Invalid field: "groups" must be a list of valid integers.'
+
+    def _validate_objects(self, group_objs, catalog_objs, group_ids, catalog_ids):
+        if not(len(group_objs) == len(group_ids)):
+                return Response(
+                {'detail': 'groups field is not valid or group with id does not exist.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if not(len(catalog_objs) == len(catalog_ids)):
+            return Response(
+                {'detail': 'catalogs field is not valid or catalog with id does not exist.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        group_site = group_objs[0].site
+        if not(len(group_objs.filter(site=group_site)) == len(group_objs)):
+            return Response(
+                {'detail': 'bulk update - groups must belong to same site.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        elif not(len(catalog_objs.filter(Q(site=group_site) | Q(site=None))) == len(catalog_ids)):
+            return Response(
+                {'detail': 'bulk update catalogs must be local catlogs of given groups or public catalogs.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        else:
+            error_response, allowed_sites = validate_sites_for_local_admin(self.request.user)
+            if allowed_sites and group_site not in allowed_sites:
+                return Response(
+                    {'detail': 'You are not authorized to perform action on these groups linkage.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+    def update(self, request):
+        error = None
+        group_ids = request.data.get('groups')
+        catalog_ids = request.data.get('catalogs')
+        action = request.data.get('action')
+
+        error = self._validate_fields(group_ids, catalog_ids, action)
+        if error:
+            raise NotFound(error)
+
+        group_objs = ClearesultGroupLinkage.objects.filter(id__in=group_ids)
+        catalog_objs = ClearesultCatalog.objects.filter(id__in=catalog_ids)
+
+        error_response = self._validate_objects(group_objs, catalog_objs, group_ids, catalog_ids)
+        if error_response:
+            return error_response
+
+        action_selector = {
+            'add': self._handle_add_catalogs_action,
+            'remove': self._handle_remove_catalogs_action,
+            'update': self._handle_update_catalogs_action
+        }
+        func = action_selector.get(action)
+        func(group_objs, catalog_objs)
+
+        group_serializer_data = ClearesultGroupsSerializer(
+            group_objs, many=True, context = {"fields": ['id', 'name', 'site', 'catalogs']}).data
+        return Response(group_serializer_data)

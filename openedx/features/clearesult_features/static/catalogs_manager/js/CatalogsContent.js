@@ -174,6 +174,7 @@ export default function CatalogsContent({context}) {
 
     return (
         <div className="catalogs-manager">
+            <h1>Catalogs Manager</h1>
             <button
                 type="button"
                 className="btn btn-primary"
@@ -181,7 +182,7 @@ export default function CatalogsContent({context}) {
                 data-target="#exampleModalCenter"
                 onClick={handleAddCatalogButton}
             >
-                New
+                New Catalog
             </button>
 
             <AddEditModal

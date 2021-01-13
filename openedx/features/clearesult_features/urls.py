@@ -5,7 +5,7 @@ from django.conf.urls import url, include
 
 from openedx.features.clearesult_features.views import (
     LoginView, ResetPasswordView, render_continuing_education,
-    render_catalogs_manager, render_groups_manager
+    render_catalogs_manager, render_groups_manager, render_group_catalogs_manager
 )
 
 from openedx.features.clearesult_features.views import LoginView, ResetPasswordView
@@ -48,5 +48,10 @@ urlpatterns = (
         r'^groups_manager/$',
         render_groups_manager,
         name='groups_manager'
+    ),
+    url(
+        r'^group_catalogs_manager/$',
+        render_group_catalogs_manager,
+        name='groups_catalogs_manager'
     )
 )

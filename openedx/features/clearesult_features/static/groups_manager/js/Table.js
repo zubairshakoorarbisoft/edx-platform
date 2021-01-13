@@ -21,7 +21,9 @@ const Table = ({groups, handleEditClick, DeleteGroup}) => {
             <React.Fragment key={id}>
                 <tr>
                     <td>
-                        <a className="btn btn-primary" data-toggle="collapse" href={div_id} role="button" aria-expanded="false" aria-controls={div_id2}>+</a>
+                        <a className="btn" data-toggle="collapse" href={div_id} role="button" aria-expanded="false" aria-controls={div_id2}>
+                            <i className="fa fa-expand" aria-hidden="true"></i>
+                        </a>
                     </td>
                     <td>{id}</td>
                     <td>{name}</td>
