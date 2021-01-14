@@ -46,7 +46,7 @@ const Table = ({
                             <div className="row">
                                 <div className="col-2">ID</div>
                                 <div className="col-3">Course Name</div>
-                                <div className="col-3">Curse ID</div>
+                                <div className="col-3">Course ID</div>
                                 <div className="col-2">Site</div>
                             </div>
                             { clearesult_courses.map(({id, course_name, site, course_id}) => {
