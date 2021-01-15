@@ -17,7 +17,8 @@ from openedx.features.clearesult_features.models import (
     ClearesultCatalog,
     ClearesultCourse,
     ClearesultLocalAdmin,
-    ClearesultGroupLinkedCatalogs
+    ClearesultGroupLinkedCatalogs,
+    ClearesultCourseCompletion
 )
 
 
@@ -88,6 +89,10 @@ class ClearesultGroupLinkedCatalogsAdmin(admin.ModelAdmin):
     list_display = ('id', 'group', 'catalog')
 
 
+class ClearesultCourseCompletionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course_id', 'completion_date', 'pass_date')
+
+
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
 admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
@@ -99,3 +104,4 @@ admin.site.register(ClearesultCatalog, ClearesultCatalogAdmin)
 admin.site.register(ClearesultGroupLinkage, ClearesultGroupLinkageAdmin)
 admin.site.register(ClearesultLocalAdmin, ClearesultLocalAdminInterface)
 admin.site.register(ClearesultGroupLinkedCatalogs, ClearesultGroupLinkedCatalogsAdmin)
+admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)

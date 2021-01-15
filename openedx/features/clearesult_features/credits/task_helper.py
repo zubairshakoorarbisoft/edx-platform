@@ -53,7 +53,7 @@ def upload_credits_csv(_xmodule_instance_args, _entry_id, course_id, task_input,
     if csv_type == 'credits':
         query_features_names = [
             'Username', 'Email', 'User Provider ID (CUI)', 'Provider Name', 'Provider Code',
-            'Course ID', 'Course Name', 'Earned Credits', 'Grade %', 'Grade'
+            'Course ID', 'Course Name', 'Earned Credits', 'Grade %', 'Grade', 'Pass Date'
         ]
         student_data = list_user_credits_for_report(course_id, provider_filter)
         csv_name = 'user_earned_credits_info'
