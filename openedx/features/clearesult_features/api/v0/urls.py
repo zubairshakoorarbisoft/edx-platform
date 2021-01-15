@@ -8,7 +8,7 @@ from openedx.features.clearesult_features.api.v0.views import (
     ClearesultCatalogViewset, ClearesultCourseViewset, SiteViewset,
     ClearesultGroupViewset, ClearesultGroupCatalogsViewset,
     SiteLinkedObjectsListView, ClearesultUpdateGroupCatalogsViewset,
-    ClearesultMandatoryCoursesViewset
+    ClearesultMandatoryCoursesViewset, ClearesultLogoutView
 )
 
 
@@ -116,5 +116,10 @@ urlpatterns = (
             'post': 'update'
         }),
         name="clearesult_group_catalogs_update"
+    ),
+    url(
+        r'^logout/$',
+        ClearesultLogoutView.as_view(),
+        name="clearesult_logout"
     )
 )

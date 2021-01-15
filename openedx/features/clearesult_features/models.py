@@ -7,6 +7,7 @@ import logging
 from config_models.models import ConfigurationModel
 from fernet_fields import EncryptedField
 from django.db import models
+from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
 from django.contrib.auth.models import User
@@ -241,6 +242,21 @@ class ClearesultLocalAdmin(models.Model):
 
     def __str__(self):
         return '{} - {}'.format( self.site, self.user)
+
+
+class ClearesultUserSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    session_key = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult User Session'
+        unique_together = (
+            ('user', 'session_key')
+        )
+
+    def __str__(self):
+        return '{} - ({})'.format( self.user.email, self.session_key)
 
 
 class ClearesultCourseCompletion(models.Model):
