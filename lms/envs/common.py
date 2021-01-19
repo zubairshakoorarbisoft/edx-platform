@@ -3975,3 +3975,7 @@ FILTER_BLOCKS_IN_UNIT = ['html']
 GLOBALLY_ENABLED_SSO_PROVIDERS = [
     'clearesult-azuread-oauth2'
 ]
+
+######################## Default Email Params ################################
+DEFAULT_LOGO = '/static/clearesult/images/clearesulttrainingservices.png'
+DEFAULT_REGISTERATION_URL = ''
