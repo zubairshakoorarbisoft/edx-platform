@@ -1519,6 +1519,7 @@ MIDDLEWARE = [
 
     # [CLEARESULT_CUSTOM]
     'openedx.features.clearesult_features.middlewares.authentication.ClearesultAuthenticationMiddleware',
+    'openedx.features.clearesult_features.middlewares.session_watcher.ClearesultSessionMiddleware',
     'openedx.features.clearesult_features.middlewares.site_security.SiteAuthenticationMiddleware',
 
     'student.middleware.UserStandingMiddleware',

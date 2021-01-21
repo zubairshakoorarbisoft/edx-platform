@@ -82,6 +82,7 @@ class ClearesultLocalAdminInterface(admin.ModelAdmin):
     """
     list_display = ('site', 'user')
 
+
 class ClearesultGroupLinkedCatalogsAdmin(admin.ModelAdmin):
     """
     Admin config clearesult credit providers.
