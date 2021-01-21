@@ -241,3 +241,19 @@ class ClearesultLocalAdmin(models.Model):
 
     def __str__(self):
         return '{} - {}'.format( self.site, self.user)
+
+
+class ClearesultCourseCompletion(models.Model):
+    """
+    This model saves the course completion information of user.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course_id = CourseKeyField(max_length=255, db_index=True)
+    completion_date = models.DateTimeField(blank=True, null=True)
+    pass_date = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        unique_together = (
+            ('course_id', 'user')
+        )

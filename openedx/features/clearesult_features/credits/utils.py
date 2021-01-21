@@ -9,7 +9,8 @@ from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCredit,
     ClearesultCreditProvider,
-    UserCreditsProfile
+    UserCreditsProfile,
+    ClearesultCourseCompletion
 )
 logger = getLogger(__name__)
 
@@ -102,7 +103,7 @@ def get_credit_provider_by_short_code(short_code):
 def list_user_credits_for_report(course_key, provider_filter=None):
     """
     Return info about user who have earned course credits after successfull completion of the courses.
-    It will also apply filteration on the basis of given provider_filter.
+    It will also apply filtration on the basis of given provider_filter.
 
     list_user_credits_for_report(course_key, provider_filter)
     would return [
@@ -115,7 +116,8 @@ def list_user_credits_for_report(course_key, provider_filter=None):
             'course_name': 'sample course name 1',
             'earned_credits': '1',
             'grade_percent': '0.83',
-            'letter_grade': 'A'
+            'letter_grade': 'A',
+            'pass_date': '2021-01-01'
         },
         {
             'username': 'username2',
@@ -126,7 +128,8 @@ def list_user_credits_for_report(course_key, provider_filter=None):
             'course_name': 'sample course name 1',
             'earned_credits': '1',
             'grade_percent': '0.78',
-            'letter_grade': 'PASS'
+            'letter_grade': 'PASS',
+            'pass_date': '2021-01-03'
         },
         {
             'username': 'username1',
@@ -137,7 +140,8 @@ def list_user_credits_for_report(course_key, provider_filter=None):
             'course_name': 'sample course name 2',
             'earned_credits': '3',
             'grade_percent': '0.80',
-            'letter_grade': 'A'
+            'letter_grade': 'A',
+            'pass_date': '2021-01-03'
         }
     ]
 
@@ -155,6 +159,9 @@ def list_user_credits_for_report(course_key, provider_filter=None):
         user_credit_courses = user_provider_profile.earned_course_credits.all()
         if user_credit_courses.count() > 0:
             for course_credit in user_credit_courses:
+                pass_date = ClearesultCourseCompletion.objects.get(user=user_provider_profile.user,
+                    course_id=course_credit.course_id).pass_date
+                pass_date = pass_date.date() if pass_date else 'N/A'
                 course_grade = CourseGradeFactory().read(user_provider_profile.user, course_key=course_credit.course_id)
                 course = modulestore().get_course(course_credit.course_id)
                 data = {
@@ -167,7 +174,8 @@ def list_user_credits_for_report(course_key, provider_filter=None):
                     'course_name': course.display_name,
                     'earned_credits': course_credit.credit_value,
                     'grade_percent': course_grade.percent,
-                    'letter_grade': course_grade.letter_grade
+                    'letter_grade': course_grade.letter_grade,
+                    'pass_date': pass_date
                 }
                 data_list.append(data)
         else:
@@ -181,7 +189,8 @@ def list_user_credits_for_report(course_key, provider_filter=None):
                 'course_name': 'N/A',
                 'earned_credits': 0.0,
                 'grade_percent': 'N/A',
-                'letter_grade': 'N/A'
+                'letter_grade': 'N/A',
+                'pass_date': 'N/A'
             }
             data_list.append(data)
 

@@ -5,16 +5,19 @@ import io
 import logging
 import six
 from csv import Error, DictReader, Sniffer
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
+from django.test import RequestFactory
 from opaque_keys.edx.keys import CourseKey
 
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
-    ClearesultLocalAdmin
+    ClearesultLocalAdmin, ClearesultCourseCompletion
 )
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 
@@ -84,12 +87,14 @@ def get_csv_file_control(file_path):
     return {'csv_file': csv_file, 'csv_reader': csv_reader}
 
 
-def get_completed_enrollments(request, enrollments):
+def get_enrollments_and_completions(request, enrollments):
     """
-    Returns user enrollment list for completed courses and incompleted courses.
+    Returns user enrollment list for completed courses and incomplete courses
+    and course completion dates as well.
     """
     complete_enrollments = []
     incomplete_enrollments = [enrollment for enrollment in enrollments]
+    course_completions = {}
     for enrollment in enrollments:
         course_id_string = six.text_type(enrollment.course.id)
         course_outline_blocks = get_course_outline_block_tree(
@@ -98,9 +103,16 @@ def get_completed_enrollments(request, enrollments):
         if course_outline_blocks:
             if course_outline_blocks.get('complete'):
                 incomplete_enrollments.remove(enrollment)
+                completion_date, pass_date = get_course_completion_and_pass_date(
+                    enrollment.user, enrollment.course_id, is_graded=course_outline_blocks.get('graded')
+                )
+                course_completions[enrollment.id] = {
+                        'completion_date': completion_date.date() if completion_date else None,
+                        'pass_date': pass_date.date() if pass_date else None,
+                }
                 complete_enrollments.append(enrollment)
 
-    return complete_enrollments, incomplete_enrollments
+    return complete_enrollments, incomplete_enrollments, course_completions
 
 
 def get_courses_progress(request, course_enrollments):
@@ -173,7 +185,7 @@ def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_U
 
     for block in course_block_children:
         if (is_block_vertical and block.get('type') in FILTER_BLOCKS_IN_UNIT and is_multi_block_type):
-                continue
+            continue
 
         total_count, completed_count = get_course_block_progress(
             block,
@@ -212,6 +224,22 @@ def get_site_users(site):
 
 
 def create_clearesult_course(destination_course_key, source_course_key=None, site=None):
+    """
+    Create a clearesult course instance for a new course or course rerun.
+
+    If you call this function for a course rerun,
+        source_course_key: will be the course key of the parent course.
+        destination_course_key: will be the course key of actual course rerun.
+        site: will be None and we will use the same site for rerun
+              which we have used for parent course.
+
+    If you call this function for a course,
+        source_course_key: will be None
+        destination_course_key: will be the actual course key which has been created.
+        site: will be the domain of site which is being linked to the clearesult course.
+              If you get `Public` for this then it means the clearesult course will be `Public`
+              and we will save `None` for that
+    """
     if site == 'Public':
         site = None
     elif site == None and source_course_key:
@@ -223,6 +251,14 @@ def create_clearesult_course(destination_course_key, source_course_key=None, sit
 
 
 def get_site_for_clearesult_course(course_id):
+    """
+    Return site if you find any site linked to the course.
+    Return 'Public' if course is public.
+    Return None if there is no relation of course with site has been saved.
+
+    If course is not linked to a site, it means course is public.
+    If course is linked to a site, it means course it is private.
+    """
     try:
         site = ClearesultCourse.objects.get(course_id=course_id).site
         if site is None:
@@ -235,6 +271,15 @@ def get_site_for_clearesult_course(course_id):
 
 
 def is_compliant_with_clearesult_un_enroll_policy(enrollment):
+    """
+    Check that either user is compliant with clearesult un-enroll policy or not.
+    Return False: if compliant
+    Return True: if not compliant
+
+    Un-enroll policy is:
+        1. User can't un-enroll from paid courses for which he has enrolled
+        2. User can't un-enroll from mandatory courses
+    """
     clearesult_groups = ClearesultGroupLinkage.objects.filter(users__username=enrollment.user.username)
     clearesult_catalogs = ClearesultGroupLinkedCatalogs.objects.filter(group__in=clearesult_groups)
     for clearesult_catalog in clearesult_catalogs:
@@ -253,3 +298,83 @@ def is_local_admin_or_superuser(user):
     otherwise return False.
     """
     return user.is_superuser or ClearesultLocalAdmin.objects.filter(user=user).exists()
+
+
+def get_course_completion_and_pass_date(user, course_id, is_graded):
+    """
+    Return course completion and pass date.
+
+    The completion and pass date should be saved in ClearesultCourseCompletion
+    according to the user enrollment. If it isn't, get the latest block completion
+    date from BlockCompletion and save it.
+    If course is not graded, completion date will be the pass date as well.
+
+    Note: don't call this function if the course is not completed.
+    """
+    try:
+        clearesult_course_completion = ClearesultCourseCompletion.objects.get(user=user, course_id=course_id)
+    except ClearesultCourseCompletion.DoesNotExist:
+        logger.info('Could not get completion for course {} and user {}'.format(course_id, user))
+        return None, None
+
+    return clearesult_course_completion.completion_date, clearesult_course_completion.pass_date
+
+
+def generate_clearesult_course_completion(user, course_id):
+    """
+    On passing a course just set the pass date to the current date.
+    """
+    ClearesultCourseCompletion.objects.update_or_create(
+        user=user, course_id=course_id,
+        defaults={
+            'pass_date': datetime.now()
+        }
+    )
+
+
+def update_clearesult_course_completion(user, course_id):
+    """
+    This function will be called on course failure as it
+    is associated with `COURSE_GRADE_NOW_FAILED` signal.
+
+    So unless you pass a course for each step (attempting of problem)
+    you will be considered as failed. Means this function will be called
+    multiple times unlike `generate_clearesult_course_completion`
+
+    In case of graded course and for failure just set the pass_date to None.
+    For non graded course completion date will be the pass date.
+    """
+    is_graded = is_course_graded(course_id, user)
+    clearesult_course_completion, created = ClearesultCourseCompletion.objects.get_or_create(
+        user=user, course_id=course_id)
+
+    if not created:
+        if is_graded:
+            clearesult_course_completion.pass_date = None
+        else:
+            clearesult_course_completion.pass_date = clearesult_course_completion.completion_date
+
+        clearesult_course_completion.save()
+
+
+def is_course_graded(course_id, user, request=None):
+    """
+    Check that course is graded.
+
+    Arguments:
+        course_id: (CourseKey/String) if CourseKey turn it into string
+        request: (WSGI Request/None) if None create your own dummy request object
+
+    Returns:
+        is_graded (bool)
+    """
+    if request is None:
+        request = RequestFactory().get(u'/')
+        request.user = user
+
+    if isinstance(course_id, CourseKey):
+        course_id = six.text_type(course_id)
+
+    course_outline = get_course_outline_block_tree(request, course_id, user)
+
+    return course_outline.get('num_graded_problems') > 0
