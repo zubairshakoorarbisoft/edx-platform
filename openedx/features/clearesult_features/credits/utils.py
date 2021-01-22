@@ -159,8 +159,12 @@ def list_user_credits_for_report(course_key, provider_filter=None):
         user_credit_courses = user_provider_profile.earned_course_credits.all()
         if user_credit_courses.count() > 0:
             for course_credit in user_credit_courses:
-                pass_date = ClearesultCourseCompletion.objects.get(user=user_provider_profile.user,
-                    course_id=course_credit.course_id).pass_date
+                try:
+                    pass_date = ClearesultCourseCompletion.objects.get(user=user_provider_profile.user,
+                        course_id=course_credit.course_id).pass_date
+                except ClearesultCourseCompletion.DoesNotExist:
+                    pass_date = None
+
                 pass_date = pass_date.date() if pass_date else 'N/A'
                 course_grade = CourseGradeFactory().read(user_provider_profile.user, course_key=course_credit.course_id)
                 course = modulestore().get_course(course_credit.course_id)
