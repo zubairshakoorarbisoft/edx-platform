@@ -94,10 +94,14 @@ class ClearesultCourseCompletionAdmin(admin.ModelAdmin):
     list_display = ('user', 'course_id', 'completion_date', 'pass_date')
 
 
+class ClearesultUserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'job_title', 'company', 'state_or_province', 'postal_code', 'extensions')
+
+
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
 admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
-admin.site.register(ClearesultUserProfile)
+admin.site.register(ClearesultUserProfile, ClearesultUserProfileAdmin)
 admin.site.register(ClearesultSiteConfiguration, ClearesultSiteConfigurationAdmin)
 admin.site.register(ClearesultUserSiteProfile, ClearesultUserSiteProfileAdmin)
 admin.site.register(ClearesultCourse, ClearesultCourseAdmin)
