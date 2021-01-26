@@ -20,7 +20,8 @@ from student.models import UserProfile
 logger = getLogger(__name__)
 CREATION_SUCCESSFUL = 'CREATED'
 CREATION_FAILED = 'FAILED'
-UPDATION_SUCCESSFUL = 'UPDATED'
+UPDATE_SUCCESSFUL = 'UPDATED'
+DUPLICATE_ENTRY = 'DUPLICATE EMAIL'
 
 
 class Command(BaseCommand):
@@ -61,38 +62,54 @@ class Command(BaseCommand):
             logger.info('Unable to get file control.')
             return
 
+        traversed_emails = []
         output_file_rows = []
-        total_count, updated_count, created_count, failure_count = 0, 0, 0, 0
+        total_count, updated_count, created_count, failure_count, duplicate_count = 0, 0, 0, 0, 0
         try:
             for row in file_controller['csv_reader']:
                 total_count = total_count + 1
                 row['Status'] = ''
                 row['Error'] = ''
-                try:
-                    with transaction.atomic():
-                        edx_user = _create_or_update_edx_users(row)
-                        _create_or_update_edx_user_profile(edx_user, row)
-                        _create_or_update_clearesult_user_profile(edx_user, row)
-                        _create_or_update_user_credits_profile(edx_user, row)
-                        created = _create_or_update_user_social_auth_accounts(edx_user)
-                        if created:
-                            created_count = created_count + 1
-                        else:
-                            updated_count = updated_count + 1
-                except IntegrityError as error:
-                    logger.exception('Error while creating/updating ({}) user and its '
-                                     'profiles with the following errors {}.'.format(row.get('Email').lower(), error))
-                    failure_count = failure_count + 1
-                    row['Status'] = CREATION_FAILED
-                    row['Error'] = error
+                if not _is_email_traversed(traversed_emails, row):
+                    try:
+                        with transaction.atomic():
+                            edx_user = _create_or_update_edx_users(row)
+                            _create_or_update_edx_user_profile(edx_user, row)
+                            _create_or_update_clearesult_user_profile(edx_user, row)
+                            _create_or_update_user_credits_profile(edx_user, row)
+                            created = _create_or_update_user_social_auth_accounts(edx_user)
+                            if created:
+                                created_count = created_count + 1
+                            else:
+                                updated_count = updated_count + 1
+                    except IntegrityError as error:
+                        logger.exception('Error while creating/updating ({}) user and its '
+                                        'profiles with the following errors {}.'.format(row.get('Email').lower(), error))
+                        failure_count = failure_count + 1
+                        row['Status'] = CREATION_FAILED
+                        row['Error'] = error
+                else:
+                    row['Status'] = DUPLICATE_ENTRY
+                    row['Error'] = 'This email has already been traversed.'
+                    duplicate_count = duplicate_count + 1
+
                 output_file_rows.append(row)
         except Error as err:
             logger.exception('Error while traversing {} file content with following error {}.'
                              .format(file_path, err))
 
-        _log_final_report(total_count, created_count, updated_count, failure_count)
+        _log_final_report(total_count, created_count, updated_count, failure_count, duplicate_count)
         file_controller['csv_file'].close()
         _write_status_on_csv_file(file_path, output_file_rows)
+
+
+def _is_email_traversed(traversed_emails, row):
+    email = row.get('Email').lower()
+    if  email in traversed_emails:
+        return True
+    else:
+        traversed_emails.append(email)
+        return False
 
 
 def _create_or_update_edx_users(user_info):
@@ -161,7 +178,7 @@ def _create_or_update_clearesult_user_profile(edx_user, user_info):
         user_info['Status'] = CREATION_SUCCESSFUL
     else:
         logger.info('{} clearesult profile has been updated.'.format(edx_user.username))
-        user_info['Status'] = UPDATION_SUCCESSFUL
+        user_info['Status'] = UPDATE_SUCCESSFUL
 
 
 def _create_or_update_user_credits_profile(edx_user, user_info):
@@ -239,9 +256,9 @@ def _write_status_on_csv_file(file_path, output_file_rows):
         logger.exception('(file_path) --- {}'.format(file_path, error.strerror))
 
 
-def _log_final_report(total_count, created_count, updated_count, failure_count):
+def _log_final_report(total_count, created_count, updated_count, failure_count, duplicate_count):
     logger.info('\n\n\n')
-    logger.info('Total number of attemps to create/update users\' accounts and their profiles: {}'.format(total_count))
+    logger.info('Total number of attempts to create/update users\' accounts and their profiles: {}'.format(total_count))
     logger.info('Total number of newly created accounts and profiles: {}'.format(created_count))
     logger.info('Total number of updated accounts and profiles: {}'.format(updated_count))
     logger.info(
@@ -249,3 +266,5 @@ def _log_final_report(total_count, created_count, updated_count, failure_count):
             failure_count
         )
     )
+    logger.info('Total unique entries: {}'.format(total_count - duplicate_count))
+    logger.info('Total duplicate entries: {}'.format(duplicate_count))
