@@ -969,6 +969,17 @@ GLOBALLY_ENABLED_SSO_PROVIDERS = ENV_TOKENS.get(
     GLOBALLY_ENABLED_SSO_PROVIDERS
 )
 
+###################### Default Email Params ###################
+DEFAULT_LOGO = ENV_TOKENS.get(
+    'DEFAULT_LOGO',
+    DEFAULT_LOGO
+)
+
+DEFAULT_REGISTERATION_URL = ENV_TOKENS.get(
+    'DEFAULT_REGISTERATION_URL',
+    DEFAULT_REGISTERATION_URL
+)
+
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded

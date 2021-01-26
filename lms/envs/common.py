@@ -1519,6 +1519,7 @@ MIDDLEWARE = [
 
     # [CLEARESULT_CUSTOM]
     'openedx.features.clearesult_features.middlewares.authentication.ClearesultAuthenticationMiddleware',
+    'openedx.features.clearesult_features.middlewares.session_watcher.ClearesultSessionMiddleware',
     'openedx.features.clearesult_features.middlewares.site_security.SiteAuthenticationMiddleware',
 
     'student.middleware.UserStandingMiddleware',
@@ -3970,3 +3971,7 @@ FEATURES['SHOW_ARCHIVED_COURSES_IN_LISTING'] = False
 GLOBALLY_ENABLED_SSO_PROVIDERS = [
     'clearesult-azuread-oauth2'
 ]
+
+######################## Default Email Params ################################
+DEFAULT_LOGO = '/static/clearesult/images/clearesulttrainingservices.png'
+DEFAULT_REGISTERATION_URL = ''
