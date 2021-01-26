@@ -339,6 +339,10 @@ ENTERPRISE_MARKETING_FOOTER_QUERY_PARAMS = OrderedDict([
     ("utm_medium", "Footer"),
 ])
 
+MIDDLEWARE.remove('openedx.features.edly.middleware.EdlyOrganizationAccessMiddleware')
+MIDDLEWARE.remove('openedx.features.edly.middleware.SettingsOverrideMiddleware')
+MIDDLEWARE.remove('edly_panel_app.middleware.EdlyUserActivityMiddleware')
+
 ############################ STATIC FILES #############################
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 MEDIA_ROOT = TEST_ROOT / "uploads"
