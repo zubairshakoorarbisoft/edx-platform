@@ -92,7 +92,7 @@ def _get_course_key(course_key_string, course_name):
     try:
         course_key = CourseKey.from_string(course_key_string)
     except InvalidKeyError:
-        logger.exception('The course with this id and name does not eixst.'.format(course_key_string, course_name))
+        logger.exception('The course with this id and name does not exist.'.format(course_key_string, course_name))
 
     return course_key
 
