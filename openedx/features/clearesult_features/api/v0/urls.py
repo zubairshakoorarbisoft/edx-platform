@@ -3,7 +3,7 @@ URLs for clearesult API v0.
 """
 from django.conf.urls import url
 
-from openedx.features.clearesult_features.api.v0.views import ClearesultCredeitProviderListView, UserCreditProfileViewset
+from openedx.features.clearesult_features.api.v0.views import ClearesultCredeitProviderListView, UserCreditProfileViewset, ClearesultLogoutView
 
 
 app_name = 'api_v0'
@@ -30,4 +30,9 @@ urlpatterns = (
         ClearesultCredeitProviderListView.as_view(),
         name="credit_providers_list"
     ),
+    url(
+        r'^logout/$',
+        ClearesultLogoutView.as_view(),
+        name="clearesult_logout"
+    )
 )
