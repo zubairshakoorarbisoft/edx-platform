@@ -3,7 +3,9 @@ Signals for clearesult features django app.
 """
 from logging import getLogger
 
+from completion.models import BlockCompletion
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
@@ -12,9 +14,15 @@ from lms.djangoapps.verify_student.models import ManualVerification
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import UserProfile
 from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, COURSE_GRADE_NOW_FAILED
+from openedx.features.clearesult_features.models import ClearesultCourseCompletion
 from openedx.features.clearesult_features.credits.utils import (
     generate_user_course_credits,
-    remove_user_cousre_credits_if_exist
+    remove_user_cousre_credits_if_exist,
+)
+from openedx.features.clearesult_features.utils import (
+    generate_clearesult_course_completion,
+    update_clearesult_course_completion,
+    is_course_graded
 )
 
 logger = getLogger(__name__)
@@ -66,16 +74,44 @@ def generate_manual_verification_for_user(sender, instance, created, **kwargs):
 
 
 @receiver(COURSE_GRADE_NOW_PASSED)
-def genrate_user_credits(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
+def genrate_user_course_credits_and_course_completion(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
     """
-    Listen for a learner passing a course and update user credits.
+    Listen for a learner passing a course and update user credits and completion dates.
     """
     generate_user_course_credits(course_id, user)
+    generate_clearesult_course_completion(user, course_id)
 
 
 @receiver(COURSE_GRADE_NOW_FAILED)
-def remove_user_cousre_credits(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
+def remove_user_cousre_credits_and_update_course_completion(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
     """
-    Listen for a learner failing a course and update user credits.
+    Listen for a learner failing a course and update user credits and completion dates.
     """
     remove_user_cousre_credits_if_exist(course_id, user)
+    update_clearesult_course_completion(user, course_id)
+
+
+@receiver(post_save, sender=BlockCompletion)
+def set_clearesult_course_completion(sender, instance, created, **kwargs):
+    """
+    Listen for block completion and update clearesult course completion.
+
+    On each save of BlockCompletion save on ClearesultCourseCompletion as well.
+    For graded courses don't mess up with the pass date. But for non graded courses
+    pass date will be same as of completion date.
+    """
+    if created:
+        if is_course_graded(instance.context_key, instance.user):
+            defaults = {
+                'completion_date':instance.created,
+            }
+        else:
+            defaults = {
+                'completion_date':instance.created,
+                'pass_date': instance.created
+            }
+
+        ClearesultCourseCompletion.objects.update_or_create(
+            user=instance.user, course_id=instance.context_key,
+            defaults=defaults
+        )

@@ -34,7 +34,7 @@ def get_students_credits(request, course_id):
     if csv_type == 'credits':
         query_features = [
             'username', 'email', 'user_provider_id', 'provider_name', 'provider_short_code',
-            'course_id', 'course_name', 'earned_credits', 'grade_percent', 'letter_grade'
+            'course_id', 'course_name', 'earned_credits', 'grade_percent', 'letter_grade', 'pass_date'
         ]
     else:
         query_features = ['username', 'email', 'user_provider_id', 'provider_name', 'total_earned_credits']

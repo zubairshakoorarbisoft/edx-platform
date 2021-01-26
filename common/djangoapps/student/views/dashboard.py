@@ -44,7 +44,7 @@ from openedx.core.djangoapps.user_api.accounts.utils import is_secondary_email_f
 from openedx.core.djangoapps.util.maintenance_banner import add_maintenance_banner
 from openedx.core.djangoapps.waffle_utils import WaffleFlag, WaffleFlagNamespace
 from openedx.core.djangolib.markup import HTML, Text
-from openedx.features.clearesult_features.utils import get_completed_enrollments, get_courses_progress
+from openedx.features.clearesult_features.utils import get_enrollments_and_completions, get_courses_progress
 from openedx.features.enterprise_support.api import get_dashboard_consent_notification
 from shoppingcart.models import CourseRegistrationCode, DonationConfiguration
 from student.api import COURSE_DASHBOARD_PLUGIN_VIEW_NAME
@@ -600,7 +600,9 @@ def student_dashboard(request):
     # Get the org whitelist or the org blacklist for the current site
     site_org_whitelist, site_org_blacklist = get_org_black_and_whitelist_for_site()
     course_enrollments = list(get_course_enrollments(user, site_org_whitelist, site_org_blacklist, course_limit))
-    complete_enrollments, incomplete_enrollments = get_completed_enrollments(request, course_enrollments)
+    complete_enrollments, incomplete_enrollments, course_completions = get_enrollments_and_completions(
+        request, course_enrollments
+    )
     course_enrollments = incomplete_enrollments + complete_enrollments
 
     # Get course progress of each incomplete enrollment
@@ -886,6 +888,7 @@ def student_dashboard(request):
         # TODO START: clean up as part of REVEM-199 (END)
         'complete_enrollments': complete_enrollments,
         'incomplete_enrollments': incomplete_enrollments,
+        'course_completions': course_completions,
         'incomplete_courses_progress': incomplete_courses_progress
     }
 
