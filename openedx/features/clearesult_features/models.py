@@ -146,7 +146,7 @@ class ClearesultUserSiteProfile(models.Model):
         return '{} - {}'.format(self.site, self.user)
 
 
-class ClearesulCourse(models.Model):
+class ClearesultCourse(models.Model):
     """
     This model saves clearesult course type.
     Clearesult courses can have following types:
@@ -155,7 +155,7 @@ class ClearesulCourse(models.Model):
     """
 
     course_id = CourseKeyField(max_length=255, db_index=True, unique=True)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         app_label = APP_LABEL
@@ -165,7 +165,7 @@ class ClearesulCourse(models.Model):
         return '{} - {}'.format( self.course_id, self.site)
 
 
-class ClearesulCatalog(models.Model):
+class ClearesultCatalog(models.Model):
     """
     This model saves clearesult catalogs.
     Clearesult Catalogs has following types types:
@@ -174,8 +174,8 @@ class ClearesulCatalog(models.Model):
     """
 
     name = models.CharField(max_length=255)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
-    clearesult_courses = models.ManyToManyField(ClearesulCourse, related_name='courses', blank=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
+    clearesult_courses = models.ManyToManyField(ClearesultCourse, related_name='courses', blank=True)
 
     class Meta:
         app_label = APP_LABEL
@@ -188,7 +188,7 @@ class ClearesulCatalog(models.Model):
         return '{} - {}'.format( self.site, self.name)
 
 
-class ClearesulGroupLinkage(models.Model):
+class ClearesultGroupLinkage(models.Model):
     """
     This model saves clearesult user groups and catalogs assigned to that group.
 
@@ -199,7 +199,8 @@ class ClearesulGroupLinkage(models.Model):
     name = models.CharField(max_length=255)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
     users =  models.ManyToManyField(User, blank=True)
-    assigned_catalogs = models.ManyToManyField(ClearesulCatalog, related_name='catalogs', blank=True)
+    catalogs = models.ManyToManyField(
+        ClearesultCatalog, related_name='linked_catalogs', blank=True, through='ClearesultGroupLinkedCatalogs')
 
     class Meta:
         app_label = APP_LABEL
@@ -210,6 +211,38 @@ class ClearesulGroupLinkage(models.Model):
 
     def __str__(self):
         return '{} - {}'.format( self.site, self.name)
+
+
+class ClearesultGroupLinkedCatalogs(models.Model):
+    """
+    This model saves mandatory courses list of catalogs assigned to groups.
+    """
+    catalog = models.ForeignKey(ClearesultCatalog, on_delete=models.CASCADE)
+    group = models.ForeignKey(ClearesultGroupLinkage, on_delete=models.CASCADE)
+    mandatory_courses = models.ManyToManyField(ClearesultCourse, related_name='mandatory_courses', blank=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Group Catalogs Mandatory Courses'
+
+class ClearesultLocalAdmin(models.Model):
+    """
+    This model saves clearesult local admin.
+    """
+
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    user =  models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Local Admin'
+        unique_together = (
+            ('site', 'user')
+        )
+
+    def __str__(self):
+        return '{} - {}'.format( self.site, self.user)
+
 
 class ClearesultUserSession(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

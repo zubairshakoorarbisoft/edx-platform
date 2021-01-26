@@ -13,10 +13,12 @@ from openedx.features.clearesult_features.models import (
     ClearesultUserProfile,
     ClearesultSiteConfiguration,
     ClearesultUserSiteProfile,
-    ClearesulGroupLinkage,
-    ClearesulCatalog,
-    ClearesulCourse,
- 	ClearesultCourseCompletion   
+    ClearesultGroupLinkage,
+    ClearesultCatalog,
+    ClearesultCourse,
+    ClearesultLocalAdmin,
+    ClearesultGroupLinkedCatalogs,
+    ClearesultCourseCompletion
 )
 
 
@@ -55,31 +57,45 @@ class ClearesultUserSiteProfileAdmin(admin.ModelAdmin):
     """
     list_display = ('user', 'site')
 
-class ClearesulCourseAdmin(admin.ModelAdmin):
+class ClearesultCourseAdmin(admin.ModelAdmin):
     """
     Admin config clearesult courses.
     """
     list_display = ('course_id', 'site')
 
-class ClearesulCatalogAdmin(admin.ModelAdmin):
+class ClearesultCatalogAdmin(admin.ModelAdmin):
     """
     Admin config clearesult credit providers.
     """
     list_display = ('name', 'site')
 
-class ClearesulGroupLinkageAdmin(admin.ModelAdmin):
+class ClearesultGroupLinkageAdmin(admin.ModelAdmin):
     """
     Admin config clearesult credit providers.
     """
     list_display = ('name', 'site')
 
 
-class ClearesultUserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'job_title', 'company', 'state_or_province', 'postal_code', 'extensions')
+class ClearesultLocalAdminInterface(admin.ModelAdmin):
+    """
+    Admin config clearesult credit providers.
+    """
+    list_display = ('site', 'user')
+
+
+class ClearesultGroupLinkedCatalogsAdmin(admin.ModelAdmin):
+    """
+    Admin config clearesult credit providers.
+    """
+    list_display = ('id', 'group', 'catalog')
 
 
 class ClearesultCourseCompletionAdmin(admin.ModelAdmin):
     list_display = ('user', 'course_id', 'completion_date', 'pass_date')
+
+
+class ClearesultUserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'job_title', 'company', 'state_or_province', 'postal_code', 'extensions')
 
 
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
@@ -88,7 +104,9 @@ admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
 admin.site.register(ClearesultUserProfile, ClearesultUserProfileAdmin)
 admin.site.register(ClearesultSiteConfiguration, ClearesultSiteConfigurationAdmin)
 admin.site.register(ClearesultUserSiteProfile, ClearesultUserSiteProfileAdmin)
-admin.site.register(ClearesulCourse, ClearesulCourseAdmin)
-admin.site.register(ClearesulCatalog, ClearesulCatalogAdmin)
-admin.site.register(ClearesulGroupLinkage, ClearesulGroupLinkageAdmin)
+admin.site.register(ClearesultCourse, ClearesultCourseAdmin)
+admin.site.register(ClearesultCatalog, ClearesultCatalogAdmin)
+admin.site.register(ClearesultGroupLinkage, ClearesultGroupLinkageAdmin)
+admin.site.register(ClearesultLocalAdmin, ClearesultLocalAdminInterface)
+admin.site.register(ClearesultGroupLinkedCatalogs, ClearesultGroupLinkedCatalogsAdmin)
 admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)
