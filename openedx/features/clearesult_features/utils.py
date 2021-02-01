@@ -388,15 +388,17 @@ def add_user_to_site_default_group(request, user, site):
     ! request is important paramenter here should contain request.user and request.site
     """
     if site:
+        logger.info("Add user: {} to site: {} default group.".format(user.email, site.domain))
         try:
             site_default_group = ClearesultGroupLinkage.objects.get(
                 name=settings.SITE_DEFAULT_GROUP_NAME,
                 site=site
             )
             site_default_group.users.add(user)
-            check_and_enroll_group_users_to_mandatory_courses.delay(request, site_default_group.id, [user])
+            check_and_enroll_group_users_to_mandatory_courses.delay(
+                request.user.id, request.site.id, site_default_group.id, [user.id])
         except ClearesultGroupLinkage.DoesNotExist:
-            logger.error("Default group for site {} doesn't exist".format(site.domain))
+            logger.error("Default group for site: {} doesn't exist".format(site.domain))
 
 def is_lms_site(site):
     return "LMS" in site.name.upper()
