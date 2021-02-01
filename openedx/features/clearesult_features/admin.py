@@ -3,6 +3,7 @@ Admin registration for Clearesult.
 """
 from config_models.admin import KeyedConfigurationModelAdmin
 from django.contrib import admin
+from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 
 from openedx.features.clearesult_features.forms import UserCreditsProfileAdminForm
@@ -75,6 +76,25 @@ class ClearesultGroupLinkageAdmin(admin.ModelAdmin):
     """
     list_display = ('name', 'site')
 
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+    def delete_model(self, request, obj):
+        """
+        Don't delete group objects linked as a default group with some site
+        """
+        is_default = False
+        clearesult_active_configs = ClearesultSiteConfiguration.objects.filter(enabled=True)
+        for config in clearesult_active_configs:
+            if config.default_group == obj:
+                is_default = True
+                messages.error(request, "Group is set as a dafault group of some site. Remove the linkgae first then try again.")
+                break
+        if not is_default:
+            super().delete_model(request, obj)
 
 class ClearesultLocalAdminInterface(admin.ModelAdmin):
     """

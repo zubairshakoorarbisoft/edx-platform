@@ -12,9 +12,13 @@ from django.db.models.signals import post_save
 from course_modes.models import CourseMode
 from lms.djangoapps.verify_student.models import ManualVerification
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from student.models import UserProfile
 from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, COURSE_GRADE_NOW_FAILED
-from openedx.features.clearesult_features.models import ClearesultCourseCompletion
+from openedx.features.clearesult_features.models import (
+    ClearesultCourseCompletion, ClearesultGroupLinkage,
+    ClearesultSiteConfiguration
+)
 from openedx.features.clearesult_features.credits.utils import (
     generate_user_course_credits,
     remove_user_cousre_credits_if_exist,
@@ -22,8 +26,9 @@ from openedx.features.clearesult_features.credits.utils import (
 from openedx.features.clearesult_features.utils import (
     generate_clearesult_course_completion,
     update_clearesult_course_completion,
-    is_course_graded
+    is_course_graded, is_lms_site
 )
+from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
 
 logger = getLogger(__name__)
 
@@ -115,3 +120,34 @@ def set_clearesult_course_completion(sender, instance, created, **kwargs):
             user=instance.user, course_id=instance.context_key,
             defaults=defaults
         )
+
+@receiver(post_save, sender=SiteConfiguration)
+def create_default_group(sender, instance, created, **kwargs):
+    """
+    Listen for SiteConfiguration and create default site group on new site creation.
+    """
+    if is_lms_site(instance.site):
+        clearesult_configuration = ClearesultSiteConfiguration.current(instance.site)
+
+        if clearesult_configuration:
+            # check if default group is set for the site
+            try:
+                if not clearesult_configuration.default_group:
+                    raise ClearesultGroupLinkage.DoesNotExist
+            except ClearesultGroupLinkage.DoesNotExist:
+                # if default group is not set then get or create DEFAULT group for the site and set it
+                # as default group
+                default_site_group = ClearesultGroupLinkage.objects.get_or_create(
+                    name=settings.SITE_DEFAULT_GROUP_NAME,
+                    site=instance.site
+                )
+                clearesult_configuration.default_group = default_site_group[0]
+                clearesult_configuration.save()
+        else:
+            default_site_group = ClearesultGroupLinkage.objects.get_or_create(
+                    name=settings.SITE_DEFAULT_GROUP_NAME,
+                    site=instance.site
+            )
+            clearesult_configuration.objects.create(
+                site=instance.site, default_group=default_site_group[0], security_code_required=False, enabled=True
+            )

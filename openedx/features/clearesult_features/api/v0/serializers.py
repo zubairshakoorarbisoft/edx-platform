@@ -3,6 +3,7 @@ Serializers for Clearesult v0 APIs.
 """
 import json
 
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import User
 from django.db.models import fields, Q
@@ -11,10 +12,14 @@ from rest_framework import serializers
 
 from openedx.features.clearesult_features.models import (
     UserCreditsProfile, ClearesultCreditProvider, ClearesultCatalog,
-    ClearesultCourse, ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs
+    ClearesultCourse, ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs, ClearesultSiteConfiguration
 )
 from openedx.features.clearesult_features.api.v0.validators import validate_user_for_site
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.features.clearesult_features.tasks import (
+    enroll_students_to_mandatory_courses,
+    check_and_enroll_group_users_to_mandatory_courses
+)
 
 
 class UserCreditsProfileSerializer(serializers.ModelSerializer):
@@ -47,9 +52,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SiteSerializer(serializers.ModelSerializer):
+    default_group = serializers.SerializerMethodField()
     class Meta:
         model = Site
-        fields = ('id', 'domain')
+        fields = ('id', 'domain', 'default_group')
+
+    def get_default_group(self, obj):
+        clearesult_configuration = ClearesultSiteConfiguration.current(obj)
+        if clearesult_configuration and clearesult_configuration.default_group:
+            return clearesult_configuration.default_group.id
 
 
 class ClearesultGroupsSerializer(serializers.ModelSerializer):
@@ -87,6 +98,16 @@ class ClearesultGroupsSerializer(serializers.ModelSerializer):
                 if not (validate_user_for_site(user, site)):
                     raise serializers.ValidationError("Invalid action - users must belong to the site")
         return validated_data
+
+    def update(self, instance, validated_data):
+        # if group is already linked with some catalogs and have some existing mandatory courses
+        # then enroll newly added users to the mandatory courses (if not already enrolled)
+        newly_added_group_users = set(validated_data.get('users', [])) - set(instance.users.all())
+        if len(newly_added_group_users):
+            check_and_enroll_group_users_to_mandatory_courses.delay(
+                self.context.get('request'), instance.id, newly_added_group_users
+        )
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
@@ -186,6 +207,9 @@ class ClearesultMandatoryCoursesSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(u'action field is not valid, available options are "add", "remove"')
 
         if action=="add":
+            enroll_students_to_mandatory_courses.delay(
+                self.context.get('request'), instance.group.users.all(),  validated_date.get('mandatory_courses')
+            )
             for course in validated_date.get('mandatory_courses'):
                 instance.mandatory_courses.add(course)
         else:

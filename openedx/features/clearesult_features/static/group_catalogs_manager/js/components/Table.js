@@ -33,7 +33,7 @@ const Table = ({
                           <i className="fa fa-expand" aria-hidden="true"></i>
                         </a>
                     </td>
-                    <td>{id}</td>
+                    <td>{id} {(id != site.default_group) ? '': <span className="badge badge-info">Default</span>}</td>
                     <td>{name}</td>
                     <td>{site.domain}</td>
                     <td>

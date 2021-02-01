@@ -145,7 +145,7 @@ def list_user_credits_for_report(course_key, provider_filter=None):
         }
     ]
 
-    Note that result will only contain results for the user earned credits.
+    ! Note that result will only contain results for the user earned credits.
     We will not include users who have completed the course but didn't get any credits.
     """
     data_list = []
@@ -231,7 +231,7 @@ def list_user_total_credits_for_report(course_key, provider_filter=None):
         }
     ]
 
-    Note that result will only contain results for the users who have registered CUI for any Provider.
+    ! Note that result will only contain results for the users who have registered CUI for any Provider.
     """
     data_list = []
 

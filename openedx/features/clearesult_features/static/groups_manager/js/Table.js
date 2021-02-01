@@ -17,6 +17,7 @@ const Table = ({groups, handleEditClick, DeleteGroup}) => {
         return groups.map(({ id, name, site, users}) => {
             const div_id = "#collapse" + id
             const div_id2 = "collapse" + id
+
             return (
             <React.Fragment key={id}>
                 <tr>
@@ -25,14 +26,14 @@ const Table = ({groups, handleEditClick, DeleteGroup}) => {
                             <i className="fa fa-expand" aria-hidden="true"></i>
                         </a>
                     </td>
-                    <td>{id}</td>
+                    <td>{id} {(id != site.default_group) ? '': <span className="badge badge-info">Default</span>}</td>
                     <td>{name}</td>
                     <td>{site.domain}</td>
                     <td className="button-holder">
                         <button type="button" data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(e)=>handleEditClick(e.target.value)} >
                             Edit
                         </button>
-                        <button type="button" value={id} onClick={(e)=> {if (window.confirm('Are you sure you wish to delete this item?')) DeleteGroup(e.target.value)}} >
+                        <button type="button" value={id} disabled={!(id != site.default_group)} onClick={(e)=> {if (window.confirm('Are you sure you wish to delete this item?')) DeleteGroup(e.target.value)}} >
                             Delete
                         </button>
                     </td>
