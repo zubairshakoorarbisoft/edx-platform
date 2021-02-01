@@ -12,7 +12,8 @@ export default function AddEditModal({
         users,
         setUsers,
         isEdit,
-        handleAddOrEditClick
+        handleAddOrEditClick,
+        isDefault
     }) {
 
     const submitButtonText = isEdit ? "Update" : "Add"
@@ -73,6 +74,7 @@ export default function AddEditModal({
                                             options={userOptions}
                                             selected={users}
                                             onChange={(selected) => setUsers(selected)}
+                                            disabled={isDefault}
                                         />
                                     </div>
                                 </div>

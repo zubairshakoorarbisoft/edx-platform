@@ -20,6 +20,7 @@ from openedx.features.clearesult_features.models import (
     ClearesultLocalAdmin, ClearesultCourseCompletion
 )
 from openedx.features.course_experience.utils import get_course_outline_block_tree
+from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
 
 logger = logging.getLogger(__name__)
 
@@ -206,7 +207,7 @@ def get_site_users(site):
     site_users = []
     site_name = "-".join(site.name.split('-')[:-1]).rstrip()
 
-    # Note: site name must contain "-" otherwise it will return emty string.
+    # ! Note: site name must contain "-" otherwise it will return emty string.
     if not site_name:
         logger.info("Site name ({}) is not in a correct format.".format(site.name))
         logger.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")
@@ -309,7 +310,7 @@ def get_course_completion_and_pass_date(user, course_id, is_graded):
     date from BlockCompletion and save it.
     If course is not graded, completion date will be the pass date as well.
 
-    Note: don't call this function if the course is not completed.
+    ! Note: don't call this function if the course is not completed.
     """
     try:
         clearesult_course_completion = ClearesultCourseCompletion.objects.get(user=user, course_id=course_id)
@@ -378,3 +379,24 @@ def is_course_graded(course_id, user, request=None):
     course_outline = get_course_outline_block_tree(request, course_id, user)
 
     return course_outline.get('num_graded_problems') > 0
+
+
+# TODO: Add newly registered users to their relevant site groups
+def add_user_to_site_default_group(request, user, site):
+    """
+    Add user to default_group of a given site.
+    ! request is important paramenter here should contain request.user and request.site
+    """
+    if site:
+        try:
+            site_default_group = ClearesultGroupLinkage.objects.get(
+                name=settings.SITE_DEFAULT_GROUP_NAME,
+                site=site
+            )
+            site_default_group.users.add(user)
+            check_and_enroll_group_users_to_mandatory_courses.delay(request, site_default_group.id, [user])
+        except ClearesultGroupLinkage.DoesNotExist:
+            logger.error("Default group for site {} doesn't exist".format(site.domain))
+
+def is_lms_site(site):
+    return "LMS" in site.name.upper()

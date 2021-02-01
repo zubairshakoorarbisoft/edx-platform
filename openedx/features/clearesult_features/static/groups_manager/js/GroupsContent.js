@@ -9,6 +9,7 @@ import Cookies from "js-cookie";
 export default function GroupsContent({ context }) {
     const [groups, setGroups] = useState([])
 
+    const [isDefault, setIsDefault] = useState(false)
     const [isEdit, setIsEdit] = useState(false)
     const [currentGroup, setCurrentGroup] = useState({})
     const [name, setName] = useState("")
@@ -113,6 +114,7 @@ export default function GroupsContent({ context }) {
         setSite(groupItem[0].site);
         setUsers(groupItem[0].users.map((user) => user.id));
         setCurrentGroup(groupItem[0]);
+        setIsDefault(groupItem[0].id == groupItem[0].site.default_group)
     }
 
     const handleAddClick = () => {
@@ -121,6 +123,7 @@ export default function GroupsContent({ context }) {
         setSite(availableSites[0]);
         setUsers([]);
         setCurrentGroup({});
+        setIsDefault(false)
     }
 
     const handleAddOrEditClick = () => {
@@ -144,8 +147,9 @@ export default function GroupsContent({ context }) {
                 setUsers={setUsers}
                 isEdit={isEdit}
                 handleAddOrEditClick={handleAddOrEditClick}
+                isDefault={isDefault}
             />
-            <Table groups={groups} handleEditClick={handleEditClick} DeleteGroup={DeleteGroup}/>
+            <Table groups={groups} handleEditClick={handleEditClick} DeleteGroup={DeleteGroup} />
             <ToastsContainer store={ToastsStore} />
         </div>
     );

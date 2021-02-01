@@ -263,7 +263,7 @@ def validate_user_for_site(user, site):
         # convert "blackhills - LMS" to "blackhills"
         site_name = "-".join(site.name.split('-')[:-1]).rstrip()
 
-        # Note: site name must contain "-" otherwise it will return empty string.
+        # ! Note: site name must contain "-" otherwise it will return empty string.
         if not site_name:
             log.info("Site name ({}) is not in a correct format.".format(site.name))
             log.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")

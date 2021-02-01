@@ -989,6 +989,13 @@ DEFAULT_REGISTERATION_URL = ENV_TOKENS.get(
     DEFAULT_REGISTERATION_URL
 )
 
+###################### Site Default Group Name ###################
+
+SITE_DEFAULT_GROUP_NAME = ENV_TOKENS.get(
+    'SITE_DEFAULT_GROUP_NAME',
+    SITE_DEFAULT_GROUP_NAME
+)
+
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded

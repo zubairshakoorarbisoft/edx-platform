@@ -113,22 +113,6 @@ class ClearesultUserProfile(models.Model):
             logger.exception(u'Invalid JSON data. \n [%s]', error)
 
 
-class ClearesultSiteConfiguration(ConfigurationModel):
-    KEY_FIELDS = ('site', )
-
-    site = models.ForeignKey(Site, related_name='clearesult_configuration', on_delete=models.CASCADE)
-
-    security_code_required = models.BooleanField(default=True)
-    security_code = EncryptedTextField(max_length=20, verbose_name="Site security code")
-
-    class Meta:
-        app_label = APP_LABEL
-        verbose_name_plural = 'Clearesult Site Configurations'
-
-    def __str__(self):
-        return '"{}" configurations'.format(self.site)
-
-
 class ClearesultUserSiteProfile(models.Model):
     """
     This model saves data for a user that is only relevant to a specific
@@ -211,6 +195,23 @@ class ClearesultGroupLinkage(models.Model):
 
     def __str__(self):
         return '{} - {}'.format( self.site, self.name)
+
+
+class ClearesultSiteConfiguration(ConfigurationModel):
+    KEY_FIELDS = ('site', )
+
+    site = models.ForeignKey(Site, related_name='clearesult_configuration', on_delete=models.CASCADE)
+
+    security_code_required = models.BooleanField(default=True)
+    security_code = EncryptedTextField(max_length=20, verbose_name="Site security code", null=True, blank=True)
+    default_group = models.ForeignKey(ClearesultGroupLinkage, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Site Configurations'
+
+    def __str__(self):
+        return '"{}" configurations'.format(self.site)
 
 
 class ClearesultGroupLinkedCatalogs(models.Model):

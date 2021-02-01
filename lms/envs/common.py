@@ -3979,3 +3979,6 @@ GLOBALLY_ENABLED_SSO_PROVIDERS = [
 ######################## Default Email Params ################################
 DEFAULT_LOGO = '/static/clearesult/images/clearesulttrainingservices.png'
 DEFAULT_REGISTERATION_URL = ''
+
+######################  Site Deafult Group Name  ###################
+SITE_DEFAULT_GROUP_NAME = "DEFAULT"

@@ -23,7 +23,7 @@ from rest_framework.views import APIView
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 
 from openedx.core.lib.api.authentication import BearerAuthentication
-from openedx.features.clearesult_features.utils import get_site_users
+from openedx.features.clearesult_features.utils import get_site_users, is_local_admin_or_superuser
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
     ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage,
@@ -39,7 +39,6 @@ from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
     validate_sites_for_local_admin, validate_catalog_update_deletion
 )
-from openedx.features.clearesult_features.utils import is_local_admin_or_superuser
 
 class IsSelf(permissions.BasePermission):
 
@@ -578,9 +577,11 @@ class ClearesultMandatoryCoursesViewset(viewsets.ModelViewSet):
         }
     ]
 
+    To update mandatory courses:
     PATCH clearesult/api/v0/mandatory_courses/ClearesultGroupLinkedCatalogs_id/
     {
-        mandatory_courses: [1,2,3]
+        "action": "add"/"remove"
+        "mandatory_courses": [1,2,3]
     }
     """
 
@@ -710,7 +711,7 @@ class ClearesultUpdateGroupCatalogsViewset(viewsets.ViewSet):
         "catalogs" [4,5]
     }
 
-    Note:
+    ! Note:
     - This serailizer is not responsible to create catalogs and groups objects. It will just add already cretaed
       catalogs to already created groups using ManyToMany relation.
     - it will not raise error if the catalogs we are trying to add in particular groups are already there.
