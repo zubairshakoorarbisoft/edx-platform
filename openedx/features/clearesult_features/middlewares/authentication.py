@@ -1,6 +1,8 @@
 import logging
 
 from django.conf import settings
+from django.contrib.auth import logout
+from django.core.cache import cache
 from django.http import HttpResponseRedirect, Http404
 from django.utils.deprecation import MiddlewareMixin
 from six.moves.urllib.parse import urlencode
@@ -21,6 +23,9 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         """
         Django middleware hook for processing request
         """
+        if self._is_user_suspicious(request):
+            return logout(request)
+
         allowed_sub_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUB_PATHS', [])
         allowed_full_paths = getattr(settings, 'CLEARESULT_ALLOWED_FULL_PATHS', [])
 
@@ -91,3 +96,20 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         site = getattr(request, 'site', None)
         domain = getattr(site, 'domain', None)
         return domain
+
+    def _is_user_suspicious(self, request):
+        user = request.user
+        if user.is_authenticated:
+            if user.is_superuser:
+                return False
+            elif request.site.name in cache.get('clearesult_allowed_site_names', []):
+                return False
+
+            site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
+            clearesult_allowed_site_names = user.clearesult_profile.get_extension_value('site_identifier', [])
+            cache.set('clearesult_allowed_site_names', clearesult_allowed_site_names, 864000)
+
+            if site_name in clearesult_allowed_site_names:
+                return False
+            else:
+                return True
