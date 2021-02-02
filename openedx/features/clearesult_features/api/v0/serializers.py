@@ -1,7 +1,9 @@
 """
 Serializers for Clearesult v0 APIs.
 """
+import six
 import json
+import logging
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -21,6 +23,8 @@ from openedx.features.clearesult_features.tasks import (
     check_and_enroll_group_users_to_mandatory_courses
 )
 
+
+log = logging.getLogger(__name__)
 
 class UserCreditsProfileSerializer(serializers.ModelSerializer):
     credit_type_details = serializers.SerializerMethodField()
@@ -104,9 +108,15 @@ class ClearesultGroupsSerializer(serializers.ModelSerializer):
         # then enroll newly added users to the mandatory courses (if not already enrolled)
         newly_added_group_users = set(validated_data.get('users', [])) - set(instance.users.all())
         if len(newly_added_group_users):
-            check_and_enroll_group_users_to_mandatory_courses.delay(
-                self.context.get('request'), instance.id, newly_added_group_users
-        )
+            request = self.context.get('request')
+            if request:
+                log.info("call Task to check and enroll newly added group users to mandatory courses.")
+                check_and_enroll_group_users_to_mandatory_courses.delay(
+                    request.user.id, request.site.id, instance.id,
+                    [user.id for user in newly_added_group_users]
+                )
+            else:
+                log.info("Mandatory courses TASK can not be called without request.")
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
@@ -200,20 +210,26 @@ class ClearesultMandatoryCoursesSerializer(serializers.ModelSerializer):
 
         return validated_data
 
-    def update(self, instance, validated_date):
+    def update(self, instance, validated_data):
         action = self.context.get('action')
 
         if not action or action not in ["add", "remove"]:
             raise serializers.ValidationError(u'action field is not valid, available options are "add", "remove"')
 
         if action=="add":
-            enroll_students_to_mandatory_courses.delay(
-                self.context.get('request'), instance.group.users.all(),  validated_date.get('mandatory_courses')
-            )
-            for course in validated_date.get('mandatory_courses'):
+            request = self.context.get('request')
+            if request:
+                log.info("Enroll existing group users to the newly added mandatory course.")
+                enroll_students_to_mandatory_courses.delay(
+                    request.user.id, request.site.id,
+                    [user.id for user in instance.group.users.all()],
+                    [six.text_type(course.course_id) for course in validated_data.get('mandatory_courses',[])])
+            else:
+                log.info("Mandatory courses TASK can not be called without request.")
+            for course in validated_data.get('mandatory_courses'):
                 instance.mandatory_courses.add(course)
         else:
-            for course in validated_date.get('mandatory_courses'):
+            for course in validated_data.get('mandatory_courses'):
                 instance.mandatory_courses.remove(course)
 
         return instance
