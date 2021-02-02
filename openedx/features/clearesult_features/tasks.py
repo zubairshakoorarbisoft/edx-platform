@@ -1,12 +1,15 @@
 import logging
+import requests
 import six
+
 from celery import task
-from django.test import RequestFactory
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from student.models import CourseEnrollment
-from openedx.core.lib.celery.task_utils import emulate_http_request
+from django.test import RequestFactory
 
+from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
@@ -82,3 +85,22 @@ def check_and_enroll_group_users_to_mandatory_courses(req_user_id, req_site_id, 
             enroll_students_to_mandatory_courses(
                 req_user_id, req_site_id, newly_added_group_user_ids,
                 [six.text_type(course.course_id) for course in mandatory_courses])
+
+
+@task()
+def call_drupal_logout_endpoint(email):
+    api_credentials = getattr(settings, 'DRUPAL_LOGOUT_API_CREDENTIALS', {})
+    if api_credentials == {}:
+        log.info('You have not provided drupal logout API credentials.')
+        return
+
+    url = api_credentials.get('url', '') + email
+    username = api_credentials.get('username', '')
+    password = api_credentials.get('password', '')
+
+    response = requests.get(url, auth=(username, password))
+
+    if response.status_code == 200:
+        log.info('Success: User with email {} has been successfully logged out from Drupal.'.format(email))
+    else:
+        log.info('Failed: User with email {} has not been logged out from Drupal.'.format(email))
