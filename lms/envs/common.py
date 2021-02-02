@@ -2820,6 +2820,7 @@ CLEARESULT_CREDIT_PROVIDERS = [
     'AEE',
     'LEED'
 ]
+CLEARESULT_LOGOUT_SERVICE_USER = 'logout_service_user'
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:

@@ -821,8 +821,17 @@ class ClearesultLogoutView(APIView):
     authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
     permission_classes = [permissions.IsAuthenticated,]
 
-    def _is_self_or_superuser(self, request, user):
+    def _is_user_authorized(self, request, user):
+        """
+        User will be authorized to access this endpoint if
+            - He is a superuser
+            - He is trying to logout himself
+            - He is a CLEARESULT_LOGOUT_SERVICE_USER
+        """
         if request.user.is_superuser:
+            return True
+
+        if request.user.username == getattr(settings, 'CLEARESULT_LOGOUT_SERVICE_USER', ''):
             return True
 
         if request.user.email == user.email:
@@ -845,7 +854,7 @@ class ClearesultLogoutView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not self._is_self_or_superuser(request, user):
+        if not self._is_user_authorized(request, user):
             return Response(
                 {'detail': 'You are not authorized to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN
