@@ -1,3 +1,6 @@
+"""
+Utils for subscriptions.
+"""
 from urllib.parse import urljoin
 import waffle
 from django.conf import settings
