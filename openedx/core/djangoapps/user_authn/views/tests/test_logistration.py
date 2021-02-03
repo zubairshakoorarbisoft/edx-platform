@@ -321,7 +321,7 @@ class LoginAndRegistrationTest(ThirdPartyAuthTestMixin, UrlResetMixin, ModuleSto
         )
 
     def test_hinted_login(self):
-        tpa_hint =self.google_provider.provider_id
+        tpa_hint = self.google_provider.provider_id
         params = [("next", "/courses/something/?tpa_hint={0}".format(tpa_hint))]
         response = self.client.get(reverse('signin_user'), params, HTTP_ACCEPT="text/html")
         self.assertContains(response, '"third_party_auth_hint": "{0}"'.format(tpa_hint))

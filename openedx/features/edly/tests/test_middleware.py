@@ -31,6 +31,9 @@ LOGGER_NAME = 'openedx.features.edly.middleware'
     }
 )
 class EdlyOrganizationAccessMiddlewareTests(TestCase):
+    """
+    Test Edly organization access middleware.
+    """
 
     def setUp(self):
         self.user = EdlyUserFactory()

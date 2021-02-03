@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse
-from django.test import TestCase, modify_settings
+from django.test import modify_settings
 from django.test.client import RequestFactory
 from edx_django_utils.cache import RequestCache
 
@@ -427,7 +427,9 @@ class UtilsTests(SharedModuleStoreTestCase):
         current_site_context_data = get_current_site_invalid_certificate_context(test_default_certificate_html_configurations)
 
         expected_current_site_context = test_default_certificate_html_configurations['default']
-        expected_current_site_context['platform_name'] = self.request.site.configuration.site_values.get('platform_name')
+        expected_current_site_context['platform_name'] = self.request.site.configuration.site_values.get(
+            'platform_name'
+        )
         assert expected_current_site_context['platform_name'] == current_site_context_data['platform_name']
 
         marketing_urls = self.request.site.configuration.get_value('MKTG_URLS', {})

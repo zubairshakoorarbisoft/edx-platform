@@ -73,7 +73,11 @@ def encode_edly_user_info_cookie(cookie_data):
     Returns:
         string
     """
-    return jwt.encode(cookie_data, settings.EDLY_COOKIE_SECRET_KEY, algorithm=settings.EDLY_JWT_ALGORITHM).decode('utf-8')
+    return jwt.encode(
+        cookie_data,
+        settings.EDLY_COOKIE_SECRET_KEY,
+        algorithm=settings.EDLY_JWT_ALGORITHM
+    ).decode('utf-8')
 
 
 def decode_edly_user_info_cookie(encoded_cookie_data):

@@ -13,6 +13,9 @@ from openedx.features.edly.tests.factories import EdlyUserFactory, EdlySubOrgani
 
 @skip_unless_lms
 class TestUserSitesViewSet(TestCase):
+    """
+    Tests for "UserSitesViewSet".
+    """
 
     def setUp(self):
         """

@@ -32,7 +32,11 @@ class EdlySubOrganization(TimeStampedModel):
     edx_organization = models.OneToOneField(Organization, on_delete=models.CASCADE)
     lms_site = models.OneToOneField(Site, related_name='edly_sub_org_for_lms', on_delete=models.CASCADE)
     studio_site = models.OneToOneField(Site, related_name='edly_sub_org_for_studio', on_delete=models.CASCADE)
-    preview_site = models.OneToOneField(Site, related_name='edly_sub_org_for_preview_site', null=True, on_delete=models.CASCADE)
+    preview_site = models.OneToOneField(
+        Site,
+        related_name='edly_sub_org_for_preview_site',
+        null=True, on_delete=models.CASCADE
+    )
 
     class Meta:
         unique_together = (('edly_organization', 'edx_organization'),)

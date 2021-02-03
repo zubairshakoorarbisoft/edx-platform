@@ -1,5 +1,5 @@
-import waffle
 from urllib.parse import urljoin
+import waffle
 from django.conf import settings
 
 from courseware.access_utils import ACCESS_DENIED, ACCESS_GRANTED
