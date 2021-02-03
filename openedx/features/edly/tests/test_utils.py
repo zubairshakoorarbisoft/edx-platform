@@ -58,6 +58,7 @@ def mock_render_to_string(template_name, context):
     """
     return str((template_name, context))
 
+
 @modify_settings(
     MIDDLEWARE={
         'append': [
