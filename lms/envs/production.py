@@ -1003,6 +1003,12 @@ SITE_DEFAULT_GROUP_NAME = ENV_TOKENS.get(
     SITE_DEFAULT_GROUP_NAME
 )
 
+###################### Completion view time ###################
+COMPLETION_BY_VIEWING_DELAY_MS = ENV_TOKENS.get(
+    'COMPLETION_BY_VIEWING_DELAY_MS',
+    COMPLETION_BY_VIEWING_DELAY_MS
+)
+
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
