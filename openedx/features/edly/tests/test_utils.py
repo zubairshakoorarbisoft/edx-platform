@@ -12,6 +12,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse
 from django.test import TestCase, modify_settings
 from django.test.client import RequestFactory
+from edx_django_utils.cache import RequestCache
 
 from openedx.core.djangoapps.site_configuration.tests.factories import SiteConfigurationFactory
 from openedx.core.djangoapps.user_authn.cookies import standard_cookie_settings as cookie_settings
@@ -88,6 +89,7 @@ class UtilsTests(SharedModuleStoreTestCase):
             'edly-sub-org': 'cloud',
             'edx-org': 'cloudX'
         }
+        RequestCache.clear_all_namespaces()
 
     def _get_stub_session(self, expire_at_browser_close=False, max_age=604800):
         return MagicMock(
