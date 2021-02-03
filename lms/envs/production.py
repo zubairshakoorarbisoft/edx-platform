@@ -989,6 +989,12 @@ DEFAULT_REGISTERATION_URL = ENV_TOKENS.get(
     DEFAULT_REGISTERATION_URL
 )
 
+###################### Completion view time ###################
+COMPLETION_BY_VIEWING_DELAY_MS = ENV_TOKENS.get(
+    'COMPLETION_BY_VIEWING_DELAY_MS',
+    COMPLETION_BY_VIEWING_DELAY_MS
+)
+
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
