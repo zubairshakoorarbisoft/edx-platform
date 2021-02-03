@@ -6,6 +6,7 @@ import re
 import six.moves.urllib.parse as parse  # pylint: disable=import-error
 from django.conf import settings
 from django.contrib.auth import logout
+from django.contrib.auth.models import AnonymousUser
 from django.utils.decorators import method_decorator
 from django.utils.http import urlencode
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -15,6 +16,7 @@ from six.moves.urllib.parse import parse_qs, urlsplit, urlunsplit  # pylint: dis
 
 from openedx.core.djangoapps.user_authn.cookies import delete_logged_in_cookies
 from openedx.core.djangoapps.user_authn.utils import is_safe_login_or_logout_redirect
+from openedx.features.clearesult_features.tasks import call_drupal_logout_endpoint
 from third_party_auth import pipeline as tpa_pipeline
 
 xframe_options_exempt_m = method_decorator(xframe_options_exempt, name='dispatch')
@@ -78,6 +80,9 @@ class LogoutView(TemplateView):
 
         # Get third party auth provider's logout url
         self.tpa_logout_url = tpa_pipeline.get_idp_logout_url_from_running_pipeline(request)
+
+        if not isinstance(request.user, AnonymousUser):
+            call_drupal_logout_endpoint.delay(request.user.email)
 
         logout(request)
 
