@@ -804,12 +804,13 @@ def _bulk_enrollment_csv_validator(file_storage, file_to_validate):
 @ensure_csrf_cookie
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @require_POST
-@require_global_staff
+@require_level('staff')
 @common_exceptions_400
 def bulk_enroll_users_to_course(request, course_id):
     """
     View method that accepts an uploaded file (using key "uploaded-file")
     containing users for course enrollment.
+
     This method spawns a celery task to do the enrollments, generates a CSV
     file with results and this file is provided via data downloads.
     """
@@ -3011,7 +3012,7 @@ def _instructor_dash_url(course_key, section=None):
     return url
 
 
-@require_global_staff
+@require_level('staff')
 @require_POST
 def generate_example_certificates(request, course_id=None):
     """Start generating a set of example certificates.
@@ -3073,7 +3074,7 @@ def mark_student_can_skip_entrance_exam(request, course_id):
 @transaction.non_atomic_requests
 @ensure_csrf_cookie
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
-@require_global_staff
+@require_level('staff')
 @require_POST
 @common_exceptions_400
 def start_certificate_generation(request, course_id):
@@ -3095,7 +3096,7 @@ def start_certificate_generation(request, course_id):
 @transaction.non_atomic_requests
 @ensure_csrf_cookie
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
-@require_global_staff
+@require_level('staff')
 @require_POST
 @common_exceptions_400
 def start_certificate_regeneration(request, course_id):
@@ -3137,7 +3138,7 @@ def start_certificate_regeneration(request, course_id):
 @transaction.non_atomic_requests
 @ensure_csrf_cookie
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
-@require_global_staff
+@require_level('staff')
 @require_http_methods(['POST', 'DELETE'])
 def certificate_exception_view(request, course_id):
     """
@@ -3449,7 +3450,7 @@ def generate_bulk_certificate_exceptions(request, course_id):
 @transaction.non_atomic_requests
 @ensure_csrf_cookie
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
-@require_global_staff
+@require_level('staff')
 @require_http_methods(['POST', 'DELETE'])
 def certificate_invalidation_view(request, course_id):
     """

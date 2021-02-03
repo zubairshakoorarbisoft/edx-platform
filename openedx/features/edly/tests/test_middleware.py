@@ -4,7 +4,7 @@ Unit tests for Middleware.
 from testfixtures import LogCapture
 from django.conf import settings
 from django.contrib import auth
-from django.test import TestCase, modify_settings
+from django.test import TestCase
 from django.test.utils import override_settings
 from django.test.client import Client, RequestFactory
 
@@ -22,18 +22,7 @@ from openedx.features.edly.tests.factories import (
 LOGGER_NAME = 'openedx.features.edly.middleware'
 
 
-@modify_settings(
-    MIDDLEWARE={
-        'append': [
-            'openedx.features.edly.middleware.EdlyOrganizationAccessMiddleware',
-            'openedx.features.edly.middleware.SettingsOverrideMiddleware',
-        ]
-    }
-)
 class EdlyOrganizationAccessMiddlewareTests(TestCase):
-    """
-    Test Edly organization access middleware.
-    """
 
     def setUp(self):
         self.user = EdlyUserFactory()
@@ -42,7 +31,7 @@ class EdlyOrganizationAccessMiddlewareTests(TestCase):
         self.request.site = SiteFactory()
         self.site_config = SiteConfigurationFactory(
             site=self.request.site,
-            site_values={
+            values={
                 'MARKETING_SITE_ROOT': 'http://marketing.site',
                 'DJANGO_SETTINGS_OVERRIDE': {'SITE_NAME': 'testserver.localhost'}
             }
@@ -83,7 +72,7 @@ class EdlyOrganizationAccessMiddlewareTests(TestCase):
                 fetch_redirect_response=True
             )
             user = auth.get_user(self.client)
-            assert not user.is_authenticated
+            assert not user.is_authenticated()
 
             logger.check_present(
                 (
@@ -116,7 +105,7 @@ class EdlyOrganizationAccessMiddlewareTests(TestCase):
             )
 
             user = auth.get_user(self.client)
-            assert not user.is_authenticated
+            assert not user.is_authenticated()
 
             logger.check_present(
                 (
@@ -149,14 +138,6 @@ class EdlyOrganizationAccessMiddlewareTests(TestCase):
         assert response.status_code == 200
 
 
-@modify_settings(
-    MIDDLEWARE={
-        'append': [
-            'openedx.features.edly.middleware.EdlyOrganizationAccessMiddleware',
-            'openedx.features.edly.middleware.SettingsOverrideMiddleware',
-        ]
-    }
-)
 class SettingsOverrideMiddlewareTests(TestCase):
     """
     Tests settings override middleware for sites.
@@ -230,7 +211,7 @@ class SettingsOverrideMiddlewareTests(TestCase):
         SiteConfigurationFactory(
             site=self.request.site,
             enabled=False,
-            site_values={
+            values={
                 'MARKETING_SITE_ROOT': 'http://wordpress.edx.devstack.lms',
             }
         )
@@ -251,7 +232,7 @@ class SettingsOverrideMiddlewareTests(TestCase):
         """
         SiteConfigurationFactory(
             site=self.request.site,
-            site_values={
+            values={
                 'MARKETING_SITE_ROOT': 'http://wordpress.edx.devstack.lms',
             }
         )
@@ -280,14 +261,14 @@ class SettingsOverrideMiddlewareTests(TestCase):
         }
         SiteConfigurationFactory(
             site=self.request.site,
-            site_values={
+            values={
                 'DJANGO_SETTINGS_OVERRIDE': django_override_settings
             }
         )
         self._assert_settings_values(self.default_settings)
         self.client.get('/', follow=True)
-        self.default_settings.get(list(django_override_settings.keys())[0]).update(
-            **django_override_settings
+        self.default_settings.get(django_override_settings.keys()[0]).update(
+            django_override_settings.values()[0]
         )
         self._assert_settings_values(self.default_settings)
 
@@ -307,7 +288,7 @@ class SettingsOverrideMiddlewareTests(TestCase):
         }
         SiteConfigurationFactory(
             site=self.request.site,
-            site_values={
+            values={
                 'DJANGO_SETTINGS_OVERRIDE': django_override_settings
             }
         )

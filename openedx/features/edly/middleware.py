@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.deprecation import MiddlewareMixin
 
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.features.edly.utils import user_has_edly_organization_access
@@ -15,7 +14,7 @@ from openedx.features.edly.utils import user_has_edly_organization_access
 logger = getLogger(__name__)
 
 
-class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
+class EdlyOrganizationAccessMiddleware(object):
     """
     Django middleware to validate edly user organization access based on request.
     """
@@ -37,7 +36,7 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
                     return HttpResponseRedirect(reverse('logout'))
 
 
-class SettingsOverrideMiddleware(MiddlewareMixin):
+class SettingsOverrideMiddleware(object):
     """
     Django middleware to override django settings from site configuration.
     """
@@ -53,7 +52,7 @@ class SettingsOverrideMiddleware(MiddlewareMixin):
             logger.warning('Site (%s) has no related site configuration.', current_site)
             return None
 
-        if current_site_configuration.site_values:
+        if current_site_configuration.values:
             django_settings_override_values = current_site_configuration.get_value('DJANGO_SETTINGS_OVERRIDE', None)
             if django_settings_override_values:
                 for config_key, config_value in django_settings_override_values.items():

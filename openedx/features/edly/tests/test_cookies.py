@@ -58,7 +58,8 @@ class CookieTests(TestCase):
             settings.EDLY_COOKIE_SECRET_KEY,
             algorithm=settings.EDLY_JWT_ALGORITHM
         )
-        assert actual_cookie_string == expected_cookie_string.decode('utf-8')
+
+        assert actual_cookie_string == expected_cookie_string
 
     def test_set_logged_in_edly_cookies(self):
         """

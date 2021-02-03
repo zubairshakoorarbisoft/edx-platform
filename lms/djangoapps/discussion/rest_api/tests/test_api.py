@@ -732,10 +732,10 @@ class GetThreadListTest(ForumsEnableMixin, CommentsServiceMockMixin, UrlResetMix
                 "updated_at": "2015-04-28T00:33:33Z",
                 "comment_list_url": None,
                 "endorsed_comment_list_url": (
-                    "http://testserver/api/discussion/v1/comments/?endorsed=True&thread_id=test_thread_id_1"
+                    "http://testserver/api/discussion/v1/comments/?thread_id=test_thread_id_1&endorsed=True"
                 ),
                 "non_endorsed_comment_list_url": (
-                    "http://testserver/api/discussion/v1/comments/?endorsed=False&thread_id=test_thread_id_1"
+                    "http://testserver/api/discussion/v1/comments/?thread_id=test_thread_id_1&endorsed=False"
                 ),
                 "editable_fields": ["abuse_flagged", "following", "read", "voted"],
             }),

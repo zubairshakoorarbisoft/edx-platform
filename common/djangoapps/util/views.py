@@ -21,11 +21,10 @@ from six.moves import map
 from lms.djangoapps.courseware.access import has_access
 from lms.djangoapps.courseware.masquerade import setup_masquerade
 from openedx.core.djangoapps.schedules.utils import reset_self_paced_schedule
-from openedx.features.edly.utils import get_edx_org_from_cookie
 
 import track.views
 from edxmako.shortcuts import render_to_response
-from student.roles import GlobalCourseCreatorRole, GlobalStaff
+from student.roles import GlobalStaff
 
 log = logging.getLogger(__name__)
 
@@ -74,9 +73,7 @@ def require_global_staff(func):
     """View decorator that requires that the user have global staff permissions. """
     @wraps(func)
     def wrapped(request, *args, **kwargs):
-        edly_user_info_cookie = request.COOKIES.get(settings.EDLY_USER_INFO_COOKIE_NAME, None) if request else None
-        edx_org = get_edx_org_from_cookie(edly_user_info_cookie)
-        if GlobalStaff().has_user(request.user) or GlobalCourseCreatorRole(edx_org).has_user(request.user):
+        if GlobalStaff().has_user(request.user):
             return func(request, *args, **kwargs)
         else:
             return HttpResponseForbidden(

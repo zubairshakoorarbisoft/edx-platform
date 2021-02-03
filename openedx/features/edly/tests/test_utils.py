@@ -10,9 +10,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse
-from django.test import modify_settings
+from django.test import TestCase
 from django.test.client import RequestFactory
-from edx_django_utils.cache import RequestCache
 
 from openedx.core.djangoapps.site_configuration.tests.factories import SiteConfigurationFactory
 from openedx.core.djangoapps.user_authn.cookies import standard_cookie_settings as cookie_settings
@@ -48,7 +47,7 @@ from student.roles import (
 )
 from student.tests.factories import UserFactory, GroupFactory
 from xmodule.modulestore.django import modulestore
-from xmodule.modulestore.tests.django_utils import SharedModuleStoreTestCase
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
 
 
@@ -59,15 +58,7 @@ def mock_render_to_string(template_name, context):
     return str((template_name, context))
 
 
-@modify_settings(
-    MIDDLEWARE={
-        'append': [
-            'openedx.features.edly.middleware.EdlyOrganizationAccessMiddleware',
-            'openedx.features.edly.middleware.SettingsOverrideMiddleware',
-        ]
-    }
-)
-class UtilsTests(SharedModuleStoreTestCase):
+class UtilsTests(ModuleStoreTestCase):
     """
     Tests for utility methods.
     """
@@ -90,7 +81,6 @@ class UtilsTests(SharedModuleStoreTestCase):
             'edly-sub-org': 'cloud',
             'edx-org': 'cloudX'
         }
-        RequestCache.clear_all_namespaces()
 
     def _get_stub_session(self, expire_at_browser_close=False, max_age=604800):
         return MagicMock(
@@ -101,7 +91,7 @@ class UtilsTests(SharedModuleStoreTestCase):
     def _copy_cookies_to_request(self, response, request):
         request.COOKIES = {
             key: val.value
-            for key, val in response.cookies.items()
+            for key, val in response.cookies.iteritems()
         }
 
     def _create_edly_sub_organization(self):
@@ -127,7 +117,7 @@ class UtilsTests(SharedModuleStoreTestCase):
             self.test_edly_user_info_cookie_data, settings.EDLY_COOKIE_SECRET_KEY,
             algorithm=settings.EDLY_JWT_ALGORITHM
         )
-        assert actual_encoded_string == expected_encoded_string.decode('utf-8')
+        assert actual_encoded_string == expected_encoded_string
 
     def test_decode_edly_user_info_cookie(self):
         """
@@ -393,11 +383,11 @@ class UtilsTests(SharedModuleStoreTestCase):
         assert expected_current_site_context_data['company_privacy_url'] == curent_site_context_data['company_privacy_url']
         assert expected_current_site_context_data['company_tos_url'] == curent_site_context_data['company_tos_url']
 
-    @mock.patch('openedx.core.djangoapps.theming.helpers.get_current_site')
-    def test_get_current_site_invalid_certificate_context_with_site_configuration(self, mocked_get_current_site):
+    def test_get_current_site_invalid_certificate_context_with_site_configuration(self):
         """
         Test method returns correct data with site configuration.
         """
+        crum.set_current_request(request=self.request)
         test_default_certificate_html_configurations = {
             'default': {
                 'accomplishment_class_append': 'accomplishment-certificate',
@@ -413,7 +403,7 @@ class UtilsTests(SharedModuleStoreTestCase):
 
         SiteConfigurationFactory(
             site=self.request.site,
-            site_values={
+            values={
                 'ENABLE_MKTG_SITE': True,
                 'platform_name': 'fake-2nd-platform-name',
                 'MKTG_URLS': {
@@ -423,14 +413,10 @@ class UtilsTests(SharedModuleStoreTestCase):
                 }
             }
         )
-        crum.set_current_request(request=self.request)
-        mocked_get_current_site.return_value = self.request.site
         current_site_context_data = get_current_site_invalid_certificate_context(test_default_certificate_html_configurations)
 
         expected_current_site_context = test_default_certificate_html_configurations['default']
-        expected_current_site_context['platform_name'] = self.request.site.configuration.site_values.get(
-            'platform_name'
-        )
+        expected_current_site_context['platform_name'] = self.request.site.configuration.values.get('platform_name')
         assert expected_current_site_context['platform_name'] == current_site_context_data['platform_name']
 
         marketing_urls = self.request.site.configuration.get_value('MKTG_URLS', {})
@@ -443,7 +429,6 @@ class UtilsTests(SharedModuleStoreTestCase):
         privacy_path = marketing_urls.get('PRIVACY')
         expected_company_privacy_url = '{}{}'.format(marketing_root_url, privacy_path)
         assert expected_company_privacy_url == current_site_context_data['company_privacy_url']
-
     def test_clean_django_settings_override_for_disallowed_settings(self):
         """
         Test disallowed settings raise correct validation error.
@@ -457,7 +442,7 @@ class UtilsTests(SharedModuleStoreTestCase):
         with self.assertRaisesMessage(ValidationError, expected_error_message):
             site_configuration = SiteConfigurationFactory(
                 site=SiteFactory(),
-                site_values={
+                values={
                     'DJANGO_SETTINGS_OVERRIDE': dissallowed_test_settings
                 }
             )
@@ -477,7 +462,7 @@ class UtilsTests(SharedModuleStoreTestCase):
         with self.assertRaisesMessage(ValidationError, expected_error_message):
             site_configuration = SiteConfigurationFactory(
                 site=SiteFactory(),
-                site_values={
+                values={
                     'DJANGO_SETTINGS_OVERRIDE': missing_test_settings
                 }
             )
