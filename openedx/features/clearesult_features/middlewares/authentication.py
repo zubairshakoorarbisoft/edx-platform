@@ -9,6 +9,7 @@ from six.moves.urllib.parse import urlencode
 
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
+from openedx.features.clearesult_features.models import ClearesultUserProfile
 import third_party_auth
 from third_party_auth import pipeline
 
@@ -106,7 +107,11 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
                 return False
 
             site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
-            clearesult_allowed_site_names = user.clearesult_profile.get_extension_value('site_identifier', [])
+            try:
+                clearesult_allowed_site_names = user.clearesult_profile.get_extension_value('site_identifier', [])
+            except ClearesultUserProfile.DoesNotExist:
+                return False
+
             cache.set('clearesult_allowed_site_names', clearesult_allowed_site_names, 864000)
 
             if site_name in clearesult_allowed_site_names:
