@@ -71,7 +71,7 @@ def update_clearesult_user_and_profile(request, response, user=None, *args, **kw
             else:
                 logger.info('Success: The clearesult user and his profile have been updated for user {}.'.format(user.email))
             # * Drupal team is sending site identifier information in jobTitle
-            _set_user_site_identifier(instance, response.get('jobTitle', ''))
+            _set_user_site_identifiers(instance, response.get('jobTitle', ''))
         except AttributeError:
             logger.error('Failed: Could not create/update clearesult user and his profile.')
 
@@ -86,8 +86,8 @@ def _set_user_first_and_last_name(user, full_name):
     user.save()
 
 
-def _set_user_site_identifier(clearesult_user_profile, site_identifier):
-    site_identifiers = clearesult_user_profile.get_extension_value('site_identifier', [])
-    if  site_identifier.strip() != '' and site_identifier not in site_identifiers:
-        site_identifiers.append(site_identifier)
-        clearesult_user_profile.set_extension_value('site_identifier', site_identifiers)
+def _set_user_site_identifiers(clearesult_user_profile, incoming_site_identifiers):
+    if incoming_site_identifiers.strip() != '':
+        incoming_site_identifiers = incoming_site_identifiers.split(',')
+        if len(incoming_site_identifiers) > 0:
+            clearesult_user_profile.set_extension_value('site_identifier', incoming_site_identifiers)
