@@ -1519,6 +1519,7 @@ MIDDLEWARE = [
 
     # [CLEARESULT_CUSTOM]
     'openedx.features.clearesult_features.middlewares.authentication.ClearesultAuthenticationMiddleware',
+    'openedx.features.clearesult_features.middlewares.session_watcher.ClearesultSessionMiddleware',
     'openedx.features.clearesult_features.middlewares.site_security.SiteAuthenticationMiddleware',
 
     'student.middleware.UserStandingMiddleware',
@@ -2819,6 +2820,15 @@ CLEARESULT_CREDIT_PROVIDERS = [
     'AEE',
     'LEED'
 ]
+
+CLEARESULT_LOGOUT_SERVICE_USER = 'logout_service_user'
+
+DRUPAL_LOGOUT_API_CREDENTIALS = {
+    'username': '',
+    'password': '',
+    'url': ''
+}
+
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
@@ -3966,7 +3976,15 @@ FEATURES['ENABLE_AUTOMATIC_ACCOUNT_VERIFICATION'] = True
 # To hide courses from discover new tab
 FEATURES['SHOW_ARCHIVED_COURSES_IN_LISTING'] = False
 
+# Block types to keep and filter in calculating course progress
+CORE_BLOCK_TYPES = ['html', 'video', 'problem', 'scormxblock']
+FILTER_BLOCKS_IN_UNIT = ['html']
+
 ###################### SSO Provider configurations ###################
 GLOBALLY_ENABLED_SSO_PROVIDERS = [
     'clearesult-azuread-oauth2'
 ]
+
+######################## Default Email Params ################################
+DEFAULT_LOGO = '/static/clearesult/images/clearesulttrainingservices.png'
+DEFAULT_REGISTERATION_URL = ''

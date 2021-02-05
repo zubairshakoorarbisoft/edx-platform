@@ -1,16 +1,35 @@
 """
 Views for Clearesult V0 APIs
 """
+import json
+from importlib import import_module
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.core.cache import cache
+from django.db import IntegrityError
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
-from rest_framework.authentication import SessionAuthentication
+from rest_framework import status
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
-
-from openedx.features.clearesult_features.models import ClearesultCreditProvider, UserCreditsProfile
 from openedx.features.clearesult_features.api.v0.serializers import UserCreditsProfileSerializer, ClearesultCreditProviderSerializer
 
+from openedx.core.lib.api.authentication import BearerAuthentication
+from openedx.features.clearesult_features.models import (
+    ClearesultCreditProvider, UserCreditsProfile, ClearesultUserSession
+)
+from openedx.features.clearesult_features.api.v0.serializers import (
+    UserCreditsProfileSerializer, ClearesultCreditProviderSerializer
+)
 
 class IsSelf(permissions.BasePermission):
 
@@ -81,3 +100,67 @@ class ClearesultCredeitProviderListView(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated, )
     serializer_class = ClearesultCreditProviderSerializer
     pagination_class = None
+
+
+class ClearesultLogoutView(APIView):
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated,]
+
+    def _is_user_authorized(self, request, user):
+        """
+        User will be authorized to access this endpoint if
+            - He is a superuser
+            - He is trying to logout himself
+            - He is a CLEARESULT_LOGOUT_SERVICE_USER
+        """
+        if request.user.is_superuser:
+            return True
+
+        if request.user.username == getattr(settings, 'CLEARESULT_LOGOUT_SERVICE_USER', ''):
+            return True
+
+        if request.user.email == user.email:
+            return True
+
+        return False
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response(
+                {'detail': 'Please provide valid email address to logout the user.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {'detail': 'User with this email does not exist.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not self._is_user_authorized(request, user):
+            return Response(
+                {'detail': 'You are not authorized to perform this action.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        self._clear_session(user)
+
+        return Response(
+            {'detail': 'User with email ({}) has been logged out.'.format(user.email)},
+            status=status.HTTP_200_OK
+        )
+
+    def _clear_session(self, user):
+        sessions = ClearesultUserSession.objects.filter(user=user)
+        session_engine = import_module(settings.SESSION_ENGINE)
+        for session in sessions:
+            _ = session_engine.SessionStore(session.session_key).delete()
+
+        if sessions:
+            # removing from database
+            sessions.delete()
+
+        # removing from cache
+        cache.delete('clearesult_{}'.format(user.email))

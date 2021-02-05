@@ -27,8 +27,17 @@ class CourseDatesFragmentView(EdxFragmentView):
         course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=False)
         course_date_blocks = get_course_date_blocks(course, request.user, request, num_assignments=2)
 
+        if course.self_paced:
+            dates_data = [
+                block for block in course_date_blocks if (
+                    block.title != 'current_datetime' and block.title != "Course Starts"
+                )
+            ]
+        else:
+            dates_data = [block for block in course_date_blocks if block.title != 'current_datetime']
+
         context = {
-            'course_date_blocks': [block for block in course_date_blocks if block.title != 'current_datetime']
+            'course_date_blocks': dates_data
         }
         html = render_to_string(self.template_name, context)
         dates_fragment = Fragment(html)

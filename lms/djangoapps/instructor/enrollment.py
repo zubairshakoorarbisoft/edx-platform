@@ -381,11 +381,12 @@ def get_email_params(course, auto_enroll, secure=True, course_key=None, display_
     )
     # TODO: Use request.build_absolute_uri rather than '{proto}://{site}{path}'.format
     # and check with the Services team that this works well with microsites
-    registration_url = u'{proto}://{site}{path}'.format(
-        proto=protocol,
-        site=stripped_site_name,
-        path=reverse('register_user')
+
+    registration_url = configuration_helpers.get_value('TRADE_ALLY_URLS',{}).get(
+        'REGISTERATION_URL',
+        settings.DEFAULT_REGISTERATION_URL
     )
+
     course_url = u'{proto}://{site}{path}'.format(
         proto=protocol,
         site=stripped_site_name,
@@ -403,9 +404,25 @@ def get_email_params(course, auto_enroll, secure=True, course_key=None, display_
 
     is_shib_course = uses_shib(course)
 
+    base_url = u'{proto}://{site}'.format(
+        proto=protocol,
+        site=stripped_site_name,
+    )
+
+    platform_name = configuration_helpers.get_value(
+        'PLATFORM_NAME',
+        stripped_site_name
+    )
+
+    logo_path = configuration_helpers.get_value(
+        'LOGO',
+        settings.DEFAULT_LOGO
+    )
+
     # Composition of email
     email_params = {
-        'site_name': stripped_site_name,
+        'site_name': platform_name,
+        'copyright_site_name': platform_name,
         'registration_url': registration_url,
         'course': course,
         'display_name': display_name,
@@ -413,6 +430,8 @@ def get_email_params(course, auto_enroll, secure=True, course_key=None, display_
         'course_url': course_url,
         'course_about_url': course_about_url,
         'is_shib_course': is_shib_course,
+        'base_url': base_url,
+        'logo_url': u'{base_url}{logo_path}'.format(base_url=base_url, logo_path=logo_path),
     }
     return email_params
 
@@ -449,8 +468,11 @@ def send_mail_to_student(student, param_dict, language=None):
     elif 'course' in param_dict:
         param_dict['course_name'] = Text(param_dict['course'].display_name_with_default)
 
+    # LONG_PLATFORM_NAME will be used as site name
+    # otherwise it will use PLATFORM_NAME as site_name and if both are not availbale then
+    # settings.SITE_NAME will be used.
     param_dict['site_name'] = configuration_helpers.get_value(
-        'SITE_NAME',
+        'LONG_PLATFORM_NAME',
         param_dict['site_name']
     )
 
@@ -474,7 +496,6 @@ def send_mail_to_student(student, param_dict, language=None):
         language=language,
         user_context=param_dict,
     )
-
     ace.send(message)
 
 

@@ -7,6 +7,8 @@
 <%!
 from django.utils.translation import ugettext as _
 %>
+
+% if len(course_credits) > 0:
     <h3 class="hd hd-6 handouts-header">${_("Course Credits")}</h3>
     % for credit in course_credits:
         <p>
@@ -15,6 +17,7 @@ from django.utils.translation import ugettext as _
             <span>${credit.get('credits')}</span>
         </p>
     % endfor
+% endif
 
 <%static:require_module_async module_name="js/dateutil_factory" class_name="DateUtilFactory">
     DateUtilFactory.transform('.localized-datetime');
