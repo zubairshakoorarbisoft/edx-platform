@@ -170,7 +170,8 @@ def compose_activation_email(root_url, user, user_registration=None, route_enabl
     if user_registration is None:
         user_registration = Registration.objects.get(user=user)
 
-    message_context = generate_activation_email_context(user, user_registration)
+    message_context = get_base_template_context(theming_helpers.get_current_site())
+    message_context.update(generate_activation_email_context(user, user_registration))
     message_context.update({
         'confirm_activation_link': '{root_url}/activate/{activation_key}'.format(
             root_url=root_url,
