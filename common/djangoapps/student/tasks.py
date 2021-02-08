@@ -39,9 +39,6 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
 
     site = Site.objects.get(id=site_id)
     user = User.objects.get(username=msg.recipient.username)
-    log.info('from address {}'.format(from_address))
-    log.info('site {}'.format(site))
-    log.info('user {}'.format(user))
 
     try:
         with emulate_http_request(site=site, user=user):
