@@ -1278,7 +1278,7 @@ TRACKING_BACKENDS = {
 # names/passwords.  Heartbeat events are likely not interesting.
 TRACKING_IGNORE_URL_PATTERNS = [r'^/event', r'^/login', r'^/heartbeat']
 
-EVENT_TRACKING_ENABLED = True
+EVENT_TRACKING_ENABLED = False
 EVENT_TRACKING_BACKENDS = {
     'tracking_logs': {
         'ENGINE': 'eventtracking.backends.routing.RoutingBackend',
