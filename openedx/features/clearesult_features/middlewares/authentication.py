@@ -24,8 +24,12 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         """
         Django middleware hook for processing request
         """
-        if self._is_user_suspicious(request):
-            return logout(request)
+        # TODO: Need to fix this suspicious user functionality
+        # When we try to Click on enroll now button specifically
+        # for paid courses we are getting a request with AnonymousUser
+        # which is causing problems
+        # if self._is_user_suspicious(request):
+        #     return logout(request)
 
         allowed_sub_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUB_PATHS', [])
         allowed_full_paths = getattr(settings, 'CLEARESULT_ALLOWED_FULL_PATHS', [])
