@@ -110,6 +110,11 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
             elif request.site.name in cache.get('clearesult_allowed_site_names', []):
                 return False
 
+            # TODO: Find a better work around for this
+            # Related Comment: https://edlyio.atlassian.net/browse/EDE-1364?focusedCommentId=26939
+            if request.path.startswith('/asset'):
+                return False
+
             site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
             try:
                 clearesult_allowed_site_names = user.clearesult_profile.get_extension_value('site_identifier', [])
