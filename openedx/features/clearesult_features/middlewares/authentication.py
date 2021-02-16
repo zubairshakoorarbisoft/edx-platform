@@ -24,6 +24,9 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         """
         Django middleware hook for processing request
         """
+        if self._is_user_suspicious(request):
+            LOGGER.info('Suspicious user: redirecting to logout')
+            return logout(request)
         user = request.user
         if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False):
             LOGGER.info('Leaving without redirection for {}'.format(request.path))
