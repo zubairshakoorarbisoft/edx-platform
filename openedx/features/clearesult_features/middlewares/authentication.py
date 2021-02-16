@@ -24,34 +24,31 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         """
         Django middleware hook for processing request
         """
-        # TODO: Need to fix this suspicious user functionality
-        # When we try to Click on enroll now button specifically
-        # for paid courses we are getting a request with AnonymousUser
-        # which is causing problems
-        # if self._is_user_suspicious(request):
-        #     return logout(request)
-
-        allowed_sub_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUB_PATHS', [])
-        allowed_full_paths = getattr(settings, 'CLEARESULT_ALLOWED_FULL_PATHS', [])
-
-        is_allowed = any([request.path.startswith(path) for path in allowed_sub_paths])
-        is_allowed = is_allowed or any([request.path == path for path in allowed_full_paths])
         user = request.user
-
-        reset_password_error = request.GET.get('error_description', '')
-        if (reset_password_error and
-                reset_password_error.startswith(getattr(settings, 'AZUREAD_B2C_FORGET_PASSWORD_CODE', 'N/A'))):
-
-            reset_password_link = configuration_helpers.get_value('RESET_PASSWORD_LINK')
-            if reset_password_link:
-                LOGGER.info('Redirectiog to Azure AD B2C reset password link.')
-                return HttpResponseRedirect(reset_password_link)
-
-        if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False) or is_allowed or user.is_authenticated:
+        if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False):
             LOGGER.info('Leaving without redirection for {}'.format(request.path))
             return
 
-        return self._redirect_to_login(request)
+
+        # Blocking all the paths which need to be shown to logged in users only
+        blocked_sub_paths = getattr(settings, 'CLEARESULT_BLOCKED_SUBPATH', [])
+        blocked_full_paths = getattr(settings, 'CLEARESULT_BLOCKED_FULL_PATH', [])
+        allowed_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUB_PATHS', [])
+
+        # Allow API calls
+        # Allowed URLS will have high priority over blocked URLS.
+        if(any([allowed_path in request.path for allowed_path in allowed_paths])):
+            LOGGER.info('Leaving without redirection for {}'.format(request.path))
+            return
+
+        # Blocking all the paths which need to be shown to logged in users only
+        is_blocked = [blocked_path in request.path for blocked_path in blocked_sub_paths]
+        is_blocked += [blocked_path == request.path for blocked_path in blocked_full_paths]
+
+        if not user.is_authenticated and any(is_blocked):
+            LOGGER.info('Need to login for: {}'.format(request.path))
+            return self._redirect_to_login(request)
+
 
     def _redirect_to_login(self, request):
         backend_name = ClearesultAzureADOAuth2.name
