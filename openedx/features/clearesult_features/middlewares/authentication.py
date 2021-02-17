@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth import logout
 from django.core.cache import cache
 from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 from six.moves.urllib.parse import urlencode
 
@@ -26,7 +27,8 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         """
         if self._is_user_suspicious(request):
             LOGGER.info('Suspicious user: redirecting to logout')
-            return logout(request)
+            logout(request)
+            return HttpResponseRedirect(reverse('root'))
         user = request.user
         if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False):
             LOGGER.info('Leaving without redirection for {}'.format(request.path))
