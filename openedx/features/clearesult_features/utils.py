@@ -2,18 +2,30 @@
 Helper functions for clearesult_features app.
 """
 import io
+import json
 import logging
 import six
 from csv import Error, DictReader, Sniffer
 from datetime import datetime
 
+from edx_ace import ace
+from edx_ace.recipient import Recipient
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 from django.test import RequestFactory
 from opaque_keys.edx.keys import CourseKey
 
+from lms.djangoapps.instructor.enrollment import (
+    get_email_params
+)
+from lms.djangoapps.courseware.courses import get_course_by_id
+from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
+from openedx.core.djangoapps.theming.helpers import get_current_site
+from openedx.core.lib.celery.task_utils import emulate_http_request
+from openedx.features.clearesult_features.message_types import MandatoryCoursesNotification
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
@@ -378,7 +390,10 @@ def is_course_graded(course_id, user, request=None):
 
     course_outline = get_course_outline_block_tree(request, course_id, user)
 
-    return course_outline.get('num_graded_problems') > 0
+    if course_outline:
+        return course_outline.get('num_graded_problems') > 0
+    else:
+        return False
 
 
 # TODO: Add newly registered users to their relevant site groups
@@ -394,11 +409,105 @@ def add_user_to_site_default_group(request, user, site):
                 name=settings.SITE_DEFAULT_GROUP_NAME,
                 site=site
             )
-            site_default_group.users.add(user)
-            check_and_enroll_group_users_to_mandatory_courses.delay(
-                request.user.id, request.site.id, site_default_group.id, [user.id])
+            if user not in site_default_group.users.all():
+                site_default_group.users.add(user)
+                check_and_enroll_group_users_to_mandatory_courses.delay(
+                    site_default_group.id, [user.id], request.site.id, request.user.id)
         except ClearesultGroupLinkage.DoesNotExist:
             logger.error("Default group for site: {} doesn't exist".format(site.domain))
 
+
 def is_lms_site(site):
     return "LMS" in site.name.upper()
+
+
+def send_ace_message(request_user, request_site, dest_email, context, message_class):
+    context.update({'site': request_site})
+
+    with emulate_http_request(site=request_site, user=request_user):
+        message = message_class().personalize(
+            recipient=Recipient(username='', email_address=dest_email),
+            language='en',
+            user_context=context,
+        )
+        logger.info('Sending email notification with context %s', context)
+
+        ace.send(message)
+
+
+def send_notification(message_type, data, subject, dest_emails, request_user, current_site=None):
+    """
+    Send an email
+    Arguments:
+        message_type - string value to select ace message object
+        data - Dict containing context/data for the template
+        subject - Email subject
+        dest_emails - List of destination emails
+    Returns:
+        a boolean variable indicating email response.
+    """
+    message_types = {
+        'mandatory_courses': MandatoryCoursesNotification,
+    }
+
+    if not current_site:
+        current_site = get_current_site()
+
+    data.update({'subject': subject})
+
+    message_context = get_base_template_context(current_site)
+    message_context.update(data)
+    content = json.dumps(message_context)
+
+    message_class = message_types[message_type]
+    return_value = False
+
+    base_root_url = current_site.configuration.get_value('LMS_ROOT_URL')
+    logo_path = current_site.configuration.get_value(
+        'LOGO',
+        settings.DEFAULT_LOGO
+    )
+
+    platform_name = current_site.configuration.get_value('platform_name')
+    message_context.update({
+        "copyright_site_name": platform_name,
+        "site_name":  current_site.configuration.get_value('SITE_NAME'),
+        "logo_url": u'{base_url}{logo_path}'.format(base_url=base_root_url, logo_path=logo_path),
+        "dashboard_url": "{}{}".format(base_root_url, message_context.get('dashboard_url'))
+    })
+
+    for email in dest_emails:
+        message_context.update({
+            "email": email
+        })
+        try:
+            send_ace_message(request_user, current_site, email, message_context, message_class)
+            logger.info(
+                'Email has been sent to "%s" for content %s.',
+                email,
+                content
+            )
+            return_value = True
+        except Exception:
+            logger.error(
+                'Unable to send an email to %s for content "%s".',
+                email,
+                content
+            )
+
+    return return_value
+
+
+def send_mandatory_courses_emails(dest_emails, courses, request_user, request_site):
+    email_params = {}
+    subject = "Mandatory Courses Enrollment"
+
+    logger.info("send mandatory course email to users: {}".format(dest_emails))
+
+    key = "mandatory_courses"
+    courses_data = [get_course_by_id(CourseKey.from_string(course_id)).display_name_with_default for course_id in courses]
+
+    data = {
+        "courses": courses_data
+    }
+    send_notification(key, data, subject, dest_emails, request_user, request_site)
