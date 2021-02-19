@@ -1504,21 +1504,17 @@ INSTALLED_APPS = [
 ]
 
 ################### CLEARESULT SETTINGS ###############################
-
+CLEARESULT_BLOCKED_SUBPATH = [
+    '/course',
+    '/home'
+]
+CLEARESULT_BLOCKED_FULL_PATH = [
+    '/'
+]
 CLEARESULT_ALLOWED_SUB_PATHS = [
-    '/auth/',
-    '/asset',
-    '/api/',
-    '/register',
-    '/admin',
-    '/heartbeat'
-    '/oauth2'
+    '/api'
 ]
 
-CLEARESULT_ALLOWED_FULL_PATHS = ['/']
-
-
-AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 CLEARESULT_CREDIT_PROVIDERS = [
     'BPI',
     'NATE',

@@ -2793,16 +2793,15 @@ XDOMAIN_PROXY_CACHE_TIMEOUT = 60 * 15
 LOGIN_REDIRECT_WHITELIST = []
 
 ################### CLEARESULT SETTINGS ###############################
-
-CLEARESULT_ALLOWED_SUB_PATHS = [
-    '/auth/',
-    '/asset',
-    '/api/',
-    '/register',
-    '/admin',
-    '/heartbeat'
+CLEARESULT_BLOCKED_SUBPATH = [
+    '/courses'
 ]
-CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+CLEARESULT_BLOCKED_FULL_PATH = [
+    '/login'
+]
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/api'
+]
 
 CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
     reverse_lazy('signin_user'),
@@ -2811,7 +2810,6 @@ CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
     reverse_lazy('logout'),
 ]
 
-AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 CLEARESULT_CREDIT_PROVIDERS = [
     'BPI',
     'NATE',
@@ -2828,7 +2826,6 @@ DRUPAL_LOGOUT_API_CREDENTIALS = {
     'password': '',
     'url': ''
 }
-
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
