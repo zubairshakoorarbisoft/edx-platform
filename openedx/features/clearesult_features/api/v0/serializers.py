@@ -112,9 +112,7 @@ class ClearesultGroupsSerializer(serializers.ModelSerializer):
             if request:
                 log.info("call Task to check and enroll newly added group users to mandatory courses.")
                 check_and_enroll_group_users_to_mandatory_courses.delay(
-                    request.user.id, request.site.id, instance.id,
-                    [user.id for user in newly_added_group_users]
-                )
+                    instance.id, [user.id for user in newly_added_group_users], request.site.id, request.user.id)
             else:
                 log.info("Mandatory courses TASK can not be called without request.")
         return super().update(instance, validated_data)
@@ -221,9 +219,9 @@ class ClearesultMandatoryCoursesSerializer(serializers.ModelSerializer):
             if request:
                 log.info("Enroll existing group users to the newly added mandatory course.")
                 enroll_students_to_mandatory_courses.delay(
-                    request.user.id, request.site.id,
                     [user.id for user in instance.group.users.all()],
-                    [six.text_type(course.course_id) for course in validated_data.get('mandatory_courses',[])])
+                    [six.text_type(course.course_id) for course in validated_data.get('mandatory_courses',[])],
+                    request.site.id, request.user.id)
             else:
                 log.info("Mandatory courses TASK can not be called without request.")
             for course in validated_data.get('mandatory_courses'):
