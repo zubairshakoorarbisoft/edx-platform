@@ -128,38 +128,6 @@ def get_enrollments_and_completions(request, enrollments):
     return complete_enrollments, incomplete_enrollments, course_completions
 
 
-def get_courses_progress(request, course_enrollments):
-    """
-    Gets course progress percentages of all courses in course_enrollments list
-
-    :param request: request object
-    :param course_enrollments: list of enrolled courses objects
-
-    :return:
-        courses_progress: progress percentage of each course in course_enrollments
-    """
-    courses_progress = []
-    CORE_BLOCK_TYPES = getattr(settings, 'CORE_BLOCK_TYPES', [])
-    FILTER_BLOCKS_IN_UNIT = getattr(settings, 'FILTER_BLOCKS_IN_UNIT', [])
-
-    for enrollment in course_enrollments:
-        course_id_string = six.text_type(enrollment.course.id)
-        course_outline_blocks = get_course_outline_block_tree(
-            request, course_id_string, request.user
-        )
-
-        total_blocks, total_completed_blocks = get_course_block_progress(
-            course_outline_blocks,
-            CORE_BLOCK_TYPES,
-            FILTER_BLOCKS_IN_UNIT
-        )
-
-        course_progress = round((total_completed_blocks / total_blocks) * 100) if total_blocks else 0
-        courses_progress.append(course_progress)
-
-    return courses_progress
-
-
 def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_UNIT):
     """
     Recursive helper function to walk course tree outline,
@@ -283,26 +251,56 @@ def get_site_for_clearesult_course(course_id):
         return None
 
 
-def is_compliant_with_clearesult_un_enroll_policy(enrollment):
-    """
-    Check that either user is compliant with clearesult un-enroll policy or not.
-    Return False: if compliant
-    Return True: if not compliant
-
-    Un-enroll policy is:
-        1. User can't un-enroll from paid courses for which he has enrolled
-        2. User can't un-enroll from mandatory courses
-    """
+def is_mandatory_course(enrollment):
     clearesult_groups = ClearesultGroupLinkage.objects.filter(users__username=enrollment.user.username)
     clearesult_catalogs = ClearesultGroupLinkedCatalogs.objects.filter(group__in=clearesult_groups)
     for clearesult_catalog in clearesult_catalogs:
         if clearesult_catalog.mandatory_courses.filter(course_id=enrollment.course_id).exists():
-            return False
+            return True
+    return False
 
-    if not enrollment.mode in ['honor', 'audit']:
-        return False
 
-    return True
+def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
+    """
+    Returns list of data that clearesult needs on student dahboard for incomeplete/in-progress courses section
+    """
+    data = []
+
+    for enrollment in enrollments:
+        data.append({
+            'progress': get_course_progress(request, enrollment.course),
+            'is_mandatory': is_mandatory_course(enrollment),
+            'is_free': enrollment.mode in ['honor', 'audit']
+        })
+
+    return data
+
+
+def get_course_progress(request, course):
+    """
+    Gets course progress percentages of the given course
+
+    :param request: request object
+    :param course_enrollments: enrolled course
+
+    :return:
+        courses_progress: progress percentage of each course in course_enrollments
+    """
+    CORE_BLOCK_TYPES = getattr(settings, 'CORE_BLOCK_TYPES', [])
+    FILTER_BLOCKS_IN_UNIT = getattr(settings, 'FILTER_BLOCKS_IN_UNIT', [])
+
+    course_id_string = six.text_type(course.id)
+    course_outline_blocks = get_course_outline_block_tree(
+        request, course_id_string, request.user
+    )
+
+    total_blocks, total_completed_blocks = get_course_block_progress(
+        course_outline_blocks,
+        CORE_BLOCK_TYPES,
+        FILTER_BLOCKS_IN_UNIT
+    )
+
+    return round((total_completed_blocks / total_blocks) * 100) if total_blocks else 0
 
 
 def is_local_admin_or_superuser(user):

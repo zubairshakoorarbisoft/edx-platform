@@ -44,7 +44,10 @@ from openedx.core.djangoapps.user_api.accounts.utils import is_secondary_email_f
 from openedx.core.djangoapps.util.maintenance_banner import add_maintenance_banner
 from openedx.core.djangoapps.waffle_utils import WaffleFlag, WaffleFlagNamespace
 from openedx.core.djangolib.markup import HTML, Text
-from openedx.features.clearesult_features.utils import get_enrollments_and_completions, get_courses_progress
+from openedx.features.clearesult_features.utils import(
+    get_enrollments_and_completions,
+    get_incomplete_enrollments_clearesult_dashboard_data
+)
 from openedx.features.enterprise_support.api import get_dashboard_consent_notification
 from shoppingcart.models import CourseRegistrationCode, DonationConfiguration
 from student.api import COURSE_DASHBOARD_PLUGIN_VIEW_NAME
@@ -605,9 +608,6 @@ def student_dashboard(request):
     )
     course_enrollments = incomplete_enrollments + complete_enrollments
 
-    # Get course progress of each incomplete enrollment
-    incomplete_courses_progress = get_courses_progress(request, incomplete_enrollments)
-
     # Get the entitlements for the user and a mapping to all available sessions for that entitlement
     # If an entitlement has no available sessions, pass through a mock course overview object
     (course_entitlements,
@@ -889,7 +889,9 @@ def student_dashboard(request):
         'complete_enrollments': complete_enrollments,
         'incomplete_enrollments': incomplete_enrollments,
         'course_completions': course_completions,
-        'incomplete_courses_progress': incomplete_courses_progress
+        'incomplete_courses_clearesult_data': get_incomplete_enrollments_clearesult_dashboard_data(
+            request, incomplete_enrollments
+        )
     }
 
     context_from_plugins = get_plugins_view_context(
