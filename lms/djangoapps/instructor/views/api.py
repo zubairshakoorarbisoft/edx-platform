@@ -789,13 +789,12 @@ def _bulk_enrollment_csv_validator(file_storage, file_to_validate):
     Verifies that the expected columns are present in the CSV used to enroll users to course.
     """
     with file_storage.open(file_to_validate) as f:
-        reader = unicodecsv.reader(UniversalNewlineIterator(f), encoding='utf-8')
+        reader = csv.reader(f.read().decode('utf-8').splitlines())
         try:
-            fieldnames = reader.next()
+            fieldnames = next(reader)
         except StopIteration:
             fieldnames = []
 
-        log.info('{}'.format(fieldnames))
         if 'email' not in fieldnames:
             msg = _("The file must contain an 'email' column.")
             raise FileValidationException(msg)
