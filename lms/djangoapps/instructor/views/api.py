@@ -795,6 +795,7 @@ def _bulk_enrollment_csv_validator(file_storage, file_to_validate):
         except StopIteration:
             fieldnames = []
 
+        log.info('{}'.format(fieldnames))
         if 'email' not in fieldnames:
             msg = _("The file must contain an 'email' column.")
             raise FileValidationException(msg)
@@ -827,7 +828,7 @@ def bulk_enroll_users_to_course(request, course_id):
         # The task will assume the default file storage.
         lms.djangoapps.instructor_task.api.submit_bulk_users_enrollments(request, course_key, filename)
     except (FileValidationException, PermissionDenied) as err:
-        return JsonResponse({'error': unicode(err)}, status=400)
+        return JsonResponse({'error': err}, status=400)
 
     return JsonResponse()
 
