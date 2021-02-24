@@ -825,7 +825,7 @@ def bulk_enroll_users_to_course(request, course_id):
             validator=_bulk_enrollment_csv_validator
         )
         # The task will assume the default file storage.
-        lms.djangoapps.instructor_task.api.submit_bulk_users_enrollments(request, course_key, filename)
+        task_api.submit_bulk_users_enrollments(request, course_key, filename)
     except (FileValidationException, PermissionDenied) as err:
         return JsonResponse({'error': err}, status=400)
 
