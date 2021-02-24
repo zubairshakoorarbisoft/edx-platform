@@ -791,7 +791,7 @@ def _bulk_enrollment_csv_validator(file_storage, file_to_validate):
     with file_storage.open(file_to_validate) as f:
         reader = unicodecsv.reader(UniversalNewlineIterator(f), encoding='utf-8')
         try:
-            fieldnames = next(reader)
+            fieldnames = reader.next()
         except StopIteration:
             fieldnames = []
 
