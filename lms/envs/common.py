@@ -2821,7 +2821,7 @@ CLEARESULT_CREDIT_PROVIDERS = [
 
 CLEARESULT_LOGOUT_SERVICE_USER = 'logout_service_user'
 
-DRUPAL_LOGOUT_API_CREDENTIALS = {
+DRUPAL_API_CREDENTIALS = {
     'username': '',
     'password': '',
     'url': ''
