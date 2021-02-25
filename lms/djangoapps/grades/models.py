@@ -232,8 +232,6 @@ class VisibleBlocks(models.Model):
         """
         cached_records = cls.bulk_read(user_id, course_key)
         non_existent_brls = {brl for brl in block_record_lists if brl.hash_value not in cached_records}
-
-        log.info('{}'.format(non_existent_brls))
         cls.bulk_create(user_id, course_key, non_existent_brls)
 
     @classmethod
