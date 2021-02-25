@@ -19,6 +19,7 @@ from openedx.features.clearesult_features.models import (
 )
 from opaque_keys.edx.keys import CourseKey
 from lms.djangoapps.instructor.enrollment import enroll_email
+from openedx.features.clearesult_features.drupal.client import DrupalClient, InvalidDrupalCredentials
 
 
 log = logging.getLogger('edx.celery.task')
@@ -115,18 +116,14 @@ def check_and_enroll_group_users_to_mandatory_courses(group_id, newly_added_grou
 
 @task()
 def call_drupal_logout_endpoint(email):
-    api_credentials = getattr(settings, 'DRUPAL_LOGOUT_API_CREDENTIALS', {})
-    if api_credentials == {}:
-        log.info('You have not provided drupal logout API credentials.')
-        return
+    try:
+        client = DrupalClient()
+        is_success = client.logout_user(email)
 
-    url = api_credentials.get('url', '') + email
-    username = api_credentials.get('username', '')
-    password = api_credentials.get('password', '')
+        if is_success:
+            log.info('Success: User with email {} has been successfully logged out from Drupal.'.format(email))
+        else:
+            log.error('Failed: User with email {} has not been logged out from Drupal.'.format(email))
 
-    response = requests.get(url, auth=(username, password))
-
-    if response.status_code == 200:
-        log.info('Success: User with email {} has been successfully logged out from Drupal.'.format(email))
-    else:
-        log.info('Failed: User with email {} has not been logged out from Drupal.'.format(email))
+    except InvalidDrupalCredentials:
+        log.error("Drupal error has been orccured.")
