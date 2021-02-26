@@ -3,6 +3,7 @@ Auth pipeline to modify authentication behavior
 """
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.urls import reverse
@@ -11,9 +12,15 @@ from social_django.models import UserSocialAuth
 
 from third_party_auth import pipeline
 
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
 from openedx.features.clearesult_features.models import ClearesultUserProfile
-from  openedx.features.clearesult_features.utils import add_user_to_site_default_group
+from  openedx.features.clearesult_features.utils import (
+    add_user_to_site_default_group, set_user_first_and_last_name,
+    get_site_from_site_identifier
+)
+from openedx.features.clearesult_features.tasks import update_magento_user_info_from_drupal
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -58,7 +65,7 @@ def update_clearesult_user_and_profile(request, response, user=None, *args, **kw
     if user:
         try:
             full_name = response.get('name', 'N/A N/A').split(' ')
-            _set_user_first_and_last_name(user, full_name)
+            set_user_first_and_last_name(user, full_name)
             instance, created = ClearesultUserProfile.objects.update_or_create(
                 user=user,
                 defaults={
@@ -73,19 +80,16 @@ def update_clearesult_user_and_profile(request, response, user=None, *args, **kw
             else:
                 logger.info('Success: The clearesult user and his profile have been updated for user {}.'.format(user.email))
             # * Drupal team is sending site identifier information in jobTitle
-            _set_user_site_identifiers(request,instance, response.get('jobTitle', ''))
+            _set_user_site_identifiers(request, instance, response.get('jobTitle', ''))
+
+            update_magento_user_info_from_drupal.delay(
+                instance.user.email,
+                configuration_helpers.get_value('MAGENTO_BASE_API_URL', settings.MAGENTO_BASE_API_URL),
+                configuration_helpers.get_value('MAGENTO_LMS_INTEGRATION_TOKEN', settings.MAGENTO_LMS_INTEGRATION_TOKEN)
+            )
+
         except AttributeError:
             logger.error('Failed: Could not create/update clearesult user and his profile.')
-
-
-def _set_user_first_and_last_name(user, full_name):
-    if not user.first_name:
-        user.first_name = full_name[0]
-    if len(full_name) > 1 and not user.last_name:
-        user.last_name = full_name[1]
-    else:
-        user.last_name = 'N/A'
-    user.save()
 
 
 def _set_user_site_identifiers(request, clearesult_user_profile, incoming_site_identifiers):
@@ -94,17 +98,6 @@ def _set_user_site_identifiers(request, clearesult_user_profile, incoming_site_i
         if len(incoming_site_identifiers) > 0:
             clearesult_user_profile.set_extension_value('site_identifier', incoming_site_identifiers)
             for site_identifier in incoming_site_identifiers:
-                site = _get_site_from_site_identifier(clearesult_user_profile.user, site_identifier)
+                site = get_site_from_site_identifier(clearesult_user_profile.user, site_identifier)
                 if site:
                     add_user_to_site_default_group(request, clearesult_user_profile.user, site)
-
-
-def _get_site_from_site_identifier(user, site_identifier):
-    lms_site_pattern = "{site_identifier} - LMS"
-    try:
-        return Site.objects.get(name=lms_site_pattern.format(site_identifier=site_identifier))
-    except Site.DoesNotExist:
-        logger.info("user with email: {} contains site identifier {} for which LMS site does not exist.".format(
-            user.email, site_identifier
-        ))
-        return None

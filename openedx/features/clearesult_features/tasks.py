@@ -19,8 +19,8 @@ from openedx.features.clearesult_features.models import (
 )
 from opaque_keys.edx.keys import CourseKey
 from lms.djangoapps.instructor.enrollment import enroll_email
+from openedx.features.clearesult_features.magento.client import MagentoClient
 from openedx.features.clearesult_features.drupal.client import DrupalClient, InvalidDrupalCredentials
-
 
 log = logging.getLogger('edx.celery.task')
 
@@ -114,16 +114,65 @@ def check_and_enroll_group_users_to_mandatory_courses(group_id, newly_added_grou
             newly_added_group_user_ids, all_madatory_courses, req_site_id, req_user_id)
 
 
-@task()
+@task(base=LoggedTask)
 def call_drupal_logout_endpoint(email):
     try:
         client = DrupalClient()
         is_success = client.logout_user(email)
-
-        if is_success:
-            log.info('Success: User with email {} has been successfully logged out from Drupal.'.format(email))
-        else:
-            log.error('Failed: User with email {} has not been logged out from Drupal.'.format(email))
-
     except InvalidDrupalCredentials:
-        log.error("Drupal error has been orccured.")
+        log.info("Drupal credentials error has been orccured.")
+        is_success = False
+
+    if is_success:
+        log.info('Success: User with email {} has been successfully logged out from Drupal.'.format(email))
+    else:
+        log.info('Failed: User with email {} has not been logged out from Drupal.'.format(email))
+
+
+@task(base=LoggedTask)
+def update_magento_user_info_from_drupal(email, magento_base_url, magento_token):
+    from openedx.features.clearesult_features.utils import (
+        set_user_first_and_last_name, prepare_magento_updated_customer_data
+    )
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        log.error("Task Error - update_magento_user_info - User with email {} does not exist".format(email))
+        return
+
+    try:
+        magento_client = MagentoClient(user, magento_base_url, magento_token)
+        magento_customer = magento_client.get_customer_data()
+    except:
+        # no need to return here - as we still need to check and update edx user's first name last name from drupal latest
+        magento_customer = None
+
+    try:
+        drupal_client = DrupalClient()
+        user_info = drupal_client.get_user_data(email)
+    except InvalidDrupalCredentials:
+        # no need to return here - as we still need to check and update magento user first name and last name
+        user_info = None
+
+    if user_info:
+        set_user_first_and_last_name(
+            user,
+            [user_info.get('first_name', 'N/A'), user_info.get('last_name', 'N/A')]
+        )
+    else:
+        log.error("Task Error - Unable to fetch user's data from Drupal.")
+
+    if magento_customer:
+        updated_magento_customer = prepare_magento_updated_customer_data(user, user_info, magento_customer)
+
+        if updated_magento_customer != magento_customer:
+            success = magento_client.update_customer_with_address(updated_magento_customer)
+            if success:
+                log.info("User with email {} has been successfully updated on Magento with latest user info.".format(email))
+            else:
+                log.info("Unable to update user with email {} on Magento with latest user info".format(email))
+        else:
+            log.info("User with email {} is already updated with latest user info on Magento".format(email))
+    else:
+        log.error("Task Error - Unable to fetch magento customer from Magento.")
