@@ -17,19 +17,31 @@ class MagentoClient(object):
     """
     _POST_METHOD = 'POST'
     _GET_METHOD = 'GET'
+    _PUT_METHOD = 'PUT'
     _CONTENT_TYPE = 'application/json'
 
-    def __init__(self, user):
+    def __init__(self, user, base_api_url=None, base_token=None, base_redirect=None):
         """
         Constructs a new instance of the Magento client.
         """
 
-        self._BASE_API_END_POINT = configuration_helpers.get_value(
-            'MAGENTO_BASE_API_URL', settings.MAGENTO_BASE_API_URL)
-        self._REDIRECT_URL = configuration_helpers.get_value(
-            'MAGENTO_REDIRECT_URL', settings.MAGENTO_REDIRECT_URL)
-        self._MAGENTO_LMS_INTEGRATION_TOKEN = configuration_helpers.get_value(
-            'MAGENTO_LMS_INTEGRATION_TOKEN', settings.MAGENTO_LMS_INTEGRATION_TOKEN)
+        if not base_api_url:
+            self._BASE_API_END_POINT = configuration_helpers.get_value(
+                'MAGENTO_BASE_API_URL', settings.MAGENTO_BASE_API_URL)
+        else:
+            self._BASE_API_END_POINT = base_api_url
+
+        if not base_redirect:
+            self._REDIRECT_URL = configuration_helpers.get_value(
+                'MAGENTO_REDIRECT_URL', settings.MAGENTO_REDIRECT_URL)
+        else:
+            self._REDIRECT_URL = base_redirect
+
+        if not base_token:
+            self._MAGENTO_LMS_INTEGRATION_TOKEN = configuration_helpers.get_value(
+                'MAGENTO_LMS_INTEGRATION_TOKEN', settings.MAGENTO_LMS_INTEGRATION_TOKEN)
+        else:
+            self._MAGENTO_LMS_INTEGRATION_TOKEN = base_token
 
         self._MAGENTO_USER_KEY = None
 
@@ -87,6 +99,7 @@ class MagentoClient(object):
         method_map = {
             self._GET_METHOD: requests.get,
             self._POST_METHOD: requests.post,
+            self._PUT_METHOD: requests.put
         }
 
         request = method_map.get(method)
@@ -106,6 +119,14 @@ class MagentoClient(object):
         )
         if success:
             return cart_id
+
+    def get_customer_data(self):
+        success, user_info = self.handle_request(
+            'customers/me', self._GET_METHOD, self.get_headers(self._MAGENTO_USER_KEY)
+        )
+        if success:
+            return user_info
+
 
     def add_product_to_cart(self, product_sku, quantity=1):
         cart_id = self.get_customer_cart()
@@ -139,3 +160,12 @@ class MagentoClient(object):
         )
         if success:
             self._MAGENTO_USER_KEY = data
+
+    def update_customer_with_address(self, customer_data):
+        success, data = self.handle_request(
+            'customers/me',
+            self._PUT_METHOD,
+            self.get_headers(self._MAGENTO_USER_KEY),
+            {'customer': customer_data}
+        )
+        return success

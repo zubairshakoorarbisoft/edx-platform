@@ -5,6 +5,7 @@ import io
 import json
 import logging
 import six
+import copy
 from csv import Error, DictReader, Sniffer
 from datetime import datetime
 
@@ -509,3 +510,73 @@ def send_mandatory_courses_emails(dest_emails, courses, request_user, request_si
         "courses": courses_data
     }
     send_notification(key, data, subject, dest_emails, request_user, request_site)
+
+
+def set_user_first_and_last_name(user, full_name):
+    name_len = len(full_name)
+    firstname = "N/A"
+    lastname = "N/A"
+
+    if name_len > 1:
+        firstname = full_name[0]
+        lastname = full_name[1]
+    elif name_len > 0:
+        firstname = full_name[0]
+
+    if not user.first_name or user.first_name == 'N/A':
+        user.first_name = firstname
+
+    if not user.last_name or user.last_name == 'N/A':
+        user.last_name = lastname
+
+    user.save()
+
+
+def get_site_from_site_identifier(user, site_identifier):
+    lms_site_pattern = "{site_identifier} - LMS"
+    try:
+        return Site.objects.get(name=lms_site_pattern.format(site_identifier=site_identifier))
+    except Site.DoesNotExist:
+        logger.info("user with email: {} contains site identifier {} for which LMS site does not exist.".format(
+            user.email, site_identifier
+        ))
+        return None
+
+
+def prepare_magento_updated_customer_data(user, drupal_user_info, magento_customer):
+    updated_magento_customer = magento_customer.copy()
+
+    if updated_magento_customer.get('firstname') != user.first_name:
+        updated_magento_customer['firstname'] = user.first_name
+    if updated_magento_customer.get('lastname') != user.last_name:
+        updated_magento_customer['lastname'] = user.last_name
+
+    if updated_magento_customer.get("addresses", []) == [] and drupal_user_info:
+        # Add new magento address
+        drupal_user_address = drupal_user_info.get("address", {})
+        updated_magento_customer["addresses"] = [
+            {
+                "firstname": user.first_name,
+                "lastname": user.last_name,
+                "company": drupal_user_info.get("company_name"),
+                "street": [
+                    drupal_user_address.get("street")
+                ],
+                "city": drupal_user_address.get("city"),
+                "postcode": drupal_user_address.get("zip"),
+                "country_id": "US",
+                "telephone": drupal_user_info.get("phone_number"),
+                "default_billing": True,
+                "default_shipping": True
+            }
+        ]
+    else:
+        # Check and update last name info in all magento existing addresses
+        updated_address = copy.deepcopy(updated_magento_customer.get("addresses", []))
+        for address in updated_address:
+            if address.get('lastname') == 'N/A':
+                address['lastname'] = user.last_name
+
+        updated_magento_customer["addresses"] = updated_address
+
+    return updated_magento_customer

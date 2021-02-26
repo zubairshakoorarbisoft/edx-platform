@@ -9,6 +9,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 
 logger = logging.getLogger(__name__)
 
+
 class InvalidDrupalCredentials(Exception):
     """
     Exception raised when an Drupal Credentials or URL is missing.
@@ -90,3 +91,10 @@ class DrupalClient(object):
         path = "single/signout?email={}".format(email)
         success, data = self.handle_request(path, self._GET_METHOD)
         return success
+
+    def get_user_data(self, email):
+        path = "user-info?email={}".format(email)
+        success, data = self.handle_request(path, self._GET_METHOD)
+        if data:
+            data = data.get('result', {}).get('user_info', {})
+        return data
