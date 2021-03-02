@@ -2,6 +2,7 @@
 Admin registration for Clearesult.
 """
 from config_models.admin import KeyedConfigurationModelAdmin
+from completion.models import BlockCompletion
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.sites.models import Site
@@ -123,6 +124,10 @@ class ClearesultUserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'job_title', 'company', 'state_or_province', 'postal_code', 'extensions')
 
 
+class BlockCompleteionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'context_key', 'block_key', 'block_type', 'completion', )
+
+
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
 admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
@@ -135,3 +140,4 @@ admin.site.register(ClearesultGroupLinkage, ClearesultGroupLinkageAdmin)
 admin.site.register(ClearesultLocalAdmin, ClearesultLocalAdminInterface)
 admin.site.register(ClearesultGroupLinkedCatalogs, ClearesultGroupLinkedCatalogsAdmin)
 admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)
+admin.site.register(BlockCompletion, BlockCompleteionAdmin)

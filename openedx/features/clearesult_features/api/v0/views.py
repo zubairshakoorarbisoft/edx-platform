@@ -1,13 +1,18 @@
 """
 Views for Clearesult V0 APIs
 """
+import logging
 import json
+import lms.djangoapps.instructor.enrollment as enrollment
 from importlib import import_module
 
+from completion.models import BlockCompletion
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.cache import cache
+from django.utils.translation import ugettext as _
+from django.urls import reverse
 from django.db import IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -15,10 +20,13 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.keys import CourseKey, UsageKey
 
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 
@@ -39,6 +47,13 @@ from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
     validate_sites_for_local_admin, validate_catalog_update_deletion
 )
+from openedx.features.clearesult_features.credits.utils import remove_user_cousre_credits_if_exist
+from openedx.features.course_experience.utils import get_course_outline_block_tree
+from student.models import CourseEnrollment
+from xmodule.modulestore.django import modulestore
+
+log = logging.getLogger(__name__)
+
 
 class IsSelf(permissions.BasePermission):
 
@@ -879,3 +894,67 @@ class ClearesultLogoutView(APIView):
 
         # removing from cache
         cache.delete('clearesult_{}'.format(user.email))
+
+
+@api_view(('POST',))
+def retake_course(request):
+    # Get the user
+    user = request.user
+
+    # Ensure the user is authenticated
+    if not user.is_authenticated:
+        return Response(
+            {'detail': 'user is not allowed to perform this action'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if 'retake_course_id' not in request.POST:
+        return Response(
+                {'detail': 'Course id not specified.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    try:
+        course_id_str = request.POST.get("retake_course_id")
+        course_id = CourseKey.from_string(course_id_str)
+    except InvalidKeyError:
+        log.warning(
+            u"User %s tried to retake course action with invalid course id: %s",
+            user.username,
+           course_id_str,
+        )
+        return Response(
+                {'detail': 'Invalid course Id {}.'.format(course_id_str)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    # Ensure the user is enrolled
+    user_enrollment = CourseEnrollment.get_enrollment(user, course_id)
+    if not user_enrollment:
+        return Response(
+                {'detail': 'User with email {} is not enrolled in the course {}.'.format(user.email, course_id_str)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    redirect_url = reverse('course_root', kwargs={'course_id': course_id_str})
+    course_block = get_course_outline_block_tree(request, course_id_str, user)
+
+    if course_block and course_block.get("id"):
+        course_usage_key = UsageKey.from_string(course_block.get("id")).replace(course_key=course_id)
+        try:
+            enrollment.reset_student_attempts(course_id, user, course_usage_key, requesting_user=user, delete_module=True)
+            BlockCompletion.objects.filter(user=user, context_key=course_id, completion=1.0).update(completion=0.0)
+            remove_user_cousre_credits_if_exist(course_id, user)
+            return Response(
+                {'url': redirect_url},
+                status=status.HTTP_200_OK
+            )
+        except Exception:
+            return Response(
+                {'detail': "Unable to reset course {} for student with email: {}.".format(course_id_str, user.email)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    else:
+        return Response(
+                { 'detail': 'Unable to reset course - unable to get course block id of course: {}.'.format(course_id_str, user.email)},
+                status=status.HTTP_400_BAD_REQUEST
+        )
