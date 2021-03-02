@@ -580,3 +580,18 @@ def prepare_magento_updated_customer_data(user, drupal_user_info, magento_custom
         updated_magento_customer["addresses"] = updated_address
 
     return updated_magento_customer
+
+
+def check_user_eligibility_for_clearesult_enrollment(user, course_id):
+    """
+    Check that the group of the specified user is linked with the catalog
+    which contains the specified course or not.
+    """
+    groups = ClearesultGroupLinkage.objects.filter(users__username=user.username)
+    group_linked_catalogs = ClearesultGroupLinkedCatalogs.objects.filter(group__in=groups).prefetch_related('catalog')
+    for group_linked_catalog in group_linked_catalogs:
+        courses = group_linked_catalog.catalog.clearesult_courses.all()
+        if courses.filter(course_id=course_id).exists():
+            return True
+
+    return False
