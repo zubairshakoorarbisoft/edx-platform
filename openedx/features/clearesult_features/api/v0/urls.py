@@ -8,7 +8,7 @@ from openedx.features.clearesult_features.api.v0.views import (
     ClearesultCatalogViewset, ClearesultCourseViewset, SiteViewset,
     ClearesultGroupViewset, ClearesultGroupCatalogsViewset,
     SiteLinkedObjectsListView, ClearesultUpdateGroupCatalogsViewset,
-    ClearesultMandatoryCoursesViewset, ClearesultLogoutView
+    ClearesultMandatoryCoursesViewset, ClearesultLogoutView, retake_course
 )
 
 
@@ -121,5 +121,10 @@ urlpatterns = (
         r'^logout/$',
         ClearesultLogoutView.as_view(),
         name="clearesult_logout"
+    ),
+    url(
+        r'^retake_course$',
+        retake_course,
+        name='clearesult_retake_course'
     )
 )
