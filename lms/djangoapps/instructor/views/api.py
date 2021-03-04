@@ -6,7 +6,6 @@ JSON views which the instructor dashboard requests.
 Many of these GETs may become PUTs in the future.
 """
 
-
 import csv
 import decimal
 import json
@@ -96,6 +95,7 @@ from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
+from openedx.features.clearesult_features.utils import check_user_eligibility_for_clearesult_enrollment
 from shoppingcart.models import (
     Coupon,
     CourseMode,
@@ -693,6 +693,15 @@ def students_update_enrollment(request, course_id):
         language = None
         try:
             user = get_student_from_identifier(identifier)
+            if not check_user_eligibility_for_clearesult_enrollment(user, course_id):
+                results.append({
+                    'identifier': identifier,
+                    'description': ('User is not eligible to be enrolled in this course'
+                                    ' as the catalog of this course is not accessible to the user'),
+                    'error': True,
+                })
+                continue
+
         except User.DoesNotExist:
             email = identifier
         else:
