@@ -109,6 +109,8 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
+PRIVATE_LMS_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
 # Disable JavaScript compression in development
 PIPELINE_JS_COMPRESSOR = None
 
