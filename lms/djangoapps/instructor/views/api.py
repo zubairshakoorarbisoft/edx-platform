@@ -2554,7 +2554,7 @@ def list_report_downloads(request, course_id):
     course_id = CourseKey.from_string(course_id)
     report_store = ReportStore.from_config(config_name='GRADES_DOWNLOAD')
     report_name = request.POST.get("report_name", None)
-    log.info('yes its working')
+
     response_payload = {
         'downloads': [
             dict(name=name, url=url, link=HTML('<a href="{}">{}</a>').format(HTML(url), Text(name)))

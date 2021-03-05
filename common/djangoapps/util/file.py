@@ -43,6 +43,7 @@ def store_uploaded_file(
             file will be deleted before the exception is re-raised. Note that the implementor of the validator function
             should take care to close the stored file if they open it for reading.
         storage (sotrage_class): an optional storage class object that should be used to save the file.
+
     Returns:
         Storage: the file storage object where the file can be retrieved from
         str: stored_file_name: the name of the stored file (including extension)
