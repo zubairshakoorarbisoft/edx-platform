@@ -101,6 +101,7 @@
             this.$survey_results_csv_btn = this.$section.find("input[name='survey-results-report']");
             this.$list_may_enroll_csv_btn = this.$section.find("input[name='list-may-enroll-csv']");
             this.$list_credits_csv_btn = this.$section.find("input[name='list-credits-csv']");
+            this.$list_all_courses_csv_btn = this.$section.find("input[name='list-all-courses-csv']");
             this.$list_total_credits_csv_btn = this.$section.find("input[name='list-total-credits-csv']");
             this.$credits_report_provider_filter_select = this.$section.find("select[name='credits-report-provider-filter']");
             this.$list_problem_responses_csv_input = this.$section.find("input[name='problem-location']");
@@ -288,6 +289,33 @@
                         'provider_filter': provider_filter,
                         'csv_type': 'credits'
                     },
+                    error: function(error) {
+                        if (error.responseText) {
+                            errorMessage = JSON.parse(error.responseText);
+                        }
+                        dataDownloadObj.$reports_request_response_error.text(errorMessage);
+                        return dataDownloadObj.$reports_request_response_error.css({
+                            display: 'block'
+                        });
+                    },
+                    success: function(data) {
+                        dataDownloadObj.$reports_request_response.text(data.status);
+                        return $('.msg-confirm').css({
+                            display: 'block'
+                        });
+                    }
+                });
+            });
+
+            this.$list_all_courses_csv_btn.click(function() {
+                var url = dataDownloadObj.$list_all_courses_csv_btn.data('endpoint');
+                var errorMessage = gettext('Error generating User earned credits reports. Please try again.');
+                dataDownloadObj.clear_display();
+                return $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: url,
+                    data: {},
                     error: function(error) {
                         if (error.responseText) {
                             errorMessage = JSON.parse(error.responseText);

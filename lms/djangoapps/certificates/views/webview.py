@@ -46,7 +46,7 @@ from openedx.core.djangoapps.certificates.api import certificates_viewable_for_c
 from openedx.core.djangoapps.lang_pref.api import get_closest_released_language
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.lib.courses import course_image_url
-from openedx.features.clearesult_features.credits.utils import get_user_course_earned_credits
+from openedx.features.clearesult_features.instructor_reports.utils import get_user_course_earned_credits
 from student.models import LinkedInAddToProfileConfiguration
 from util import organizations_helpers as organization_api
 from util.date_utils import strftime_localized
