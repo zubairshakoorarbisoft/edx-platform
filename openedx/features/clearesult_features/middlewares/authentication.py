@@ -107,9 +107,10 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
     def _is_user_suspicious(self, request):
         user = request.user
         if user.is_authenticated:
+            site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
             if user.is_superuser:
                 return False
-            elif request.site.name in cache.get('clearesult_allowed_site_names', []):
+            elif site_name in cache.get('clearesult_allowed_site_names', []):
                 return False
 
             # TODO: Find a better work around for this
@@ -117,7 +118,6 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
             if request.path.startswith('/asset'):
                 return False
 
-            site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
             try:
                 clearesult_allowed_site_names = user.clearesult_profile.get_extension_value('site_identifier', [])
             except ClearesultUserProfile.DoesNotExist:
