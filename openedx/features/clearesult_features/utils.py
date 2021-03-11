@@ -543,7 +543,7 @@ def get_site_from_site_identifier(user, site_identifier):
         return None
 
 
-def prepare_magento_updated_customer_data(user, drupal_user_info, magento_customer):
+def prepare_magento_updated_customer_data(user, drupal_user_info, magento_customer, region):
     updated_magento_customer = magento_customer.copy()
 
     if updated_magento_customer.get('firstname') != user.first_name:
@@ -551,7 +551,7 @@ def prepare_magento_updated_customer_data(user, drupal_user_info, magento_custom
     if updated_magento_customer.get('lastname') != user.last_name:
         updated_magento_customer['lastname'] = user.last_name
 
-    if updated_magento_customer.get("addresses", []) == [] and drupal_user_info:
+    if not updated_magento_customer.get("addresses", []) and drupal_user_info and region:
         # Add new magento address
         drupal_user_address = drupal_user_info.get("address", {})
         updated_magento_customer["addresses"] = [
@@ -564,7 +564,8 @@ def prepare_magento_updated_customer_data(user, drupal_user_info, magento_custom
                 ],
                 "city": drupal_user_address.get("city"),
                 "postcode": drupal_user_address.get("zip"),
-                "country_id": "US",
+                "country_id": drupal_user_info.get("country_code"),
+                "region_id": region[0],
                 "telephone": drupal_user_info.get("phone_number"),
                 "default_billing": True,
                 "default_shipping": True
