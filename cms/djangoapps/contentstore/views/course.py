@@ -69,7 +69,7 @@ from openedx.core.djangolib.js_utils import dump_js_escaped_json
 from openedx.core.lib.course_tabs import CourseTabPluginManager
 from openedx.core.lib.courses import course_image_url
 from openedx.features.clearesult_features.models import ClearesultCourseCredit, ClearesultCreditProvider
-from openedx.features.clearesult_features.credits.utils import (
+from openedx.features.clearesult_features.instructor_reports.utils import (
     get_all_credits_provider_list,
     get_available_credits_provider_list,
     get_course_credits_list

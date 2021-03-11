@@ -19,7 +19,7 @@ from openedx.features.clearesult_features.models import (
     ClearesultCourseCompletion, ClearesultGroupLinkage,
     ClearesultSiteConfiguration
 )
-from openedx.features.clearesult_features.credits.utils import (
+from openedx.features.clearesult_features.instructor_reports.utils import (
     generate_user_course_credits,
     remove_user_cousre_credits_if_exist,
 )

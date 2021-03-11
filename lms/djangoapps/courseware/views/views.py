@@ -107,7 +107,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
 from openedx.core.djangoapps.zendesk_proxy.utils import create_zendesk_ticket
 from openedx.core.djangolib.markup import HTML, Text
-from openedx.features.clearesult_features.credits.utils import get_course_credits_list
+from openedx.features.clearesult_features.instructor_reports.utils import get_course_credits_list
 from openedx.features.course_duration_limits.access import generate_course_expired_fragment
 from openedx.features.course_experience import (
     COURSE_ENABLE_UNENROLLED_ACCESS_FLAG,

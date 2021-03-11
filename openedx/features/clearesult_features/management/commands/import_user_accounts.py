@@ -12,7 +12,7 @@ from django.utils.crypto import get_random_string
 from social_django.models import UserSocialAuth
 
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
-from openedx.features.clearesult_features.credits.utils import get_credit_provider_by_short_code
+from openedx.features.clearesult_features.instructor_reports.utils import get_credit_provider_by_short_code
 from openedx.features.clearesult_features.models import ClearesultUserProfile, UserCreditsProfile
 from openedx.features.clearesult_features.utils import get_csv_file_control
 from student.models import UserProfile
