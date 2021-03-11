@@ -169,3 +169,17 @@ class MagentoClient(object):
             {'customer': customer_data}
         )
         return success
+
+    def get_region_details(self, country_code, region_code):
+        success, data = self.handle_request(
+            'region/exist/{}/{}'.format(country_code, region_code),
+            self._GET_METHOD,
+            self.get_headers(self._MAGENTO_LMS_INTEGRATION_TOKEN)
+        )
+
+        if not data:
+            logger.info(
+                "Magento API - Unable to get region data with country: {}, region: {}".format(country_code, region_code))
+
+        if success and len(data):
+            return data

@@ -164,7 +164,15 @@ def update_magento_user_info_from_drupal(email, magento_base_url, magento_token)
         log.error("Task Error - Unable to fetch user's data from Drupal.")
 
     if magento_customer:
-        updated_magento_customer = prepare_magento_updated_customer_data(user, user_info, magento_customer)
+        country_code = user_info.get("country_code")
+        region_code = user_info.get("address", {}).get("state")
+        region = None
+        if country_code and region_code:
+            region = magento_client.get_region_details(country_code, region_code)
+        else:
+            log.error("Missing Drupal Country code or region code.")
+
+        updated_magento_customer = prepare_magento_updated_customer_data(user, user_info, magento_customer, region)
 
         if updated_magento_customer != magento_customer:
             success = magento_client.update_customer_with_address(updated_magento_customer)
@@ -174,5 +182,8 @@ def update_magento_user_info_from_drupal(email, magento_base_url, magento_token)
                 log.info("Unable to update user with email {} on Magento with latest user info".format(email))
         else:
             log.info("User with email {} is already updated with latest user info on Magento".format(email))
+
+            if not region:
+                log.info("Unable to update address due to missing region - firstname and lastname is already updated".format(email))
     else:
         log.error("Task Error - Unable to fetch magento customer from Magento.")
