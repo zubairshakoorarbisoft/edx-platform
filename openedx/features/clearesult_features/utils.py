@@ -17,6 +17,7 @@ from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 from django.test import RequestFactory
+from django.db.models import Q
 from opaque_keys.edx.keys import CourseKey
 
 from lms.djangoapps.instructor.enrollment import (
@@ -583,16 +584,58 @@ def prepare_magento_updated_customer_data(user, drupal_user_info, magento_custom
     return updated_magento_customer
 
 
+def get_user_all_courses(user):
+    courses_list = []
+    groups = ClearesultGroupLinkage.objects.filter(users__username=user.username)
+    for courses in get_groups_courses_generator(groups):
+        courses_list.extend(courses)
+    return courses_list
+
+
+def get_groups_courses_generator(groups):
+    group_linked_catalogs = ClearesultGroupLinkedCatalogs.objects.filter(group__in=groups).prefetch_related('catalog')
+    for group_linked_catalog in group_linked_catalogs:
+        courses = group_linked_catalog.catalog.clearesult_courses.all()
+        yield courses
+
+
 def check_user_eligibility_for_clearesult_enrollment(user, course_id):
     """
     Check that the group of the specified user is linked with the catalog
     which contains the specified course or not.
     """
     groups = ClearesultGroupLinkage.objects.filter(users__username=user.username)
-    group_linked_catalogs = ClearesultGroupLinkedCatalogs.objects.filter(group__in=groups).prefetch_related('catalog')
-    for group_linked_catalog in group_linked_catalogs:
-        courses = group_linked_catalog.catalog.clearesult_courses.all()
+    for courses in get_groups_courses_generator(groups):
         if courses.filter(course_id=course_id).exists():
             return True
-
     return False
+
+
+def filter_out_course_library_courses(courses, user):
+    courses_list = []
+    user_courses = [course.course_id for course in get_user_all_courses(user)]
+    show_archive_courses = settings.FEATURES.get('SHOW_ARCHIVED_COURSES_IN_LISTING')
+
+    if user.is_superuser or user.is_staff:
+        # for superuser just check if for archive courses
+        # superuser can see courses in course library.
+        if not show_archive_courses:
+            return [course for course in courses if not course.has_ended()]
+        else:
+            return courses
+
+    for course in courses:
+        if course.id in user_courses:
+            if show_archive_courses or (not show_archive_courses and not course.has_ended()):
+                courses_list.append(course)
+
+    return courses_list
+
+
+def get_site_visible_courses_for_anonymous_user(site):
+    all_courses = ClearesultCourse.objects.none()
+    groups = ClearesultGroupLinkage.objects.filter(site=site)
+    for courses in get_groups_courses_generator(groups):
+        all_courses |= courses
+
+    return all_courses.distinct()

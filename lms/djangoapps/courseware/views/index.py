@@ -47,6 +47,7 @@ from openedx.features.course_experience import (
 from openedx.features.course_experience.urls import COURSE_HOME_VIEW_NAME
 from openedx.features.course_experience.views.course_sock import CourseSockFragmentView
 from openedx.features.enterprise_support.api import data_sharing_consent_required
+from openedx.features.clearesult_features.authentication.permissions import course_linked_user_required
 from student.models import CourseEnrollment
 from util.views import ensure_valid_course_key
 from xmodule.course_module import COURSE_VISIBILITY_PUBLIC
@@ -101,6 +102,7 @@ class CoursewareIndex(View):
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     @method_decorator(ensure_valid_course_key)
     @method_decorator(data_sharing_consent_required)
+    @method_decorator(course_linked_user_required)
     def get(self, request, course_id, chapter=None, section=None, position=None):
         """
         Displays courseware accordion and associated content.  If course, chapter,
