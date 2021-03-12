@@ -51,6 +51,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
 from openedx.core.djangolib.markup import HTML, Text
+from openedx.features.clearesult_features.utils import filter_courses_for_index_page_per_site
 from student.helpers import DISABLE_UNENROLL_CERT_STATES, cert_info, generate_activation_email_context
 from student.message_types import AccountActivation, EmailChange, EmailChangeConfirmation, RecoveryEmailCreate
 from student.models import (
@@ -130,6 +131,8 @@ def index(request, extra_context=None, user=AnonymousUser()):
         courses = sort_by_start_date(courses)
     else:
         courses = sort_by_announcement(courses)
+
+    courses = filter_courses_for_index_page_per_site(request, courses)
 
     context = {'courses': courses}
 
