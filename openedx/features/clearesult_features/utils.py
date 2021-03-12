@@ -639,3 +639,23 @@ def get_site_visible_courses_for_anonymous_user(site):
         all_courses |= courses
 
     return all_courses.distinct()
+
+
+def filter_courses_for_index_page_per_site(request, courses):
+    """
+    Filter to get only those courses whose catalogs are somehow
+    associated with the user groups of the site.
+    """
+    clearesult_courses = get_site_visible_courses_for_anonymous_user(request.site)
+
+    clearesult_courses_ids = []
+
+    for clearesult_course in clearesult_courses:
+        clearesult_courses_ids.append(clearesult_course.course_id)
+
+    filtered_courses = []
+    for course in courses:
+        if course.id in clearesult_courses_ids:
+            filtered_courses.append(course)
+
+    return filtered_courses
