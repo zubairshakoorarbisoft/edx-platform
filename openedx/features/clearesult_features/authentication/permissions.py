@@ -1,12 +1,17 @@
 """
 Permissions for authentication related views.
 """
+import logging
 from django.urls import reverse
 from django.shortcuts import redirect
 from django.http import HttpResponseForbidden
 
 from openedx.features.clearesult_features.authentication.utils import is_user_authenticated_for_site
 from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
+from openedx.features.clearesult_features.utils import get_groups_courses_generator, get_site_visible_courses_for_anonymous_user
+from openedx.features.clearesult_features.models import ClearesultGroupLinkage
+
+log = logging.getLogger(__name__)
 
 
 def non_site_authenticated_user_required(view_fn):
@@ -38,4 +43,35 @@ def local_admin_required(view_fn):
 
         return view_fn(request, *args, **kwargs)
 
+    return inner
+
+
+def course_linked_user_required(view_fn):
+    """
+    Decorator only for course URLS
+    Ensures that user should only access courses accessible to their groups.
+    """
+
+    def inner(request, *args, **kwargs):
+        log.info("course_linked_user_required - Decorator called to check if course is accessible for the users")
+        course_key = kwargs.get('course_key_string') or kwargs.get('course_id')
+
+        if not request.user or request.user.is_superuser or request.user.is_staff:
+            # for super user and staff users, run normal flow.
+            return view_fn(request, *args, **kwargs)
+
+        if not request.user.is_anonymous:
+            log.info("course_linked_user_required - Anonymous User flow")
+            # for authenticated users, check if course is accessible to user's any group.
+            groups = ClearesultGroupLinkage.objects.filter(users__username=request.user.username)
+            for courses in get_groups_courses_generator(groups):
+                if courses.filter(course_id=course_key).exists():
+                    return view_fn(request, *args, **kwargs)
+        else :
+            # for unauthenticated user, checks if course is a site private course or a public course.
+            courses = get_site_visible_courses_for_anonymous_user(request.site)
+            if courses.filter(course_id=course_key).exists():
+                return view_fn(request, *args, **kwargs)
+
+        return HttpResponseForbidden()
     return inner

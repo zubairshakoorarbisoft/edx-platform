@@ -18,6 +18,7 @@ from openedx.features.clearesult_features.models import (
     ClearesultCourseCompletion
 )
 from openedx.features.clearesult_features.utils import get_course_progress
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
 logger = getLogger(__name__)
 
@@ -299,9 +300,9 @@ def list_all_coures_enrolled_users_progress_for_report(course_key):
         user = enrollment.user
         request = RequestFactory().get(u'/')
         request.user = user
-        course_id = enrollment.course.id
+        course_id = enrollment.course_id
 
-        progress = get_course_progress(request, enrollment.course)
+        progress = get_course_progress(request, CourseOverview.objects.get(id=course_key))
         try:
             completion_obj = ClearesultCourseCompletion.objects.get(user=user, course_id=course_id)
             pass_date = completion_obj.pass_date

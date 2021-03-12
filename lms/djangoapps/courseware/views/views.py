@@ -121,6 +121,7 @@ from openedx.features.course_experience.views.course_dates import CourseDatesFra
 from openedx.features.course_experience.waffle import ENABLE_COURSE_ABOUT_SIDEBAR_HTML
 from openedx.features.course_experience.waffle import waffle as course_experience_waffle
 from openedx.features.enterprise_support.api import data_sharing_consent_required
+from openedx.features.clearesult_features.authentication.permissions import course_linked_user_required
 from student.models import CourseEnrollment, UserTestGroup
 from track import segment
 from util.cache import cache, cache_if_anonymous
@@ -258,8 +259,8 @@ def courses(request):
         else:
             courses_list = sort_by_announcement(courses_list)
 
-    if not settings.FEATURES.get('SHOW_ARCHIVED_COURSES_IN_LISTING'):
-        courses_list = [course for course in courses_list if not course.has_ended()]
+    from openedx.features.clearesult_features.utils import filter_out_course_library_courses
+    courses_list = filter_out_course_library_courses(courses_list, request.user)
 
     # Add marketable programs to the context.
     programs_list = get_programs_with_type(request.site, include_hidden=False)
@@ -876,6 +877,7 @@ class EnrollStaffView(View):
 @ensure_csrf_cookie
 @ensure_valid_course_key
 @cache_if_anonymous()
+@course_linked_user_required
 def course_about(request, course_id):
     """
     Display the course's about page.
