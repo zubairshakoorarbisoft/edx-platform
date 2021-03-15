@@ -2974,6 +2974,7 @@ ORA2_FILE_PREFIX = None
 FILE_UPLOAD_STORAGE_BUCKET_NAME = 'SET-ME-PLEASE (ex. bucket-name)'
 FILE_UPLOAD_STORAGE_PREFIX = 'submissions_attachments'
 
+PRIVATE_LMS_BUCKET = ''
 PRIVATE_LMS_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 ##### ACCOUNT LOCKOUT DEFAULT PARAMETERS #####

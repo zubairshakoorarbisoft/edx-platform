@@ -817,7 +817,7 @@ def bulk_enroll_users_to_course(request, course_id):
     course_key = CourseKey.from_string(course_id)
 
     try:
-        __, filename = store_uploaded_file(
+        storage, filename = store_uploaded_file(
             request,
             'uploaded-file',
             ['.csv'],
@@ -826,6 +826,10 @@ def bulk_enroll_users_to_course(request, course_id):
             validator=_bulk_enrollment_csv_validator,
             storage=private_lms_storage
         )
+        log.info(u'storage class: %s', storage)
+        log.info(u'filename: %s', filename)
+        log.info(u'file uploaded to s3 bucket')
+        log.info(u's3 bucket name %s', settings.PRIVATE_LMS_BUCKET)
         # The task will assume the default file storage.
         task_api.submit_bulk_users_enrollments(request, course_key, filename)
     except (FileValidationException, PermissionDenied) as err:
