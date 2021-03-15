@@ -56,6 +56,14 @@ def course_linked_user_required(view_fn):
         log.info("course_linked_user_required - Decorator called to check if course is accessible for the users")
         course_key = kwargs.get('course_key_string') or kwargs.get('course_id')
 
+        if not course_key and "courseware" in request.path:
+            # for courseware url, we have to extract course id from url as we are not getting it in kwargs
+            url_split = request.path.split('/')
+            if len(url_split) > 2:
+                course_key = url_split[2]
+
+        log.info("course_linked_user_required - course_key: {} and request.path: {}".format(course_key, request.path))
+
         if not request.user or request.user.is_superuser or request.user.is_staff:
             # for super user and staff users, run normal flow.
             return view_fn(request, *args, **kwargs)
