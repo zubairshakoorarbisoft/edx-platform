@@ -22,7 +22,7 @@ class FileValidationException(Exception):
 
 
 def store_uploaded_file(
-        request, file_key, allowed_file_types, base_storage_filename, max_file_size, validator=None,
+        request, file_key, allowed_file_types, base_storage_filename, max_file_size, validator=None, storage=None,
 ):
     """
     Stores an uploaded file to django file storage.
@@ -44,6 +44,7 @@ def store_uploaded_file(
             a `FileValidationException` if the file is not properly formatted. If any exception is thrown, the stored
             file will be deleted before the exception is re-raised. Note that the implementor of the validator function
             should take care to close the stored file if they open it for reading.
+        storage (sotrage_class): an optional storage class object that should be used to save the file.
 
     Returns:
         Storage: the file storage object where the file can be retrieved from
@@ -70,11 +71,13 @@ def store_uploaded_file(
             raise PermissionDenied(msg)
 
         stored_file_name = base_storage_filename + file_extension
+        if storage:
+            file_storage = storage
+        else:
+            file_storage = DefaultStorage()
 
-        file_storage = DefaultStorage()
         # If a file already exists with the supplied name, file_storage will make the filename unique.
         stored_file_name = file_storage.save(stored_file_name, uploaded_file)
-
         if validator:
             try:
                 validator(file_storage, stored_file_name)

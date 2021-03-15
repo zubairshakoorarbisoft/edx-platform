@@ -96,6 +96,7 @@ from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
+from openedx.features.edly.storage import private_lms_storage
 from shoppingcart.models import (
     Coupon,
     CourseMode,
@@ -822,7 +823,8 @@ def bulk_enroll_users_to_course(request, course_id):
             ['.csv'],
             course_and_time_based_filename_generator(course_key, 'bulk enrollments'),
             max_file_size=2000000,  # limit to 2 MB
-            validator=_bulk_enrollment_csv_validator
+            validator=_bulk_enrollment_csv_validator,
+            storage=private_lms_storage
         )
         # The task will assume the default file storage.
         task_api.submit_bulk_users_enrollments(request, course_key, filename)

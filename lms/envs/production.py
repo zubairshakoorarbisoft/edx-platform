@@ -486,6 +486,13 @@ elif AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
 else:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
+PRIVATE_LMS_BUCKET = ENV_TOKENS.get('PRIVATE_LMS_BUCKET', '')
+
+if PRIVATE_LMS_BUCKET:
+    PRIVATE_LMS_STORAGE = 'openedx.features.edly.storage.PrivateS3Storage'
+else:
+    PRIVATE_LMS_STORAGE = DEFAULT_FILE_STORAGE
+
 # If there is a database called 'read_replica', you can use the use_read_replica_if_available
 # function in util/query.py, which is useful for very large database reads
 DATABASES = AUTH_TOKENS['DATABASES']
