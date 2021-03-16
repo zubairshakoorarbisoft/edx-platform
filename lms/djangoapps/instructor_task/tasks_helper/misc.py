@@ -23,6 +23,7 @@ from lms.djangoapps.instructor_analytics.basic import get_proctored_exam_results
 from lms.djangoapps.instructor_analytics.csvs import format_dictlist
 from openedx.core.djangoapps.course_groups.cohorts import add_user_to_cohort
 from openedx.core.djangoapps.course_groups.models import CourseUserGroup
+from openedx.features.edly.storage import private_lms_storage
 from survey.models import SurveyAnswer
 from util.file import UniversalNewlineIterator
 
@@ -285,7 +286,7 @@ def bulk_enroll_students_and_upload(_xmodule_instance_args, _entry_id, course_id
     start_date = datetime.now(UTC)
 
     # Iterate through rows to get total assignments for task progress
-    with DefaultStorage().open(task_input['file_name']) as f:
+    with private_lms_storage.open(task_input['file_name']) as f:
         total_assignments = 0
         for _line in csv.DictReader(_get_csv_file_content(f).splitlines()):
             total_assignments += 1
@@ -305,7 +306,7 @@ def bulk_enroll_students_and_upload(_xmodule_instance_args, _entry_id, course_id
         'Learners Failed To Enroll': set(),
     }
 
-    with DefaultStorage().open(task_input['file_name']) as f:
+    with private_lms_storage.open(task_input['file_name']) as f:
         for row in csv.DictReader(_get_csv_file_content(f).splitlines()):
             # Try to use the 'email' field to identify the user.  If it's not present, use 'username'.
             username_or_email = row.get('email') or row.get('username')
