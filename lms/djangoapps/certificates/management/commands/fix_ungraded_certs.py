@@ -51,6 +51,8 @@ class Command(BaseCommand):
         course = courses.get_course_by_id(course_id)
         for cert in ungraded:
             # grade the student
+
+            log.info('------- Logging from fix_undergaded_cert.py  --- 22 ---------------------')
             grade = CourseGradeFactory().read(cert.user, course)
             log.info(u'grading %s - %s', cert.user, grade.percent)
             cert.grade = grade.percent

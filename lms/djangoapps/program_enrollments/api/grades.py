@@ -64,6 +64,7 @@ def _generate_grades(course_key, enrollments):
     users = [enrollment.program_enrollment.user for enrollment in enrollments]
     prefetch_course_grades(course_key, users)
     try:
+        logger.info('------- Logging from grades.py ---------------------')
         grades_iter = CourseGradeFactory().iter(users, course_key=course_key)
         for enrollment, grade_tuple in zip(enrollments, grades_iter):
             user, course_grade, exception = grade_tuple

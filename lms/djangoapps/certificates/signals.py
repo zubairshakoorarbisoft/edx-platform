@@ -107,6 +107,7 @@ def _listen_for_id_verification_status_changed(sender, user, **kwargs):  # pylin
 
     user_enrollments = CourseEnrollment.enrollments_for_user(user=user)
 
+    log.info('------- Logging from signals.py  --- 3333 ---------------------')
     grade_factory = CourseGradeFactory()
     expected_verification_status = IDVerificationService.user_status(user)
     expected_verification_status = expected_verification_status['status']

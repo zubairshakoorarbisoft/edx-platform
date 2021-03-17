@@ -549,6 +549,8 @@ def _cert_info(user, course_overview, cert_status):
     if status in {'generating', 'downloadable', 'notpassing', 'restricted', 'auditing', 'unverified'}:
         cert_grade_percent = -1
         persisted_grade_percent = -1
+
+        log.info('------- Logging from helpers.py ---------------------')
         persisted_grade = CourseGradeFactory().read(user, course=course_overview, create_if_needed=False)
         if persisted_grade is not None:
             persisted_grade_percent = persisted_grade.percent

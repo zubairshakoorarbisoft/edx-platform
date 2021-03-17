@@ -682,6 +682,7 @@ class CourseGradeReport(object):
             bulk_context = _CourseGradeBulkContext(context, users)
 
             success_rows, error_rows = [], []
+            TASK_LOG.info('------- Logging from signals.py ---------------------')
             for user, course_grade, error in CourseGradeFactory().iter(
                 users,
                 course=context.course,
@@ -765,6 +766,7 @@ class ProblemGradeReport(GradeReportBase):
         """
         self.log_additional_info_for_testing(context, 'ProblemGradeReport: Starting to process new user batch.')
         success_rows, error_rows = [], []
+        TASK_LOG.info('------- Logging from signals.py  --- 22 ---------------------')
         for student, course_grade, error in CourseGradeFactory().iter(
             users,
             course=context.course,

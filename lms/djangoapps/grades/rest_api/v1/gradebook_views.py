@@ -528,6 +528,7 @@ class GradebookView(GradeViewMixin, PaginatedAPIView):
 
         if request.GET.get('username'):
             with self._get_user_or_raise(request, course_key) as grade_user:
+                log.info('------- Logging from gradebook.py  --- 1111 ---------------------')
                 course_grade = CourseGradeFactory().read(grade_user, course)
 
             entry = self._gradebook_entry(grade_user, course, graded_subsections, course_grade)
@@ -623,6 +624,7 @@ class GradebookView(GradeViewMixin, PaginatedAPIView):
             users_counts = self._get_users_counts(course_key, q_objects, annotations=annotations)
 
             with bulk_gradebook_view_context(course_key, users):
+                log.info('------- Logging from gradebook.py  --- 33333 ---------------------')
                 for user, course_grade, exc in CourseGradeFactory().iter(
                     users, course_key=course_key, collected_block_structure=course_data.collected_structure
                 ):

@@ -137,6 +137,7 @@ class CourseGradesView(GradeViewMixin, PaginatedAPIView):
         users = self._paginate_users(course_key)
 
         with bulk_course_grade_context(course_key, users):
+            log.info('------- Logging from views.py  --- bbbb ---------------------')
             for user, course_grade, exc in CourseGradeFactory().iter(users, course_key=course_key):
                 if not exc:
                     user_grades.append(self._serialize_user_grade(user, course_key, course_grade))

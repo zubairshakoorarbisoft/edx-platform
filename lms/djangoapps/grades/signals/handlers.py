@@ -248,6 +248,7 @@ def recalculate_course_grade_only(sender, course, course_structure, user, **kwar
     Updates a saved course grade, but does not update the subsection
     grades the user has in this course.
     """
+    log.info('------- Logging from handlers.py  --- 111222 ---------------------')
     CourseGradeFactory().update(user, course=course, course_structure=course_structure)
 
 

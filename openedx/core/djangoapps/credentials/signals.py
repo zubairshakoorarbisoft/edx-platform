@@ -125,6 +125,7 @@ def send_grade_if_interesting(user, course_run_key, mode, status, letter_grade, 
     # Grab grades if we don't have them in hand
     if letter_grade is None or percent_grade is None:
         grade = CourseGradeFactory().read(user, course_key=course_run_key, create_if_needed=False)
+        log.info('------- Logging from signals.py ---------------------')
         if grade is None:
             if verbose:
                 log.info(

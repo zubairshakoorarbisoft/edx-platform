@@ -120,6 +120,7 @@ def compute_grades_for_course(course_key, offset, batch_size, **kwargs):  # pyli
 
     enrollments = CourseEnrollment.objects.filter(course_id=course_key).order_by('created')
     student_iter = (enrollment.user for enrollment in enrollments[offset:offset + batch_size])
+    log.info('------- Logging from tests.py  --- 2222 ---------------------')
     for result in CourseGradeFactory().iter(users=student_iter, course_key=course_key, force_update=True):
         if result.error is not None:
             raise result.error
@@ -157,6 +158,7 @@ def recalculate_course_and_subsection_grades_for_user(self, **kwargs):  # pylint
         )
         return
 
+    log.info('------- Logging from view.py  --- 44444 ---------------------')
     previous_course_grade = CourseGradeFactory().read(user, course_key=course_key)
     if previous_course_grade and previous_course_grade.attempted:
         CourseGradeFactory().update(

@@ -20,6 +20,10 @@ from xmodule.modulestore.django import modulestore
 
 from .. import permissions
 
+
+from logging import getLogger
+log = getLogger(__name__)
+
 # Grade book: max students per page
 MAX_STUDENTS_PER_PAGE_GRADE_BOOK = 20
 
@@ -88,6 +92,8 @@ def get_grade_book_page(request, course, course_key):
         enrolled_students = enrolled_students[offset: offset + MAX_STUDENTS_PER_PAGE_GRADE_BOOK]
 
     with modulestore().bulk_operations(course.location.course_key):
+
+        log.info('------- Logging from signals.py  --- 22 ---------------------')
         student_info = [
             {
                 'username': student.username,

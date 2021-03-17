@@ -19,6 +19,8 @@ from util.query import use_read_replica_if_available
 
 USER_MODEL = get_user_model()
 
+from logging import getLogger
+log = getLogger(__name__)
 
 class CourseEnrollmentPagination(CursorPagination):
     """
@@ -126,6 +128,8 @@ class GradeViewMixin(DeveloperErrorViewMixin):
         Returns:
             A serializable list of grade responses
         """
+
+        log.info('------- Logging from utils.py  --- 111222 ---------------------')
         course_grade = CourseGradeFactory().read(grade_user, course_key=course_key)
         return Response([self._serialize_user_grade(grade_user, course_key, course_grade)])
 
