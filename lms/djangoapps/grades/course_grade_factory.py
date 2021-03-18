@@ -221,8 +221,8 @@ class CourseGradeFactory(object):
                 course_id=course_data.course_key,
                 grade=course_grade,
             )
-
-        traceback.print_tb()
+        exc_info = sys.exc_info()
+        traceback.print_tb(*exc_info)
         log.info(
             u'Grades: Update, %s, User: %s, %s, persisted: %s',
             course_data.full_string(), user.id, course_grade, should_persist,
