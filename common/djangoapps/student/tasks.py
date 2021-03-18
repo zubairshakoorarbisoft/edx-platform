@@ -40,6 +40,9 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
     site = Site.objects.get(id=site_id)
     user = User.objects.get(username=msg.recipient.username)
 
+    log.info(user)
+    log.info(site)
+    log.info(msg.__dict__)
     try:
         with emulate_http_request(site=site, user=user):
             ace.send(msg)
