@@ -1,6 +1,6 @@
 """Grading policy"""
 
-
+import logging
 import json
 from base64 import b64encode
 from datetime import timedelta
@@ -15,6 +15,7 @@ from xmodule.modulestore.django import modulestore
 
 GRADING_POLICY_CHANGED_EVENT_TYPE = 'edx.grades.grading_policy_changed'
 
+log = logging.getLogger(__name__)
 
 class CourseGradingModel(object):
     """
@@ -78,6 +79,7 @@ class CourseGradingModel(object):
         CourseGradingModel.update_grace_period_from_json(course_key, jsondict['grace_period'], user)
 
         CourseGradingModel.update_minimum_grade_credit_from_json(course_key, jsondict['minimum_grade_credit'], user)
+        log.info('-----------log from update_from_json --------------')
         _grading_event_and_signal(course_key, user.id)
 
         return CourseGradingModel.fetch(course_key)
@@ -99,6 +101,7 @@ class CourseGradingModel(object):
         else:
             descriptor.raw_grader.append(grader)
 
+        log.info('-----------log from update_grader_from_json --------------')
         modulestore().update_item(descriptor, user.id)
         _grading_event_and_signal(course_key, user.id)
 
@@ -114,6 +117,7 @@ class CourseGradingModel(object):
         descriptor.grade_cutoffs = cutoffs
 
         modulestore().update_item(descriptor, user.id)
+        log.info('-----------log from update_cutoffs --------------')
         _grading_event_and_signal(course_key, user.id)
         return cutoffs
 
@@ -169,6 +173,7 @@ class CourseGradingModel(object):
             # force propagation to definition
             descriptor.raw_grader = descriptor.raw_grader
 
+        log.info('-----------log from delete_grader --------------')
         modulestore().update_item(descriptor, user.id)
         _grading_event_and_signal(course_key, user.id)
 
@@ -200,6 +205,7 @@ class CourseGradingModel(object):
             del descriptor.format
             del descriptor.graded
 
+        log.info('-----------log from update_section_grader_type --------------')
         modulestore().update_item(descriptor, user.id)
         _grading_event_and_signal(descriptor.location.course_key, user.id)
         return {'graderType': grader_type}
