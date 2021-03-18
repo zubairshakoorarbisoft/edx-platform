@@ -8,7 +8,8 @@ from openedx.features.clearesult_features.api.v0.views import (
     ClearesultCatalogViewset, ClearesultCourseViewset, SiteViewset,
     ClearesultGroupViewset, ClearesultGroupCatalogsViewset,
     SiteLinkedObjectsListView, ClearesultUpdateGroupCatalogsViewset,
-    ClearesultMandatoryCoursesViewset, ClearesultLogoutView, retake_course
+    ClearesultMandatoryCoursesViewset, ClearesultLogoutView, retake_course,
+    ClearesultCreditReportView
 )
 
 
@@ -126,5 +127,10 @@ urlpatterns = (
         r'^retake_course$',
         retake_course,
         name='clearesult_retake_course'
+    ),
+    url(
+        r'^earned_credit_report/$',
+        ClearesultCreditReportView.as_view(),
+        name='earned_credit_report'
     )
 )

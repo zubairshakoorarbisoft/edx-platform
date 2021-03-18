@@ -3,6 +3,7 @@ Views for Clearesult V0 APIs
 """
 import logging
 import json
+import six
 import lms.djangoapps.instructor.enrollment as enrollment
 from importlib import import_module
 
@@ -35,7 +36,7 @@ from openedx.features.clearesult_features.utils import get_site_users, is_local_
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
     ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage,
-    ClearesultGroupLinkedCatalogs, ClearesultUserSession
+    ClearesultGroupLinkedCatalogs, ClearesultUserSession, ClearesultCourseCompletion
 )
 from openedx.features.clearesult_features.api.v0.serializers import (
     UserCreditsProfileSerializer, ClearesultCreditProviderSerializer,
@@ -957,4 +958,72 @@ def retake_course(request):
         return Response(
                 { 'detail': 'Unable to reset course - unable to get course block id of course: {}.'.format(course_id_str, user.email)},
                 status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class ClearesultCreditReportView(APIView):
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated,]
+
+    def get(self, request):
+        """
+        Return yearly earned credit reports for the user who is making the request
+
+        URL:    clearesult/api/v0/earned_credit_report/
+
+        OUTPUT will be like this:
+        {
+            "credit_report": {
+                "Building Performance Institute": {
+                    "2021": 1.5
+                },
+                "American Institute of Architects": {
+                    "2021": 3.0
+                }
+            },
+            "providers": [
+                "American Institute of Architects",
+                "Building Performance Institute"
+            ],
+            "years": [
+                2021
+            ]
+        }
+        """
+        credits = UserCreditsProfile.objects.filter(user=request.user).prefetch_related('earned_course_credits')
+        if not credits:
+            return Response(
+                {},
+                status=status.HTTP_200_OK
+            )
+
+
+
+        providers = []
+        course_date_mapping = {}
+        completions = ClearesultCourseCompletion.objects.filter(user=request.user, pass_date__isnull=False)
+        for completion in completions:
+            course_id = six.text_type(completion.course_id)
+            course_date_mapping[course_id] = completion.pass_date.year
+
+        credit_date_mapping = {}
+        for credit in credits:
+            provider = credit.credit_type.name
+            providers.append(provider)
+            if not provider in credit_date_mapping:
+                credit_date_mapping[provider] = {}
+            earned_course_credits = credit.earned_course_credits.all()
+            if earned_course_credits:
+                for earned_course_credit in earned_course_credits:
+                    course_id = six.text_type(earned_course_credit.course_id)
+                    earned_year = course_date_mapping[course_id]
+                    credit_date_mapping[provider][earned_year] = credit_date_mapping[provider].get(earned_year, 0) + earned_course_credit.credit_value
+
+        return Response(
+            {
+                'credit_report': credit_date_mapping,
+                'years': sorted(set(course_date_mapping.values()), reverse=True),
+                'providers': providers
+            },
+            status=status.HTTP_200_OK
         )

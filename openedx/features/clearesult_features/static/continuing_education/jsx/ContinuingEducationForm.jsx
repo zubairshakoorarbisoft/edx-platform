@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 
 import AddProviderForm from "./components/AddProviderForm";
 import ProviderUpdateForm from "./components/ProviderUpdateForm";
+import Table from "./components/Table";
 
 import HttpClient from "../js/client";
 
@@ -12,6 +13,7 @@ export default function ContinuingEducationForm({ context }) {
     const [availableProviders, setAvailableProviders] = useState([]);
     const [allProviders, setAllProviders] = useState([]);
     const [userCreditProfiles, setUserCreditProfiles] = useState([]);
+    const [yearlyEarnedCredits, setYearlyEarnedCredits] = useState({});
 
     const client = new HttpClient({
         headers: {
@@ -23,12 +25,14 @@ export default function ContinuingEducationForm({ context }) {
         try {
             const providers = (await client.get(context.CREDIT_PROVIDERS_LIST_URL)).data;
             const userCreditProfiles = (await client.get(context.USER_CREDIT_PROFILE_LIST_URL)).data;
+            const earnedCredits = (await client.get(context.EARNED_CREDITS_REPORT_URL)).data;
             const existingUserIds = userCreditProfiles.map((profile) => profile.credit_type);
             const availableProviders = providers.filter((provider) => existingUserIds.indexOf(provider.id) < 0);
 
             setUserCreditProfiles(userCreditProfiles);
             setAvailableProviders(availableProviders);
             setAllProviders(providers);
+            setYearlyEarnedCredits(earnedCredits);
             setIsLoading(false);
         } catch (e) {
             console.error(e);
@@ -110,20 +114,25 @@ export default function ContinuingEducationForm({ context }) {
     return (
         <div className="edu-holder">
             <h1>Continuing Education IDs</h1>
+            <br></br>
             <div className="edu-holder-container">
                 {isLoading ? (
                     <h3>Loading data...</h3>
                 ) : (
                     <div>
-                        <AddProviderForm
-                            choices={availableProviders}
-                            handleAddProvider={handleAddProvider}
-                            handleOnSkipClick={handleOnSkipClick}
-                        />
+                        <Table earnedCredits={yearlyEarnedCredits}/>
+                        <hr></hr>
                         <ProviderUpdateForm
                             profiles={userCreditProfiles}
                             handleDeleteProvider={handleDeleteProviderProfile}
                             handleUpdateProvider={handleUpdateProviderProfile}
+                        />
+                        <br></br>
+                        <hr></hr>
+                        <AddProviderForm
+                            choices={availableProviders}
+                            handleAddProvider={handleAddProvider}
+                            handleOnSkipClick={handleOnSkipClick}
                         />
                     </div>
                 )}
