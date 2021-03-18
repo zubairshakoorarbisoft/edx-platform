@@ -2,6 +2,8 @@
 Course Grade Factory Class
 """
 
+import sys
+import traceback
 
 from collections import namedtuple
 from logging import getLogger
@@ -219,7 +221,8 @@ class CourseGradeFactory(object):
                 course_id=course_data.course_key,
                 grade=course_grade,
             )
-
+        exc_info = sys.exc_info()
+        traceback.print_exception(*exc_info)
         log.info(
             u'Grades: Update, %s, User: %s, %s, persisted: %s',
             course_data.full_string(), user.id, course_grade, should_persist,
