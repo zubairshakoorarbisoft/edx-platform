@@ -55,6 +55,8 @@ def compute_all_grades_for_course(**kwargs):
     Kicks off a series of compute_grades_for_course_v2 tasks
     to cover all of the students in the course.
     """
+
+    log.info('------- Logging from tasks.py  --- calling from compute_all_grades_for_course ---------------------')
     if waffle().is_enabled(DISABLE_REGRADE_ON_POLICY_CHANGE):
         log.debug('Grades: ignoring policy change regrade due to waffle switch')
     else:
@@ -98,6 +100,7 @@ def compute_grades_for_course_v2(self, **kwargs):
     if 'event_transaction_type' in kwargs:
         set_event_transaction_type(kwargs['event_transaction_type'])
 
+    log.info('------- Logging from tasks.py  --- calling from compute_grades_for_course_v2 ---------------------')
     try:
         return compute_grades_for_course(kwargs['course_key'], kwargs['offset'], kwargs['batch_size'])
     except Exception as exc:
@@ -120,7 +123,7 @@ def compute_grades_for_course(course_key, offset, batch_size, **kwargs):  # pyli
 
     enrollments = CourseEnrollment.objects.filter(course_id=course_key).order_by('created')
     student_iter = (enrollment.user for enrollment in enrollments[offset:offset + batch_size])
-    log.info('------- Logging from tests.py  --- 2222 ---------------------')
+    log.info('------- Logging from tasks.py  --- 2222 ---------------------')
     for result in CourseGradeFactory().iter(users=student_iter, course_key=course_key, force_update=True):
         if result.error is not None:
             raise result.error
