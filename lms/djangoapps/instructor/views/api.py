@@ -823,13 +823,14 @@ def bulk_enroll_users_to_course(request, course_id):
             ['.csv'],
             course_and_time_based_filename_generator(course_key, 'bulk enrollments'),
             max_file_size=2000000,  # limit to 2 MB
-            validator=_bulk_enrollment_csv_validator,
-            storage=private_lms_storage
+            validator=_bulk_enrollment_csv_validator
         )
         log.info(u'storage class: %s', storage)
         log.info(u'filename: %s', filename)
         log.info(u'file uploaded to s3 bucket')
         log.info(u's3 bucket name %s', settings.PRIVATE_LMS_BUCKET)
+        log.info(u'private lms storage %s', private_lms_storage)
+        log.info(u'grades download bucket %s', settings.GRADES_DOWNLOAD)
         # The task will assume the default file storage.
         task_api.submit_bulk_users_enrollments(request, course_key, filename)
     except (FileValidationException, PermissionDenied) as err:
