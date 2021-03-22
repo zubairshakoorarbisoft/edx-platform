@@ -205,6 +205,8 @@ class ClearesultSiteConfiguration(ConfigurationModel):
     security_code_required = models.BooleanField(default=True)
     security_code = EncryptedTextField(max_length=20, verbose_name="Site security code", null=True, blank=True)
     default_group = models.ForeignKey(ClearesultGroupLinkage, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
 
     class Meta:
         app_label = APP_LABEL
@@ -273,4 +275,27 @@ class ClearesultCourseCompletion(models.Model):
         app_label = APP_LABEL
         unique_together = (
             ('course_id', 'user')
+        )
+
+
+class ClearesultCourseConfig(models.Model):
+    """
+    This model saves the course configs on different sites.
+
+    Mandatory Courses due dates can be managed as follows
+    - site default configs in ClearesultSiteConfigurations
+    - course specific configs in ClearesultCourseConfig
+
+    Priority has been given to course specific configs but if course specific configs is not there for the mandatory
+    course then site defaults will be used.
+    """
+    course_id = CourseKeyField(max_length=255, db_index=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        unique_together = (
+            ('course_id', 'site')
         )

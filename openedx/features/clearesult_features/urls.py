@@ -5,7 +5,8 @@ from django.conf.urls import url, include
 
 from openedx.features.clearesult_features.views import (
     render_continuing_education, render_catalogs_manager,
-    render_groups_manager, render_group_catalogs_manager
+    render_groups_manager, render_group_catalogs_manager,
+    render_admin_configurations
 )
 
 from openedx.features.clearesult_features.authentication.views import SiteSecurityView
@@ -42,5 +43,10 @@ urlpatterns = (
         r'^group_catalogs_manager/$',
         render_group_catalogs_manager,
         name='groups_catalogs_manager'
+    ),
+    url(
+        r'^admin_configurations/$',
+        render_admin_configurations,
+        name='admin_configurations'
     )
 )

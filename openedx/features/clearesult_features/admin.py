@@ -21,7 +21,8 @@ from openedx.features.clearesult_features.models import (
     ClearesultCourse,
     ClearesultLocalAdmin,
     ClearesultGroupLinkedCatalogs,
-    ClearesultCourseCompletion
+    ClearesultCourseCompletion,
+    ClearesultCourseConfig
 )
 
 
@@ -127,6 +128,9 @@ class ClearesultUserProfileAdmin(admin.ModelAdmin):
 class BlockCompleteionAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'context_key', 'block_key', 'block_type', 'completion', )
 
+class ClearesultCourseConfigAdmin(admin.ModelAdmin):
+    list_display = ('id', 'course_id', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
+
 
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
@@ -141,3 +145,4 @@ admin.site.register(ClearesultLocalAdmin, ClearesultLocalAdminInterface)
 admin.site.register(ClearesultGroupLinkedCatalogs, ClearesultGroupLinkedCatalogsAdmin)
 admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)
 admin.site.register(BlockCompletion, BlockCompleteionAdmin)
+admin.site.register(ClearesultCourseConfig, ClearesultCourseConfigAdmin)

@@ -31,3 +31,9 @@ def render_groups_manager(request):
 @local_admin_required
 def render_group_catalogs_manager(request):
     return render_to_response('clearesult/group_catalogs_manager.html', {'uses_bootstrap': True})
+
+
+@login_required
+@local_admin_required
+def render_admin_configurations(request):
+    return render_to_response('clearesult/admin_configurations.html', {'uses_bootstrap': True})
