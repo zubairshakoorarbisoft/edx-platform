@@ -2802,7 +2802,9 @@ CLEARESULT_BLOCKED_FULL_PATH = [
 CLEARESULT_ALLOWED_SUB_PATHS = [
     '/api'
 ]
-
+CLEARESULT_ALLOWED_SUFFIX_PATHS = [
+    '/about'
+]
 CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
     reverse_lazy('signin_user'),
     reverse_lazy('register_user'),
