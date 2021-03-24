@@ -37,6 +37,7 @@ from student.models import CourseEnrollment
 from util.views import ensure_valid_course_key
 from xmodule.course_module import COURSE_VISIBILITY_PUBLIC, COURSE_VISIBILITY_PUBLIC_OUTLINE
 
+
 from .. import (
     COURSE_ENABLE_UNENROLLED_ACCESS_FLAG,
     LATEST_UPDATE_FLAG,
@@ -52,8 +53,10 @@ from .course_sock import CourseSockFragmentView
 from .latest_update import LatestUpdateFragmentView
 from .next_up_banner import NextUpBannerFragmentView
 from .welcome_message import WelcomeMessageFragmentView
+from openedx.features.clearesult_features.authentication.permissions import course_linked_user_required
 
 EMPTY_HANDOUTS_HTML = u'<ol></ol>'
+
 
 
 class CourseHomeView(CourseTabView):
@@ -64,6 +67,7 @@ class CourseHomeView(CourseTabView):
     @method_decorator(cache_control(no_cache=True, no_store=True, must_revalidate=True))
     @method_decorator(ensure_valid_course_key)
     @method_decorator(add_maintenance_banner)
+    @method_decorator(course_linked_user_required)
     def get(self, request, course_id, **kwargs):
         """
         Displays the home page for the specified course.

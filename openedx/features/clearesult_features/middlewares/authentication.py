@@ -1,12 +1,16 @@
 import logging
 
 from django.conf import settings
+from django.contrib.auth import logout
+from django.core.cache import cache
 from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 from six.moves.urllib.parse import urlencode
 
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
+from openedx.features.clearesult_features.models import ClearesultUserProfile
 import third_party_auth
 from third_party_auth import pipeline
 
@@ -21,27 +25,35 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         """
         Django middleware hook for processing request
         """
-        allowed_sub_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUB_PATHS', [])
-        allowed_full_paths = getattr(settings, 'CLEARESULT_ALLOWED_FULL_PATHS', [])
-
-        is_allowed = any([request.path.startswith(path) for path in allowed_sub_paths])
-        is_allowed = is_allowed or any([request.path == path for path in allowed_full_paths])
+        if self._is_user_suspicious(request):
+            LOGGER.info('Suspicious user: redirecting to logout')
+            logout(request)
+            return HttpResponseRedirect(reverse('root'))
         user = request.user
-
-        reset_password_error = request.GET.get('error_description', '')
-        if (reset_password_error and
-                reset_password_error.startswith(getattr(settings, 'AZUREAD_B2C_FORGET_PASSWORD_CODE', 'N/A'))):
-
-            reset_password_link = configuration_helpers.get_value('RESET_PASSWORD_LINK')
-            if reset_password_link:
-                LOGGER.info('Redirectiog to Azure AD B2C reset password link.')
-                return HttpResponseRedirect(reset_password_link)
-
-        if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False) or is_allowed or user.is_authenticated:
+        if not settings.FEATURES.get('ENABLE_AZURE_AD_LOGIN_REDIRECTION', False):
             LOGGER.info('Leaving without redirection for {}'.format(request.path))
             return
 
-        return self._redirect_to_login(request)
+
+        # Blocking all the paths which need to be shown to logged in users only
+        blocked_sub_paths = getattr(settings, 'CLEARESULT_BLOCKED_SUBPATH', [])
+        blocked_full_paths = getattr(settings, 'CLEARESULT_BLOCKED_FULL_PATH', [])
+        allowed_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUB_PATHS', [])
+
+        # Allow API calls
+        # Allowed URLS will have high priority over blocked URLS.
+        if(any([allowed_path in request.path for allowed_path in allowed_paths])):
+            LOGGER.info('Leaving without redirection for {}'.format(request.path))
+            return
+
+        # Blocking all the paths which need to be shown to logged in users only
+        is_blocked = [blocked_path in request.path for blocked_path in blocked_sub_paths]
+        is_blocked += [blocked_path == request.path for blocked_path in blocked_full_paths]
+
+        if not user.is_authenticated and any(is_blocked):
+            LOGGER.info('Need to login for: {}'.format(request.path))
+            return self._redirect_to_login(request)
+
 
     def _redirect_to_login(self, request):
         backend_name = ClearesultAzureADOAuth2.name
@@ -91,3 +103,29 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         site = getattr(request, 'site', None)
         domain = getattr(site, 'domain', None)
         return domain
+
+    def _is_user_suspicious(self, request):
+        user = request.user
+        if user.is_authenticated:
+            site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
+            if user.is_superuser:
+                return False
+            elif site_name in cache.get('clearesult_allowed_site_names', []):
+                return False
+
+            # TODO: Find a better work around for this
+            # Related Comment: https://edlyio.atlassian.net/browse/EDE-1364?focusedCommentId=26939
+            if request.path.startswith('/asset'):
+                return False
+
+            try:
+                clearesult_allowed_site_names = user.clearesult_profile.get_extension_value('site_identifier', [])
+            except ClearesultUserProfile.DoesNotExist:
+                return False
+
+            cache.set('clearesult_allowed_site_names', clearesult_allowed_site_names, 864000)
+
+            if site_name in clearesult_allowed_site_names:
+                return False
+            else:
+                return True

@@ -2,9 +2,14 @@
 Helper functions for Clearesult credits.
 """
 
+import six
+
+from django.test import RequestFactory
 from logging import getLogger
+from student.models import CourseEnrollment
 from xmodule.modulestore.django import modulestore
 
+from lms.djangoapps.certificates.models import CertificateStatuses, GeneratedCertificate
 from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCredit,
@@ -12,6 +17,9 @@ from openedx.features.clearesult_features.models import (
     UserCreditsProfile,
     ClearesultCourseCompletion
 )
+from openedx.features.clearesult_features.utils import get_course_progress
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+
 logger = getLogger(__name__)
 
 
@@ -66,6 +74,7 @@ def generate_user_course_credits(course_id, user):
                         course_credit.credit_value, course_credit.credit_type.name, user.email, course_id
                     )
                 )
+
 
 def remove_user_cousre_credits_if_exist(course_id, user):
     course_credits = ClearesultCourseCredit.objects.filter(course_id=course_id)
@@ -145,7 +154,7 @@ def list_user_credits_for_report(course_key, provider_filter=None):
         }
     ]
 
-    Note that result will only contain results for the user earned credits.
+    ! Note that result will only contain results for the user earned credits.
     We will not include users who have completed the course but didn't get any credits.
     """
     data_list = []
@@ -231,7 +240,7 @@ def list_user_total_credits_for_report(course_key, provider_filter=None):
         }
     ]
 
-    Note that result will only contain results for the users who have registered CUI for any Provider.
+    ! Note that result will only contain results for the users who have registered CUI for any Provider.
     """
     data_list = []
 
@@ -256,3 +265,79 @@ def list_user_total_credits_for_report(course_key, provider_filter=None):
         data_list.append(data)
 
     return data_list
+
+
+def list_all_coures_enrolled_users_progress_for_report(course_key):
+    """
+    Return info about user all courses enrolled students progress details.
+    would return [
+        {
+            'user_id': '1',
+            'email': 'username1@example.com',
+            'username'': 'username1'
+            'first_name': 'Jhon',
+            'last_name': 'Doe',
+            'course_id': 'course-v1:edX+def17+def17',
+            'course_name': 'Example course name',
+            'enrollment_status'': 'enrolled'
+            'enrollment_mode': 'honor',
+            'enrollment_date': '2020-10-11',
+            'progress_percent': '100%',
+            'grade_percent': '20%',
+            'letter_grade': 'Pass"
+            'completion_date': '2020-10-22',
+            'pass_date'': '2020-10-22'
+            'certificate_eligible': 'Y',
+            'certificate_delivered': 'N',
+        }
+    ]
+
+    ! Note that result will only contain results for the users who have registered CUI for any Provider.
+    """
+    data = []
+    all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, user__is_staff=False, user__is_superuser=False)
+    for enrollment in all_active_enrollments:
+        user = enrollment.user
+        request = RequestFactory().get(u'/')
+        request.user = user
+        course_id = enrollment.course_id
+
+        progress = get_course_progress(request, CourseOverview.objects.get(id=course_key))
+        try:
+            completion_obj = ClearesultCourseCompletion.objects.get(user=user, course_id=course_id)
+            pass_date = completion_obj.pass_date
+            completion_date = completion_obj.completion_date
+        except ClearesultCourseCompletion.DoesNotExist:
+            completion_date = pass_date = None
+
+        try:
+            certificate = GeneratedCertificate.eligible_certificates.get(user=user, course_id=course_id)
+            certificate_status = certificate.status
+        except GeneratedCertificate.DoesNotExist:
+            certificate = certificate_status = None
+
+        course_grade = CourseGradeFactory().read(user, course_key=course_id)
+
+        user_course_dict = {
+            'user_id': user.id,
+            'email': user.email,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'course_id': six.text_type(enrollment.course.id),
+            'course_name': enrollment.course.display_name,
+            'enrollment_status': "enrolled" if CourseEnrollment.is_enrolled(user, course_id) else "unenrolled",
+            'enrollment_mode': enrollment.mode,
+            'enrollment_date':  enrollment.created.date(),
+            'progress_percent': "{} %".format(progress),
+            'grade_percent': "{} %".format(course_grade.percent * 100),
+            'letter_grade': course_grade.letter_grade,
+            'completion_date': completion_date.date() if (completion_date and progress == 100) else 'N/A',
+            'pass_date': pass_date.date() if pass_date else 'N/A',
+            'certificate_eligible': 'Y' if course_grade.passed else 'N',
+            'certificate_delivered': 'Y' if certificate_status == CertificateStatuses.downloadable else 'N'
+        }
+
+        data.append(user_course_dict)
+
+    return data

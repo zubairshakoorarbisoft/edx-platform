@@ -653,7 +653,7 @@ such that the value can be defined later than this assignment (file load order).
         batchEnrollment.prototype.display_response = function(dataFromServer) {
             var allowed, autoenrolled, enrolled, errors, errorsLabel,
                 invalidIdentifier, notenrolled, notunenrolled, renderList, sr, studentResults,
-                i, j, len, len1, ref, renderIdsLists,
+                i, j, len, len1, ref, renderIdsLists, renderErrorsDescriptions,
                 displayResponse = this;
             this.clear_input();
             this.$task_response.empty();
@@ -690,21 +690,37 @@ such that the value can be defined later than this assignment (file load order).
                     console.warn('student results not reported to user');  // eslint-disable-line no-console
                 }
             }
-            renderList = function(label, ids) {
+            renderList = function(label, ids, errorsDescriptions) {
                 var identifier, $idsList, $taskResSection, h, len3;
+                errorsDescriptions = typeof errorsDescriptions !== 'undefined' ? errorsDescriptions : [];
                 $taskResSection = $('<div/>', {
-                    class: 'request-res-section'
+                    class: errorsDescriptions.length > 0 ? 'request-res-section error' : 'request-res-section success'
                 });
                 $taskResSection.append($('<h3/>', {
                     text: label
                 }));
                 $idsList = $('<ul/>');
                 $taskResSection.append($idsList);
-                for (h = 0, len3 = ids.length; h < len3; h++) {
-                    identifier = ids[h];
-                    $idsList.append($('<li/>', {
-                        text: identifier
-                    }));
+                if (errorsDescriptions.length > 0) {
+                    for (h = 0, len3 = ids.length; h < len3; h++) {
+                        identifier = ids[h];
+                        if (h < errorsDescriptions.length && errorsDescriptions[h] !== '') {
+                            $idsList.append($('<li/>', {
+                                text: identifier + ' (' + errorsDescriptions[h] + ')'
+                            }));
+                        } else {
+                            $idsList.append($('<li/>', {
+                                text: identifier
+                            }));
+                        }
+                    }
+                } else {
+                    for (h = 0, len3 = ids.length; h < len3; h++) {
+                        identifier = ids[h];
+                        $idsList.append($('<li/>', {
+                            text: identifier
+                        }));
+                    }
                 }
                 return displayResponse.$task_response.append($taskResSection);
             };
@@ -717,7 +733,7 @@ such that the value can be defined later than this assignment (file load order).
                         results.push(sr.identifier);
                     }
                     return results;
-                }()));
+                }()), ['']);
             }
             if (errors.length) {
                 errorsLabel = (function() {
@@ -740,9 +756,21 @@ such that the value can be defined later than this assignment (file load order).
                     }
                     return results;
                 };
+                renderErrorsDescriptions = function(errs) {
+                    var errorIndex = 0;
+                    var results = [];
+                    for (errorIndex = 0, len = errs.length; errorIndex < len; errorIndex++) {
+                        if (errs[errorIndex].hasOwnProperty('description')) {
+                            results.push(errs[errorIndex].description);
+                        } else {
+                            results.push('');
+                        }
+                    }
+                    return results;
+                };
                 for (j = 0, len1 = errors.length; j < len1; j++) {
                     studentResults = errors[j];
-                    renderList(errorsLabel, renderIdsLists(errors));
+                    renderList(errorsLabel, renderIdsLists(errors), renderErrorsDescriptions(errors));
                 }
             }
             if (enrolled.length && emailStudents) {

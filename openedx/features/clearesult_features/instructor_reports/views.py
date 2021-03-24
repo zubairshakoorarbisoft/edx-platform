@@ -11,7 +11,7 @@ from lms.djangoapps.instructor.views.api import (
     common_exceptions_400,
     SUCCESS_MESSAGE_TEMPLATE
 )
-from openedx.features.clearesult_features.credits import task_helper
+from openedx.features.clearesult_features.instructor_reports import task_helper
 
 
 @transaction.non_atomic_requests
@@ -41,4 +41,31 @@ def get_students_credits(request, course_id):
 
     task_helper.submit_calculate_credits_csv(request, course_key, query_features, csv_type)
     success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=csv_type)
+    return JsonResponse({'status': success_status})
+
+
+@transaction.non_atomic_requests
+@require_POST
+@ensure_csrf_cookie
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
+@require_course_permission(permissions.CAN_RESEARCH)
+@common_exceptions_400
+def get_all_courses_progress_data(request, course_id):
+    """
+    Initiate generation of a CSV file containing information about
+    all courses enrollment progress and status details.
+
+    Responds with JSON
+        {"status": "... status message ..."}
+    """
+    task_type = 'all_courses_progress'
+    course_key = CourseKey.from_string(course_id)
+    query_features = [
+        'user_id', 'email', 'username', 'first_name', 'last_name', 'course_id', 'course_name', 'enrollment_status',
+        'enrollment_mode', 'enrollment_date', 'progress_percent', 'grade_percent', 'letter_grade', 'completion_date', 'pass_date',
+        'certificate_eligible', 'certificate_delivered'
+    ]
+
+    task_helper.submit_calculate_all_courses_progress_csv(request, course_key, query_features, task_type)
+    success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=task_type)
     return JsonResponse({'status': success_status})

@@ -205,6 +205,27 @@
              $('#unenroll-modal').css('position', 'fixed');
          });
 
+         $('.action-retake').click(function(event) {
+            $('#retake_course_id').val($(event.target).data('course-id'));
+            $('#retake-modal').css('position', 'fixed');
+        });
+
+        $('#retake_form').submit(function(event) {;
+            $.ajax({
+                type: 'POST',
+                url: urls.retakeCourse,
+                data: $(this).serializeArray(),
+                success: function(data) {
+                    window.location.href = data.url;
+                },
+                error: function(xhr) {
+                    $('#retake_error').text(xhr.responseText).stop().css('display', 'block')
+                }
+            });
+            return false;
+
+        });
+
          $('#email_settings_form').submit(function() {
              $.ajax({
                  type: 'POST',

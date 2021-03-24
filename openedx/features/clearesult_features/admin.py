@@ -2,7 +2,10 @@
 Admin registration for Clearesult.
 """
 from config_models.admin import KeyedConfigurationModelAdmin
+from completion.models import BlockCompletion
 from django.contrib import admin
+from django.contrib import messages
+from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 
 from openedx.features.clearesult_features.forms import UserCreditsProfileAdminForm
@@ -75,6 +78,29 @@ class ClearesultGroupLinkageAdmin(admin.ModelAdmin):
     """
     list_display = ('name', 'site')
 
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+    def delete_model(self, request, obj):
+        """
+        Don't delete group objects linked as a default group with some site
+        """
+        is_default = False
+
+        sites = Site.objects.filter(name__icontains="LMS")
+
+        for site in sites:
+            config = site.clearesult_configuration.latest('change_date')
+            if config.default_group == obj:
+                is_default = True
+                messages.error(request, "Group is set as a dafault group of some site. Remove the linkgae first then try again.")
+                break
+
+        if not is_default:
+            super().delete_model(request, obj)
 
 class ClearesultLocalAdminInterface(admin.ModelAdmin):
     """
@@ -98,6 +124,10 @@ class ClearesultUserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'job_title', 'company', 'state_or_province', 'postal_code', 'extensions')
 
 
+class BlockCompleteionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'context_key', 'block_key', 'block_type', 'completion', )
+
+
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
 admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
@@ -110,3 +140,4 @@ admin.site.register(ClearesultGroupLinkage, ClearesultGroupLinkageAdmin)
 admin.site.register(ClearesultLocalAdmin, ClearesultLocalAdminInterface)
 admin.site.register(ClearesultGroupLinkedCatalogs, ClearesultGroupLinkedCatalogsAdmin)
 admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)
+admin.site.register(BlockCompletion, BlockCompleteionAdmin)
