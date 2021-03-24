@@ -39,7 +39,7 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
         blocked_sub_paths = getattr(settings, 'CLEARESULT_BLOCKED_SUBPATH', [])
         blocked_full_paths = getattr(settings, 'CLEARESULT_BLOCKED_FULL_PATH', [])
         allowed_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUB_PATHS', [])
-        allowed_suffix_paths = getattr(settings, 'CLEARESULT_ALLOWED_SUFFIX_PATHS', [])
+        allowed_included_paths = getattr(settings, 'CLEARESULT_ALLOWED_INCLUDED_PATHS', [])
 
         # Allow API calls
         # Allowed URLS will have high priority over blocked URLS.
@@ -47,8 +47,7 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
             LOGGER.info('Leaving without redirection for allowed path {}'.format(request.path))
             return
 
-        request_suffix_path = request.path.lstrip('/') if request.path[-1] == '/' else request.path
-        if any([request_suffix_path.endswith(allowed_suffix_path) for allowed_suffix_path in allowed_suffix_paths]):
+        if any([allowed_included_path in request.path for allowed_included_path in allowed_included_paths]):
             LOGGER.info('Leaving without redirection for suffix path {}'.format(request.path))
             return
 
