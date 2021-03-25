@@ -13,10 +13,15 @@ export default function AddEditModal({
         selectedSite,
     }) {
 
-    const submitButtonText = isEditButton ? "Update" : "Add"
-    const siteOptions = availableSites.map(
-        (availableSite) => <option key={availableSite.id} value={availableSite.id}>{availableSite.domain}</option>
-    )
+    const submitButtonText = isEditButton ? "Update" : "Add";
+    let siteOptions = null;
+    if (isEditButton) {
+        siteOptions = <option key={selectedSite.id} value={selectedSite.id}>{selectedSite.domain}</option>
+    } else {
+        siteOptions = availableSites.map(
+            (availableSite) => <option key={availableSite.id} value={availableSite.id}>{availableSite.domain}</option>
+        )
+    }
 
     const courseOptions = availableFilteredCourses.map((availableFilteredCourse) => {
         return {'value': availableFilteredCourse.course_id, 'label': availableFilteredCourse.course_name}
