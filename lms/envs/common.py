@@ -2828,6 +2828,19 @@ DRUPAL_API_CREDENTIALS = {
     'password': '',
     'url': ''
 }
+
+CLEARESULT_AVAILABLE_SITES_MAPPING = {
+    'black-hills-energy-swepco': {
+        'theme': 'blackhillsswepco'
+    },
+    'bayren': {
+        'theme': 'bayren'
+    },
+    'georgia-power': {
+        'theme': 'georgia_power'
+    }
+}
+
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:

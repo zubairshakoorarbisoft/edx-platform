@@ -64,6 +64,12 @@ $(document).ready(function() {
         $hamburgerMenu.toggleClass('open');
     });
 
+    // Toggling mobile dropdown menu
+    $(document).on('click', '.mobile-menu .drop-opener', function(event) {
+        event.preventDefault();
+        $(this).parent().toggleClass('active');
+    });
+
     // Hide hamburger menu if no nav items (sign in and register pages)
     if ($('.mobile-nav-item').size() === 0) {
         $('.global-header .hamburger-menu').addClass('hidden');
