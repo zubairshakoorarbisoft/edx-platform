@@ -552,6 +552,10 @@ CLEARESULT_CREDIT_PROVIDERS = ENV_TOKENS.get(
     'CLEARESULT_CREDIT_PROVIDERS',
     CLEARESULT_CREDIT_PROVIDERS
 )
+CLEARESULT_AVAILABLE_SITES_MAPPING = ENV_TOKENS.get(
+    'CLEARESULT_AVAILABLE_SITES_MAPPING',
+    CLEARESULT_AVAILABLE_SITES_MAPPING
+)
 ####################### Plugin Settings ##########################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
