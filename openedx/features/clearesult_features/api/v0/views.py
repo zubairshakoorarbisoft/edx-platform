@@ -31,18 +31,20 @@ from opaque_keys.edx.keys import CourseKey, UsageKey
 
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.api.authentication import BearerAuthentication
 from openedx.features.clearesult_features.utils import get_site_users, is_local_admin_or_superuser
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
     ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage,
-    ClearesultGroupLinkedCatalogs, ClearesultUserSession, ClearesultCourseCompletion
+    ClearesultGroupLinkedCatalogs, ClearesultUserSession, ClearesultCourseCompletion,
+    ClearesultSiteConfiguration, ClearesultCourseConfig
 )
 from openedx.features.clearesult_features.api.v0.serializers import (
     UserCreditsProfileSerializer, ClearesultCreditProviderSerializer,
     ClearesultCatalogSerializer, ClearesultCourseSerializer,
     UserSerializer, SiteSerializer, ClearesultGroupsSerializer,
-    ClearesultMandatoryCoursesSerializer
+    ClearesultMandatoryCoursesSerializer, ClearesultCourseConfigSerializer, MandatoryCoursesConfigSerializer
 )
 from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
@@ -1027,3 +1029,207 @@ class ClearesultCreditReportView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class ClearesultSiteDefaultConfigViewset(viewsets.ViewSet):
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication,]
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
+
+    def update(self, request, **kwargs):
+        """
+        Return the list of available sites default due dates
+        GET /clearesult/api/v0/sites_mandatory_configs/
+
+        [
+            {
+                "id": 1,
+                "domain": "localhost:18000",
+                "mandatory_courses_alotted_time": "",
+                "mandatory_courses_notification_period": ""
+            }
+            ...
+            ...
+        ]
+        """
+        site_pk = self.kwargs.get('site_pk')
+        try:
+            site = Site.objects.get(id=site_pk)
+        except Site.DoesNotExist:
+            raise NotFound("error - site with id doesn't exist")
+
+        clearesult_site = site.clearesult_configuration.latest('change_date')
+
+        updated_aloted_time = request.data.get("mandatory_courses_alotted_time")
+        updated_notification_period = request.data.get("mandatory_courses_notification_period")
+
+        try:
+            clearesult_site.mandatory_courses_alotted_time = updated_aloted_time
+            clearesult_site.mandatory_courses_notification_period = updated_notification_period
+            clearesult_site.save()
+        except:
+            return Response(
+                {'detail': 'Invalid post data.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(
+            {
+                "id": site.id,
+                "domain": site.domain,
+                "mandatory_courses_notification_period": clearesult_site.mandatory_courses_notification_period or  "",
+                "mandatory_courses_alotted_time": clearesult_site.mandatory_courses_alotted_time or ""
+            }
+        )
+
+
+    def list(self, request):
+        """
+        Return the list of available sites due dates
+        GET /clearesult/api/v0/sites_mandatory_configs/
+
+        [
+            {
+                "id": 1,
+                "domain": "localhost:18000",
+                "mandatory_courses_alotted_time": "",
+                "mandatory_courses_notification_period": ""
+            }
+            ...
+            ...
+        ]
+        """
+        if request.user.is_superuser:
+            queryset = Site.objects.filter(name__iendswith='LMS')
+        else:
+            queryset = ClearesultLocalAdmin.objects.filter(
+                user=request.user,
+                site__name__iendswith='LMS'
+            ).values('site')
+            local_sites_ids = []
+            for item in queryset:
+                local_sites_ids.append(item.get('site'))
+            queryset = Site.objects.filter(id__in=local_sites_ids)
+
+        data = []
+        for site in queryset:
+            clearesult_site = site.clearesult_configuration.latest('change_date')
+            data_dict = {
+                "id": site.id,
+                "domain": site.domain,
+                "mandatory_courses_notification_period": clearesult_site.mandatory_courses_notification_period or  "",
+                "mandatory_courses_alotted_time": clearesult_site.mandatory_courses_alotted_time or ""
+            }
+            data.append(data_dict)
+
+        return Response(data)
+
+
+class ClearesultCoursesConfigViewset(viewsets.ModelViewSet):
+    """
+        GET /clearesult/api/v0/mandatory_courses_configs_per_course/site_pk/
+        Returns list of all course configs of given site
+        [
+            {
+                "id": 20,
+                "course_id": "course-v1:edX+def12+def12",
+                "course_name": "default course 12",
+                "mandatory_courses_alotted_time": 20,
+                "mandatory_courses_notification_period": 10
+            }
+            ...
+            ...
+        ]
+
+        GET /clearesult/api/v0/mandatory_courses_configs_per_course/site_pk/pk/
+        Returns course config single object
+        {
+            "id": 20,
+            "course_id": "course-v1:edX+def12+def12",
+            "course_name": "default course 12",
+            "mandatory_courses_alotted_time": 20,
+            "mandatory_courses_notification_period": 10
+        }
+
+        PATCH /clearesult/api/v0/mandatory_courses_configs_per_course/site_pk/pk/
+        Payload = {
+            "mandatory_courses_alotted_time": 20,
+            "mandatory_courses_notification_period": 10
+        }
+        Returns updated object
+        {
+            "id": 20,
+            "course_id": "course-v1:edX+def12+def12",
+            "course_name": "default course 12",
+            "mandatory_courses_alotted_time": 20,
+            "mandatory_courses_notification_period": 20
+        }
+
+        DELETE /clearesult/api/v0/mandatory_courses_configs_per_course/site_pk/pk/
+    """
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication,]
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
+    serializer_class = ClearesultCourseConfigSerializer
+    pagination_class = None
+
+
+    def get_queryset(self):
+        site_pk = self.kwargs.get('site_pk')
+        try:
+            site = Site.objects.get(id=site_pk)
+        except Site.DoesNotExist:
+            raise NotFound("error - site with id doesn't exist")
+
+        return ClearesultCourseConfig.objects.filter(site=site)
+
+
+class SiteMandatoryCoursesView(generics.ListAPIView):
+    """
+        GET /clearesult/api/v0/site_mandatory_courses/site_pk/
+        Returns list of all mandatory courses linked with given site
+        [
+            {
+                "id": 3,
+                "course_id": "course-v1:edX+def12+def12",
+                "course_name": "default course 12",
+                "course_config": {
+                    "mandatory_courses_alotted_time": 10,
+                    "mandatory_courses_notification_period": 12,
+                    "id": 14
+                }
+            },
+            {
+                "id": 3,
+                "course_id": "course-v1:edX+test+test",
+                "course_name": "sample course name 2",
+                "course_config": null
+            }
+            ...
+            ...
+        ]
+    """
+    authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication,]
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
+    serializer_class = MandatoryCoursesConfigSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        site_pk = self.kwargs.get('site_pk')
+        try:
+            site = Site.objects.get(id=site_pk)
+        except Site.DoesNotExist:
+            raise NotFound("error - site with id doesn't exist")
+
+        clearesult_groups = ClearesultGroupLinkage.objects.filter(site=site)
+        clearesult_catalogs = ClearesultGroupLinkedCatalogs.objects.filter(group__in=clearesult_groups)
+
+        all_mandatory_courses = ClearesultCourse.objects.none()
+        for clearesult_catalog in clearesult_catalogs:
+            all_mandatory_courses |= clearesult_catalog.mandatory_courses.all()
+        all_mandatory_courses = all_mandatory_courses.distinct()
+
+        return all_mandatory_courses
+
+    def get_serializer_context(self):
+        context = super(SiteMandatoryCoursesView, self).get_serializer_context()
+        context.update({'site_id': self.kwargs.get('site_pk')})
+        return context
