@@ -40,6 +40,9 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
     log.warning(" ---- Test Site Config ------- %s", getattr(site_test, "configuration", None))
     log.warning(" ---- Site Configuration ------- %s", configuration_helpers.get_current_site_configuration())
 
+    log.warning(" ---- From Address ------- %s", from_address)
+
+
     if from_address is None:
         from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS') or (
             configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)

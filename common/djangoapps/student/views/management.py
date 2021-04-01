@@ -220,6 +220,8 @@ def compose_and_send_activation_email(user, profile, user_registration=None):
     log.warning(" Management PY ---- ACTIVATION_EMAIL_FROM_ADDRESS ------- %s", configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS'))
     log.warning("  Management PY  ---- email_from_address ------- %s", configuration_helpers.get_value('email_from_address'))
 
+    log.warning("  Management PY  ---- From_address ------- %s", from_address)
+
 
     send_activation_email.delay(str(msg), site.id, from_address)
 
