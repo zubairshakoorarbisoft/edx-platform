@@ -1515,6 +1515,10 @@ CLEARESULT_ALLOWED_SUB_PATHS = [
     '/api'
 ]
 
+CLEARESULT_ALLOWED_INCLUDED_PATHS = [
+    '/about'
+]
+
 CLEARESULT_CREDIT_PROVIDERS = [
     'BPI',
     'NATE',
@@ -1523,6 +1527,21 @@ CLEARESULT_CREDIT_PROVIDERS = [
     'AEE',
     'LEED'
 ]
+
+CLEARESULT_AVAILABLE_SITES_MAPPING = {
+    'black-hills-energy-swepco': {
+        'theme': 'blackhillsswepco',
+        'lms_root_url': '#'
+    },
+    'bayren': {
+        'theme': 'bayren',
+        'lms_root_url': '#'
+    },
+    'georgia-power': {
+        'theme': 'georgia_power',
+        'lms_root_url': '#'
+    }
+}
 ################# EDX MARKETING SITE ##################################
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'

@@ -2802,7 +2802,9 @@ CLEARESULT_BLOCKED_FULL_PATH = [
 CLEARESULT_ALLOWED_SUB_PATHS = [
     '/api'
 ]
-
+CLEARESULT_ALLOWED_INCLUDED_PATHS = [
+    '/about'
+]
 CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
     reverse_lazy('signin_user'),
     reverse_lazy('register_user'),
@@ -2826,6 +2828,19 @@ DRUPAL_API_CREDENTIALS = {
     'password': '',
     'url': ''
 }
+
+CLEARESULT_AVAILABLE_SITES_MAPPING = {
+    'black-hills-energy-swepco': {
+        'theme': 'blackhillsswepco'
+    },
+    'bayren': {
+        'theme': 'bayren'
+    },
+    'georgia-power': {
+        'theme': 'georgia_power'
+    }
+}
+
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
