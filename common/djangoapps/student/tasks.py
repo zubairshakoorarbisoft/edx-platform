@@ -49,6 +49,8 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
         )
     msg.options['from_address'] = from_address
 
+    log.warning(" ---- From Address AFTER ------- %s", msg.options['from_address'])
+
     dest_addr = msg.recipient.email_address
 
     site = Site.objects.get(id=site_id)
