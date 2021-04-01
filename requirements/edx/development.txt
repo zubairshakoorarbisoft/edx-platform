@@ -15,6 +15,7 @@
 -e git+https://github.com/dementrock/pystache_custom.git@776973740bdaad83a3b029f96e415a7d1e8bec2f#egg=pystache_custom-dev  # via -r requirements/edx/testing.txt
 -e git+https://github.com/edx/RateXBlock.git@2.0#egg=rate-xblock  # via -r requirements/edx/testing.txt
 -e git+https://github.com/edly-io/edx_xblock_scorm.git@v1.0.9#egg=scorm-xblock
+-e git+https://github.com/technige/py2neo.git@py2neo-3.1.2#egg=py2neo==3.1.2
 -e common/lib/safe_lxml  # via -r requirements/edx/testing.txt
 -e common/lib/sandbox-packages  # via -r requirements/edx/testing.txt
 -e git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/edx/testing.txt
@@ -219,7 +220,6 @@ pkgconfig==1.5.1          # via -r requirements/edx/testing.txt, xmlsec
 pluggy==0.13.1            # via -r requirements/edx/testing.txt, diff-cover, pytest, tox
 polib==1.1.0              # via -r requirements/edx/testing.txt, edx-i18n-tools
 psutil==1.2.1             # via -r requirements/edx/testing.txt, edx-django-utils
-py2neo==3.1.2             # via -r requirements/edx/testing.txt
 py==1.8.1                 # via -r requirements/edx/testing.txt, pytest, tox
 pycodestyle==2.6.0        # via -r requirements/edx/testing.txt, flake8
 pycontracts==1.8.12       # via -r requirements/edx/testing.txt, edx-user-state-client
