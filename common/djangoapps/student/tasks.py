@@ -29,6 +29,11 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
     max_retries = settings.RETRY_ACTIVATION_EMAIL_MAX_ATTEMPTS
     retries = self.request.retries
 
+    log.warning(" ---- ACTIVATION_EMAIL_FROM_ADDRESS ------- %s", configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS'))
+    log.warning(" ---- email_from_address ------- %s", configuration_helpers.get_value('email_from_address'))
+    log.warning(" ---- DEFAULT_FROM_EMAIL ------- %s", settings.DEFAULT_FROM_EMAIL)
+
+
     if from_address is None:
         from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS') or (
             configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
