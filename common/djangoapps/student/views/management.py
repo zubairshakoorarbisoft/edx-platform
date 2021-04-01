@@ -213,7 +213,9 @@ def compose_and_send_activation_email(user, profile, user_registration=None):
     msg = compose_activation_email(root_url, user, user_registration, route_enabled, profile.name)
     site = theming_helpers.get_current_site()
 
-    send_activation_email.delay(str(msg), site.id)
+    from_address = configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
+    from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS', from_address)
+    send_activation_email.delay(str(msg), site.id, from_address)
 
 
 @login_required
