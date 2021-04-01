@@ -32,7 +32,8 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
     log.warning(" ---- ACTIVATION_EMAIL_FROM_ADDRESS ------- %s", configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS'))
     log.warning(" ---- email_from_address ------- %s", configuration_helpers.get_value('email_from_address'))
     log.warning(" ---- DEFAULT_FROM_EMAIL ------- %s", settings.DEFAULT_FROM_EMAIL)
-
+    log.warning(" ---- Site ID ------- %s", site_id)
+    log.warning(" ---- Site Configuration ------- %s", configuration_helpers.get_current_site_configuration().__dict__)
 
     if from_address is None:
         from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS') or (
