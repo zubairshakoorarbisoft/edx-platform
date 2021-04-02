@@ -29,12 +29,6 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
     max_retries = settings.RETRY_ACTIVATION_EMAIL_MAX_ATTEMPTS
     retries = self.request.retries
 
-    if from_address is None:
-        from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS') or (
-            configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
-        )
-    msg.options['from_address'] = from_address
-
     dest_addr = msg.recipient.email_address
 
     site = Site.objects.get(id=site_id)
@@ -42,6 +36,16 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
 
     try:
         with emulate_http_request(site=site, user=user):
+            # import pdb; pdb.set_trace()
+            if from_address is None:
+                from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS') or (
+                    configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
+                )
+            msg.options['from_address'] = from_address
+
+            log.warning(" ---- ACTIVATION_EMAIL_FROM_ADDRESS ------- %s", configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS'))
+            log.warning(" ---- email_from_address ------- %s", configuration_helpers.get_value('email_from_address'))
+            log.warning(" ---- DEFAULT_FROM_EMAIL ------- %s", settings.DEFAULT_FROM_EMAIL)
             ace.send(msg)
     except RecoverableChannelDeliveryError:
         log.info('Retrying sending email to user {dest_addr}, attempt # {attempt} of {max_attempts}'.format(
