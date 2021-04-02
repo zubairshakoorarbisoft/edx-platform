@@ -60,6 +60,7 @@ def send_activation_email(self, msg_string, site_id, from_address=None):
         with emulate_http_request(site=site, user=user):
             log.warning(" ---- From Address in emulate_http_request ------- %s", msg.options['from_address'])
             log.warning(" ---- From Address from message object ------- %s", msg.options.get('from_address'))
+            log.warning(" ---- From Address from message object with u ------- %s", msg.options.get(u'from_address'))
 
             ace.send(msg)
     except RecoverableChannelDeliveryError:
