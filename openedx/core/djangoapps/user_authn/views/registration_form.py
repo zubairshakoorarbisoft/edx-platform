@@ -853,14 +853,14 @@ class RegistrationFormFactory(object):
         )
 
     def _add_phone_number_field(self, form_desc, required=False):
-        """Add a First Name field to a form description.
+        """Add a Phone Number field to a form description.
         Arguments:
             form_desc: A form description
         Keyword Arguments:
             required (bool): Whether this field is required; defaults to False
         """
         # Translators: This label appears above a field on the registration form
-        # which allows the user to input the First Name
+        # which allows the user to input the Phone Number
         first_name_label = _(u"Phone Number")
 
         form_desc.add_field(
