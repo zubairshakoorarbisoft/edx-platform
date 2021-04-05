@@ -315,6 +315,7 @@ class RegistrationFormFactory(object):
         "terms_of_service",
         "profession",
         "specialty",
+        "phone_number"
     ]
 
     def _is_field_visible(self, field_name):
@@ -847,6 +848,23 @@ class RegistrationFormFactory(object):
 
         form_desc.add_field(
             "first_name",
+            label=first_name_label,
+            required=required
+        )
+
+    def _add_phone_number_field(self, form_desc, required=False):
+        """Add a First Name field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to False
+        """
+        # Translators: This label appears above a field on the registration form
+        # which allows the user to input the First Name
+        first_name_label = _(u"Phone Number")
+
+        form_desc.add_field(
+            "phone_number",
             label=first_name_label,
             required=required
         )
