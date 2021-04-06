@@ -22,6 +22,7 @@ from lms.djangoapps.instructor.enrollment import enroll_email
 from openedx.features.clearesult_features.magento.client import MagentoClient
 from openedx.features.clearesult_features.drupal.client import DrupalClient, InvalidDrupalCredentials
 
+
 log = logging.getLogger('edx.celery.task')
 
 @task(base=LoggedTask)
@@ -30,7 +31,9 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
     enroll given users to the given clearesult_courses list if not already enrolled
     """
     from lms.djangoapps.instructor.views.api import students_update_enrollment
-    from openedx.features.clearesult_features.utils import send_mandatory_courses_emails
+    from openedx.features.clearesult_features.utils import (
+        send_mandatory_courses_emails, update_clearesult_enrollment_date
+    )
 
     log.info("TASK: enroll student to mandatory courses has been called.")
 
@@ -72,6 +75,8 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
 
             # if before enrollment status was false and after status is true means user is now enrolled
             if (not before_status.get('enrollment', False)) and after_status.get('enrollment', False):
+                update_clearesult_enrollment_date(enrollment_obj)
+
                 if email_course_data.get(user.email):
                     new_value = email_course_data.get(user.email)
                     #avoid duplicate mandatory courses

@@ -19,6 +19,7 @@ from django.db.models.functions import Coalesce
 from django.test import RequestFactory
 from django.db.models import Q
 from opaque_keys.edx.keys import CourseKey
+from student.models import CourseEnrollment
 
 from lms.djangoapps.instructor.enrollment import (
     get_email_params
@@ -31,7 +32,8 @@ from openedx.features.clearesult_features.message_types import MandatoryCoursesN
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
-    ClearesultLocalAdmin, ClearesultCourseCompletion
+    ClearesultLocalAdmin, ClearesultCourseCompletion, 
+    ClearesultCourseEnrollment
 )
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
@@ -659,3 +661,24 @@ def filter_courses_for_index_page_per_site(request, courses):
             filtered_courses.append(course)
 
     return filtered_courses
+
+
+def update_clearesult_enrollment_date(enrollment):  # pylint: disable=unused-argument
+    if enrollment.is_active:
+        try:
+            logger.info("Update enrollment date as enrolled status is changed for user: {} and course: {}.".format(
+                enrollment.user.email,
+                six.text_type(enrollment.course_id)
+            ))
+
+            enrollment.clearesultcourseenrollment.updated_date=datetime.now()
+            enrollment.clearesultcourseenrollment.save()
+        except CourseEnrollment.clearesultcourseenrollment.RelatedObjectDoesNotExist:
+            ClearesultCourseEnrollment.objects.create(
+                enrollment=enrollment,
+                updated_date=datetime.now(),
+            )
+        logger.info("Enrollment date has been updated user: {} and course: {}.".format(
+            enrollment.user.email,
+            six.text_type(enrollment.course_id)
+        ))
