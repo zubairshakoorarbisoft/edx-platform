@@ -12,6 +12,7 @@ from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from student.models import CourseEnrollment
 from jsonfield.fields import JSONField
 
 logger = logging.getLogger(__name__)
@@ -299,3 +300,14 @@ class ClearesultCourseConfig(models.Model):
         unique_together = (
             ('course_id', 'site')
         )
+        
+        
+class ClearesultCourseEnrollment(models.Model):
+    """
+    This model will save the enrollment date.
+    """
+    enrollment = models.OneToOneField(CourseEnrollment, on_delete=models.CASCADE)
+    updated_date = models.DateTimeField()
+
+    class Meta:
+        app_label = APP_LABEL
