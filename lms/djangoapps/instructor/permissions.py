@@ -5,6 +5,7 @@ Permissions for the instructor dashboard and associated actions
 from bridgekeeper import perms
 from bridgekeeper.rules import is_staff
 from lms.djangoapps.courseware.rules import HasAccessRule, HasRolesRule
+from openedx.features.clearesult_features.bridgekeeper_extended_rules import is_local_admin
 
 
 ALLOW_STUDENT_TO_BYPASS_ENTRANCE_EXAM = 'instructor.allow_student_to_bypass_entrance_exam'
@@ -43,7 +44,7 @@ perms[GIVE_STUDENT_EXTENSION] = HasAccessRule('staff')
 perms[VIEW_ISSUED_CERTIFICATES] = HasAccessRule('staff') | HasRolesRule('data_researcher')
 # only global staff or those with the data_researcher role can access the data download tab
 # HasAccessRule('staff') also includes course staff
-perms[CAN_RESEARCH] = is_staff | HasRolesRule('data_researcher')
+perms[CAN_RESEARCH] = is_local_admin | is_staff | HasRolesRule('data_researcher')
 perms[CAN_ENROLL] = HasAccessRule('staff')
 perms[CAN_BETATEST] = HasAccessRule('instructor')
 perms[ENROLLMENT_REPORT] = HasAccessRule('staff') | HasRolesRule('data_researcher')
