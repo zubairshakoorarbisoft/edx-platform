@@ -7,7 +7,7 @@ import logging
 import six
 import copy
 from csv import Error, DictReader, Sniffer
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from edx_ace import ace
 from edx_ace.recipient import Recipient
@@ -18,6 +18,7 @@ from django.db.models import Sum, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 from django.test import RequestFactory
 from django.db.models import Q
+from django.urls import reverse
 from opaque_keys.edx.keys import CourseKey
 from student.models import CourseEnrollment
 
@@ -28,12 +29,16 @@ from lms.djangoapps.courseware.courses import get_course_by_id
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.lib.celery.task_utils import emulate_http_request
-from openedx.features.clearesult_features.message_types import MandatoryCoursesNotification
+from openedx.features.clearesult_features.message_types import (
+    MandatoryCoursesNotification,
+    MandatoryCoursesApproachingDueDatesNotification,
+    MandatoryCoursesPassedDueDatesNotification
+)
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
-    ClearesultLocalAdmin, ClearesultCourseCompletion, 
-    ClearesultCourseEnrollment
+    ClearesultLocalAdmin, ClearesultCourseCompletion,
+    ClearesultCourseEnrollment, ClearesultCourseConfig
 )
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
@@ -263,6 +268,20 @@ def is_mandatory_course(enrollment):
             return True
     return False
 
+def get_calculated_due_date(request, enrollment):
+    due_date = None
+    try:
+        config = get_mandatory_courses_due_date_config(request, enrollment)
+        enrollment_date = enrollment.clearesultcourseenrollment.updated_date.date()
+        due_date = enrollment_date + timedelta(days=int(config.get("mandatory_courses_alotted_time")))
+    except Exception as ex:
+        logger.error("Error has occured while calculating due_date of enrollment: {}, user: {}, course: {}".format(
+            str(enrollment.id),
+            enrollment.user.email,
+            six.text_type(enrollment.course_id),
+        ))
+    return due_date
+
 
 def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
     """
@@ -274,7 +293,8 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
         data.append({
             'progress': get_course_progress(request, enrollment.course),
             'is_mandatory': is_mandatory_course(enrollment),
-            'is_free': enrollment.mode in ['honor', 'audit']
+            'is_free': enrollment.mode in ['honor', 'audit'],
+            'mandatory_course_due_date': get_calculated_due_date(request, enrollment)
         })
 
     return data
@@ -450,6 +470,8 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
     """
     message_types = {
         'mandatory_courses': MandatoryCoursesNotification,
+        'mandatory_courses_approaching_due_date': MandatoryCoursesApproachingDueDatesNotification,
+        'mandatory_courses_passed_due_date': MandatoryCoursesPassedDueDatesNotification
     }
 
     if not current_site:
@@ -459,6 +481,7 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
 
     message_context = get_base_template_context(current_site)
     message_context.update(data)
+
     content = json.dumps(message_context)
 
     message_class = message_types[message_type]
@@ -490,12 +513,13 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
                 content
             )
             return_value = True
-        except Exception:
+        except Exception as e:
             logger.error(
                 'Unable to send an email to %s for content "%s".',
                 email,
-                content
+                content,
             )
+            logger.error(e)
 
     return return_value
 
@@ -682,3 +706,145 @@ def update_clearesult_enrollment_date(enrollment):  # pylint: disable=unused-arg
             enrollment.user.email,
             six.text_type(enrollment.course_id)
         ))
+
+
+def get_site_prefered_mandatory_courses_due_dates_config(site, course_id):
+    """
+    Mandatory Courses due dates can be managed as follows
+    - site default configs in ClearesultSiteConfigurations
+    - course specific configs in ClearesultCourseConfig
+
+    Priority has been given to course specific configs but if course specific configs is not there for the mandatory
+    course then site defaults will be used.
+
+    Returns config dict as follows:
+    {
+        "mandatory_courses_alotted_time": 10,
+        "mandatory_courses_notification_period": 2,
+        "site": <Site obj>
+    }
+    """
+    config = {}
+    try:
+        course_config = ClearesultCourseConfig.objects.get(site=site, course_id=course_id)
+        config = {
+            "mandatory_courses_alotted_time": course_config.mandatory_courses_alotted_time,
+            "mandatory_courses_notification_period": course_config.mandatory_courses_notification_period
+        }
+
+    except ClearesultCourseConfig.DoesNotExist:
+        site_config = site.clearesult_configuration.latest('change_date')
+        config = {
+            "mandatory_courses_alotted_time": site_config.mandatory_courses_alotted_time,
+            "mandatory_courses_notification_period": site_config.mandatory_courses_notification_period
+        }
+
+    config.update({"site": site})
+    return config
+
+
+def get_shortest_config(sites_list, course_id):
+    """
+    Find mandatory courses config with shortest alotted time.
+
+    let's say, Site-A has alotted time 10 days and Site-B has 20 days for course-abc which is mandatory for both
+    sites then Site-A config should be user as 10 < 20.
+    """
+    total_sites = len(sites_list)
+
+    if total_sites:
+        if total_sites == 1:
+            return get_site_prefered_mandatory_courses_due_dates_config(sites_list[0], course_id)
+        else:
+            # find shortest:
+            config = {}
+            for site in sites_list:
+                site_config = get_site_prefered_mandatory_courses_due_dates_config(site, course_id)
+                if site_config.get("mandatory_courses_alotted_time", 999999) < config.get("mandatory_courses_alotted_time", 999999):
+                    config = site_config
+            return config
+
+    else:
+        return {}
+
+
+def get_mandatory_courses_due_date_config(request, enrollment):
+    """
+    Find mandatory courses config.
+
+    if course is private -> use course-site config
+    if course is public -> use config of the site  with shortest aloted time.
+    """
+    config = {}
+    try:
+        clearesult_course = ClearesultCourse.objects.get(course_id=enrollment.course_id)
+    except ClearesultCourse.DoesNExceptionotExist:
+        logger.error("Clearesult course does not exist for course_id {}".format(six.text_type(course_id)))
+        return config
+
+    if clearesult_course.site!=None:
+        # course is private
+        config = get_site_prefered_mandatory_courses_due_dates_config(clearesult_course.site, enrollment.course_id)
+    else:
+        # course is public
+        linkages = ClearesultGroupLinkedCatalogs.objects.filter(
+            mandatory_courses__course_id=enrollment.course_id,
+            group__users__id=enrollment.user.id
+        )
+
+        # extract all sites on which user is linked with the course
+        linked_sites = []
+        if len(linkages):
+            for linkage in linkages:
+                if linkage.group.site not in linked_sites:
+                    linked_sites.append(linkage.group.site)
+
+            config = get_shortest_config(linked_sites, enrollment.course_id)
+
+    return config
+
+
+def send_course_due_date_approching_email(request, config, enrollment):
+    """
+    Send email to student about approaching due dates that X days are remaining in due date.
+    """
+    site = config.get("site")
+    key = "mandatory_courses_approaching_due_date"
+    subject = "Mandatory Courses Approaching Due Date "
+
+    logger.info("Send mandatory course approching due date email to user: {}".format(enrollment.user.email))
+
+    course = get_course_by_id(enrollment.course_id)
+    root_url = site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    course_url = "{}{}".format(root_url, reverse('course_root', kwargs={'course_id': enrollment.course_id}))
+
+    email_params = {
+        "days_left": config.get("mandatory_courses_notification_period"),
+        "full_name": enrollment.user.first_name + " " + enrollment.user.last_name,
+        "display_name": course.display_name_with_default,
+        "course_url": course_url
+    }
+    return send_notification(key, email_params, subject, [enrollment.user.email], request.user, site)
+
+
+def send_due_date_passed_email_to_admins(passed_due_dates_site_users):
+    """
+    Send email to admins about the student hasn't completed course with in aloted time.
+    """
+    email_key = "mandatory_courses_passed_due_date"
+    subject = "Mandatory Courses Due Date Passed"
+    request_user = User.objects.filter(is_active=True, is_superuser=True).first()
+
+    for key, value in passed_due_dates_site_users.items():
+        try:
+            dest_emails = settings.SUPPORT_DEST_EMAILS
+            site = Site.objects.get(domain=key)
+            site_local_admins = ClearesultLocalAdmin.objects.filter(site=site)
+            dest_emails.extend([localAdmin.user.email for localAdmin in site_local_admins])
+            logger.info("Send mandatory course passed due date email to admins: {} of site: {}".format(dest_emails, key))
+            email_params = {
+                "site_enrollments": value
+            }
+            send_notification(email_key, email_params, subject, dest_emails, request_user, site)
+        except Site.DoesNotExist:
+            logger.info("Couldn't send mandatory course passed due date email as Site for domain:{} doesn't exist.".format(key))
