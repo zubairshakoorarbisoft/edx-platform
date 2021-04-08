@@ -33,6 +33,7 @@ from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthenticat
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.api.authentication import BearerAuthentication
+from openedx.features.clearesult_features.constants import USER_SESSION_CACHE_KEY_SUFFIX
 from openedx.features.clearesult_features.utils import get_site_users, is_local_admin_or_superuser
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
@@ -896,7 +897,7 @@ class ClearesultLogoutView(APIView):
             sessions.delete()
 
         # removing from cache
-        cache.delete('clearesult_{}'.format(user.email))
+        cache.delete(user.email + USER_SESSION_CACHE_KEY_SUFFIX)
 
 
 @api_view(('POST',))
