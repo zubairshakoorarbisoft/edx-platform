@@ -131,11 +131,15 @@ export default function GroupsContent({ context }) {
     }
 
     return (
-        <div className="group-manager">
-            <h1>Groups Manager</h1>
-            <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" onClick={handleAddClick} >
-                New Group
-            </button>
+        <div>
+            <div className="admin-header">
+                <h2>Groups Manager</h2>
+                <div className="form-inline">
+                    <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" onClick={handleAddClick} >
+                        Add
+                    </button>
+                </div>
+            </div>
             <AddEditModal
                 availableSites={availableSites}
                 currentSiteUsers={currentSiteUsers}

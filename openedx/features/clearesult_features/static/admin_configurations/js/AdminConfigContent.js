@@ -164,11 +164,10 @@ export default function AdminConfigContent({context}) {
 
     return (
         <div>
-            <h1>Configurations</h1>
             <MandatoryCoursesConfig
                 availableSites={availableSites}
                 changedSiteHandler={changedSiteHandler}
-                dueDateConfigbtnText={(isSiteConfig && alottedTime == "" && notificationTime == "") ? "Add Configurations": "Update Configurations"}
+                dueDateConfigbtnText={(isSiteConfig && alottedTime == "" && notificationTime == "") ? "Add": "Update"}
                 editBtnClickHandler={editBtnClickHandler}
             />
             <MandatoryCoursesConfigModal

@@ -9,22 +9,24 @@ export default function MandatoryCoursesConfig({availableSites, changedSiteHandl
         }
     )
     return (
-        <div>
-            <h2>Mandatory Courses Due Date Configurations</h2>
-            <p> Site:
-                <select onChange={(e) => changedSiteHandler(e.target.value)}>
-                    {siteOptions}
-                </select>
-            </p>
-            <button
-                    type="button"
-                    className="btn btn-primary"
-                    data-toggle="modal"
-                    data-target="#exampleModalCenter"
-                    onClick={(event)=>{editBtnClickHandler(true)}}
-                >
-                    {dueDateConfigbtnText}
-            </button>
+        <div className='admin-header'>
+            <h2>Mandatory Courses Due Date</h2>
+            <div className='form-inline'>
+                <span> Site:
+                    <select className='form-control' onChange={(e) => changedSiteHandler(e.target.value)}>
+                        {siteOptions}
+                    </select>
+                </span>
+                <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-toggle="modal"
+                        data-target="#exampleModalCenter"
+                        onClick={(event)=>{editBtnClickHandler(true)}}
+                    >
+                        {dueDateConfigbtnText}
+                </button>
+            </div>
         </div>
     )
 }

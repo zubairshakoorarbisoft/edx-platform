@@ -2,9 +2,9 @@ import React from 'react';
 const MandatoryCoursesConfigTable = ({selectedSite, siteMandatoryCourses, editBtnClickHandler, resetBtnClickHandler}) => {
 
     const renderHeader = () => {
-        let headerElement = ['#', 'course id', 'course name', 'alotted completion time', 'notification period', 'Action']
+        let headerElement = ['#', 'course id', 'course name', 'alotted completion time', 'notification period', 'actions']
         return headerElement.map((key, index) => {
-            return <th key={index}>{key.toUpperCase()}</th>
+            return <th className={( key === 'actions')? 'actions': ''} key={index}>{key.toUpperCase()}</th>
         })
     }
 
@@ -25,10 +25,9 @@ const MandatoryCoursesConfigTable = ({selectedSite, siteMandatoryCourses, editBt
                 <td>{course_name}</td>
                 <td>{mandatory_courses_alotted_time}</td>
                 <td>{mandatory_courses_notification_period}</td>
-                <td>
+                <td className='actions'>
                     <button
                         type="button"
-                        className="btn btn-primary"
                         data-toggle="modal"
                         data-target="#exampleModalCenter"
                         onClick={(event)=> editBtnClickHandler(false, course_id)}
@@ -38,31 +37,30 @@ const MandatoryCoursesConfigTable = ({selectedSite, siteMandatoryCourses, editBt
 
                     <button
                         type="button"
-                        className="btn btn-primary"
                         onClick={(event) => {if (window.confirm('Are you sure you want to reset?')) resetBtnClickHandler(course_id)}}
                         value={course_id}
                     >
                         <i className="fa fa-refresh" aria-hidden="true"></i>
                     </button>
                 </td>
-
             </tr>
         })
     }
 
     return (
         <div>
-            <h2>Mandatory Courses Specific Due Dates</h2>
-            <table id='catalogs' className="table">
-                <thead>
-                    <tr>
-                        {renderHeader()}
-                    </tr>
-                </thead>
-                <tbody>
-                    {renderBody()}
-                </tbody>
-            </table>
+            <div className='table-responsive'>
+                <table id='catalogs' className="table">
+                    <thead>
+                        <tr>
+                            {renderHeader()}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {renderBody()}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

@@ -29,7 +29,7 @@ export default function AddEditModal({
     return (
         <div>
             <div className="modal fade modal-update" id="exampleModalCenter" tabIndex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
                     <div className="modal-content">
                         <form onSubmit={(event)=>handleSubmit(event)}>
                             <div className="modal-header">

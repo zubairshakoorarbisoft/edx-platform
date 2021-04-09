@@ -174,16 +174,20 @@ export default function CatalogsContent({context}) {
 
     return (
         <div className="catalogs-manager">
-            <h1>Catalogs Manager</h1>
-            <button
-                type="button"
-                className="btn btn-primary"
-                data-toggle="modal"
-                data-target="#exampleModalCenter"
-                onClick={handleAddCatalogButton}
-            >
-                New Catalog
-            </button>
+            <div className="admin-header">
+                <h2>Catalogs Manager</h2>
+                <div className="form-inline">
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-toggle="modal"
+                        data-target="#exampleModalCenter"
+                        onClick={handleAddCatalogButton}
+                    >
+                        Add
+                    </button>
+                </div>
+            </div>
 
             <AddEditModal
                 catalogName={catalogName}
