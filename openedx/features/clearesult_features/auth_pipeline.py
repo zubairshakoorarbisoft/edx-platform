@@ -6,6 +6,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import redirect
 from social_django.models import UserSocialAuth
@@ -101,3 +102,14 @@ def _set_user_site_identifiers(request, clearesult_user_profile, incoming_site_i
                 site = get_site_from_site_identifier(clearesult_user_profile.user, site_identifier)
                 if site:
                     add_user_to_site_default_group(request, clearesult_user_profile.user, site)
+
+
+def block_user_to_access_restricted_site(request, response, user=None, *args, **kwargs):
+    """
+    Third party pipeline which will be executed at the very beginning of authentication.
+    So that if the user is not eligible, don't waste anything extra
+    """
+    site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
+    if not site_name in response.get('jobTitle', ''):
+        logger.info('Failed: user is not eligible to be logged in this site.')
+        return HttpResponseRedirect(reverse('root'))

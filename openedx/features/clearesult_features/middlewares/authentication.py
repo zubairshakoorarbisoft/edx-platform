@@ -10,6 +10,9 @@ from six.moves.urllib.parse import urlencode
 
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
+from openedx.features.clearesult_features.constants import (
+    ALLOWED_SITES_NAMES_CACHE_KEY_SUFFIX, ALLOWED_SITES_NAMES_CACHE_TIMEOUT
+)
 from openedx.features.clearesult_features.models import ClearesultUserProfile
 import third_party_auth
 from third_party_auth import pipeline
@@ -112,10 +115,11 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
     def _is_user_suspicious(self, request):
         user = request.user
         if user.is_authenticated:
+            cache_key = user.username + ALLOWED_SITES_NAMES_CACHE_KEY_SUFFIX
             site_name = '-'.join(request.site.name.split('-')[:-1]).rstrip()
             if user.is_superuser:
                 return False
-            elif site_name in cache.get('clearesult_allowed_site_names', []):
+            elif site_name in cache.get(cache_key, []):
                 return False
 
             # TODO: Find a better work around for this
@@ -128,7 +132,7 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
             except ClearesultUserProfile.DoesNotExist:
                 return False
 
-            cache.set('clearesult_allowed_site_names', clearesult_allowed_site_names, 864000)
+            cache.set(cache_key, clearesult_allowed_site_names, ALLOWED_SITES_NAMES_CACHE_TIMEOUT)
 
             if site_name in clearesult_allowed_site_names:
                 return False
