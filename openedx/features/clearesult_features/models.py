@@ -42,7 +42,7 @@ class ClearesultCourseCredit(models.Model):
         )
 
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
-    credit_value = models.DecimalField(decimal_places=1, max_digits=3,
+    credit_value = models.DecimalField(decimal_places=2, max_digits=4,
                                        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     course_id = CourseKeyField(max_length=255, db_index=True)
 
@@ -274,3 +274,37 @@ class ClearesultCourseCompletion(models.Model):
         unique_together = (
             ('course_id', 'user')
         )
+
+
+class ClearesultCourseConfig(models.Model):
+    """
+    This model saves the course configs on different sites.
+
+    Mandatory Courses due dates can be managed as follows
+    - site default configs in ClearesultSiteConfigurations
+    - course specific configs in ClearesultCourseConfig
+
+    Priority has been given to course specific configs but if course specific configs is not there for the mandatory
+    course then site defaults will be used.
+    """
+    course_id = CourseKeyField(max_length=255, db_index=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        unique_together = (
+            ('course_id', 'site')
+        )
+
+
+class ClearesultCourseEnrollment(models.Model):
+    """
+    This model will save the enrollment date.
+    """
+    enrollment = models.OneToOneField(CourseEnrollment, on_delete=models.CASCADE)
+    updated_date = models.DateTimeField()
+
+    class Meta:
+        app_label = APP_LABEL
