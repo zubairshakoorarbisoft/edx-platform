@@ -1012,6 +1012,13 @@ COMPLETION_BY_VIEWING_DELAY_MS = ENV_TOKENS.get(
     COMPLETION_BY_VIEWING_DELAY_MS
 )
 
+###################### Email addresses to receieve support notifications ###################
+
+SUPPORT_DEST_EMAILS = ENV_TOKENS.get(
+    'SUPPORT_DEST_EMAILS',
+    SUPPORT_DEST_EMAILS
+)
+
 ############################### Plugin Settings ###############################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded

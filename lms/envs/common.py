@@ -4003,3 +4003,7 @@ DEFAULT_REGISTERATION_URL = ''
 
 ######################  Site Deafult Group Name  ###################
 SITE_DEFAULT_GROUP_NAME = "DEFAULT"
+
+###################### Email addresses to receieve support notifications ###################
+
+SUPPORT_DEST_EMAILS = []
