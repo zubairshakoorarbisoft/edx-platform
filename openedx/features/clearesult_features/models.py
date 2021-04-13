@@ -43,7 +43,7 @@ class ClearesultCourseCredit(models.Model):
         )
 
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
-    credit_value = models.DecimalField(decimal_places=1, max_digits=3,
+    credit_value = models.DecimalField(decimal_places=2, max_digits=4,
                                        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     course_id = CourseKeyField(max_length=255, db_index=True)
 
@@ -300,8 +300,8 @@ class ClearesultCourseConfig(models.Model):
         unique_together = (
             ('course_id', 'site')
         )
-        
-        
+
+
 class ClearesultCourseEnrollment(models.Model):
     """
     This model will save the enrollment date.
