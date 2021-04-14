@@ -632,13 +632,28 @@ def filter_out_course_library_courses(courses, user):
     return courses_list
 
 
-def get_site_visible_courses_for_anonymous_user(site):
+def get_site_linked_courses_and_groups(sites):
+    """
+    It will return list of all courses that are somehow linked with given sites user groups
+    through public or private catalogs linkage.
+    """
     all_courses = ClearesultCourse.objects.none()
-    groups = ClearesultGroupLinkage.objects.filter(site=site)
+    groups = ClearesultGroupLinkage.objects.filter(site__in=sites)
     for courses in get_groups_courses_generator(groups):
         all_courses |= courses
 
-    return all_courses.distinct()
+    return all_courses.distinct(), groups
+
+
+def get_group_users(groups):
+    """
+    It will return all users of given user-groups.
+    """
+    site_users = User.objects.none()
+    for group in groups:
+        site_users |= group.users.all()
+
+    return site_users.distinct()
 
 
 def filter_courses_for_index_page_per_site(request, courses):
@@ -646,7 +661,7 @@ def filter_courses_for_index_page_per_site(request, courses):
     Filter to get only those courses whose catalogs are somehow
     associated with the user groups of the site.
     """
-    clearesult_courses = get_site_visible_courses_for_anonymous_user(request.site)
+    clearesult_courses, _ = get_site_linked_courses_and_groups([request.site])
 
     clearesult_courses_ids = []
 
