@@ -12,6 +12,7 @@ from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from student.models import CourseEnrollment
 from jsonfield.fields import JSONField
 
 logger = logging.getLogger(__name__)
@@ -205,6 +206,8 @@ class ClearesultSiteConfiguration(ConfigurationModel):
     security_code_required = models.BooleanField(default=True)
     security_code = EncryptedTextField(max_length=20, verbose_name="Site security code", null=True, blank=True)
     default_group = models.ForeignKey(ClearesultGroupLinkage, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
 
     class Meta:
         app_label = APP_LABEL
