@@ -670,7 +670,7 @@ def filter_out_course_library_courses(courses, user):
 
 def get_site_linked_courses_and_groups(sites):
     """
-    It will return list of all courses that are somehow linked with given sites user groups
+    It will return list of all courses that are somehow linked with given sites list user groups
     through public or private catalogs linkage.
     """
     all_courses = ClearesultCourse.objects.none()
