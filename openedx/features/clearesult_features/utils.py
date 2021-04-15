@@ -35,6 +35,7 @@ from openedx.features.clearesult_features.models import (
 )
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
+from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
 
 logger = logging.getLogger(__name__)
 
@@ -613,7 +614,6 @@ def check_user_eligibility_for_clearesult_enrollment(user, course_id):
 
 def filter_out_course_library_courses(courses, user):
     courses_list = []
-    user_courses = [course.course_id for course in get_user_all_courses(user)]
     show_archive_courses = settings.FEATURES.get('SHOW_ARCHIVED_COURSES_IN_LISTING')
 
     if user.is_superuser or user.is_staff:
@@ -624,6 +624,16 @@ def filter_out_course_library_courses(courses, user):
         else:
             return courses
 
+    error, allowed_sites = validate_sites_for_local_admin(user)
+    if allowed_sites:
+        # local admin flow
+        # local admin will have access to all the linked courses
+        accessble_courses, _ = get_site_linked_courses_and_groups(allowed_sites)
+    else:
+        # normal user flow
+        accessble_courses = get_user_all_courses(user)
+
+    user_courses = [course.course_id for course in accessble_courses]
     for course in courses:
         if course.id in user_courses:
             if show_archive_courses or (not show_archive_courses and not course.has_ended()):

@@ -8,7 +8,11 @@ from django.http import HttpResponseForbidden
 
 from openedx.features.clearesult_features.authentication.utils import is_user_authenticated_for_site
 from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
-from openedx.features.clearesult_features.utils import get_groups_courses_generator, get_site_linked_courses_and_groups
+from openedx.features.clearesult_features.utils import (
+    get_groups_courses_generator,
+    get_site_linked_courses_and_groups,
+    get_user_all_courses
+)
 from openedx.features.clearesult_features.models import ClearesultGroupLinkage
 
 log = logging.getLogger(__name__)
@@ -76,9 +80,16 @@ def course_linked_user_required(view_fn):
                 if courses.filter(course_id=course_key).exists():
                     return view_fn(request, *args, **kwargs)
         else :
-            # for unauthenticated user, checks if course is a site private course or a public course.
-            courses, _ = get_site_linked_courses_and_groups([request.site])
-            if courses.filter(course_id=course_key).exists():
+            error, allowed_sites = validate_sites_for_local_admin(user)
+            if allowed_sites:
+                # local admin flow
+                # local admin will have access to all the linked courses
+                accessble_courses, _ = get_site_linked_courses_and_groups(allowed_sites)
+            else:
+                # normal user flow
+                accessble_courses = get_user_all_courses(user)
+
+            if accessble_courses.filter(course_id=course_key).exists():
                 return view_fn(request, *args, **kwargs)
 
         return HttpResponseForbidden()
