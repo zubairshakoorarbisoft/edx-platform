@@ -612,11 +612,11 @@ def prepare_magento_updated_customer_data(user, drupal_user_info, magento_custom
 
 
 def get_user_all_courses(user):
-    courses_list = []
+    all_courses = ClearesultCourse.objects.none()
     groups = ClearesultGroupLinkage.objects.filter(users__username=user.username)
     for courses in get_groups_courses_generator(groups):
-        courses_list.extend(courses)
-    return courses_list
+        all_courses |= courses
+    return all_courses.distinct()
 
 
 def get_groups_courses_generator(groups):
