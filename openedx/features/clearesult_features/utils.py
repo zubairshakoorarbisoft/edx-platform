@@ -35,6 +35,7 @@ from openedx.features.clearesult_features.models import (
 )
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
+from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
 
 logger = logging.getLogger(__name__)
 
@@ -613,7 +614,6 @@ def check_user_eligibility_for_clearesult_enrollment(user, course_id):
 
 def filter_out_course_library_courses(courses, user):
     courses_list = []
-    user_courses = [course.course_id for course in get_user_all_courses(user)]
     show_archive_courses = settings.FEATURES.get('SHOW_ARCHIVED_COURSES_IN_LISTING')
 
     if user.is_superuser or user.is_staff:
@@ -624,6 +624,16 @@ def filter_out_course_library_courses(courses, user):
         else:
             return courses
 
+    error, allowed_sites = validate_sites_for_local_admin(user)
+    if allowed_sites:
+        # local admin flow
+        # local admin will have access to all the linked courses
+        accessble_courses, _ = get_site_linked_courses_and_groups(allowed_sites)
+    else:
+        # normal user flow
+        accessble_courses = get_user_all_courses(user)
+
+    user_courses = [course.course_id for course in accessble_courses]
     for course in courses:
         if course.id in user_courses:
             if show_archive_courses or (not show_archive_courses and not course.has_ended()):
@@ -632,13 +642,28 @@ def filter_out_course_library_courses(courses, user):
     return courses_list
 
 
-def get_site_visible_courses_for_anonymous_user(site):
+def get_site_linked_courses_and_groups(sites):
+    """
+    It will return list of all courses that are somehow linked with given sites list user groups
+    through public or private catalogs linkage.
+    """
     all_courses = ClearesultCourse.objects.none()
-    groups = ClearesultGroupLinkage.objects.filter(site=site)
+    groups = ClearesultGroupLinkage.objects.filter(site__in=sites)
     for courses in get_groups_courses_generator(groups):
         all_courses |= courses
 
-    return all_courses.distinct()
+    return all_courses.distinct(), groups
+
+
+def get_group_users(groups):
+    """
+    It will return all users of given user-groups.
+    """
+    site_users = User.objects.none()
+    for group in groups:
+        site_users |= group.users.all()
+
+    return site_users.distinct()
 
 
 def filter_courses_for_index_page_per_site(request, courses):
@@ -646,7 +671,7 @@ def filter_courses_for_index_page_per_site(request, courses):
     Filter to get only those courses whose catalogs are somehow
     associated with the user groups of the site.
     """
-    clearesult_courses = get_site_visible_courses_for_anonymous_user(request.site)
+    clearesult_courses, _ = get_site_linked_courses_and_groups([request.site])
 
     clearesult_courses_ids = []
 

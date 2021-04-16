@@ -8,7 +8,11 @@ from django.http import HttpResponseForbidden
 
 from openedx.features.clearesult_features.authentication.utils import is_user_authenticated_for_site
 from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
-from openedx.features.clearesult_features.utils import get_groups_courses_generator, get_site_visible_courses_for_anonymous_user
+from openedx.features.clearesult_features.utils import (
+    get_groups_courses_generator,
+    get_site_linked_courses_and_groups,
+    get_user_all_courses
+)
 from openedx.features.clearesult_features.models import ClearesultGroupLinkage
 
 log = logging.getLogger(__name__)
@@ -68,18 +72,24 @@ def course_linked_user_required(view_fn):
             # for super user and staff users, run normal flow.
             return view_fn(request, *args, **kwargs)
 
-        if not request.user.is_anonymous:
+        if request.user.is_anonymous:
+            # anonymous user flow
             log.info("course_linked_user_required - Anonymous User flow")
-            # for authenticated users, check if course is accessible to user's any group.
-            groups = ClearesultGroupLinkage.objects.filter(users__username=request.user.username)
-            for courses in get_groups_courses_generator(groups):
-                if courses.filter(course_id=course_key).exists():
-                    return view_fn(request, *args, **kwargs)
-        else :
-            # for unauthenticated user, checks if course is a site private course or a public course.
-            courses = get_site_visible_courses_for_anonymous_user(request.site)
-            if courses.filter(course_id=course_key).exists():
-                return view_fn(request, *args, **kwargs)
+            accessble_courses, _ = get_site_linked_courses_and_groups([request.site])
+        else:
+            error, allowed_sites = validate_sites_for_local_admin(request.user)
+            if allowed_sites:
+                log.info("course_linked_user_required - Local Admi User flow")
+                # local admin flow
+                # local admin will have access to all the linked courses
+                accessble_courses, _ = get_site_linked_courses_and_groups(allowed_sites)
+            else:
+                log.info("course_linked_user_required - Authenticated Normal User flow")
+                # normal user flow
+                accessble_courses = get_user_all_courses(request.user)
+
+        if accessble_courses.filter(course_id=course_key).exists():
+            return view_fn(request, *args, **kwargs)
 
         return HttpResponseForbidden()
     return inner
