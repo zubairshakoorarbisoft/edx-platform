@@ -11,7 +11,7 @@ from web_fragments.fragment import Fragment
 
 from lms.djangoapps.courseware.courses import get_course_date_blocks, get_course_with_access
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
-from openedx.features.clearesult_features.credits.utils import get_course_credits_list
+from openedx.features.clearesult_features.instructor_reports.utils import get_course_credits_list
 
 class CourseCreditsFragmentView(EdxFragmentView):
     """

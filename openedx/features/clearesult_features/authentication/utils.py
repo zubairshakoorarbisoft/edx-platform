@@ -16,6 +16,13 @@ def _get_authentication_key_for_site(request):
 
 
 def is_user_authenticated_for_site(request, allow_anonymous=True):
+    # Somehow in database there are some hard-coded values being set for
+    # a specific environment DEV, these values also include the domain part
+    # which fails this authentication that's why putting this if check here
+    # to ignore that scenerio
+    if request.path.startswith('/asset'):
+        return True
+
     is_already_authenticated = request.session.get(_get_authentication_key_for_site(request), False)
 
     if is_already_authenticated or (request.user.is_anonymous and allow_anonymous):

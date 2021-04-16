@@ -2,16 +2,29 @@
 Helper functions for Clearesult credits.
 """
 
+import six
+
 from logging import getLogger
+from student.models import CourseEnrollment
+from django.contrib.auth.models import User
+from django.test import RequestFactory
 from xmodule.modulestore.django import modulestore
 
+from lms.djangoapps.certificates.models import CertificateStatuses, GeneratedCertificate
 from lms.djangoapps.grades.api import CourseGradeFactory
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCredit,
     ClearesultCreditProvider,
     UserCreditsProfile,
     ClearesultCourseCompletion
 )
+from openedx.features.clearesult_features.models import ClearesultCourse, ClearesultGroupLinkage
+from openedx.features.clearesult_features.utils import (
+    get_course_progress, get_site_linked_courses_and_groups,
+    get_group_users
+)
+
 logger = getLogger(__name__)
 
 
@@ -67,6 +80,7 @@ def generate_user_course_credits(course_id, user):
                     )
                 )
 
+
 def remove_user_cousre_credits_if_exist(course_id, user):
     course_credits = ClearesultCourseCredit.objects.filter(course_id=course_id)
     user_credits = UserCreditsProfile.objects.filter(user=user).prefetch_related('earned_course_credits')
@@ -100,7 +114,29 @@ def get_credit_provider_by_short_code(short_code):
         return None
 
 
-def list_user_credits_for_report(course_key, provider_filter=None):
+def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None):
+    if allowed_sites:
+        # local admin scenerio - retrieve all site users
+        groups = ClearesultGroupLinkage.objects.filter(site__in=allowed_sites)
+        site_users = get_group_users(groups)
+
+    if provider_filter and allowed_sites:
+        # local admin scenerio with provider filter
+        user_credits_profiles = UserCreditsProfile.objects.filter(user__in=site_users, credit_type__short_code=provider_filter)
+    elif provider_filter and not allowed_sites:
+        # global admin scenerio with provider filter
+        user_credits_profiles = UserCreditsProfile.objects.filter(credit_type__short_code=provider_filter)
+    elif not provider_filter and allowed_sites:
+        # local admin scenerio with out provider filter
+        user_credits_profiles = UserCreditsProfile.objects.filter(user__in=site_users)
+    else:
+        # global admin scenerio with out provider filter
+        user_credits_profiles = UserCreditsProfile.objects.all()
+
+    return user_credits_profiles
+
+
+def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None):
     """
     Return info about user who have earned course credits after successfull completion of the courses.
     It will also apply filtration on the basis of given provider_filter.
@@ -145,15 +181,11 @@ def list_user_credits_for_report(course_key, provider_filter=None):
         }
     ]
 
-    Note that result will only contain results for the user earned credits.
+    ! Note that result will only contain results for the user earned credits.
     We will not include users who have completed the course but didn't get any credits.
     """
     data_list = []
-
-    if provider_filter:
-        user_credits_profiles = UserCreditsProfile.objects.filter(credit_type__short_code=provider_filter)
-    else:
-        user_credits_profiles = UserCreditsProfile.objects.all()
+    user_credits_profiles = get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None)
 
     for user_provider_profile in user_credits_profiles:
         user_credit_courses = user_provider_profile.earned_course_credits.all()
@@ -201,7 +233,7 @@ def list_user_credits_for_report(course_key, provider_filter=None):
     return data_list
 
 
-def list_user_total_credits_for_report(course_key, provider_filter=None):
+def list_user_total_credits_for_report(course_key, allowed_sites, provider_filter=None):
     """
     Return info about user accumulative earned credits. It will also apply filteration on the basis of
     given provider_filter.
@@ -231,14 +263,10 @@ def list_user_total_credits_for_report(course_key, provider_filter=None):
         }
     ]
 
-    Note that result will only contain results for the users who have registered CUI for any Provider.
+    ! Note that result will only contain results for the users who have registered CUI for any Provider.
     """
     data_list = []
-
-    if provider_filter:
-        user_credits_profiles = UserCreditsProfile.objects.filter(credit_type__short_code=provider_filter)
-    else:
-        user_credits_profiles = UserCreditsProfile.objects.all()
+    user_credits_profiles = get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None)
 
     for user_provider_profile in user_credits_profiles:
         total_earned_credits = 0
@@ -256,3 +284,95 @@ def list_user_total_credits_for_report(course_key, provider_filter=None):
         data_list.append(data)
 
     return data_list
+
+
+def list_all_coures_enrolled_users_progress_for_report(allowed_sites):
+    """
+    Return info about user all courses enrolled students progress details.
+    would return [
+        {
+            'user_id': '1',
+            'email': 'username1@example.com',
+            'username'': 'username1'
+            'first_name': 'Jhon',
+            'last_name': 'Doe',
+            'course_id': 'course-v1:edX+def17+def17',
+            'course_name': 'Example course name',
+            'enrollment_status'': 'enrolled'
+            'enrollment_mode': 'honor',
+            'enrollment_date': '2020-10-11',
+            'progress_percent': '100%',
+            'grade_percent': '20%',
+            'letter_grade': 'Pass"
+            'completion_date': '2020-10-22',
+            'pass_date'': '2020-10-22'
+            'certificate_eligible': 'Y',
+            'certificate_delivered': 'N',
+        }
+    ]
+
+    ! Note that result will only contain results for the users who have registered CUI for any Provider.
+    """
+    data = []
+    all_active_enrollments = []
+
+    if allowed_sites == None:
+        # user is superuser
+        all_active_enrollments = CourseEnrollment.objects.filter(is_active=True)
+    else:
+        # user is local admin
+
+        # retrieve site courses
+        site_courses, groups = get_site_linked_courses_and_groups(allowed_sites)
+        site_courses_ids = [course.course_id for course in site_courses]
+
+        # retrieve site users
+        site_users = get_group_users(groups)
+
+        all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id__in=site_courses_ids, user__in=site_users)
+
+    for enrollment in all_active_enrollments:
+        user = enrollment.user
+        request = RequestFactory().get(u'/')
+        request.user = user
+        course_id = enrollment.course_id
+
+        progress = get_course_progress(request, enrollment.course)
+        try:
+            completion_obj = ClearesultCourseCompletion.objects.get(user=user, course_id=course_id)
+            pass_date = completion_obj.pass_date
+            completion_date = completion_obj.completion_date
+        except ClearesultCourseCompletion.DoesNotExist:
+            completion_date = pass_date = None
+
+        try:
+            certificate = GeneratedCertificate.eligible_certificates.get(user=user, course_id=course_id)
+            certificate_status = certificate.status
+        except GeneratedCertificate.DoesNotExist:
+            certificate = certificate_status = None
+
+        course_grade = CourseGradeFactory().read(user, course_key=course_id)
+
+        user_course_dict = {
+            'user_id': user.id,
+            'email': user.email,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'course_id': six.text_type(enrollment.course.id),
+            'course_name': enrollment.course.display_name,
+            'enrollment_status': "enrolled" if CourseEnrollment.is_enrolled(user, course_id) else "unenrolled",
+            'enrollment_mode': enrollment.mode,
+            'enrollment_date':  enrollment.created.date(),
+            'progress_percent': "{} %".format(progress),
+            'grade_percent': "{} %".format(course_grade.percent * 100),
+            'letter_grade': course_grade.letter_grade,
+            'completion_date': completion_date.date() if (completion_date and progress == 100) else 'N/A',
+            'pass_date': pass_date.date() if pass_date else 'N/A',
+            'certificate_eligible': 'Y' if course_grade.passed else 'N',
+            'certificate_delivered': 'Y' if certificate_status == CertificateStatuses.downloadable else 'N'
+        }
+
+        data.append(user_course_dict)
+
+    return data

@@ -33,6 +33,7 @@ from xblock.runtime import KvsFieldData
 
 from openedx.core.djangoapps.video_config.models import HLSPlaybackEnabledFlag, CourseYoutubeBlockedFlag
 from openedx.core.djangoapps.video_pipeline.config.waffle import DEPRECATE_YOUTUBE, waffle_flags
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.lib.cache_utils import request_cached
 from openedx.core.lib.license import LicenseMixin
 from xmodule.contentstore.content import StaticContent
@@ -418,7 +419,7 @@ class VideoBlock(
             'transcriptLanguages': sorted_languages,
             'ytTestTimeout': settings.YOUTUBE['TEST_TIMEOUT'],
             'ytApiUrl': settings.YOUTUBE['API'],
-            'lmsRootURL': settings.LMS_ROOT_URL,
+            'lmsRootURL': configuration_helpers.get_value('LMS_ROOT_URL', settings.LMS_ROOT_URL),
             'ytMetadataEndpoint': (
                 # In the new runtime, get YouTube metadata via a handler. The handler supports anonymous users and
                 # can work in sandboxed iframes. In the old runtime, the JS will call the LMS's yt_video_metadata

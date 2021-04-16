@@ -2793,17 +2793,18 @@ XDOMAIN_PROXY_CACHE_TIMEOUT = 60 * 15
 LOGIN_REDIRECT_WHITELIST = []
 
 ################### CLEARESULT SETTINGS ###############################
-
-CLEARESULT_ALLOWED_SUB_PATHS = [
-    '/auth/',
-    '/asset',
-    '/api/',
-    '/register',
-    '/admin',
-    '/heartbeat'
+CLEARESULT_BLOCKED_SUBPATH = [
+    '/courses'
 ]
-CLEARESULT_ALLOWED_FULL_PATHS = ['/']
-
+CLEARESULT_BLOCKED_FULL_PATH = [
+    '/login'
+]
+CLEARESULT_ALLOWED_SUB_PATHS = [
+    '/api'
+]
+CLEARESULT_ALLOWED_INCLUDED_PATHS = [
+    '/about'
+]
 CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
     reverse_lazy('signin_user'),
     reverse_lazy('register_user'),
@@ -2811,7 +2812,6 @@ CLEARESULT_SITE_SECURITY_ALLOWED_PATHS = [
     reverse_lazy('logout'),
 ]
 
-AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 CLEARESULT_CREDIT_PROVIDERS = [
     'BPI',
     'NATE',
@@ -2823,10 +2823,22 @@ CLEARESULT_CREDIT_PROVIDERS = [
 
 CLEARESULT_LOGOUT_SERVICE_USER = 'logout_service_user'
 
-DRUPAL_LOGOUT_API_CREDENTIALS = {
+DRUPAL_API_CREDENTIALS = {
     'username': '',
     'password': '',
     'url': ''
+}
+
+CLEARESULT_AVAILABLE_SITES_MAPPING = {
+    'black-hills-energy-swepco': {
+        'theme': 'blackhillsswepco'
+    },
+    'bayren': {
+        'theme': 'bayren'
+    },
+    'georgia-power': {
+        'theme': 'georgia_power'
+    }
 }
 
 ###################### Registration ##################################
@@ -3988,3 +4000,6 @@ GLOBALLY_ENABLED_SSO_PROVIDERS = [
 ######################## Default Email Params ################################
 DEFAULT_LOGO = '/static/clearesult/images/clearesulttrainingservices.png'
 DEFAULT_REGISTERATION_URL = ''
+
+######################  Site Deafult Group Name  ###################
+SITE_DEFAULT_GROUP_NAME = "DEFAULT"

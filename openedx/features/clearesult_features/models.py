@@ -12,6 +12,7 @@ from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from student.models import CourseEnrollment
 from jsonfield.fields import JSONField
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class ClearesultCourseCredit(models.Model):
         )
 
     credit_type = models.ForeignKey(ClearesultCreditProvider, on_delete=models.CASCADE)
-    credit_value = models.DecimalField(decimal_places=1, max_digits=3,
+    credit_value = models.DecimalField(decimal_places=2, max_digits=4,
                                        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     course_id = CourseKeyField(max_length=255, db_index=True)
 
@@ -111,22 +112,6 @@ class ClearesultUserProfile(models.Model):
             self.save()
         except AttributeError as error:
             logger.exception(u'Invalid JSON data. \n [%s]', error)
-
-
-class ClearesultSiteConfiguration(ConfigurationModel):
-    KEY_FIELDS = ('site', )
-
-    site = models.ForeignKey(Site, related_name='clearesult_configuration', on_delete=models.CASCADE)
-
-    security_code_required = models.BooleanField(default=True)
-    security_code = EncryptedTextField(max_length=20, verbose_name="Site security code")
-
-    class Meta:
-        app_label = APP_LABEL
-        verbose_name_plural = 'Clearesult Site Configurations'
-
-    def __str__(self):
-        return '"{}" configurations'.format(self.site)
 
 
 class ClearesultUserSiteProfile(models.Model):
@@ -213,6 +198,25 @@ class ClearesultGroupLinkage(models.Model):
         return '{} - {}'.format( self.site, self.name)
 
 
+class ClearesultSiteConfiguration(ConfigurationModel):
+    KEY_FIELDS = ('site', )
+
+    site = models.ForeignKey(Site, related_name='clearesult_configuration', on_delete=models.CASCADE)
+
+    security_code_required = models.BooleanField(default=True)
+    security_code = EncryptedTextField(max_length=20, verbose_name="Site security code", null=True, blank=True)
+    default_group = models.ForeignKey(ClearesultGroupLinkage, null=True, blank=True, on_delete=models.SET_NULL, default=None)
+    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        verbose_name_plural = 'Clearesult Site Configurations'
+
+    def __str__(self):
+        return '"{}" configurations'.format(self.site)
+
+
 class ClearesultGroupLinkedCatalogs(models.Model):
     """
     This model saves mandatory courses list of catalogs assigned to groups.
@@ -273,3 +277,37 @@ class ClearesultCourseCompletion(models.Model):
         unique_together = (
             ('course_id', 'user')
         )
+
+
+class ClearesultCourseConfig(models.Model):
+    """
+    This model saves the course configs on different sites.
+
+    Mandatory Courses due dates can be managed as follows
+    - site default configs in ClearesultSiteConfigurations
+    - course specific configs in ClearesultCourseConfig
+
+    Priority has been given to course specific configs but if course specific configs is not there for the mandatory
+    course then site defaults will be used.
+    """
+    course_id = CourseKeyField(max_length=255, db_index=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE)
+    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        app_label = APP_LABEL
+        unique_together = (
+            ('course_id', 'site')
+        )
+
+
+class ClearesultCourseEnrollment(models.Model):
+    """
+    This model will save the enrollment date.
+    """
+    enrollment = models.OneToOneField(CourseEnrollment, on_delete=models.CASCADE)
+    updated_date = models.DateTimeField()
+
+    class Meta:
+        app_label = APP_LABEL

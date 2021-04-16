@@ -118,6 +118,12 @@ module.exports = Merge.smart({
             // Clearesult
             ContinuingEducation: './openedx/features/clearesult_features/static/continuing_education/jsx/' +
                 'ContinuingEducation.jsx',
+            CatalogsManager: './openedx/features/clearesult_features/static/catalogs_manager/js/' +
+            'CatalogsManager.js',
+            GroupsManager: './openedx/features/clearesult_features/static/groups_manager/js/' +
+                'GroupsManager.js',
+            GroupCatalogsManager: './openedx/features/clearesult_features/static/group_catalogs_manager/js/' +
+                'GroupCatalogsManager.js',
 
             // Common
             ReactRenderer: './common/static/js/src/ReactRenderer.jsx',

@@ -40,6 +40,7 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
 
     return (
         <div>
+            <h2>Add a new account</h2>
             <p>If you have a continuing education account, please select the name of the organization and enter your account ID, then click Add.
                 You can come back to this page at any time to add or edit your continuing education account(s).</p>
             <br></br>

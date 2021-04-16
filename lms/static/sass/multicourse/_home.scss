@@ -26,6 +26,7 @@ $course-search-input-height: ($button-size);
 
     .outer-wrapper {
       @include clearfix();
+      min-height: 170px;
 
       @extend .animation-home-header-pop-up;
 
@@ -53,6 +54,7 @@ $course-search-input-height: ($button-size);
       padding: ($baseline) ($baseline*1.5);
       min-height: ($baseline*6);
       vertical-align: top;
+      display: none;
 
       // STATE: hover and focus
       &:hover,

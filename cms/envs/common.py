@@ -1504,21 +1504,21 @@ INSTALLED_APPS = [
 ]
 
 ################### CLEARESULT SETTINGS ###############################
-
+CLEARESULT_BLOCKED_SUBPATH = [
+    '/course',
+    '/home'
+]
+CLEARESULT_BLOCKED_FULL_PATH = [
+    '/'
+]
 CLEARESULT_ALLOWED_SUB_PATHS = [
-    '/auth/',
-    '/asset',
-    '/api/',
-    '/register',
-    '/admin',
-    '/heartbeat'
-    '/oauth2'
+    '/api'
 ]
 
-CLEARESULT_ALLOWED_FULL_PATHS = ['/']
+CLEARESULT_ALLOWED_INCLUDED_PATHS = [
+    '/about'
+]
 
-
-AZUREAD_B2C_FORGET_PASSWORD_CODE = 'AADB2C90118'
 CLEARESULT_CREDIT_PROVIDERS = [
     'BPI',
     'NATE',
@@ -1527,6 +1527,21 @@ CLEARESULT_CREDIT_PROVIDERS = [
     'AEE',
     'LEED'
 ]
+
+CLEARESULT_AVAILABLE_SITES_MAPPING = {
+    'black-hills-energy-swepco': {
+        'theme': 'blackhillsswepco',
+        'lms_root_url': '#'
+    },
+    'bayren': {
+        'theme': 'bayren',
+        'lms_root_url': '#'
+    },
+    'georgia-power': {
+        'theme': 'georgia_power',
+        'lms_root_url': '#'
+    }
+}
 ################# EDX MARKETING SITE ##################################
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'

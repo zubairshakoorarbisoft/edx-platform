@@ -55,6 +55,7 @@
       font-size: $font-size-sm;
       color: theme-color("dark");
       line-height: 1em;
+      // Hide the course header for smaller screen sizes
       display: none;
 
       .course-name {
@@ -62,11 +63,6 @@
         font-size: $font-size-base;
         margin-top: 7px;
         font-weight: 600;
-      }
-
-      // Hide the course header for smaller screen sizes
-      @include media-breakpoint-up(lg) {
-        display: block;
       }
     }
   }
