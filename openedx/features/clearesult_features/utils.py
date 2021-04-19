@@ -435,7 +435,7 @@ def add_user_to_site_default_group(request, user, site):
             if user not in site_default_group.users.all():
                 site_default_group.users.add(user)
                 check_and_enroll_group_users_to_mandatory_courses.delay(
-                    site_default_group.id, [user.id], request.site.id, request.user.id)
+                    site_default_group.id, [user.id], site_default_group.site.id, request.user.id)
         except ClearesultGroupLinkage.DoesNotExist:
             logger.error("Default group for site: {} doesn't exist".format(site.domain))
 

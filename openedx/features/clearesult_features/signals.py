@@ -28,7 +28,6 @@ from openedx.features.clearesult_features.utils import (
     update_clearesult_course_completion,
     is_course_graded, is_lms_site
 )
-from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
 
 logger = getLogger(__name__)
 
