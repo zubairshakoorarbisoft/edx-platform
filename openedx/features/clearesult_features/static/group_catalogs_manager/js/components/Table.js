@@ -68,7 +68,7 @@ const Table = ({
                                                     <td className="actions">
                                                         <button
                                                             value={group_id + ',' + catalog.id}
-                                                            onClick={(e) => {if (window.confirm('Are you sure you wish to remove this catalog?')) removeCatalog(e.target.value)}}
+                                                            onClick={(e) => {if (window.confirm('Are you sure you wish to remove this catalog?')) removeCatalog(group_id + ',' + catalog.id)}}
                                                         >
                                                             <i className="fa fa-trash" aria-hidden="true"></i>
                                                         </button>

@@ -31,10 +31,10 @@ const Table = ({
                     <td>{name}</td>
                     <td>{(site === null) ? "public" : site.domain}</td>
                     <td className="actions">
-                        <button type="button" className={(site === null && isSuperUser == 0) ? "disabled" : ""} data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(event)=>handleEditCatalogButton(event)} >
+                        <button type="button" className={(site === null && isSuperUser == 0) ? "disabled" : ""} data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(event)=>handleEditCatalogButton(id)} >
                             <i className="fa fa-pencil" aria-hidden="true"></i>
                         </button>
-                        <button type="button" className={(site === null && isSuperUser == 0) ? "disabled" : ""} value={id} onClick={(event)=>handleDeleteCatalogButton(event)} >
+                        <button type="button" className={(site === null && isSuperUser == 0) ? "disabled" : ""} value={id} onClick={(event)=>handleDeleteCatalogButton(id)} >
                             <i className="fa fa-trash" aria-hidden="true"></i>
                         </button>
                     </td>
