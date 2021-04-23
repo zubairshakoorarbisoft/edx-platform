@@ -654,7 +654,7 @@ def filter_out_course_library_courses(courses, user):
     if allowed_sites:
         # local admin flow
         # local admin will have access to all the linked courses
-        accessble_courses, _ = get_site_linked_courses_and_groups(allowed_sites)
+        accessble_courses = ClearesultCourse.objects.filter(Q(site__in=allowed_sites) | Q(site=None))
     else:
         # normal user flow
         accessble_courses = get_user_all_courses(user)

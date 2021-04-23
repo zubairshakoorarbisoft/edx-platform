@@ -109,6 +109,11 @@ class ClearesultLocalAdminInterface(admin.ModelAdmin):
     Admin config clearesult credit providers.
     """
     list_display = ('site', 'user')
+    search_fields = ('site', 'user')
+
+    # disable change functionality
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 class ClearesultGroupLinkedCatalogsAdmin(admin.ModelAdmin):
@@ -150,4 +155,3 @@ admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)
 admin.site.register(BlockCompletion, BlockCompleteionAdmin)
 admin.site.register(ClearesultCourseConfig, ClearesultCourseConfigAdmin)
 admin.site.register(ClearesultCourseEnrollment, ClearesultCourseEnrollmentAdmin)
-

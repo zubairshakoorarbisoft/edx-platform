@@ -7,17 +7,21 @@ from completion.models import BlockCompletion
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models import Q
+from django.db.models.signals import post_save, pre_delete
 
 from course_modes.models import CourseMode
 from lms.djangoapps.verify_student.models import ManualVerification
+from student import auth
+from student.models import UserProfile
+from student.roles import CourseStaffRole, CourseInstructorRole
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-from student.models import UserProfile
 from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, COURSE_GRADE_NOW_FAILED
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCompletion, ClearesultGroupLinkage,
-    ClearesultSiteConfiguration
+    ClearesultSiteConfiguration, ClearesultLocalAdmin,
+    ClearesultCourse
 )
 from openedx.features.clearesult_features.instructor_reports.utils import (
     generate_user_course_credits,
@@ -28,6 +32,7 @@ from openedx.features.clearesult_features.utils import (
     update_clearesult_course_completion,
     is_course_graded, is_lms_site
 )
+
 
 logger = getLogger(__name__)
 
@@ -150,3 +155,22 @@ def create_default_group(sender, instance, created, **kwargs):
             clearesult_configuration.objects.create(
                 site=instance.site, default_group=default_site_group[0], security_code_required=False, enabled=True
             )
+
+
+@receiver(post_save, sender=ClearesultLocalAdmin)
+def check_and_give_staff_access(sender, instance, created, **kwargs):
+    if created:
+        site_courses = ClearesultCourse.objects.filter(Q(site=instance.site) | Q(site=None))
+        for course in site_courses:
+            role = CourseStaffRole(course.course_id)
+            auth.add_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, instance.user)
+
+
+@receiver(pre_delete, sender=ClearesultLocalAdmin)
+def check_and_revert_staff_access(sender, instance, **kwargs):
+    site_courses = ClearesultCourse.objects.filter(Q(site=instance.site) | Q(site=None))
+    for course in site_courses:
+        role = CourseStaffRole(course.course_id)
+
+        if role.has_user(instance.user, check_user_activation=False):
+            auth.remove_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, instance.user)
