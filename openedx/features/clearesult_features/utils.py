@@ -873,3 +873,9 @@ def send_due_date_passed_email_to_admins(passed_due_dates_site_users):
             send_notification(email_key, email_params, subject, dest_emails, request_user, site)
         except Site.DoesNotExist:
             logger.info("Couldn't send mandatory course passed due date email as Site for domain:{} doesn't exist.".format(key))
+
+
+def is_public_course(course_key):
+    if len(ClearesultCourse.objects.filter(course_id=course_key, site=None)):
+        return True
+    return False

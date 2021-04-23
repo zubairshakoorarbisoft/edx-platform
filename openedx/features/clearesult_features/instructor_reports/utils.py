@@ -286,7 +286,7 @@ def list_user_total_credits_for_report(course_key, allowed_sites, provider_filte
     return data_list
 
 
-def list_all_coures_enrolled_users_progress_for_report(allowed_sites):
+def list_all_coures_enrolled_users_progress_for_report(allowed_sites, course_id, is_course_level=False):
     """
     Return info about user all courses enrolled students progress details.
     would return [
@@ -316,20 +316,28 @@ def list_all_coures_enrolled_users_progress_for_report(allowed_sites):
     data = []
     all_active_enrollments = []
 
-    if allowed_sites == None:
-        # user is superuser
+    if allowed_sites == None and not is_course_level:
+        # user is superuser and report is for all courses of all sites
         all_active_enrollments = CourseEnrollment.objects.filter(is_active=True)
+    elif allowed_sites == None and is_course_level:
+        # user is superuser and report is for only for current course
+        all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id=course_id)
     else:
         # user is local admin
 
         # retrieve site courses
         site_courses, groups = get_site_linked_courses_and_groups(allowed_sites)
-        site_courses_ids = [course.course_id for course in site_courses]
 
         # retrieve site users
         site_users = get_group_users(groups)
 
-        all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id__in=site_courses_ids, user__in=site_users)
+        if not is_course_level:
+            # user is local-admin and report is for all courses of allowed sites
+            site_courses_ids = [course.course_id for course in site_courses]
+            all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id__in=site_courses_ids, user__in=site_users)
+        else:
+            # user is local-admin and report is only for current course
+            all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id=course_id, user__in=site_users)
 
     for enrollment in all_active_enrollments:
         user = enrollment.user

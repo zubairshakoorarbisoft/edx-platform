@@ -309,13 +309,15 @@
 
             this.$list_all_courses_csv_btn.click(function() {
                 var url = dataDownloadObj.$list_all_courses_csv_btn.data('endpoint');
-                var errorMessage = gettext('Error generating User earned credits reports. Please try again.');
+                var errorMessage = gettext('Error generating course  reports. Please try again.');
                 dataDownloadObj.clear_display();
                 return $.ajax({
                     type: 'POST',
                     dataType: 'json',
                     url: url,
-                    data: {},
+                    data: {
+                        "is_course_level": $(this).attr("data-is-course-level")
+                    },
                     error: function(error) {
                         if (error.responseText) {
                             errorMessage = JSON.parse(error.responseText);
