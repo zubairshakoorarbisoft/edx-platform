@@ -572,7 +572,12 @@ def course_listing(request):
         if allowed_sites:
             allowed_sites = [site.domain for site in allowed_sites]
             public_courses_ids = [six.text_type(course.course_id) for course in ClearesultCourse.objects.filter(site=None)]
+
+            # filter public courses out from course-listing on studio-home page for local admins
             active_courses = [course for course in active_courses if course.get('course_key') not in public_courses_ids]
+
+            # filter public courses out from archived course-listing on studio-home page for local admins
+            archived_courses = [course for course in archived_courses if course.get('course_key') not in public_courses_ids]
 
     return render_to_response(u'index.html', {
         u'courses': active_courses,

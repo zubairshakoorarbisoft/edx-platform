@@ -876,6 +876,6 @@ def send_due_date_passed_email_to_admins(passed_due_dates_site_users):
 
 
 def is_public_course(course_key):
-    if len(ClearesultCourse.objects.filter(course_id=course_key, site=None)):
+    if ClearesultCourse.objects.filter(course_id=course_key, site=None).exists():
         return True
     return False
