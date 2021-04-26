@@ -23,6 +23,8 @@ from student.roles import (
     OrgLibraryUserRole,
     OrgStaffRole
 )
+from openedx.features.clearesult_features.models import ClearesultCourse
+
 
 # Studio permissions:
 STUDIO_EDIT_ROLES = 8
@@ -90,8 +92,12 @@ def get_user_permissions(user, course_key, org=None):
         return all_perms
     if course_key and user_has_role(user, CourseInstructorRole(course_key)):
         return all_perms
-    # Staff have all permissions except EDIT_ROLES:
+    # Staff have all permissions except EDIT_ROLES and Public courses:
     if OrgStaffRole(org=org).has_user(user) or (course_key and user_has_role(user, CourseStaffRole(course_key))):
+        # check if course is public course
+        if len(ClearesultCourse.objects.filter(course_id=course_key, site=None)):
+            return STUDIO_NO_PERMISSIONS
+
         return STUDIO_VIEW_USERS | STUDIO_EDIT_CONTENT | STUDIO_VIEW_CONTENT
     # Otherwise, for libraries, users can view only:
     if course_key and isinstance(course_key, LibraryLocator):

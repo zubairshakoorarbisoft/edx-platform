@@ -20,32 +20,6 @@ define(['jquery', 'gettext', 'common/js/components/utils/view_utils', 'js/views/
                 });
             };
 
-            this.setUpSiteAutoComplete = function() {
-                if ($(selectors.site).children().length > 1) {
-                    // No need to repopulate the site dropdown if it's already populated.
-                    return;
-                }
-
-                $(selectors.site).append(
-                    $('<option>', {
-                        value: 'Public',
-                        text: 'Public'
-                    })
-                );
-
-
-                $.getJSON('/clearesult/api/v0/sites/', function(data) {
-                    $.each(data, function(i, item) {
-                        $(selectors.site).append(
-                            $('<option>', {
-                                value: item.domain,
-                                text: item.domain
-                            })
-                        );
-                    });
-                });
-            };
-
             this.create = function(courseInfo, errorHandler) {
                 $.postJSON(
                     '/course/',
