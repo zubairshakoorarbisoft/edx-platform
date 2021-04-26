@@ -30,10 +30,10 @@ const Table = ({groups, handleEditClick, DeleteGroup}) => {
                     <td>{name}</td>
                     <td>{site.domain}</td>
                     <td className="actions">
-                        <button type="button" data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(e)=>handleEditClick(e.target.value)} >
+                        <button type="button" data-toggle="modal" data-target="#exampleModalCenter" value={id} onClick={(e)=>handleEditClick(id)} >
                             <i className="fa fa-pencil" aria-hidden="true"></i>
                         </button>
-                        <button type="button" value={id} disabled={!(id != site.default_group)} onClick={(e)=> {if (window.confirm('Are you sure you wish to delete this item?')) DeleteGroup(e.target.value)}} >
+                        <button type="button" value={id} disabled={!(id != site.default_group)} onClick={(e)=> {if (window.confirm('Are you sure you wish to delete this item?')) DeleteGroup(id)}} >
                             <i className="fa fa-trash" aria-hidden="true"></i>
                         </button>
                     </td>
