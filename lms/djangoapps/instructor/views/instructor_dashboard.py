@@ -51,6 +51,7 @@ from openedx.core.djangoapps.django_comment_common.models import FORUM_ROLE_ADMI
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.verified_track_content.models import VerifiedTrackCohortedCourse
 from openedx.core.djangolib.markup import HTML, Text
+from openedx.features.clearesult_features.utils import is_public_course
 from openedx.core.lib.url_utils import quote_slashes
 from openedx.core.lib.xblock_utils import wrap_xblock
 from shoppingcart.models import Coupon, CourseRegCodeItem, PaidCourseRegistration
@@ -236,6 +237,10 @@ def instructor_dashboard_2(request, course_id):
     )
 
     certificate_invalidations = CertificateInvalidation.get_certificate_invalidations(course_key)
+    hide_course_level_reports = False
+
+    if is_public_course(course.id) and not (request.user.is_superuser or request.user.is_staff):
+        hide_course_level_reports = True
 
     context = {
         'course': course,
@@ -250,6 +255,7 @@ def instructor_dashboard_2(request, course_id):
         'certificate_exception_view_url': certificate_exception_view_url,
         'certificate_invalidation_view_url': certificate_invalidation_view_url,
         'xqa_server': settings.FEATURES.get('XQA_SERVER', "http://your_xqa_server.com"),
+        'hide_course_level_reports': hide_course_level_reports
     }
 
     return render_to_response('instructor/instructor_dashboard_2/instructor_dashboard_2.html', context)

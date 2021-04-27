@@ -3,6 +3,7 @@ Admin registration for Clearesult.
 """
 from config_models.admin import KeyedConfigurationModelAdmin
 from completion.models import BlockCompletion
+from django.contrib.auth.models import User
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.sites.models import Site
@@ -115,6 +116,11 @@ class ClearesultLocalAdminInterface(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(ClearesultLocalAdminInterface, self).get_form(request, obj, **kwargs)
+        form.base_fields['site'].queryset = Site.objects.filter(name__icontains="LMS")
+        form.base_fields['user'].queryset = User.objects.filter(is_superuser=False, is_staff=False, is_active=True)
+        return form
 
 class ClearesultGroupLinkedCatalogsAdmin(admin.ModelAdmin):
     """

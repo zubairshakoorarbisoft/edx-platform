@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from pytz import UTC
 from time import time
@@ -50,9 +51,12 @@ def submit_calculate_all_courses_progress_csv(request, course_key, features, tas
     Raises AlreadyRunningError if said file is already being updated.
     """
     task_class = calculate_all_courses_progress_csv
+
+    # json loads will help to convert string bool value i.e 'false' to Python bool value i.e False
     task_input = {
         'features': features,
-        'request_user_id': request.user.id
+        'request_user_id': request.user.id,
+        'is_course_level': json.loads(request.POST.get('is_course_level', 'false').lower())
     }
     return submit_task(request, task_type, task_class, course_key, task_input, '')
 
@@ -182,7 +186,6 @@ def upload_all_courses_progress_csv(_xmodule_instance_args, _entry_id, course_id
     task_progress = TaskProgress(action_name, num_reports, start_time)
     current_step = {'step': 'Calculating progress'}
     task_progress.update_task_state(extra_meta=current_step)
-    csv_name = "courses_enrolled_users_progress_info"
 
     query_features_names = [
         'User ID', 'Email', 'Username', 'First Name', 'Last Name', 'Course ID', 'Course Name', 'Enrollment Status',
@@ -192,6 +195,12 @@ def upload_all_courses_progress_csv(_xmodule_instance_args, _entry_id, course_id
 
     query_features = task_input.get('features')
     request_user_id = task_input.get('request_user_id')
+    is_course_level = task_input.get('is_course_level')
+
+    if is_course_level:
+        csv_name = "current_course_enrolled_users_progress_info"
+    else:
+        csv_name = "courses_enrolled_users_progress_info"
 
     try:
         request_user = User.objects.get(id=request_user_id)
@@ -204,7 +213,7 @@ def upload_all_courses_progress_csv(_xmodule_instance_args, _entry_id, course_id
         # user is normal user - not authorized to view reports
         logger.error(error)
     else:
-        student_data = list_all_coures_enrolled_users_progress_for_report(allowed_sites)
+        student_data = list_all_coures_enrolled_users_progress_for_report(allowed_sites, course_id, is_course_level)
 
     csv_name = get_csv_name(allowed_sites, csv_name)
     header, rows = format_dictlist(student_data, query_features)
