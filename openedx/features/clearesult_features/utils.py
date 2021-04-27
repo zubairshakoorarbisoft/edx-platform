@@ -338,12 +338,17 @@ def generate_clearesult_course_completion(user, course_id):
     """
     On passing a course just set the pass date to the current date.
     """
-    ClearesultCourseCompletion.objects.update_or_create(
-        user=user, course_id=course_id,
-        defaults={
-            'pass_date': datetime.now()
-        }
-    )
+    try:
+        course_completion_object = ClearesultCourseCompletion.objects.get(
+            user=user, course_id=course_id
+        )
+        if not course_completion_object.pass_date:
+            course_completion_object.pass_date = datetime.now()
+            course_completion_object.save()
+    except ClearesultCourseCompletion.DoesNotExist:
+        ClearesultCourseCompletion.objects.create (
+            user=user, course_id=course_id, pass_date=datetime.now()
+        )
 
 
 def update_clearesult_course_completion(user, course_id):
