@@ -116,11 +116,14 @@ class ClearesultLocalAdminInterface(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    def get_form(self, request, obj=None, **kwargs):
-        form = super(ClearesultLocalAdminInterface, self).get_form(request, obj, **kwargs)
-        form.base_fields['site'].queryset = Site.objects.filter(name__icontains="LMS")
-        form.base_fields['user'].queryset = User.objects.filter(is_superuser=False, is_staff=False, is_active=True)
-        return form
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "site":
+            kwargs["queryset"] = Site.objects.filter(name__icontains="LMS")
+        elif db_field.name == "user":
+            kwargs["queryset"] = User.objects.filter(is_superuser=False, is_staff=False, is_active=True)
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class ClearesultGroupLinkedCatalogsAdmin(admin.ModelAdmin):
     """
