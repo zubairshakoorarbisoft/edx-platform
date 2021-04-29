@@ -34,7 +34,11 @@ from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthenticat
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.lib.api.authentication import BearerAuthentication
 from openedx.features.clearesult_features.constants import USER_SESSION_CACHE_KEY_SUFFIX
-from openedx.features.clearesult_features.utils import get_site_users, is_local_admin_or_superuser
+from openedx.features.clearesult_features.utils import (
+    get_site_users,
+    is_local_admin_or_superuser,
+    get_site_linked_courses_and_groups
+)
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
     ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage,
@@ -399,7 +403,7 @@ class SiteViewset(viewsets.ViewSet):
 class SiteLinkedObjectsListView(generics.ListAPIView):
     """
     Return a list of catalogs/users/groups linked with site_id depending upon type parameter.
-    Available options for type are catalogs, groups and users
+    Available options for type are catalogs, groups, courses and users
 
     To get a list of groups of given site:
     Get /clearesult/api/v0/site_linked_objects/groups/site_pk/
@@ -452,6 +456,27 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
         },
     ]
     ```
+
+    To get a list of linked courses of given site:
+    Get /clearesult/api/v0/site_linked_objects/courses/site_pk/
+    [
+        {
+            "id": 3,
+            "course_name": "Demonstration Course",
+            "site": null,
+            "course_id": "course-v1:edX+DemoX+Demo_Course"
+        },
+        {
+            "id": 4,
+            "course_name": "New Course with certificates",
+            "site": {
+                "id": 1,
+                "domain": "localhost:18000",
+                "default_group": 10
+            },
+            "course_id": "course-v1:edx+CS102+2020_T1"
+        }
+    ]
     """
     permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
     authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
@@ -459,13 +484,14 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
 
     def get_serializer_class(self):
         object_type = self.kwargs.get('type')
-        typeSerilizerMap = {
+        typeSerializerMap = {
             'users': UserSerializer,
             'groups': ClearesultGroupsSerializer,
-            'catalogs': ClearesultCatalogSerializer
+            'catalogs': ClearesultCatalogSerializer,
+            'courses': ClearesultCourseSerializer
         }
         if object_type:
-            serializer_class = typeSerilizerMap.get(object_type)
+            serializer_class = typeSerializerMap.get(object_type)
 
         if not object_type or not serializer_class:
             raise NotFound(
@@ -494,6 +520,7 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
             'users': get_site_users(site),
             'groups': ClearesultGroupLinkage.objects.filter(site=site),
             'catalogs': ClearesultCatalog.objects.filter(Q(site=site) | Q(site=None)),
+            'courses': self._prepare_query_set_for_courses(site)
         }
         object_type = self.kwargs.get('type')
         query_set = typeObjectsQuerySetMap.get(object_type)
@@ -507,6 +534,10 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
         if object_type == "catalogs":
             context.update({'fields' : ['id', 'name', 'site']})
         return context
+
+    def _prepare_query_set_for_courses(self, site):
+        courses, _ = get_site_linked_courses_and_groups([site])
+        return courses
 
 
 class ClearesultGroupViewset(viewsets.ModelViewSet):

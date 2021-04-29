@@ -128,6 +128,8 @@ module.exports = Merge.smart({
             AdminConfigurations: './openedx/features/clearesult_features/static/admin_configurations/js/' +
                 'AdminConfigurations.js',
 
+            Reports: './openedx/features/clearesult_features/static/reports/js/' +
+                'Reports.js',
             // Common
             ReactRenderer: './common/static/js/src/ReactRenderer.jsx',
             XModuleShim: 'xmodule/js/src/xmodule.js',
