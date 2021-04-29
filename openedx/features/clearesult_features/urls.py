@@ -6,7 +6,7 @@ from django.conf.urls import url, include
 from openedx.features.clearesult_features.views import (
     render_continuing_education, render_catalogs_manager,
     render_groups_manager, render_group_catalogs_manager,
-    render_admin_configurations
+    render_admin_configurations, render_reports
 )
 
 from openedx.features.clearesult_features.authentication.views import SiteSecurityView
@@ -19,6 +19,11 @@ urlpatterns = (
         r'^continuing_education/$',
         render_continuing_education,
         name='continuing_education'
+    ),
+    url(
+        r'^reports/$',
+        render_reports,
+        name='clearesult_reports'
     ),
     url(
         r'^site_security/$',

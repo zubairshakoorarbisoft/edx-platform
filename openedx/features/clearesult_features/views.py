@@ -11,6 +11,12 @@ def render_continuing_education(request):
 
 @login_required
 @local_admin_required
+def render_reports(request):
+    return render_to_response('clearesult/reports.html', {'uses_bootstrap': True})
+
+
+@login_required
+@local_admin_required
 def render_catalogs_manager(request):
     return render_to_response(
         'clearesult/catalogs_manager.html',
