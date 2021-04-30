@@ -116,21 +116,27 @@ def get_credit_provider_by_short_code(short_code):
 
 def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None):
     if allowed_sites:
-        # local admin scenerio - retrieve all site users
+        # allowed_sites can contain data in following situations:
+        # when user wants to generate report only for request-site (default-behavior).
+        # when local admin wants to get data for all of it's allowed sites
+
+        # retrieve users only for allowed sites list.
         groups = ClearesultGroupLinkage.objects.filter(site__in=allowed_sites)
         site_users = get_group_users(groups)
 
     if provider_filter and allowed_sites:
-        # local admin scenerio with provider filter
+        # Either global/local admins scenerio for request-site - with provider filter
+        # OR local admin scenerio for all allowed sites - with provider filter
         user_credits_profiles = UserCreditsProfile.objects.filter(user__in=site_users, credit_type__short_code=provider_filter)
     elif provider_filter and not allowed_sites:
-        # global admin scenerio with provider filter
+        # global admin scenerio for all sites - with provider filter
         user_credits_profiles = UserCreditsProfile.objects.filter(credit_type__short_code=provider_filter)
     elif not provider_filter and allowed_sites:
-        # local admin scenerio with out provider filter
+        # Either global/local admins scenerio for request-site - without provider filter
+        # OR local admin scenerio for all allowed sites - without provider filter
         user_credits_profiles = UserCreditsProfile.objects.filter(user__in=site_users)
     else:
-        # global admin scenerio with out provider filter
+        # global admin scenerio for all sites - without provider filter
         user_credits_profiles = UserCreditsProfile.objects.all()
 
     return user_credits_profiles
@@ -286,7 +292,7 @@ def list_user_total_credits_for_report(course_key, allowed_sites, provider_filte
     return data_list
 
 
-def list_all_coures_enrolled_users_progress_for_report(allowed_sites, course_id, is_course_level=False):
+def list_all_course_enrolled_users_progress_for_report(allowed_sites, course_id, is_course_level=False):
     """
     Return info about user all courses enrolled students progress details.
     would return [
