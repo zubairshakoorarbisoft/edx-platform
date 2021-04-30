@@ -686,6 +686,19 @@ def get_site_linked_courses_and_groups(sites):
     return all_courses.distinct(), groups
 
 
+def get_site_linked_any_course(site):
+    """
+    It will return any course which is linked to the site.
+    """
+    course = ClearesultCourse.objects.none()
+    groups = ClearesultGroupLinkage.objects.filter(site=site)
+    for courses in get_groups_courses_generator(groups):
+        if len(courses) > 0:
+            return ClearesultCourse.objects.filter(id=courses[0].id)
+
+    return course
+
+
 def get_group_users(groups):
     """
     It will return all users of given user-groups.

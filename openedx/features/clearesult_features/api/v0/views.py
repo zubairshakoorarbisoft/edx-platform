@@ -37,7 +37,8 @@ from openedx.features.clearesult_features.constants import USER_SESSION_CACHE_KE
 from openedx.features.clearesult_features.utils import (
     get_site_users,
     is_local_admin_or_superuser,
-    get_site_linked_courses_and_groups
+    get_site_linked_courses_and_groups,
+    get_site_linked_any_course
 )
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
@@ -481,6 +482,28 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, IsAdminOrLocalAdmin]
     authentication_classes = [BasicAuthentication, SessionAuthentication, BearerAuthentication, JwtAuthentication]
     pagination_class = None
+    allowed_types = ['users', 'groups', 'catalogs', 'courses', 'course']
+
+    def _validate_type(self):
+        if not self.kwargs.get('type') in self.allowed_types:
+            raise NotFound('Invalid type given.')
+
+    def _prepare_query_set_for_courses(self, site):
+        courses, _ = get_site_linked_courses_and_groups([site])
+        return courses
+
+    def _prepare_query_set_for_course(self, site):
+        course = get_site_linked_any_course(site)
+        return course
+
+    def _prepare_query_set_for_catalogs(self, site):
+        return ClearesultCatalog.objects.filter(Q(site=site) | Q(site=None))
+
+    def _prepare_query_set_for_groups(self, site):
+        return ClearesultGroupLinkage.objects.filter(site=site)
+
+    def _prepare_query_set_for_users(self, site):
+        return get_site_users(site)
 
     def get_serializer_class(self):
         object_type = self.kwargs.get('type')
@@ -488,19 +511,14 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
             'users': UserSerializer,
             'groups': ClearesultGroupsSerializer,
             'catalogs': ClearesultCatalogSerializer,
-            'courses': ClearesultCourseSerializer
+            'courses': ClearesultCourseSerializer,
+            'course': ClearesultCourseSerializer,
         }
-        if object_type:
-            serializer_class = typeSerializerMap.get(object_type)
 
-        if not object_type or not serializer_class:
-            raise NotFound(
-                "error - site linked objects of given type doesn't exist." +
-                " Available options are users, groups, catalogs")
-
-        return serializer_class
+        return typeSerializerMap.get(object_type)
 
     def get_queryset(self):
+        self._validate_type()
         site_pk = self.kwargs.get('site_pk')
 
         try:
@@ -517,13 +535,15 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
             )
 
         typeObjectsQuerySetMap = {
-            'users': get_site_users(site),
-            'groups': ClearesultGroupLinkage.objects.filter(site=site),
-            'catalogs': ClearesultCatalog.objects.filter(Q(site=site) | Q(site=None)),
-            'courses': self._prepare_query_set_for_courses(site)
+            'users': self._prepare_query_set_for_users,
+            'groups': self._prepare_query_set_for_groups,
+            'catalogs': self._prepare_query_set_for_catalogs,
+            'courses': self._prepare_query_set_for_courses,
+            'course': self._prepare_query_set_for_course
         }
+
         object_type = self.kwargs.get('type')
-        query_set = typeObjectsQuerySetMap.get(object_type)
+        query_set = typeObjectsQuerySetMap[object_type](site)
         return query_set
 
     def get_serializer_context(self):
@@ -534,10 +554,6 @@ class SiteLinkedObjectsListView(generics.ListAPIView):
         if object_type == "catalogs":
             context.update({'fields' : ['id', 'name', 'site']})
         return context
-
-    def _prepare_query_set_for_courses(self, site):
-        courses, _ = get_site_linked_courses_and_groups([site])
-        return courses
 
 
 class ClearesultGroupViewset(viewsets.ModelViewSet):
