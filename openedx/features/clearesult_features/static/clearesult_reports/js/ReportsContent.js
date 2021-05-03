@@ -69,7 +69,7 @@ function ReportsContent() {
 
     const handleSiteSelectForCourseReport = (event) => {
         let site = getSiteObject(event);
-        if(!isNaN(value)) {
+        if(!isNaN(site.id)) {
             setSiteForCourseReport(site);
             loadSiteLinkedCourses(site);
         } else {
@@ -86,7 +86,7 @@ function ReportsContent() {
 
     const handleSiteSelectForSiteReport = (event) => {
         let site = getSiteObject(event);
-        if(!isNaN(value)) {
+        if(!isNaN(site.id)) {
             loadSiteLinkedCourse(site);
         } else {
             setSiteReportLink("");
