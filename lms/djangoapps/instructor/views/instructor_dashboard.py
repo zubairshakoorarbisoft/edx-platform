@@ -237,10 +237,6 @@ def instructor_dashboard_2(request, course_id):
     )
 
     certificate_invalidations = CertificateInvalidation.get_certificate_invalidations(course_key)
-    hide_course_level_reports = False
-
-    if is_public_course(course.id) and not (request.user.is_superuser or request.user.is_staff):
-        hide_course_level_reports = True
 
     context = {
         'course': course,
@@ -254,8 +250,7 @@ def instructor_dashboard_2(request, course_id):
         'generate_bulk_certificate_exceptions_url': generate_bulk_certificate_exceptions_url,
         'certificate_exception_view_url': certificate_exception_view_url,
         'certificate_invalidation_view_url': certificate_invalidation_view_url,
-        'xqa_server': settings.FEATURES.get('XQA_SERVER', "http://your_xqa_server.com"),
-        'hide_course_level_reports': hide_course_level_reports
+        'xqa_server': settings.FEATURES.get('XQA_SERVER', "http://your_xqa_server.com")
     }
 
     return render_to_response('instructor/instructor_dashboard_2/instructor_dashboard_2.html', context)
