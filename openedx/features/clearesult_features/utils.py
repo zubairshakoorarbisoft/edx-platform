@@ -897,3 +897,16 @@ def is_public_course(course_key):
     if ClearesultCourse.objects.filter(course_id=course_key, site=None).exists():
         return True
     return False
+
+
+def is_block_contains_scorm(block):
+    block_children = block.get('children')
+    if not block_children:
+        return "scorm" in block.get('type')
+
+    for child_block in block_children:
+        child_contains_scorm = is_block_contains_scorm(child_block)
+        if child_contains_scorm:
+            return True
+
+    return False
