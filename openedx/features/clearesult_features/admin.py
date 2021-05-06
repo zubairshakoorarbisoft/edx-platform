@@ -68,6 +68,12 @@ class ClearesultCourseAdmin(admin.ModelAdmin):
     Admin config clearesult courses.
     """
     list_display = ('course_id', 'site')
+    search_fields = ('course_id', 'site')
+
+    # disable change functionality
+    def has_change_permission(self, request, obj=None):
+        return False
+
 
 class ClearesultCatalogAdmin(admin.ModelAdmin):
     """
@@ -99,7 +105,7 @@ class ClearesultGroupLinkageAdmin(admin.ModelAdmin):
             config = site.clearesult_configuration.latest('change_date')
             if config.default_group == obj:
                 is_default = True
-                messages.error(request, "Group is set as a dafault group of some site. Remove the linkgae first then try again.")
+                messages.error(request, "Group is set as a default group of some site. Remove the linkage first then try again.")
                 break
 
         if not is_default:

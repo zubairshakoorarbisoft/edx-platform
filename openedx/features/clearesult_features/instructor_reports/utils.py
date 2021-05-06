@@ -81,7 +81,7 @@ def generate_user_course_credits(course_id, user):
                 )
 
 
-def remove_user_cousre_credits_if_exist(course_id, user):
+def remove_user_course_credits_if_exist(course_id, user):
     course_credits = ClearesultCourseCredit.objects.filter(course_id=course_id)
     user_credits = UserCreditsProfile.objects.filter(user=user).prefetch_related('earned_course_credits')
 
