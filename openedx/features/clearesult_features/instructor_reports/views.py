@@ -69,3 +69,21 @@ def get_all_courses_progress_data(request, course_id):
     task_helper.submit_calculate_all_courses_progress_csv(request, course_key, query_features, task_type)
     success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=task_type)
     return JsonResponse({'status': success_status})
+
+
+@transaction.non_atomic_requests
+@require_POST
+@ensure_csrf_cookie
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
+@require_course_permission(permissions.CAN_RESEARCH)
+@common_exceptions_400
+def get_registered_users(request, course_id):
+    task_type = 'site_wise_registered_users'
+    course_key = CourseKey.from_string(course_id)
+    query_features = [
+        'user_id', 'email', 'username', 'first_name', 'last_name', 'date_joined'
+    ]
+
+    task_helper.submit_get_registered_users_csv(request, course_key, query_features, task_type)
+    success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=task_type)
+    return JsonResponse({'status': success_status})

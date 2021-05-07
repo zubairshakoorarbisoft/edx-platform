@@ -203,13 +203,10 @@ def get_site_users(site):
         logger.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")
         return site_users
 
-    clearesult_user_profiles = ClearesultUserProfile.objects.exclude(extensions={}).select_related("user")
+    clearesult_user_profiles = ClearesultUserProfile.objects.filter(job_title__icontains=site_name).select_related("user")
 
     for profile in clearesult_user_profiles:
-        user_site_identifiers =  profile.extensions.get('site_identifier', [])
-
-        if site_name in user_site_identifiers:
-            site_users.append(profile.user)
+        site_users.append(profile.user)
 
     return  site_users
 

@@ -102,7 +102,8 @@
             this.$list_may_enroll_csv_btn = this.$section.find("input[name='list-may-enroll-csv']");
             this.$list_credits_csv_btn = this.$section.find("input[name='list-credits-csv']");
             this.$list_all_courses_csv_btn = this.$section.find("input[name='list-all-courses-csv']");
-            this.$all_sites_filter_checkbox =  this.$section.find("input[name='all-sites']");
+            this.$list_all_registered_users_csv_btn = this.$section.find("input[name='list-all-registered-users-csv']");
+            this.$all_sites_filter_checkbox = this.$section.find("input[name='all-sites']");
             this.$list_total_credits_csv_btn = this.$section.find("input[name='list-total-credits-csv']");
             this.$credits_report_provider_filter_select = this.$section.find("select[name='credits-report-provider-filter']");
             this.$list_problem_responses_csv_input = this.$section.find("input[name='problem-location']");
@@ -290,6 +291,36 @@
                         'provider_filter': provider_filter,
                         'csv_type': 'credits',
                         "is_site_level": dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true
+                    },
+                    error: function(error) {
+                        if (error.responseText) {
+                            errorMessage = JSON.parse(error.responseText);
+                        }
+                        dataDownloadObj.$reports_request_response_error.text(errorMessage);
+                        return dataDownloadObj.$reports_request_response_error.css({
+                            display: 'block'
+                        });
+                    },
+                    success: function(data) {
+                        dataDownloadObj.$reports_request_response.text(data.status);
+                        return $('.msg-confirm').css({
+                            display: 'block'
+                        });
+                    }
+                });
+            });
+
+            this.$list_all_registered_users_csv_btn.click(function() {
+                var url = dataDownloadObj.$list_all_registered_users_csv_btn.data('endpoint');
+                var errorMessage = gettext('Error generating registered users report. Please try again.');
+                dataDownloadObj.clear_display();
+                return $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: url,
+                    data: {
+                        is_course_level: $(this).attr('data-is-course-level'),
+                        is_site_level: dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true
                     },
                     error: function(error) {
                         if (error.responseText) {

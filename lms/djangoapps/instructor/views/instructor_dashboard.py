@@ -707,6 +707,7 @@ def _section_data_download(course, access):
         'get_all_courses_progress_data_url': reverse(
             'get_all_courses_progress_data', kwargs={'course_id': six.text_type(course_key)}
         ),
+        'get_registered_users_url': reverse('get_registered_users', kwargs={'course_id': six.text_type(course_key)}),
         'get_anon_ids_url': reverse('get_anon_ids', kwargs={'course_id': six.text_type(course_key)}),
         'list_proctored_results_url': reverse(
             'get_proctored_exam_results', kwargs={'course_id': six.text_type(course_key)}

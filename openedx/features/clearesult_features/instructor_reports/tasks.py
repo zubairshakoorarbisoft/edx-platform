@@ -30,3 +30,15 @@ def calculate_all_courses_progress_csv(entry_id, xmodule_instance_args):
     action_name = ugettext_noop('generated')
     task_fn = partial(task_helper.upload_all_courses_progress_csv, xmodule_instance_args)
     return run_main_task(entry_id, task_fn, action_name)
+
+
+@task(base=BaseInstructorTask)
+def get_site_registered_users_csv(entry_id, xmodule_instance_args):
+    """
+    Collect information about active registered users of current site_name
+    and upload the CSV to an S3 bucket for download.
+    """
+    # Translators: This is a past-tense verb that is inserted into task progress messages as {action}.
+    action_name = ugettext_noop('generated')
+    task_fn = partial(task_helper.upload_all_site_registered_users_csv, xmodule_instance_args)
+    return run_main_task(entry_id, task_fn, action_name)
