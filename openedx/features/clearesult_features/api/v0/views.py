@@ -56,7 +56,7 @@ from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
     validate_sites_for_local_admin, validate_catalog_update_deletion
 )
-from openedx.features.clearesult_features.instructor_reports.utils import remove_user_cousre_credits_if_exist
+from openedx.features.clearesult_features.instructor_reports.utils import remove_user_course_credits_if_exist
 from openedx.features.course_experience.utils import get_course_outline_block_tree
 from student.models import CourseEnrollment
 from xmodule.modulestore.django import modulestore
@@ -994,7 +994,7 @@ def retake_course(request):
         try:
             enrollment.reset_student_attempts(course_id, user, course_usage_key, requesting_user=user, delete_module=True)
             BlockCompletion.objects.filter(user=user, context_key=course_id, completion=1.0).update(completion=0.0)
-            remove_user_cousre_credits_if_exist(course_id, user)
+            remove_user_course_credits_if_exist(course_id, user)
             return Response(
                 {'url': redirect_url},
                 status=status.HTTP_200_OK
