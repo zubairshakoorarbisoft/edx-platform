@@ -13,11 +13,16 @@ from lms.djangoapps.instructor_task.api_helper import submit_task
 from lms.djangoapps.instructor_task.models import ReportStore
 from lms.djangoapps.instructor_task.tasks_helper.runner import TaskProgress
 from lms.djangoapps.instructor_task.tasks_helper.utils import tracker_emit
-from openedx.features.clearesult_features.instructor_reports.tasks import calculate_credits_csv, calculate_all_courses_progress_csv
+from openedx.features.clearesult_features.instructor_reports.tasks import (
+    calculate_credits_csv,
+    calculate_all_courses_progress_csv,
+    get_site_registered_users_csv
+)
 from openedx.features.clearesult_features.instructor_reports.utils import (
     list_user_credits_for_report,
     list_user_total_credits_for_report,
-    list_all_course_enrolled_users_progress_for_report
+    list_all_course_enrolled_users_progress_for_report,
+    list_all_site_wise_registered_users_for_report
 )
 from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
 
@@ -80,6 +85,26 @@ def submit_calculate_credits_csv(request, course_key, features, task_type):
         'request_user_id': request.user.id,
         'is_site_level': json.loads(request.POST.get('is_site_level', 'true').lower()),
         'request_site_domain': request.site.domain,
+    }
+    task_key = ''
+
+    return submit_task(request, task_type, task_class, course_key, task_input, task_key)
+
+
+def submit_get_registered_users_csv(request, course_key, features, task_type):
+    """
+    Submits a task to generate a CSV file containing information about
+    registered users and their date of joining.
+
+    Raises AlreadyRunningError if said file is already being updated.
+    """
+    task_class = get_site_registered_users_csv
+    task_input = {
+        'features': features,
+        'csv_type': task_type,
+        'request_user_id': request.user.id,
+        'request_site_domain': request.site.domain,
+        'is_site_level': json.loads(request.POST.get('is_site_level', 'true').lower()),
     }
     task_key = ''
 
@@ -246,6 +271,51 @@ def upload_all_courses_progress_csv(_xmodule_instance_args, _entry_id, course_id
 
     csv_name = get_csv_name(allowed_sites, csv_name, is_site_level)
     header, rows = format_dictlist(student_data, query_features)
+
+    task_progress.attempted = task_progress.succeeded = len(rows)
+    task_progress.skipped = task_progress.total - task_progress.attempted
+
+    rows.insert(0, query_features_names)
+
+    current_step = {'step': 'Uploading CSV'}
+    task_progress.update_task_state(extra_meta=current_step)
+
+    # Perform the upload
+    upload_credits_csv_to_report_store(rows, csv_name, course_id, start_date, False)
+
+    return task_progress.update_task_state(extra_meta=current_step)
+
+
+def upload_all_site_registered_users_csv(_xmodule_instance_args, _entry_id, course_id, task_input, action_name):
+    """
+    Generate a CSV file containing information about all active registered users of current site.
+    """
+    user_data = []
+    start_time = time()
+    start_date = datetime.now(UTC)
+    num_reports = 1
+    task_progress = TaskProgress(action_name, num_reports, start_time)
+    current_step = {'step': 'Generating users\'s details'}
+    task_progress.update_task_state(extra_meta=current_step)
+    error = None
+
+    query_features_names = [
+        'User ID', 'Email', 'Username', 'First Name', 'Last Name', 'Date Joined'
+    ]
+
+    query_features = task_input.get('features')
+    request_user_id = task_input.get('request_user_id')
+    request_site_domain = task_input.get('request_site_domain')
+    is_site_level = task_input.get('is_site_level')
+    site = Site.objects.get(domain=request_site_domain)
+
+
+    csv_name = "registered_users_info"
+    csv_name = get_csv_name([site], csv_name, is_site_level)
+
+    user_data = list_all_site_wise_registered_users_for_report(site, is_site_level)
+
+    header, rows = format_dictlist(user_data, query_features)
 
     task_progress.attempted = task_progress.succeeded = len(rows)
     task_progress.skipped = task_progress.total - task_progress.attempted

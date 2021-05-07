@@ -14,6 +14,7 @@ from lms.djangoapps.certificates.models import CertificateStatuses, GeneratedCer
 from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.features.clearesult_features.models import (
+    ClearesultUserProfile,
     ClearesultCourseCredit,
     ClearesultCreditProvider,
     UserCreditsProfile,
@@ -22,7 +23,7 @@ from openedx.features.clearesult_features.models import (
 from openedx.features.clearesult_features.models import ClearesultCourse, ClearesultGroupLinkage
 from openedx.features.clearesult_features.utils import (
     get_course_progress, get_site_linked_courses_and_groups,
-    get_group_users
+    get_group_users, get_site_users
 )
 
 logger = getLogger(__name__)
@@ -388,5 +389,45 @@ def list_all_course_enrolled_users_progress_for_report(allowed_sites, course_id,
         }
 
         data.append(user_course_dict)
+
+    return data
+
+
+def list_all_site_wise_registered_users_for_report(site, is_site_level):
+    """
+    Return info of the users' registration
+
+    Data would be in this format
+    [
+        {
+            'user_id': 1,
+            'username': 'John',
+            'email': 'john@example.com',
+            'first_name': 'John',
+            'last_name': 'Wick',
+            'date_joined': '2020-12-07'
+        },
+        ...
+        ...
+    ]
+    """
+    data = []
+    users = []
+    if is_site_level:
+        users = get_site_users(site)
+    else:
+        users = User.objects.filter(is_active=True)
+
+    for user in users:
+        if user.is_active:
+            user_info = {
+                'user_id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'date_joined': user.date_joined.date()
+            }
+            data.append(user_info)
 
     return data
