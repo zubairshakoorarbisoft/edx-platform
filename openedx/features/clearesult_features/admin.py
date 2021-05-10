@@ -3,6 +3,7 @@ Admin registration for Clearesult.
 """
 from config_models.admin import KeyedConfigurationModelAdmin
 from completion.models import BlockCompletion
+from django.contrib.auth.models import User
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.sites.models import Site
@@ -21,7 +22,9 @@ from openedx.features.clearesult_features.models import (
     ClearesultCourse,
     ClearesultLocalAdmin,
     ClearesultGroupLinkedCatalogs,
-    ClearesultCourseCompletion
+    ClearesultCourseCompletion,
+    ClearesultCourseConfig,
+    ClearesultCourseEnrollment
 )
 
 
@@ -65,6 +68,12 @@ class ClearesultCourseAdmin(admin.ModelAdmin):
     Admin config clearesult courses.
     """
     list_display = ('course_id', 'site')
+    search_fields = ('course_id', 'site')
+
+    # disable change functionality
+    def has_change_permission(self, request, obj=None):
+        return False
+
 
 class ClearesultCatalogAdmin(admin.ModelAdmin):
     """
@@ -96,7 +105,7 @@ class ClearesultGroupLinkageAdmin(admin.ModelAdmin):
             config = site.clearesult_configuration.latest('change_date')
             if config.default_group == obj:
                 is_default = True
-                messages.error(request, "Group is set as a dafault group of some site. Remove the linkgae first then try again.")
+                messages.error(request, "Group is set as a default group of some site. Remove the linkage first then try again.")
                 break
 
         if not is_default:
@@ -107,6 +116,19 @@ class ClearesultLocalAdminInterface(admin.ModelAdmin):
     Admin config clearesult credit providers.
     """
     list_display = ('site', 'user')
+    search_fields = ('site', 'user')
+
+    # disable change functionality
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "site":
+            kwargs["queryset"] = Site.objects.filter(name__icontains="LMS")
+        elif db_field.name == "user":
+            kwargs["queryset"] = User.objects.filter(is_superuser=False, is_staff=False, is_active=True)
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class ClearesultGroupLinkedCatalogsAdmin(admin.ModelAdmin):
@@ -127,6 +149,11 @@ class ClearesultUserProfileAdmin(admin.ModelAdmin):
 class BlockCompleteionAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'context_key', 'block_key', 'block_type', 'completion', )
 
+class ClearesultCourseConfigAdmin(admin.ModelAdmin):
+    list_display = ('id', 'course_id', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
+
+class ClearesultCourseEnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'enrollment', 'updated_date')
 
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
@@ -141,3 +168,5 @@ admin.site.register(ClearesultLocalAdmin, ClearesultLocalAdminInterface)
 admin.site.register(ClearesultGroupLinkedCatalogs, ClearesultGroupLinkedCatalogsAdmin)
 admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)
 admin.site.register(BlockCompletion, BlockCompleteionAdmin)
+admin.site.register(ClearesultCourseConfig, ClearesultCourseConfigAdmin)
+admin.site.register(ClearesultCourseEnrollment, ClearesultCourseEnrollmentAdmin)

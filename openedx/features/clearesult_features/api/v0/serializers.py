@@ -14,7 +14,8 @@ from rest_framework import serializers
 
 from openedx.features.clearesult_features.models import (
     UserCreditsProfile, ClearesultCreditProvider, ClearesultCatalog,
-    ClearesultCourse, ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs, ClearesultSiteConfiguration
+    ClearesultCourse, ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
+    ClearesultSiteConfiguration, ClearesultCourseConfig
 )
 from openedx.features.clearesult_features.api.v0.validators import validate_user_for_site
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
@@ -112,7 +113,7 @@ class ClearesultGroupsSerializer(serializers.ModelSerializer):
             if request:
                 log.info("call Task to check and enroll newly added group users to mandatory courses.")
                 check_and_enroll_group_users_to_mandatory_courses.delay(
-                    instance.id, [user.id for user in newly_added_group_users], request.site.id, request.user.id)
+                    instance.id, [user.id for user in newly_added_group_users], instance.site.id, request.user.id)
             else:
                 log.info("Mandatory courses TASK can not be called without request.")
         return super().update(instance, validated_data)
@@ -221,7 +222,7 @@ class ClearesultMandatoryCoursesSerializer(serializers.ModelSerializer):
                 enroll_students_to_mandatory_courses.delay(
                     [user.id for user in instance.group.users.all()],
                     [six.text_type(course.course_id) for course in validated_data.get('mandatory_courses',[])],
-                    request.site.id, request.user.id)
+                    instance.group.site.id, request.user.id)
             else:
                 log.info("Mandatory courses TASK can not be called without request.")
             for course in validated_data.get('mandatory_courses'):
@@ -230,4 +231,63 @@ class ClearesultMandatoryCoursesSerializer(serializers.ModelSerializer):
             for course in validated_data.get('mandatory_courses'):
                 instance.mandatory_courses.remove(course)
 
+            # delete existing mandatory courses configs.
+            ClearesultCourseConfig.objects.filter(
+                site=instance.group.site,
+                course_id__in=[course.course_id for course in validated_data.get('mandatory_courses')]
+            ).delete()
+
         return instance
+
+
+class MandatoryCoursesConfigSerializer(serializers.ModelSerializer):
+    course_name = serializers.SerializerMethodField()
+    course_config = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClearesultCourse
+        fields = ('id', 'course_id', 'course_name', 'course_config')
+
+    def get_course_name(self, obj):
+        try:
+            display_name = CourseOverview.objects.get(id=obj.course_id).display_name
+        except CourseOverview.DoesNotExist:
+            raise NotFound('The course id: {} does not exist.'.format(obj.course_id))
+        except AssertionError as err:
+            raise NotFound(err)
+
+        return display_name
+
+    def get_course_config(self, obj, **kwargs):
+        try:
+            site_id = self.context.get('site_id')
+            courseConfig = ClearesultCourseConfig.objects.get(course_id=obj.course_id, site__id=site_id)
+            return {
+                "id": courseConfig.id,
+                "mandatory_courses_alotted_time": courseConfig.mandatory_courses_alotted_time,
+                "mandatory_courses_notification_period": courseConfig.mandatory_courses_notification_period
+            }
+        except ClearesultCourseConfig.DoesNotExist:
+            return None
+
+
+class ClearesultCourseConfigSerializer(serializers.ModelSerializer):
+    course_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClearesultCourseConfig
+        fields = ('id', 'course_id', 'course_name', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
+        read_only_fields = ('id', 'course_name')
+        extra_kwargs = {
+            'site': {'write_only': True},
+        }
+
+    def get_course_name(self, obj):
+        try:
+            display_name = CourseOverview.objects.get(id=obj.course_id).display_name
+        except CourseOverview.DoesNotExist:
+            raise NotFound('The course id: {} does not exist.'.format(obj.course_id))
+        except AssertionError as err:
+            raise NotFound(err)
+
+        return display_name

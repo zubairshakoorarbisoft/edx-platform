@@ -122,10 +122,14 @@ export default function GroupCatalogsContent({context}) {
 
     return (
         <div>
-            <h1>Groups Catalogs Linkage Manager</h1>
-            <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#addLinkageModal" >
-                New Linkage
-            </button>
+            <div className="admin-header">
+            <h2>Groups Catalogs Linkage Manager</h2>
+                <div className="form-inline">
+                    <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#addLinkageModal" >
+                        Add
+                    </button>
+                </div>
+            </div>
             <AddLinkageModal
                 availableSites={availableSites}
                 setSite={setSite}

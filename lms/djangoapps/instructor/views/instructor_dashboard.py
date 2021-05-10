@@ -51,6 +51,7 @@ from openedx.core.djangoapps.django_comment_common.models import FORUM_ROLE_ADMI
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.verified_track_content.models import VerifiedTrackCohortedCourse
 from openedx.core.djangolib.markup import HTML, Text
+from openedx.features.clearesult_features.utils import is_public_course
 from openedx.core.lib.url_utils import quote_slashes
 from openedx.core.lib.xblock_utils import wrap_xblock
 from shoppingcart.models import Coupon, CourseRegCodeItem, PaidCourseRegistration
@@ -249,7 +250,7 @@ def instructor_dashboard_2(request, course_id):
         'generate_bulk_certificate_exceptions_url': generate_bulk_certificate_exceptions_url,
         'certificate_exception_view_url': certificate_exception_view_url,
         'certificate_invalidation_view_url': certificate_invalidation_view_url,
-        'xqa_server': settings.FEATURES.get('XQA_SERVER', "http://your_xqa_server.com"),
+        'xqa_server': settings.FEATURES.get('XQA_SERVER', "http://your_xqa_server.com")
     }
 
     return render_to_response('instructor/instructor_dashboard_2/instructor_dashboard_2.html', context)
@@ -706,6 +707,7 @@ def _section_data_download(course, access):
         'get_all_courses_progress_data_url': reverse(
             'get_all_courses_progress_data', kwargs={'course_id': six.text_type(course_key)}
         ),
+        'get_registered_users_url': reverse('get_registered_users', kwargs={'course_id': six.text_type(course_key)}),
         'get_anon_ids_url': reverse('get_anon_ids', kwargs={'course_id': six.text_type(course_key)}),
         'list_proctored_results_url': reverse(
             'get_proctored_exam_results', kwargs={'course_id': six.text_type(course_key)}

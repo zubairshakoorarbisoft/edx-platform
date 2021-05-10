@@ -42,10 +42,29 @@ export default function AddEditModal({
         setSite(availableSites.filter((avialbleSite) => avialbleSite.id == e.target.value)[0]);
     }
 
+    const validator = (val) => {
+        this.error = [];
+        this.val = val;
+        this.isRequired = function(){
+          if (!this.val) {
+            this.error.push('This field is required');
+          }
+          return this;
+        }
+        this.isEmail = function() {
+         const filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+         if (this.val && !filter.test(this.val)) {
+            this.error.push('Invalid Email');
+         }
+         return this;
+        }
+        return this;
+    }
+
     return (
         <div>
             <div className="modal fade modal-update" id="exampleModalCenter" tabIndex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div className="modal-content">
                         <form onSubmit={(e)=>submitHandler(e)}>
                             <div className="modal-header">
@@ -57,7 +76,7 @@ export default function AddEditModal({
                             <div className="modal-body">
                                 <div className="form-group">
                                     <label htmlFor="clearesultGroupName">Group Name</label>
-                                    <input type="text" className="form-control" id="clearesultGroupName" aria-describedby="clearesultGroupNameHelp" placeholder="Enter Group Name" required value={name} onChange={(e) => setName(e.target.value)} />
+                                    <input  validate={(val) => new validator(val).isRequired().error } type="text" className="form-control" id="clearesultGroupName" aria-describedby="clearesultGroupNameHelp" placeholder="Enter Group Name" required value={name} onChange={(e) => setName(e.target.value)} />
                                     <small id="clearesultGroupNameHelp" className="form-text text-muted">We'll never share your email with anyone else.</small>
                                 </div>
                                 <div className="form-group">

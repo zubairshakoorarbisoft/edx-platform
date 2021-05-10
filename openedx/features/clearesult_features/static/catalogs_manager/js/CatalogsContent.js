@@ -76,8 +76,7 @@ export default function CatalogsContent({context}) {
         }
     }
 
-    const handleDeleteCatalogButton = async (event) => {
-        let pk = event.target.value;
+    const handleDeleteCatalogButton = async (pk) => {
         if (confirm('Are you sure to delete the catalog with id: ' + pk)) {
             try {
                 let data = (await client.delete(context.CATALOGS_URL + pk)).data
@@ -122,10 +121,10 @@ export default function CatalogsContent({context}) {
         setSelectedCourses([]);
     }
 
-    const handleEditCatalogButton = (event) => {
+    const handleEditCatalogButton = (id) => {
         // perform the necessary fetching
         // will be sent in table
-        let catalog = availableCatalogs.filter((availableCatalog) => availableCatalog.id == event.target.value)[0];
+        let catalog = availableCatalogs.filter((availableCatalog) => availableCatalog.id == id)[0];
         setCurrentCatalog(catalog);
         if (catalog.site == null) {
             setSelectedSite({id: 0, domain:"public"});
@@ -174,16 +173,20 @@ export default function CatalogsContent({context}) {
 
     return (
         <div className="catalogs-manager">
-            <h1>Catalogs Manager</h1>
-            <button
-                type="button"
-                className="btn btn-primary"
-                data-toggle="modal"
-                data-target="#exampleModalCenter"
-                onClick={handleAddCatalogButton}
-            >
-                New Catalog
-            </button>
+            <div className="admin-header">
+                <h2>Catalogs Manager</h2>
+                <div className="form-inline">
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        data-toggle="modal"
+                        data-target="#exampleModalCenter"
+                        onClick={handleAddCatalogButton}
+                    >
+                        Add
+                    </button>
+                </div>
+            </div>
 
             <AddEditModal
                 catalogName={catalogName}

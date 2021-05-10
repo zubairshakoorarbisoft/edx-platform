@@ -151,9 +151,9 @@ def _assign_credits_to_users(user, providers_for_course, course_id_string):
 
 
 def _get_block_locators(course):
-    scorm_block_locators = []
+    course_block_locators = []
     course_data = CourseData(user=None, course=course)
     for id in course_data.collected_structure.get_block_keys():
-        scorm_block_locators.append(id)
+        course_block_locators.append(id)
 
-    return scorm_block_locators
+    return course_block_locators
