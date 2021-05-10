@@ -23,11 +23,11 @@ logger = getLogger(__name__)
 
 class Command(BaseCommand):
     """
-    This command will check and send emails to students for aproaching due dates of mandatory courses notification.
+    This command will check and send emails to students for approaching due dates of mandatory courses notification.
     Example usage:
         $ ./manage.py lms check_and_send_due_dates_emails
     """
-    help = 'Command to mark all existing users as Verified'
+    help = 'Command to check and send mandatory courses due-dates emails'
 
     def _is_course_completed(self, request, enrollment):
         course_outline_blocks = get_course_outline_block_tree(

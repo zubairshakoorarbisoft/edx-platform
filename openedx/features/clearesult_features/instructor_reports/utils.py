@@ -116,7 +116,7 @@ def get_credit_provider_by_short_code(short_code):
         return None
 
 
-def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None):
+def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None, pass_date_filter=None):
     if allowed_sites:
         # allowed_sites can contain data in following situations:
         # when user wants to generate report only for request-site (default-behavior).
@@ -144,7 +144,20 @@ def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_fil
     return user_credits_profiles
 
 
-def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None):
+def check_date_with_filter(pass_date_filter, date):
+    is_valid = True
+    if not date or date == 'N/A':
+        is_valid = False
+    elif pass_date_filter:
+        if pass_date_filter.get('start') and (date < pass_date_filter.get('start')):
+            is_valid = False
+
+        if pass_date_filter.get('end') and (date > pass_date_filter.get('end')):
+            is_valid = False
+    return is_valid
+
+
+def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None, pass_date_filter=None):
     """
     Return info about user who have earned course credits after successfull completion of the courses.
     It will also apply filtration on the basis of given provider_filter.
@@ -193,50 +206,60 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
     We will not include users who have completed the course but didn't get any credits.
     """
     data_list = []
-    user_credits_profiles = get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None)
+    user_credits_profiles = get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter, pass_date_filter)
 
     for user_provider_profile in user_credits_profiles:
         user_credit_courses = user_provider_profile.earned_course_credits.all()
         if user_credit_courses.count() > 0:
             for course_credit in user_credit_courses:
+                is_pass_date_valid_with_filter = True
                 try:
                     pass_date = ClearesultCourseCompletion.objects.get(user=user_provider_profile.user,
                         course_id=course_credit.course_id).pass_date
                 except ClearesultCourseCompletion.DoesNotExist:
                     pass_date = None
 
-                pass_date = pass_date.date() if pass_date else 'N/A'
-                course_grade = CourseGradeFactory().read(user_provider_profile.user, course_key=course_credit.course_id)
-                course = modulestore().get_course(course_credit.course_id)
+                if pass_date:
+                    pass_date = pass_date.date()
+                else:
+                    pass_date = 'N/A'
+
+                if pass_date_filter.get('start') or pass_date_filter.get('end'):
+                    is_pass_date_valid_with_filter = check_date_with_filter(pass_date_filter, pass_date)
+
+                if is_pass_date_valid_with_filter:
+                    course_grade = CourseGradeFactory().read(user_provider_profile.user, course_key=course_credit.course_id)
+                    course = modulestore().get_course(course_credit.course_id)
+                    data = {
+                        'username': user_provider_profile.user.username,
+                        'email': user_provider_profile.user.email,
+                        'user_provider_id': user_provider_profile.credit_id,
+                        'provider_name': user_provider_profile.credit_type.name,
+                        'provider_short_code':  user_provider_profile.credit_type.short_code,
+                        'course_id': course_credit.course_id,
+                        'course_name': course.display_name,
+                        'earned_credits': course_credit.credit_value,
+                        'grade_percent': course_grade.percent,
+                        'letter_grade': course_grade.letter_grade,
+                        'pass_date': pass_date
+                    }
+                    data_list.append(data)
+        else:
+            if not(pass_date_filter.get('start') or pass_date_filter.get('end')):
                 data = {
                     'username': user_provider_profile.user.username,
                     'email': user_provider_profile.user.email,
                     'user_provider_id': user_provider_profile.credit_id,
                     'provider_name': user_provider_profile.credit_type.name,
                     'provider_short_code':  user_provider_profile.credit_type.short_code,
-                    'course_id': course_credit.course_id,
-                    'course_name': course.display_name,
-                    'earned_credits': course_credit.credit_value,
-                    'grade_percent': course_grade.percent,
-                    'letter_grade': course_grade.letter_grade,
-                    'pass_date': pass_date
+                    'course_id': 'N/A',
+                    'course_name': 'N/A',
+                    'earned_credits': 0.0,
+                    'grade_percent': 'N/A',
+                    'letter_grade': 'N/A',
+                    'pass_date': 'N/A'
                 }
                 data_list.append(data)
-        else:
-            data = {
-                'username': user_provider_profile.user.username,
-                'email': user_provider_profile.user.email,
-                'user_provider_id': user_provider_profile.credit_id,
-                'provider_name': user_provider_profile.credit_type.name,
-                'provider_short_code':  user_provider_profile.credit_type.short_code,
-                'course_id': 'N/A',
-                'course_name': 'N/A',
-                'earned_credits': 0.0,
-                'grade_percent': 'N/A',
-                'letter_grade': 'N/A',
-                'pass_date': 'N/A'
-            }
-            data_list.append(data)
 
     return data_list
 

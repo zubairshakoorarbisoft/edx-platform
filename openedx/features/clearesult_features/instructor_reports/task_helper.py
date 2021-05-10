@@ -81,6 +81,8 @@ def submit_calculate_credits_csv(request, course_key, features, task_type):
     task_input = {
         'features': features,
         'provider_filter': request.POST.get('provider_filter', ''),
+        'pass_date_filter_start': request.POST.get('pass_date_filter_start', ''),
+        'pass_date_filter_end': request.POST.get('pass_date_filter_end', ''),
         'csv_type': task_type,
         'request_user_id': request.user.id,
         'is_site_level': json.loads(request.POST.get('is_site_level', 'true').lower()),
@@ -129,6 +131,14 @@ def upload_credits_csv(_xmodule_instance_args, _entry_id, course_id, task_input,
     # Compute result table and format it
     query_features = task_input.get('features')
     provider_filter = task_input.get('provider_filter')
+    pass_date_start = task_input.get('pass_date_filter_start')
+    pass_date_end = task_input.get('pass_date_filter_end')
+
+    pass_date_filter = {
+        'start': datetime.strptime(pass_date_start, "%Y-%m-%d").date() if pass_date_start else None,
+        'end': datetime.strptime(pass_date_end, "%Y-%m-%d").date() if pass_date_end else None
+    }
+
     csv_type = task_input.get('csv_type')
     request_user_id = task_input.get('request_user_id')
     request_site_domain = task_input.get('request_site_domain')
@@ -158,7 +168,9 @@ def upload_credits_csv(_xmodule_instance_args, _entry_id, course_id, task_input,
                 'Username', 'Email', 'User Provider ID (CUI)', 'Provider Name', 'Provider Code',
                 'Course ID', 'Course Name', 'Earned Credits', 'Grade %', 'Grade', 'Pass Date'
             ]
-            student_data = list_user_credits_for_report(course_id, allowed_sites, provider_filter)
+
+            student_data = list_user_credits_for_report(
+                course_id, allowed_sites, provider_filter, pass_date_filter)
             csv_name = 'user_earned_credits_info'
         else:
             query_features_names = ['Username', 'Email', 'User Provider ID (CUI)', 'Provider Name', 'Total Earned Credits']
