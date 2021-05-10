@@ -421,6 +421,12 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
 
     for user in users:
         if user.is_active:
+            sites_associated = ''
+            try:
+                sites_associated = user.clearesult_profile.job_title
+            except ClearesultUserProfile.DoesNotExist:
+                pass
+
             user_info = {
                 'user_id': user.id,
                 'username': user.username,
@@ -428,7 +434,7 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'date_joined': user.date_joined.date(),
-                'sites_associated': user.clearesult_profile.job_title
+                'sites_associated': sites_associated
             }
             data.append(user_info)
 
