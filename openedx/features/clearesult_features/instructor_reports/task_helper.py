@@ -300,7 +300,7 @@ def upload_all_site_registered_users_csv(_xmodule_instance_args, _entry_id, cour
     error = None
 
     query_features_names = [
-        'User ID', 'Email', 'Username', 'First Name', 'Last Name', 'Date Joined'
+        'User ID', 'Email', 'Username', 'First Name', 'Last Name', 'Date Joined', 'Site(s) associated'
     ]
 
     query_features = task_input.get('features')

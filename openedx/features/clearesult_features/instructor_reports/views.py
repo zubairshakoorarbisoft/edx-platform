@@ -81,7 +81,7 @@ def get_registered_users(request, course_id):
     task_type = 'site_wise_registered_users'
     course_key = CourseKey.from_string(course_id)
     query_features = [
-        'user_id', 'email', 'username', 'first_name', 'last_name', 'date_joined'
+        'user_id', 'email', 'username', 'first_name', 'last_name', 'date_joined', 'sites_associated'
     ]
 
     task_helper.submit_get_registered_users_csv(request, course_key, query_features, task_type)
