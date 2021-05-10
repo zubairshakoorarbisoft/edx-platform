@@ -6,6 +6,7 @@ import six
 
 from logging import getLogger
 from student.models import CourseEnrollment
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory
 from xmodule.modulestore.django import modulestore
@@ -420,13 +421,17 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
 
     for user in users:
         if user.is_active:
+            site_mapping = settings.CLEARESULT_AVAILABLE_SITES_MAPPING
+            site_identifiers = user.clearesult_profile.job_title.split(',')
+            sites_associated = [site_mapping[site_identifier]['lms_root_url'] for site_identifier in site_identifiers]
             user_info = {
                 'user_id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
-                'date_joined': user.date_joined.date()
+                'date_joined': user.date_joined.date(),
+                'sites_associated': '"{}"'.format(',\n'.join(sites_associated))
             }
             data.append(user_info)
 
