@@ -444,15 +444,6 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
 
     for user in users:
         if user.is_active:
-            site_mapping = settings.CLEARESULT_AVAILABLE_SITES_MAPPING
-            site_identifiers = user.clearesult_profile.job_title.split(',')
-            sites_associated = []
-            for site_identifier in site_identifiers:
-                try:
-                    sites_associated.append(site_mapping[site_identifier]['lms_root_url'])
-                except KeyError:
-                    pass
-
             user_info = {
                 'user_id': user.id,
                 'username': user.username,
@@ -460,7 +451,7 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'date_joined': user.date_joined.date(),
-                'sites_associated': '"{}"'.format(',\n'.join(sites_associated))
+                'sites_associated': user.clearesult_profile.job_title
             }
             data.append(user_info)
 
