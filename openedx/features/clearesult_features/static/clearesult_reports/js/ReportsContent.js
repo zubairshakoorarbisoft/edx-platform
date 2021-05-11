@@ -73,18 +73,13 @@ function ReportsContent() {
     const handleSiteSelectForCourseReport = (event) => {
         let site = getSiteObject(event);
         setCourseBtnState(false);
+        setFilteredCourses([])
         if(!isNaN(site.id)) {
             setSiteForCourseReport(site);
             loadSiteLinkedCourses(site);
         } else {
             setSiteForCourseReport(site);
             setCourseReportLink("");
-            setFilteredCourses([
-                {
-                    course_id: "----",
-                    course_name: "----"
-                }
-            ])
         }
     }
 
