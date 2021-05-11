@@ -146,9 +146,9 @@ class Command(BaseCommand):
 
     def _log_final_report(self, total_enrollments, incomplete_enrollments, near_due_dates_users_count, student_failed_notifications_emails):
         logger.info('\n\n\n')
-        logger.info("--------------------- DUE DATES EMAILS STATS - {} ---------------------".format
-            (datetime.now().date().strftime("%m-%d-%Y"))
-        )
+        logger.info("--------------------- DUE DATES EMAILS STATS - {} ---------------------".format(
+            datetime.now().date().strftime("%m-%d-%Y")
+        ))
         logger.info('Total number of mandatory courses active enrollments: {}'.format(total_enrollments))
         logger.info('Total number of incomplete enrollments: {}'.format(incomplete_enrollments))
         logger.info('Total number of users who need to be informed about approaching due dates: {}'.format(near_due_dates_users_count))
@@ -174,45 +174,49 @@ class Command(BaseCommand):
             logger.info("------> {} Checking for user: {}, course: {}".format(
                 enrollment.id, enrollment.user.email, six.text_type(enrollment.course_id))
             )
-            request.user = enrollment.user
+            try:
+                request.user = enrollment.user
 
-            # check if course completed
-            if(not self._is_course_completed(request, enrollment)):
-                incomplete_enrollments += 1
-                logger.info("=> Result - course not completed")
+                # check if course completed
+                if(not self._is_course_completed(request, enrollment)):
+                    incomplete_enrollments += 1
+                    logger.info("=> Result - course not completed")
 
-                config = get_mandatory_courses_due_date_config(request, enrollment)
-                alotted_time = config.get("mandatory_courses_alotted_time")
-                notification_period = config.get("mandatory_courses_notification_period")
-                site = config.get("site")
+                    config = get_mandatory_courses_due_date_config(request, enrollment)
+                    alotted_time = config.get("mandatory_courses_alotted_time")
+                    notification_period = config.get("mandatory_courses_notification_period")
+                    site = config.get("site")
 
-                if alotted_time and notification_period and site:
-                    # calculate estimated due date for the enrollment.
-                    enrollment_date = enrollment.clearesultcourseenrollment.updated_date.date()
-                    due_date = enrollment_date + timedelta(days=int(alotted_time))
-                    logger.info("enrollment date: {}, calculated due date: {} using site: {} config".format(
-                        enrollment_date, due_date, site.domain))
+                    if alotted_time and notification_period and site:
+                        # calculate estimated due date for the enrollment.
+                        enrollment_date = enrollment.clearesultcourseenrollment.updated_date.date()
+                        due_date = enrollment_date + timedelta(days=int(alotted_time))
+                        logger.info("enrollment date: {}, calculated due date: {} using site: {} config".format(
+                            enrollment_date, due_date, site.domain))
 
-                    if due_date - timedelta(days=int(notification_period)) == datetime.now().date():
-                        # notification_period days are remaining in due date
-                        # send due date approching emails to students
-                        near_due_dates_users_count += 1
-                        if not send_course_due_date_approching_email(request, config, enrollment):
-                            student_failed_notifications_emails.append("{}: {}".format(
-                                enrollment.user.email, six.text_type(enrollment.course_id))
-                            )
+                        if due_date - timedelta(days=int(notification_period)) == datetime.now().date():
+                            # notification_period days are remaining in due date
+                            # send due date approching emails to students
+                            near_due_dates_users_count += 1
+                            if not send_course_due_date_approching_email(request, config, enrollment):
+                                student_failed_notifications_emails.append("{}: {}".format(
+                                    enrollment.user.email, six.text_type(enrollment.course_id))
+                                )
 
-                    elif due_date + timedelta(days=1) == datetime.now().date():
-                        # user hasn't completed courses in estimated due date.
+                        elif due_date + timedelta(days=1) == datetime.now().date():
+                            # user hasn't completed courses in estimated due date.
 
-                        # update passed_due_dates_site_users dict which will be used to send compiled email to
-                        # local admins and superusers.
-                        self._update_passed_due_dates_site_users_data(passed_due_dates_site_users, site, enrollment, due_date)
+                            # update passed_due_dates_site_users dict which will be used to send compiled email to
+                            # local admins and superusers.
+                            self._update_passed_due_dates_site_users_data(passed_due_dates_site_users, site, enrollment, due_date)
+                    else:
+                        logger.error("=> Mandatory courses config values are not properly set.")
+
                 else:
-                    logger.error("=> Mandatory courses config values are not properly set.")
-
-            else:
-                logger.info("=> Result - course is completed")
+                    logger.info("=> Result - course is completed")
+            except Exception as e:
+                logger.error("=> Error")
+                logger.error(str(e))
 
         send_due_date_passed_email_to_admins(passed_due_dates_site_users)
         self._log_final_report(
