@@ -1,0 +1,15 @@
+<%page expression_filter="h"/>
+<%!
+from django.utils.translation import ugettext as _
+from openedx.core.djangolib.markup import HTML, Text
+
+certificate_info_description = 'CMEOnline acknowledges achievements certificates, which are awarded for course activities that CMEOnline students complete.'
+accomplishment_copy_about = 'About CMEOnline Accomplishments'
+%>
+<section class="about-item about-accomplishments">
+    <h2 class="about-title hd-4">${accomplishment_copy_about}</h2>
+
+    <div class="about-copy copy copy-meta">
+        <p>${certificate_info_description}</p>
+    </div>
+</section>

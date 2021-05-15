@@ -1,0 +1,121 @@
+<%page expression_filter="h"/>
+<%! from django.utils.translation import ugettext as _ %>
+<%namespace name='static' file='../static_content.html'/>
+<%
+course_mode_class = course_mode if course_mode else ''
+course_mode_icon_url = 'images/ico-'+ course_mode_class + '.png'
+course_mode_bg_url = 'images/bg-'+ course_mode_class + '.png'
+## organization_short_name = 'CMEOnline'
+platform_name = 'CMEOnline'	## Currently only used for the user@platforname since logos were disabled for now
+document_title = "Continuing Education Verification Report"
+## document_title = "Continuing Education Verification Report | {course_number} Certificate".format(
+## course_number=context['course_number']
+## )
+accomplishment_copy_description_full = 'successfully completed, received a passing grade, and was awarded this CMEOnline Continuing Education Verification Certificate of Completion in '
+accomplishment_copy_course_description = 'a course of study offered by CMEOnline'
+accomplishment_bottom_box_approval = 'CMEOnline is approved by the Council on Podiatric Medical Education as a sponsor ofcontinuing education in podiatric medicine.This certifies that the above Doctor of Podiatric Medicine has attended andsuccessfully completed the above noted continued education course as indicated byThe 2017 Western Foot and Ankle Conference.'
+%>
+
+
+<main class="accomplishment accomplishment-main">
+
+    <div class="wrapper-accomplishment-rendering">
+		<div class="accomplishment-rendering" style="
+			background-color: white;
+			background-image: url('');
+			background-size: 65%;
+		">
+            <span class="deco-corner deco-corner-tl"></span>
+            <span class="deco-corner deco-corner-tr"></span>
+            <span class="deco-corner deco-corner-bl"></span>
+            <span class="deco-corner deco-corner-br"></span>
+
+            <div class="accomplishment-type">
+				<span class="accomplishment-type-symbol">
+					## <img class="src" src="" alt="Image for course mode of type ${course_mode_class} with icon url ${course_mode_icon_url}">
+					<img class="src" src="" alt="">
+				</span>
+				<img class="signatory-signature" src="${static.url('images/logo.png')}" alt="CMEOnline Logo">
+            </div>
+
+            <div class="wrapper-statement-and-signatories" style="margin: 0 auto; text-align: center">
+                <div class="accomplishment-statement" style="border-bottom: 0.125rem #f5f5f5; text-align: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem">
+					<span class="accomplishment-type-label hd-3" style="font-size: 1.6rem">${document_title}</span>
+				</div>
+
+                <div class="accomplishment-statement" style="border-bottom: 0.125rem #f5f5f5; text-align: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem">
+					## <dl>
+					## 	<dt>${certificate_date_issued_title}</dt>
+					## 	<dd>${certificate_date_issued}</dd>
+					## </dl>
+
+					##<p class="accomplishment-course-name" style="font-size: 1.3rem">This certificate is extended to: ${accomplishment_copy_username}</p>
+          ##
+          ## McDaniel May-2019: change username (and integer ID) to the user's Full Name.
+          ## also, removing leading text "This certificate is extended to:"
+          <p class="accomplishment-course-name" style="font-size: 1.3rem">${accomplishment_copy_name}</p>
+                </div>
+
+                <div class="accomplishment-statement" style="border-bottom: 0.125rem #f5f5f5; text-align: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem">
+
+					<table border="0" style="border-collapse: separate; display: table;border-spacing: 22px; margin: 0 auto;font-size: 1.2rem">
+						<tr>
+							<th>Date</th>
+							<th>Course</th>
+							% if cmeonline_course_credits is not UNDEFINED:
+							<th>Credits</th>
+							% endif
+						</tr>
+						<tr>
+							<td>${certificate_date_issued}</td>
+							<td>${accomplishment_copy_course_name}</td>
+							% if cmeonline_course_credits is not UNDEFINED:
+							<td>${cmeonline_course_credits}</td>
+							% endif
+						</tr>
+					</table>
+                </div>
+
+				<div class="accomplishment-signatories" style="border-bottom: 0.125rem #f5f5f5; margin-bottom: 1.5rem; padding-bottom: 1.5rem">
+					<h3 class="accomplishment-signatories-title sr-only">${_("Noted by")}</h3>
+
+					<div class="wrapper-signatories">
+						<div class="list-signatories">
+							% if certificate_data:
+								% for signatory in certificate_data.get('signatories', []):
+								<div class="signatory">
+									<img class="signatory-signature" src="${static.url(signatory['signature_image_path'])}" alt="${signatory['name']}">
+
+									<h4 class="signatory-name hd-5">${signatory['name']}</h4>
+									<p class="signatory-credentials copy copy-micro">
+										<span class="role">${signatory['title']}</span>
+										<span class="organization">${signatory['organization']}</span>
+									</p>
+								</div>
+								% endfor
+							% endif
+						</div>
+					</div>
+				</div>
+
+                <div class="accomplishment-statement" style="border-bottom: 0.125rem #f5f5f5; text-align: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem">
+					<p style="margin: 0 auto; width: 94%; padding: 10px; border: 2px solid gray; font-size: 1.0rem; text-align: center;">
+					CMEOnline is approved by the Council on Podiatric Medical Education as a sponsor
+					of continuing education in podiatric medicine.</br></br>
+					This certifies that the above Doctor of Podiatric Medicine has attended
+					and successfully completed the above noted continued education course as
+					indicated by CMEOnline
+					</p>
+					</br>
+				</div>
+
+                <div class="accomplishment-statement" style="border-bottom: 0.125rem #f5f5f5; text-align: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem">
+					<p style="font-size: 1.2rem; text-align: center;">
+					${certificate_id_number_title} : ${certificate_id_number}
+					</p>
+				</div>
+
+			</div>
+        </div>
+    </div>
+</main>

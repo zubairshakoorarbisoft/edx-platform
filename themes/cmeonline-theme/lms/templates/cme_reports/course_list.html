@@ -1,0 +1,87 @@
+<%page expression_filter="h"/>
+
+<%!
+  from django.utils.translation import ugettext as _
+  from django.urls import reverse
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="pagetitle">Courses List</%block>
+
+<main id="main" class="courses-list container" aria-label="Content" tabindex="-1">
+    <section>
+        <h1>All Courses</h1>
+        <div class="reports-filter-wrapper">
+            <form name="course-search-form" method="GET" action="" class="search-form">
+                <input type="hidden"  value="${ csrf_token }">
+                <input type="text" name="search" placeholder="Search" value=${search_string} >
+                <input type="submit" value="Search" />
+                % if search_string:
+                    <button class="search-clear"><a href="${reverse('reports_course_list')}">Clear</a></button>
+                % endif
+            </form>
+        </div>
+        %if search_string and not courses:
+            <div class="no-content-message">
+                <h2><b>Result not found with string ${search_string}</b></h2>
+            </div>
+        %else:
+        <table class="report-table">
+            <thead>
+                <th>Course ID</th>
+                <th>Course Name</th>
+                <th>Course Mode</th>
+                <th>Category</th>
+                <th>Enrollments</th>
+                <th>Certificates</th>
+                <th>Orders</th>
+            </thead>
+            <tbody>
+                % for course in courses:
+                <tr>
+                    <td>${course['course']}</td>
+                    <td>${course['course_display_name']}</td>
+                    <td>${course['mode_display_name']}</td>
+                    <td>${course['category']}</td>
+                    <td>${course['enrollment_count']}</td>
+                    <td>
+                        % if course['mode_slug'] in ['verified', 'no-id-professional', 'honor']:
+                            <a href="${reverse('reports_course_certificates', kwargs={'course_id': course['course']})}?course_mode=${course['mode_slug']}" target="_blank">View</a>
+                        % else:
+                            --
+                        % endif
+                    </td>
+                    <td>
+                        % if course['mode_slug'] in ['verified', 'no-id-professional']:
+                            <a href="${reverse('reports_course_orders', kwargs={'course_id': course['course']})}" target="_blank">View</a>
+                        %else:
+                            --
+                        %endif
+                    </td>
+                </tr>
+                % endfor
+            </tbody>
+        </table>
+        % endif
+
+        % if course_modes_page.has_other_pages:
+            <ul class="report-pagination">
+            % for i in course_modes_page.paginator.page_range:
+              % if course_modes_page.number == i:
+                <li class="active"><span>${i} <span class="sr-only">(current)</span></span></li>
+              % else:
+                % if search_string:
+                    <li><a href="?search=${search_string}&page=${i}">${i}</a></li>
+                % else:
+                    <li><a href="?page=${i}">${i}</a></li>
+                % endif
+              % endif
+            % endfor
+          </ul>
+        % endif
+
+    </section>
+</main>
+

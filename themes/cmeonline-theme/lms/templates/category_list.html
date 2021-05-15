@@ -1,0 +1,31 @@
+<%!
+  from django.utils.translation import ugettext as _
+  from django.urls import reverse
+%>
+<%inherit file="main.html" />
+
+<%namespace name='static' file='static_content.html'/>
+
+<%block name="pagetitle">${_("Categories")}</%block>
+
+<main id="main" class="theme-content" aria-label="Content" tabindex="-1">
+
+  <section class="find-courses">
+    <section class="courses-container">
+      % if categories:
+        <h2 class="title">${_('Categories')}</h2>
+      % else:
+        <h2 class="title">${_('Categories not available')}</h2>
+      % endif
+      <div class="courses no-course-discovery" role="region" aria-label="${_('List of Categories')}">
+        <ul class="courses-listing">
+          % for category in categories:
+          <li class="courses-listing-item">
+            <%include file="cat.html" args="category=category" />
+          </li>
+          % endfor
+        </ul>
+      </div>
+    </section>
+  </section>
+</main>

@@ -1,0 +1,48 @@
+<%page expression_filter="h"/>
+
+## Override the default styles_version to use Bootstrap
+##<%! main_css = "css/bootstrap/lms-main.css" %>
+
+<%!
+  from django.utils.translation import ugettext as _
+  from django.urls import reverse
+%>
+<%inherit file="main.html" />
+
+<%namespace name='static' file='static_content.html'/>
+
+<%block name="pagetitle">${category.name}</%block>
+
+<main id="main" class="category-level" aria-label="Content" tabindex="-1">
+    <section class="about">
+        <div class="bg section-header">
+            <h1 class="title">${category.name}</h1>
+            <p>${category.description}</p>
+
+            <div class="sub-category">
+              % for descendant in descendants:
+                <a class="btn btn-primary" href="${reverse('course_category', kwargs={'slug': descendant.slug})}">${descendant.name}</a>
+              % endfor
+            </div>
+
+          <section class="find-courses">
+            <section class="courses-container">
+              % if courses:
+                <a class="courses-link" href="/courses">${_('View All Courses')}</a>
+              % else:
+                <h2 class="title">${_('Courses not available for this category.')} <a href="/courses">${_('View All Courses')}</a></h2>
+              % endif
+              <div class="courses no-course-discovery" role="region" aria-label="${_('List of Courses')}">
+                <ul class="courses-listing">
+                  % for course in courses:
+                  <li class="courses-listing-item">
+                    <%include file="course.html" args="course=course" />
+                  </li>
+                  % endfor
+                </ul>
+              </div>
+            </section>
+          </section>
+        </div>
+    </section>
+</main>

@@ -1,0 +1,58 @@
+<%page expression_filter="h"/>
+
+<%!
+  from datetime import datetime
+  from django.utils.translation import ugettext as _
+  from django.urls import reverse
+  from lms.djangoapps.commerce.utils import EcommerceService
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+
+</%block>
+
+<%block name="pagetitle">Course Orders</%block>
+
+<main id="main" class="course-orders container" aria-label="Content" tabindex="-1">
+    <section>
+        <h1>${course_name} Order Details</h1>
+        <h2><strong>Course Category: </strong> ${category} </h2>
+        <!--<h2><strong>Course Instructors: </strong> ${instructors} </h2>-->
+        % if orders:
+        <table class="report-table">
+            <thead>
+                <th>Order Number</th>
+                <th>Username</th>
+                <th>Attendee Email</th>
+                <th>Date Placed</th>
+                <th>Amount Incl Tax</th>
+            </thead>
+            <tbody>
+               % for order in orders:
+               <%
+                    try:
+                        date_placed = datetime.strptime(order.get('date_placed').split('T')[0], "%Y-%m-%d").date().strftime("%e %b, %Y")
+                    except:
+                        date_placed = '--'
+               %>
+               <tr>
+                   <td><a href="${EcommerceService().get_receipt_page_url(order['number'])}" target="_blank">${order.get('number')}</a></td>
+                   <td>${order.get('user__username')}</td>
+                   <td>${order.get('user__email')}</td>
+                   <td>${date_placed}</td>
+                   <td>$${order.get('total_incl_tax')}</td>
+               </tr>
+               % endfor
+            </tbody>
+        </table>
+        % else:
+            <div class="no-content-message">
+                <h2><b>No order found for this course.</b></h2>
+            </div>
+        % endif
+    </section>
+</main>
+

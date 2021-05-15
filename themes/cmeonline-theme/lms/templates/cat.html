@@ -1,0 +1,20 @@
+<%def name="online_help_token()"><% return "category" %></%def>
+<%namespace name='static' file='static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.urls import reverse
+from six import text_type
+%>
+<%page args="category" expression_filter="h"/>
+
+<article class="course" id="${category.id}" role="region" aria-label="${category.name}">
+  <a href="${reverse('course_category', args=[category.slug])}">
+    <header class="course-image">
+      <div class="cover-image">
+        <h2>${category.name}</h2>
+        <p>${category.description}</p>
+        <div class="learn-more" aria-hidden="true">${_("LEARN MORE")}</div>
+      </div>
+    </header>
+  </a>
+</article>

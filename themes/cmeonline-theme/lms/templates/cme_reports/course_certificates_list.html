@@ -1,0 +1,91 @@
+<%page expression_filter="h"/>
+
+<%!
+  from django.utils.translation import ugettext as _
+  from django.urls import reverse
+%>
+<%inherit file="../main.html" />
+
+<%namespace name='static' file='../static_content.html'/>
+
+<%block name="header_extras">
+<style>
+
+</style>
+</%block>
+
+<%block name="pagetitle">Course Certificates</%block>
+
+<main id="main" class="course-orders container" aria-label="Content" tabindex="-1">
+    <section>
+        <h1>${course_name} (${course_mode}) Certificate Details</h1>
+        <h2><strong>Course Category: </strong> ${category} </h2>
+        <div class="reports-filter-wrapper">
+            <form name="course-search-form" method="GET" action="" class="search-form">
+                <input type="hidden"  value="${ csrf_token }">
+                <input type="hidden" name="course_mode" value="${course_mode}">
+                <input type="text" name="search" placeholder="Search" value=${search_string} >
+                <input type="submit" value="Search" />
+                % if search_string:
+                    <button class="search-clear">
+                        <a href="${reverse('reports_course_certificates', kwargs={'course_id': course_id})}?course_mode=${course_mode}">Clear</a>
+                    </button>
+                % endif
+                % if certificate_data:
+                    <button class="export-data">
+                        <a href="${reverse('export_course_certificates', kwargs={'course_id': course_id})}?course_mode=${course_mode}">Export Data</a>
+                    </button>
+                % endif
+            </form>
+        </div>
+        % if certificate_data:
+            <table class="report-table">
+                <thead>
+                    <th>ID</th>
+                    <th>Course Completed On</th>
+                    <th>Attendee Name</th>
+                    <th>Attendee Email</th>
+                    <th>View Certificate</th>
+                </thead>
+                <tbody>
+                    % for data in certificate_data:
+                   <tr>
+                       <td>${data['verify_uuid']}</td>
+                       <td>${data['created_date']}</td>
+                       <td>${data['user_fullname']}</td>
+                       <td>${data['user_email']}</td>
+                       <td>
+                           %if data['status'] != 'unavailable':
+                                <a href="${reverse('certificates:render_cert_by_uuid', kwargs={'certificate_uuid': data['verify_uuid']})}" target="_blank">View</a>
+                           %else:
+                                <b>Unavailable</b>
+                           %endif
+                       </td>
+                   </tr>
+                    %endfor
+                </tbody>
+            </table>
+        % else:
+            <div class="no-content-message">
+                <h2><b>No one get certificate in this course.</b></h2>
+            </div>
+        % endif
+
+        % if cert_page.has_other_pages:
+            <ul class="report-pagination">
+            % for i in cert_page.paginator.page_range:
+              % if cert_page.number == i:
+                <li class="active"><span>${i} <span class="sr-only">(current)</span></span></li>
+              % else:
+                % if search_string:
+                    <li><a href="?course_mode=${course_mode}&search=${search_string}&page=${i}">${i}</a></li>
+                % else:
+                    <li><a href="?course_mode=${course_mode}&page=${i}">${i}</a></li>
+                % endif
+              % endif
+            % endfor
+          </ul>
+        % endif
+    </section>
+</main>
+
