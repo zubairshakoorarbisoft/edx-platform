@@ -51,11 +51,12 @@ def replace_old_clearesult_app_uid(backend, uid, details, response, *args, **kwa
             logger.info('Could not fetch email from facebook against uid: {}.'.format(uid))
 
 
-def redirect_to_continuing_education(new_association, auth_entry, *_, **__):
+def redirect_to_continuing_education(user=None, *_, **__):
     """
     Redirect a new registered user to "Continuing Education" page.
     """
-    if new_association and auth_entry == pipeline.AUTH_ENTRY_REGISTER:
+    if user and not user.clearesult_profile.get_extension_value('has_visited_continuing_education_form', False):
+        user.clearesult_profile.set_extension_value('has_visited_continuing_education_form', True)
         return redirect(reverse('clearesult_features:continuing_education'))
 
 
