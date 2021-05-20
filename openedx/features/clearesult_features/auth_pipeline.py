@@ -71,7 +71,7 @@ def update_clearesult_user_and_profile(request, response, user=None, *args, **kw
             instance, created = ClearesultUserProfile.objects.update_or_create(
                 user=user,
                 defaults={
-                    'job_title': response.get('jobTitle', ''),
+                    'site_identifiers': response.get('jobTitle', ''),
                     'company': response.get('extension_Client', ''),
                     'state_or_province': response.get('state', ''),
                     'postal_code': response.get('postalCode', '')
@@ -96,10 +96,11 @@ def update_clearesult_user_and_profile(request, response, user=None, *args, **kw
 
 def _set_user_site_identifiers(request, clearesult_user_profile, incoming_site_identifiers):
     if incoming_site_identifiers.strip() != '':
-        incoming_site_identifiers = incoming_site_identifiers.split(',')
-        if len(incoming_site_identifiers) > 0:
-            clearesult_user_profile.set_extension_value('site_identifier', incoming_site_identifiers)
-            for site_identifier in incoming_site_identifiers:
+        incoming_site_identifiers_list = incoming_site_identifiers.split(',')
+        if len(incoming_site_identifiers_list) > 0:
+            clearesult_user_profile.site_identifiers = incoming_site_identifiers
+            clearesult_user_profile.save()
+            for site_identifier in incoming_site_identifiers_list:
                 site = get_site_from_site_identifier(clearesult_user_profile.user, site_identifier)
                 if site:
                     add_user_to_site_default_group(request, clearesult_user_profile.user, site)

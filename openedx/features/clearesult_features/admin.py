@@ -143,7 +143,7 @@ class ClearesultCourseCompletionAdmin(admin.ModelAdmin):
 
 
 class ClearesultUserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'job_title', 'company', 'state_or_province', 'postal_code', 'extensions')
+    list_display = ('user', 'site_identifiers', 'company', 'state_or_province', 'postal_code', 'extensions')
 
 
 class BlockCompleteionAdmin(admin.ModelAdmin):

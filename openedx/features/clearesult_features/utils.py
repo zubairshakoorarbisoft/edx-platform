@@ -203,7 +203,7 @@ def get_site_users(site):
         logger.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")
         return site_users
 
-    clearesult_user_profiles = ClearesultUserProfile.objects.filter(job_title__icontains=site_name).select_related("user")
+    clearesult_user_profiles = ClearesultUserProfile.get_site_related_profiles(site_name)
 
     for profile in clearesult_user_profiles:
         site_users.append(profile.user)
@@ -283,7 +283,7 @@ def get_calculated_due_date(request, enrollment):
 
 def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
     """
-    Returns list of data that clearesult needs on student dahboard for incomeplete/in-progress courses section
+    Returns list of data that clearesult needs on student dahboard for incomplete/in-progress courses section
     """
     data = []
 

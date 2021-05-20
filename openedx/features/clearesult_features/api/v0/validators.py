@@ -269,9 +269,7 @@ def validate_user_for_site(user, site):
             log.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")
             return False
 
-        user_site_identifiers = user.clearesult_profile.extensions.get('site_identifier', [])
-
-        if site_name in user_site_identifiers:
+        if user.clearesult_profile.has_identifier(site_name):
             return True
         log.info("user {} does not belong to site {}. ".format(user.email, site_name))
         return False
