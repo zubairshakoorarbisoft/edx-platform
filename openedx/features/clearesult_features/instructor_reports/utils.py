@@ -446,7 +446,7 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
         if user.is_active:
             sites_associated = ''
             try:
-                sites_associated = user.clearesult_profile.job_title
+                sites_associated = user.clearesult_profile.site_identifiers
             except ClearesultUserProfile.DoesNotExist:
                 pass
 

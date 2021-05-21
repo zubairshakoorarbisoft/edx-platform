@@ -167,7 +167,6 @@ def _create_or_update_clearesult_user_profile(edx_user, user_info):
         user_info (dict): Dict containing the values of single row of csv file
     """
     clearesult_profile_data = {
-        'job_title': user_info.get('Job Title'),
         'company': user_info.get('Company'),
         'state_or_province': user_info.get('State/Province'),
         'postal_code': user_info.get('Postal Code')
