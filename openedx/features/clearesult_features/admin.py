@@ -143,7 +143,13 @@ class ClearesultCourseCompletionAdmin(admin.ModelAdmin):
 
 
 class ClearesultUserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'site_identifiers', 'company', 'state_or_province', 'postal_code', 'extensions')
+    readonly_fields=('get_user_email',)
+    list_display = ('user', 'get_user_email', 'site_identifiers', 'extensions')
+
+    def get_user_email(self, obj):
+        return obj.user.email
+
+    get_user_email.short_description = 'Email'
 
 
 class BlockCompleteionAdmin(admin.ModelAdmin):
