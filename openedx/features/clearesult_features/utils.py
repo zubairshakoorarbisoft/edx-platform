@@ -288,11 +288,17 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
     data = []
 
     for enrollment in enrollments:
+        due_date = ""
+        is_mandatory = is_mandatory_course(enrollment)
+
+        if is_mandatory:
+            due_date = get_calculated_due_date(request, enrollment)
+
         data.append({
             'progress': get_course_progress(request, enrollment.course),
-            'is_mandatory': is_mandatory_course(enrollment),
+            'is_mandatory': is_mandatory,
             'is_free': enrollment.mode in ['honor', 'audit'],
-            'mandatory_course_due_date': get_calculated_due_date(request, enrollment)
+            'mandatory_course_due_date': due_date
         })
 
     return data
