@@ -197,7 +197,7 @@ def get_site_users(site):
     site_users = []
     site_name = "-".join(site.name.split('-')[:-1]).rstrip()
 
-    # ! Note: site name must contain "-" otherwise it will return emty string.
+    # ! Note: site name must contain "-" otherwise it will return empty string.
     if not site_name:
         logger.info("Site name ({}) is not in a correct format.".format(site.name))
         logger.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")

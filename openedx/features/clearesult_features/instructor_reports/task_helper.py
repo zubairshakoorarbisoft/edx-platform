@@ -103,6 +103,8 @@ def submit_get_registered_users_csv(request, course_key, features, task_type):
     task_class = get_site_registered_users_csv
     task_input = {
         'features': features,
+        'date_joined_filter_start': request.POST.get('date_joined_filter_start', ''),
+        'date_joined_filter_end': request.POST.get('date_joined_filter_end', ''),
         'csv_type': task_type,
         'request_user_id': request.user.id,
         'request_site_domain': request.site.domain,
@@ -316,6 +318,14 @@ def upload_all_site_registered_users_csv(_xmodule_instance_args, _entry_id, cour
     ]
 
     query_features = task_input.get('features')
+    date_joined_start = task_input.get('date_joined_filter_start')
+    date_joined_end = task_input.get('date_joined_filter_end')
+
+    date_joined_filter = {
+        'start': datetime.strptime(date_joined_start, "%Y-%m-%d").date() if date_joined_start else None,
+        'end': datetime.strptime(date_joined_end, "%Y-%m-%d").date() if date_joined_end else None
+    }
+
     request_user_id = task_input.get('request_user_id')
     request_site_domain = task_input.get('request_site_domain')
     is_site_level = task_input.get('is_site_level')
@@ -325,7 +335,7 @@ def upload_all_site_registered_users_csv(_xmodule_instance_args, _entry_id, cour
     csv_name = "registered_users_info"
     csv_name = get_csv_name([site], csv_name, is_site_level)
 
-    user_data = list_all_site_wise_registered_users_for_report(site, is_site_level)
+    user_data = list_all_site_wise_registered_users_for_report(site, is_site_level, date_joined_filter)
 
     header, rows = format_dictlist(user_data, query_features)
 

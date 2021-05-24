@@ -108,6 +108,8 @@
             this.$credits_report_provider_filter_select = this.$section.find("select[name='credits-report-provider-filter']");
             this.$credits_report_pass_date_filter_start = this.$section.find("input[name='credits-report-pass-date-filter-start']");
             this.$credits_report_pass_date_filter_end = this.$section.find("input[name='credits-report-pass-date-filter-end']");
+            this.$registered_users_report_date_joined_filter_start = this.$section.find("input[name='registered-users-report-date-joined-filter-start']");
+            this.$registered_users_report_date_joined_filter_end = this.$section.find("input[name='registered-users-report-date-joined-filter-end']");
             this.$list_problem_responses_csv_input = this.$section.find("input[name='problem-location']");
             this.$list_problem_responses_csv_btn = this.$section.find("input[name='list-problem-responses-csv']");
             this.$list_anon_btn = this.$section.find("input[name='list-anon-ids']");
@@ -320,6 +322,8 @@
             this.$list_all_registered_users_csv_btn.click(function() {
                 var url = dataDownloadObj.$list_all_registered_users_csv_btn.data('endpoint');
                 var errorMessage = gettext('Error generating registered users report. Please try again.');
+                var dateJoinedFilterStart = dataDownloadObj.$registered_users_report_date_joined_filter_start.val();
+                var dateJoinedFilterEnd = dataDownloadObj.$registered_users_report_date_joined_filter_end.val();
                 dataDownloadObj.clear_display();
                 return $.ajax({
                     type: 'POST',
@@ -327,7 +331,9 @@
                     url: url,
                     data: {
                         is_course_level: $(this).attr('data-is-course-level'),
-                        is_site_level: dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true
+                        is_site_level: dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true,
+                        date_joined_filter_start: dateJoinedFilterStart,
+                        date_joined_filter_end: dateJoinedFilterEnd
                     },
                     error: function(error) {
                         if (error.responseText) {

@@ -144,15 +144,15 @@ def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_fil
     return user_credits_profiles
 
 
-def check_date_with_filter(pass_date_filter, date):
+def check_date_with_filter(date_filter, date):
     is_valid = True
     if not date or date == 'N/A':
         is_valid = False
-    elif pass_date_filter:
-        if pass_date_filter.get('start') and (date < pass_date_filter.get('start')):
+    elif date_filter:
+        if date_filter.get('start') and (date < date_filter.get('start')):
             is_valid = False
 
-        if pass_date_filter.get('end') and (date > pass_date_filter.get('end')):
+        if date_filter.get('end') and (date > date_filter.get('end')):
             is_valid = False
     return is_valid
 
@@ -266,7 +266,7 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
 
 def list_user_total_credits_for_report(course_key, allowed_sites, provider_filter=None):
     """
-    Return info about user accumulative earned credits. It will also apply filteration on the basis of
+    Return info about user accumulative earned credits. It will also apply filtration on the basis of
     given provider_filter.
 
     list_user_total_credits_for_report(course_key, provider_filter)
@@ -417,7 +417,7 @@ def list_all_course_enrolled_users_progress_for_report(allowed_sites, course_id,
     return data
 
 
-def list_all_site_wise_registered_users_for_report(site, is_site_level):
+def list_all_site_wise_registered_users_for_report(site, is_site_level, date_joined_filter=None):
     """
     Return info of the users' registration
 
@@ -450,15 +450,29 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
             except ClearesultUserProfile.DoesNotExist:
                 pass
 
-            user_info = {
-                'user_id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'date_joined': user.date_joined.date(),
-                'sites_associated': sites_associated
-            }
-            data.append(user_info)
+            actual_joined_date = user.date_joined.date()
+            if date_joined_filter.get('start') or date_joined_filter.get('end'):
+                if check_date_with_filter(date_joined_filter, actual_joined_date):
+                    user_info = {
+                        'user_id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'date_joined': actual_joined_date,
+                        'sites_associated': sites_associated
+                    }
+                    data.append(user_info)
+            else:
+                user_info = {
+                    'user_id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'date_joined': actual_joined_date,
+                    'sites_associated': sites_associated
+                }
+                data.append(user_info)
 
     return data
