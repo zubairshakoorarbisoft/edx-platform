@@ -6,6 +6,7 @@ import six
 
 from logging import getLogger
 from student.models import CourseEnrollment
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory
 from xmodule.modulestore.django import modulestore
@@ -14,6 +15,7 @@ from lms.djangoapps.certificates.models import CertificateStatuses, GeneratedCer
 from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.features.clearesult_features.models import (
+    ClearesultUserProfile,
     ClearesultCourseCredit,
     ClearesultCreditProvider,
     UserCreditsProfile,
@@ -22,7 +24,7 @@ from openedx.features.clearesult_features.models import (
 from openedx.features.clearesult_features.models import ClearesultCourse, ClearesultGroupLinkage
 from openedx.features.clearesult_features.utils import (
     get_course_progress, get_site_linked_courses_and_groups,
-    get_group_users
+    get_group_users, get_site_users
 )
 
 logger = getLogger(__name__)
@@ -81,7 +83,7 @@ def generate_user_course_credits(course_id, user):
                 )
 
 
-def remove_user_cousre_credits_if_exist(course_id, user):
+def remove_user_course_credits_if_exist(course_id, user):
     course_credits = ClearesultCourseCredit.objects.filter(course_id=course_id)
     user_credits = UserCreditsProfile.objects.filter(user=user).prefetch_related('earned_course_credits')
 
@@ -114,29 +116,48 @@ def get_credit_provider_by_short_code(short_code):
         return None
 
 
-def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None):
+def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None, pass_date_filter=None):
     if allowed_sites:
-        # local admin scenerio - retrieve all site users
+        # allowed_sites can contain data in following situations:
+        # when user wants to generate report only for request-site (default-behavior).
+        # when local admin wants to get data for all of it's allowed sites
+
+        # retrieve users only for allowed sites list.
         groups = ClearesultGroupLinkage.objects.filter(site__in=allowed_sites)
         site_users = get_group_users(groups)
 
     if provider_filter and allowed_sites:
-        # local admin scenerio with provider filter
+        # Either global/local admins scenerio for request-site - with provider filter
+        # OR local admin scenerio for all allowed sites - with provider filter
         user_credits_profiles = UserCreditsProfile.objects.filter(user__in=site_users, credit_type__short_code=provider_filter)
     elif provider_filter and not allowed_sites:
-        # global admin scenerio with provider filter
+        # global admin scenerio for all sites - with provider filter
         user_credits_profiles = UserCreditsProfile.objects.filter(credit_type__short_code=provider_filter)
     elif not provider_filter and allowed_sites:
-        # local admin scenerio with out provider filter
+        # Either global/local admins scenerio for request-site - without provider filter
+        # OR local admin scenerio for all allowed sites - without provider filter
         user_credits_profiles = UserCreditsProfile.objects.filter(user__in=site_users)
     else:
-        # global admin scenerio with out provider filter
+        # global admin scenerio for all sites - without provider filter
         user_credits_profiles = UserCreditsProfile.objects.all()
 
     return user_credits_profiles
 
 
-def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None):
+def check_date_with_filter(pass_date_filter, date):
+    is_valid = True
+    if not date or date == 'N/A':
+        is_valid = False
+    elif pass_date_filter:
+        if pass_date_filter.get('start') and (date < pass_date_filter.get('start')):
+            is_valid = False
+
+        if pass_date_filter.get('end') and (date > pass_date_filter.get('end')):
+            is_valid = False
+    return is_valid
+
+
+def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None, pass_date_filter=None):
     """
     Return info about user who have earned course credits after successfull completion of the courses.
     It will also apply filtration on the basis of given provider_filter.
@@ -185,50 +206,60 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
     We will not include users who have completed the course but didn't get any credits.
     """
     data_list = []
-    user_credits_profiles = get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter=None)
+    user_credits_profiles = get_user_credits_profile_data_for_credits_report(allowed_sites, provider_filter, pass_date_filter)
 
     for user_provider_profile in user_credits_profiles:
         user_credit_courses = user_provider_profile.earned_course_credits.all()
         if user_credit_courses.count() > 0:
             for course_credit in user_credit_courses:
+                is_pass_date_valid_with_filter = True
                 try:
                     pass_date = ClearesultCourseCompletion.objects.get(user=user_provider_profile.user,
                         course_id=course_credit.course_id).pass_date
                 except ClearesultCourseCompletion.DoesNotExist:
                     pass_date = None
 
-                pass_date = pass_date.date() if pass_date else 'N/A'
-                course_grade = CourseGradeFactory().read(user_provider_profile.user, course_key=course_credit.course_id)
-                course = modulestore().get_course(course_credit.course_id)
+                if pass_date:
+                    pass_date = pass_date.date()
+                else:
+                    pass_date = 'N/A'
+
+                if pass_date_filter.get('start') or pass_date_filter.get('end'):
+                    is_pass_date_valid_with_filter = check_date_with_filter(pass_date_filter, pass_date)
+
+                if is_pass_date_valid_with_filter:
+                    course_grade = CourseGradeFactory().read(user_provider_profile.user, course_key=course_credit.course_id)
+                    course = modulestore().get_course(course_credit.course_id)
+                    data = {
+                        'username': user_provider_profile.user.username,
+                        'email': user_provider_profile.user.email,
+                        'user_provider_id': user_provider_profile.credit_id,
+                        'provider_name': user_provider_profile.credit_type.name,
+                        'provider_short_code':  user_provider_profile.credit_type.short_code,
+                        'course_id': course_credit.course_id,
+                        'course_name': course.display_name,
+                        'earned_credits': course_credit.credit_value,
+                        'grade_percent': course_grade.percent,
+                        'letter_grade': course_grade.letter_grade,
+                        'pass_date': pass_date
+                    }
+                    data_list.append(data)
+        else:
+            if not(pass_date_filter.get('start') or pass_date_filter.get('end')):
                 data = {
                     'username': user_provider_profile.user.username,
                     'email': user_provider_profile.user.email,
                     'user_provider_id': user_provider_profile.credit_id,
                     'provider_name': user_provider_profile.credit_type.name,
                     'provider_short_code':  user_provider_profile.credit_type.short_code,
-                    'course_id': course_credit.course_id,
-                    'course_name': course.display_name,
-                    'earned_credits': course_credit.credit_value,
-                    'grade_percent': course_grade.percent,
-                    'letter_grade': course_grade.letter_grade,
-                    'pass_date': pass_date
+                    'course_id': 'N/A',
+                    'course_name': 'N/A',
+                    'earned_credits': 0.0,
+                    'grade_percent': 'N/A',
+                    'letter_grade': 'N/A',
+                    'pass_date': 'N/A'
                 }
                 data_list.append(data)
-        else:
-            data = {
-                'username': user_provider_profile.user.username,
-                'email': user_provider_profile.user.email,
-                'user_provider_id': user_provider_profile.credit_id,
-                'provider_name': user_provider_profile.credit_type.name,
-                'provider_short_code':  user_provider_profile.credit_type.short_code,
-                'course_id': 'N/A',
-                'course_name': 'N/A',
-                'earned_credits': 0.0,
-                'grade_percent': 'N/A',
-                'letter_grade': 'N/A',
-                'pass_date': 'N/A'
-            }
-            data_list.append(data)
 
     return data_list
 
@@ -286,7 +317,7 @@ def list_user_total_credits_for_report(course_key, allowed_sites, provider_filte
     return data_list
 
 
-def list_all_coures_enrolled_users_progress_for_report(allowed_sites):
+def list_all_course_enrolled_users_progress_for_report(allowed_sites, course_id, is_course_level=False):
     """
     Return info about user all courses enrolled students progress details.
     would return [
@@ -316,20 +347,28 @@ def list_all_coures_enrolled_users_progress_for_report(allowed_sites):
     data = []
     all_active_enrollments = []
 
-    if allowed_sites == None:
-        # user is superuser
+    if allowed_sites == None and not is_course_level:
+        # user is superuser and report is for all courses of all sites
         all_active_enrollments = CourseEnrollment.objects.filter(is_active=True)
+    elif allowed_sites == None and is_course_level:
+        # user is superuser and report is for only for current course
+        all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id=course_id)
     else:
         # user is local admin
 
         # retrieve site courses
         site_courses, groups = get_site_linked_courses_and_groups(allowed_sites)
-        site_courses_ids = [course.course_id for course in site_courses]
 
         # retrieve site users
         site_users = get_group_users(groups)
 
-        all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id__in=site_courses_ids, user__in=site_users)
+        if not is_course_level:
+            # user is local-admin and report is for all courses of allowed sites
+            site_courses_ids = [course.course_id for course in site_courses]
+            all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id__in=site_courses_ids, user__in=site_users)
+        else:
+            # user is local-admin and report is only for current course
+            all_active_enrollments = CourseEnrollment.objects.filter(is_active=True, course_id=course_id, user__in=site_users)
 
     for enrollment in all_active_enrollments:
         user = enrollment.user
@@ -374,5 +413,52 @@ def list_all_coures_enrolled_users_progress_for_report(allowed_sites):
         }
 
         data.append(user_course_dict)
+
+    return data
+
+
+def list_all_site_wise_registered_users_for_report(site, is_site_level):
+    """
+    Return info of the users' registration
+
+    Data would be in this format
+    [
+        {
+            'user_id': 1,
+            'username': 'John',
+            'email': 'john@example.com',
+            'first_name': 'John',
+            'last_name': 'Wick',
+            'date_joined': '2020-12-07'
+        },
+        ...
+        ...
+    ]
+    """
+    data = []
+    users = []
+    if is_site_level:
+        users = get_site_users(site)
+    else:
+        users = User.objects.filter(is_active=True)
+
+    for user in users:
+        if user.is_active:
+            sites_associated = ''
+            try:
+                sites_associated = user.clearesult_profile.job_title
+            except ClearesultUserProfile.DoesNotExist:
+                pass
+
+            user_info = {
+                'user_id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'date_joined': user.date_joined.date(),
+                'sites_associated': sites_associated
+            }
+            data.append(user_info)
 
     return data

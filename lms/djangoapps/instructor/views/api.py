@@ -95,7 +95,7 @@ from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
-from openedx.features.clearesult_features.utils import check_user_eligibility_for_clearesult_enrollment
+from openedx.features.clearesult_features.utils import check_user_eligibility_for_clearesult_enrollment, update_clearesult_enrollment_date
 from shoppingcart.models import (
     Coupon,
     CourseMode,
@@ -732,6 +732,9 @@ def students_update_enrollment(request, course_id):
                                 state_transition = ALLOWEDTOENROLL_TO_ENROLLED
                             else:
                                 state_transition = UNENROLLED_TO_ENROLLED
+                                #update enrollment date as user status changed from unenrolled to enrolled
+                                if user:
+                                    update_clearesult_enrollment_date(enrollment_obj)
                 else:
                     if after_allowed:
                         state_transition = UNENROLLED_TO_ALLOWEDTOENROLL

@@ -16,6 +16,7 @@ import six
 from ccx_keys.locator import CCXLocator
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
 from django.shortcuts import redirect
@@ -68,13 +69,19 @@ from openedx.core.djangoapps.waffle_utils import WaffleSwitchNamespace
 from openedx.core.djangolib.js_utils import dump_js_escaped_json
 from openedx.core.lib.course_tabs import CourseTabPluginManager
 from openedx.core.lib.courses import course_image_url
-from openedx.features.clearesult_features.models import ClearesultCourseCredit, ClearesultCreditProvider
+from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
+from openedx.features.clearesult_features.models import (
+    ClearesultCourseCredit, ClearesultCreditProvider, ClearesultCourse
+)
 from openedx.features.clearesult_features.instructor_reports.utils import (
     get_all_credits_provider_list,
     get_available_credits_provider_list,
     get_course_credits_list
 )
-from openedx.features.clearesult_features.utils import create_clearesult_course, get_site_for_clearesult_course
+from openedx.features.clearesult_features.utils import (
+    create_clearesult_course, get_site_for_clearesult_course,
+    is_local_admin_or_superuser
+)
 from openedx.features.content_type_gating.models import ContentTypeGatingConfig
 from openedx.features.content_type_gating.partitions import CONTENT_TYPE_GATING_SCHEME
 from openedx.features.course_experience.waffle import ENABLE_COURSE_ABOUT_SIDEBAR_HTML
@@ -553,7 +560,24 @@ def course_listing(request):
 
     split_archived = settings.FEATURES.get(u'ENABLE_SEPARATE_ARCHIVED_COURSES', False)
     active_courses, archived_courses = _process_courses_list(courses_iter, in_process_course_actions, split_archived)
+
     in_process_course_actions = [format_in_process_course_view(uca) for uca in in_process_course_actions]
+
+    allowed_sites = None
+    if request.user.is_superuser:
+        allowed_sites = [site.domain for site in Site.objects.filter(name__iendswith='LMS')]
+        allowed_sites.append("Public")
+    else:
+        error, allowed_sites = validate_sites_for_local_admin(request.user)
+        if allowed_sites:
+            allowed_sites = [site.domain for site in allowed_sites]
+            public_courses_ids = [six.text_type(course.course_id) for course in ClearesultCourse.objects.filter(site=None)]
+
+            # filter public courses out from course-listing on studio-home page for local admins
+            active_courses = [course for course in active_courses if course.get('course_key') not in public_courses_ids]
+
+            # filter public courses out from archived course-listing on studio-home page for local admins
+            archived_courses = [course for course in archived_courses if course.get('course_key') not in public_courses_ids]
 
     return render_to_response(u'index.html', {
         u'courses': active_courses,
@@ -568,7 +592,8 @@ def course_listing(request):
         u'rerun_creator_status': GlobalStaff().has_user(user),
         u'allow_unicode_course_id': settings.FEATURES.get(u'ALLOW_UNICODE_COURSE_ID', False),
         u'allow_course_reruns': settings.FEATURES.get(u'ALLOW_COURSE_RERUNS', True),
-        u'optimization_enabled': optimization_enabled
+        u'optimization_enabled': optimization_enabled,
+        u'local_admin_sites': allowed_sites,
     })
 
 
@@ -798,7 +823,7 @@ def _create_or_rerun_course(request):
     Returns the destination course_key and overriding fields for the new course.
     Raises DuplicateCourseError and InvalidKeyError
     """
-    if not auth.user_has_role(request.user, CourseCreatorRole()):
+    if not is_local_admin_or_superuser(request.user) and not auth.user_has_role(request.user, CourseCreatorRole()):
         raise PermissionDenied()
 
     try:
@@ -1825,7 +1850,7 @@ def _get_course_creator_status(user):
     added with status 'unrequested' if the course creator group is in use.
     """
 
-    if user.is_staff:
+    if user.is_staff or is_local_admin_or_superuser(user):
         course_creator_status = 'granted'
     elif settings.FEATURES.get('DISABLE_COURSE_CREATION', False):
         course_creator_status = 'disallowed_for_this_site'

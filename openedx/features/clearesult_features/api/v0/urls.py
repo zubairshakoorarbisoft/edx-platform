@@ -9,7 +9,8 @@ from openedx.features.clearesult_features.api.v0.views import (
     ClearesultGroupViewset, ClearesultGroupCatalogsViewset,
     SiteLinkedObjectsListView, ClearesultUpdateGroupCatalogsViewset,
     ClearesultMandatoryCoursesViewset, ClearesultLogoutView, retake_course,
-    ClearesultCreditReportView
+    ClearesultCreditReportView, ClearesultSiteDefaultConfigViewset,
+    ClearesultCoursesConfigViewset, SiteMandatoryCoursesView
 )
 
 
@@ -132,5 +133,41 @@ urlpatterns = (
         r'^earned_credit_report/$',
         ClearesultCreditReportView.as_view(),
         name='earned_credit_report'
+    ),
+    url(
+        r'^clearesult_site_config/$',
+        ClearesultSiteDefaultConfigViewset.as_view({
+            'get': 'list'
+        }),
+        name="clearesult_site_config_list"
+    ),
+    url(
+        r'^clearesult_site_config/(?P<site_pk>\d+)/$',
+        ClearesultSiteDefaultConfigViewset.as_view({
+            'post': 'update'
+        }),
+        name="clearesult_site_configs_update"
+    ),
+    url(
+        r'^clearesult_course_config/(?P<site_pk>\d+)/$',
+        ClearesultCoursesConfigViewset.as_view({
+            'get': 'list',
+            'post': 'create'
+        }),
+        name="clearesult_course_config_list"
+    ),
+    url(
+        r'^clearesult_course_config/(?P<site_pk>\d+)/(?P<pk>\d+)/$',
+        ClearesultCoursesConfigViewset.as_view({
+            'patch': 'partial_update',
+            'delete': 'destroy',
+            'get': 'retrieve'
+        }),
+        name="clearesult_course_config_details"
+    ),
+    url(
+        r'^site_mandatory_courses/(?P<site_pk>\d+)/$',
+        SiteMandatoryCoursesView.as_view(),
+        name="site_mandatory_courses_list"
     )
 )

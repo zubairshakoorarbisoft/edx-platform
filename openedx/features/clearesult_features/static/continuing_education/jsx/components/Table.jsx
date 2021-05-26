@@ -34,7 +34,7 @@ const Table = ({earnedCredits}) => {
                 <h2>
                     Summary of earned credits
                 </h2>
-                <p>No data available!!!</p>
+                <p>No credits earned yet</p>
             </div>
         )
     }

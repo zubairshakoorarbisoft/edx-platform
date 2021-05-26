@@ -6,3 +6,16 @@ class MandatoryCoursesNotification(BaseMessageType):
     A message for notifying students about mandatory courses enrollment.
     """
     pass
+
+
+class MandatoryCoursesApproachingDueDatesNotification(BaseMessageType):
+    """
+    A message for notifying Students about mandatory courses approching due date.
+    """
+    pass
+
+class MandatoryCoursesPassedDueDatesNotification(BaseMessageType):
+    """
+    A message for notifying Admins about mandatory courses passed due dates.
+    """
+    pass

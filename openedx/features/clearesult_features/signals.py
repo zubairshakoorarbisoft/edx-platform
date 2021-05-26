@@ -7,30 +7,46 @@ from completion.models import BlockCompletion
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models import Q
+from django.db.models.signals import post_save, pre_delete, pre_save
 
 from course_modes.models import CourseMode
 from lms.djangoapps.verify_student.models import ManualVerification
+from student import auth
+from student.models import UserProfile
+from student.roles import CourseStaffRole, CourseInstructorRole
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-from student.models import UserProfile
 from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, COURSE_GRADE_NOW_FAILED
 from openedx.features.clearesult_features.models import (
     ClearesultCourseCompletion, ClearesultGroupLinkage,
-    ClearesultSiteConfiguration
+    ClearesultSiteConfiguration, ClearesultLocalAdmin,
+    ClearesultCourse
 )
 from openedx.features.clearesult_features.instructor_reports.utils import (
     generate_user_course_credits,
-    remove_user_cousre_credits_if_exist,
+    remove_user_course_credits_if_exist,
 )
 from openedx.features.clearesult_features.utils import (
     generate_clearesult_course_completion,
     update_clearesult_course_completion,
     is_course_graded, is_lms_site
 )
-from openedx.features.clearesult_features.tasks import check_and_enroll_group_users_to_mandatory_courses
 
 logger = getLogger(__name__)
+
+
+def _add_users_as_instructor_to_course(course_id, users):
+    role = CourseStaffRole(course_id)
+    for user in users:
+        auth.add_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, user)
+
+
+def _remove_users_instructor_access_from_course(course_id, users):
+    role = CourseStaffRole(course_id)
+    for user in users:
+        if role.has_user(user, check_user_activation=False):
+            auth.remove_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, user)
 
 
 @receiver(post_save, sender=CourseOverview)
@@ -88,11 +104,11 @@ def genrate_user_course_credits_and_course_completion(sender, user, course_id, *
 
 
 @receiver(COURSE_GRADE_NOW_FAILED)
-def remove_user_cousre_credits_and_update_course_completion(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
+def remove_user_course_credits_and_update_course_completion(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
     """
     Listen for a learner failing a course and update user credits and completion dates.
     """
-    remove_user_cousre_credits_if_exist(course_id, user)
+    remove_user_course_credits_if_exist(course_id, user)
     update_clearesult_course_completion(user, course_id)
 
 
@@ -151,3 +167,58 @@ def create_default_group(sender, instance, created, **kwargs):
             clearesult_configuration.objects.create(
                 site=instance.site, default_group=default_site_group[0], security_code_required=False, enabled=True
             )
+
+
+@receiver(post_save, sender=ClearesultLocalAdmin)
+def check_and_give_staff_access_to_related_courses(sender, instance, created, **kwargs):
+    """
+    Newly added local admin should have instructor access to all local and public course.
+    """
+    if created:
+        site_courses = ClearesultCourse.objects.filter(Q(site=instance.site) | Q(site=None))
+        for course in site_courses:
+            _add_users_as_instructor_to_course(course.course_id, [instance.user])
+
+
+@receiver(pre_delete, sender=ClearesultLocalAdmin)
+def check_and_revert_staff_access_from_related_courses(sender, instance, **kwargs):
+    """
+    When local admin access is deleted - we need to revert instructor access from all local and public courses
+    """
+    site_courses = ClearesultCourse.objects.filter(Q(site=instance.site) | Q(site=None))
+    for course in site_courses:
+        _remove_users_instructor_access_from_course(course.course_id, [instance.user] )
+
+
+@receiver(post_save, sender=ClearesultCourse)
+def check_and_add_existing_local_admins_to_the_course(sender, instance, created, **kwargs):
+    """
+    Check and give existing local-admins an instructor access to newly created local course
+    """
+    if created:
+        if instance.site:
+            # for local course - retrieve all local admins of the site
+            existing_local_admins = ClearesultLocalAdmin.objects.filter(site=instance.site)
+        else:
+            # for public course - retrieve all existing local admins of all sites
+            existing_local_admins = ClearesultLocalAdmin.objects.all()
+
+        users = [admin.user for admin in existing_local_admins]
+        _add_users_as_instructor_to_course(instance.course_id, users)
+
+
+@receiver(pre_delete, sender=ClearesultCourse)
+def check_and_remove_existing_local_admins_from_the_courses(sender, instance, **kwargs):
+    """
+    Check and revert instructor access of existing local-admins from deleted local course
+    """
+    if instance.site:
+        # for local course - retrieve all local admins of the site
+        existing_local_admins = ClearesultLocalAdmin.objects.filter(site=instance.site)
+    else:
+        # for public course - retrieve all existing local admins of all sites
+        existing_local_admins = ClearesultLocalAdmin.objects.all()
+
+    users = [admin.user for admin in existing_local_admins]
+    # remove instructor role of existing local admins from the course-team
+    _remove_users_instructor_access_from_course(instance.course_id, users)

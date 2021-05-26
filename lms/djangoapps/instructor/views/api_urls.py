@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^get_students_who_may_enroll$', api.get_students_who_may_enroll, name='get_students_who_may_enroll'),
     url(r'^get_students_credits/$', clearesult_report_views.get_students_credits, name='get_students_credits'),
     url(r'^get_all_courses_progress_data/$', clearesult_report_views.get_all_courses_progress_data, name='get_all_courses_progress_data'),
+    url(r'^get_registered_users/$', clearesult_report_views.get_registered_users, name='get_registered_users'),
     url(r'^get_user_invoice_preference$', api.get_user_invoice_preference, name='get_user_invoice_preference'),
     url(r'^get_sale_records(?P<csv>/csv)?$', api.get_sale_records, name='get_sale_records'),
     url(r'^get_sale_order_records$', api.get_sale_order_records, name='get_sale_order_records'),

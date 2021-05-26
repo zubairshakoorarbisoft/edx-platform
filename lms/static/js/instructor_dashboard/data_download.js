@@ -102,8 +102,12 @@
             this.$list_may_enroll_csv_btn = this.$section.find("input[name='list-may-enroll-csv']");
             this.$list_credits_csv_btn = this.$section.find("input[name='list-credits-csv']");
             this.$list_all_courses_csv_btn = this.$section.find("input[name='list-all-courses-csv']");
+            this.$list_all_registered_users_csv_btn = this.$section.find("input[name='list-all-registered-users-csv']");
+            this.$all_sites_filter_checkbox = this.$section.find("input[name='all-sites']");
             this.$list_total_credits_csv_btn = this.$section.find("input[name='list-total-credits-csv']");
             this.$credits_report_provider_filter_select = this.$section.find("select[name='credits-report-provider-filter']");
+            this.$credits_report_pass_date_filter_start = this.$section.find("input[name='credits-report-pass-date-filter-start']");
+            this.$credits_report_pass_date_filter_end = this.$section.find("input[name='credits-report-pass-date-filter-end']");
             this.$list_problem_responses_csv_input = this.$section.find("input[name='problem-location']");
             this.$list_problem_responses_csv_btn = this.$section.find("input[name='list-problem-responses-csv']");
             this.$list_anon_btn = this.$section.find("input[name='list-anon-ids']");
@@ -279,6 +283,9 @@
             this.$list_credits_csv_btn.click(function() {
                 var url = dataDownloadObj.$list_credits_csv_btn.data('endpoint');
                 var provider_filter = dataDownloadObj.$credits_report_provider_filter_select.val()
+                var pass_date_filter_start = dataDownloadObj.$credits_report_pass_date_filter_start.val()
+                var pass_date_filter_end = dataDownloadObj.$credits_report_pass_date_filter_end.val()
+
                 var errorMessage = gettext('Error generating User earned credits reports. Please try again.');
                 dataDownloadObj.clear_display();
                 return $.ajax({
@@ -287,7 +294,40 @@
                     url: url,
                     data: {
                         'provider_filter': provider_filter,
-                        'csv_type': 'credits'
+                        'pass_date_filter_start': pass_date_filter_start,
+                        'pass_date_filter_end': pass_date_filter_end,
+                        'csv_type': 'credits',
+                        "is_site_level": dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true
+                    },
+                    error: function(error) {
+                        if (error.responseText) {
+                            errorMessage = JSON.parse(error.responseText);
+                        }
+                        dataDownloadObj.$reports_request_response_error.text(errorMessage);
+                        return dataDownloadObj.$reports_request_response_error.css({
+                            display: 'block'
+                        });
+                    },
+                    success: function(data) {
+                        dataDownloadObj.$reports_request_response.text(data.status);
+                        return $('.msg-confirm').css({
+                            display: 'block'
+                        });
+                    }
+                });
+            });
+
+            this.$list_all_registered_users_csv_btn.click(function() {
+                var url = dataDownloadObj.$list_all_registered_users_csv_btn.data('endpoint');
+                var errorMessage = gettext('Error generating registered users report. Please try again.');
+                dataDownloadObj.clear_display();
+                return $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: url,
+                    data: {
+                        is_course_level: $(this).attr('data-is-course-level'),
+                        is_site_level: dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true
                     },
                     error: function(error) {
                         if (error.responseText) {
@@ -309,13 +349,16 @@
 
             this.$list_all_courses_csv_btn.click(function() {
                 var url = dataDownloadObj.$list_all_courses_csv_btn.data('endpoint');
-                var errorMessage = gettext('Error generating User earned credits reports. Please try again.');
+                var errorMessage = gettext('Error generating course Activity report. Please try again.');
                 dataDownloadObj.clear_display();
                 return $.ajax({
                     type: 'POST',
                     dataType: 'json',
                     url: url,
-                    data: {},
+                    data: {
+                        "is_course_level": $(this).attr("data-is-course-level"),
+                        "is_site_level": dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true
+                    },
                     error: function(error) {
                         if (error.responseText) {
                             errorMessage = JSON.parse(error.responseText);
@@ -345,7 +388,8 @@
                     url: url,
                     data: {
                         'provider_filter': provider_filter,
-                        'csv_type': 'total_credits'
+                        'csv_type': 'total_credits',
+                        "is_site_level":  dataDownloadObj.$all_sites_filter_checkbox.length ? !dataDownloadObj.$all_sites_filter_checkbox[0].checked : true
                     },
                     error: function(error) {
                         if (error.responseText) {

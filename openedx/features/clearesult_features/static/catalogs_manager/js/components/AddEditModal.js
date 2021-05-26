@@ -13,7 +13,7 @@ export default function AddEditModal({
         selectedSite,
     }) {
 
-    const submitButtonText = isEditButton ? "Update" : "Add"
+    const submitButtonText = isEditButton ? "Update" : "Add";
     let siteOptions = null;
     if (isEditButton) {
         siteOptions = <option key={selectedSite.id} value={selectedSite.id}>{selectedSite.domain}</option>
@@ -29,7 +29,7 @@ export default function AddEditModal({
     return (
         <div>
             <div className="modal fade modal-update" id="exampleModalCenter" tabIndex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
                     <div className="modal-content">
                         <form onSubmit={(event)=>handleSubmit(event)}>
                             <div className="modal-header">
