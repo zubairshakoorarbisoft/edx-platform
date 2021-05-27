@@ -76,7 +76,6 @@ function() {
     //     have to do repeated jQuery element selects.
     function _renderElements(state) {
         state.videoProgressSlider.el = $(template);
-
         state.el.find('.video-controls').prepend(state.videoProgressSlider.el);
         state.videoProgressSlider.buildSlider();
         _buildHandle(state);

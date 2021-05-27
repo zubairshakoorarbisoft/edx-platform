@@ -102,6 +102,7 @@
 
             /** Handler to call when a timeupdate event is triggered */
             handleTimeUpdate: function(currentTime) {
+                
                 var duration;
                 if (this.isComplete) {
                     return;
@@ -132,6 +133,9 @@
                 var errmsg;
                 this.isComplete = true;
                 this.lastSentTime = currentTime;
+                if (self.state.config.enableNextOnCompletion === true && self.state.config.isComplete === false) {
+                    $('.sequence-nav-button.button-next').prop('disabled', false);
+                }
                 if (this.state.config.publishCompletionUrl) {
                     $.ajax({
                         type: 'POST',
@@ -142,6 +146,7 @@
                         success: function() {
                             self.state.el.off('timeupdate.completion');
                             self.state.el.off('ended.completion');
+                            self.state.videoSaveStatePlugin.onVideoComplete();
                         },
                         error: function(xhr) {
                             /* eslint-disable no-console */
