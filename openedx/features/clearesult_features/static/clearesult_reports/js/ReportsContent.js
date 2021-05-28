@@ -23,7 +23,8 @@ function ReportsContent() {
             let data = (await client.get(context.SITES_URL)).data;
             setSites(data);
             if (data.length > 0) {
-                loadSiteLinkedCourses(data[0])
+                loadSiteLinkedCourses(data[0]);
+                setSelectedSite(data[0]);
             }
         } catch (exp) {
             console.error(exp);
