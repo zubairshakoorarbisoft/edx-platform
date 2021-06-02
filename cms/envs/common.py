@@ -1531,11 +1531,13 @@ CLEARESULT_CREDIT_PROVIDERS = [
 CLEARESULT_AVAILABLE_SITES_MAPPING = {
     'black-hills-energy-swepco': {
         'theme': 'blackhillsswepco',
-        'lms_root_url': '#'
+        'lms_root_url': '#',
+        'time_zone': 'US/Central'
     },
     'bayren': {
         'theme': 'bayren',
-        'lms_root_url': '#'
+        'lms_root_url': '#',
+        'time_zone': 'US/Pacific'
     },
     'georgia-power': {
         'theme': 'georgia_power',
