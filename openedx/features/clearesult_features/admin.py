@@ -1,6 +1,7 @@
 """
 Admin registration for Clearesult.
 """
+import six
 from config_models.admin import KeyedConfigurationModelAdmin
 from completion.models import BlockCompletion
 from django.contrib.auth.models import User
@@ -159,7 +160,19 @@ class ClearesultCourseConfigAdmin(admin.ModelAdmin):
     list_display = ('id', 'course_id', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
 
 class ClearesultCourseEnrollmentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'enrollment', 'updated_date')
+    list_display = ('id', 'get_user_email', 'get_course_id', 'enrollment', 'updated_date')
+    search_fields = ('enrollment__user__email',)
+    readonly_fields=('get_user_email', 'get_course_id',)
+
+    def get_user_email(self, obj):
+        return obj.enrollment.user.email
+
+    def get_course_id(self, obj):
+        return six.text_type(obj.enrollment.course_id)
+
+    get_user_email.short_description = 'Email'
+    get_course_id.short_description = 'Course'
+
 
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
