@@ -137,7 +137,7 @@ class ClearesultUserProfile(models.Model):
         super(ClearesultUserProfile, self).save(*args, **kwargs)
 
     def has_identifier(self, identifier):
-        if '{},'.format(identifier) in self.site.identifiers:
+        if '{},'.format(identifier) in self.site_identifiers:
             return True
         return False
 
