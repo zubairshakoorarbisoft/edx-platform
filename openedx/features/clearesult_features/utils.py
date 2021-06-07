@@ -19,6 +19,7 @@ from django.db.models.functions import Coalesce
 from django.test import RequestFactory
 from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
 from opaque_keys.edx.keys import CourseKey
 from student.models import CourseEnrollment
 
@@ -913,3 +914,11 @@ def is_block_contains_scorm(block):
             return True
 
     return False
+
+
+def add_timezone_to_datetime(datetime):
+    """
+    Gets a datetime object and append timezone information in it
+    """
+    return timezone.datetime(year=datetime.year, month=datetime.month, day=datetime.day, hour=datetime.hour,
+                             minute=datetime.minute, second=datetime.second, tzinfo=timezone.get_current_timezone())

@@ -24,7 +24,7 @@ from openedx.features.clearesult_features.models import (
 from openedx.features.clearesult_features.models import ClearesultCourse, ClearesultGroupLinkage
 from openedx.features.clearesult_features.utils import (
     get_course_progress, get_site_linked_courses_and_groups,
-    get_group_users, get_site_users
+    get_group_users, get_site_users, add_timezone_to_datetime
 )
 
 logger = getLogger(__name__)
@@ -220,9 +220,10 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
                     pass_date = None
 
                 if pass_date:
+                    pass_datetime = pass_date
                     pass_date = pass_date.date()
                 else:
-                    pass_date = 'N/A'
+                    pass_datetime = pass_date = 'N/A'
 
                 if pass_date_filter.get('start') or pass_date_filter.get('end'):
                     is_pass_date_valid_with_filter = check_date_with_filter(pass_date_filter, pass_date)
@@ -241,7 +242,7 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
                         'earned_credits': course_credit.credit_value,
                         'grade_percent': course_grade.percent,
                         'letter_grade': course_grade.letter_grade,
-                        'pass_date': pass_date
+                        'pass_date': add_timezone_to_datetime(pass_datetime)
                     }
                     data_list.append(data)
         else:
@@ -402,12 +403,12 @@ def list_all_course_enrolled_users_progress_for_report(allowed_sites, course_id,
             'course_name': enrollment.course.display_name,
             'enrollment_status': "enrolled" if CourseEnrollment.is_enrolled(user, course_id) else "unenrolled",
             'enrollment_mode': enrollment.mode,
-            'enrollment_date':  enrollment.created.date(),
+            'enrollment_date':  add_timezone_to_datetime(enrollment.created),
             'progress_percent': "{} %".format(progress),
             'grade_percent': "{} %".format(course_grade.percent * 100),
             'letter_grade': course_grade.letter_grade,
-            'completion_date': completion_date.date() if (completion_date and progress == 100) else 'N/A',
-            'pass_date': pass_date.date() if pass_date else 'N/A',
+            'completion_date': add_timezone_to_datetime(completion_date) if (completion_date and progress == 100) else 'N/A',
+            'pass_date': add_timezone_to_datetime(pass_date) if pass_date else 'N/A',
             'certificate_eligible': 'Y' if course_grade.passed else 'N',
             'certificate_delivered': 'Y' if certificate_status == CertificateStatuses.downloadable else 'N'
         }
@@ -459,7 +460,7 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level, date_joi
                         'email': user.email,
                         'first_name': user.first_name,
                         'last_name': user.last_name,
-                        'date_joined': actual_joined_date,
+                        'date_joined': add_timezone_to_datetime(user.date_joined),
                         'sites_associated': sites_associated
                     }
                     data.append(user_info)
@@ -470,7 +471,7 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level, date_joi
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
-                    'date_joined': actual_joined_date,
+                    'date_joined': add_timezone_to_datetime(user.date_joined),
                     'sites_associated': sites_associated
                 }
                 data.append(user_info)
