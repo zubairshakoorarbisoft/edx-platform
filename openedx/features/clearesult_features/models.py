@@ -186,6 +186,7 @@ class ClearesultCourse(models.Model):
 
     course_id = CourseKeyField(max_length=255, db_index=True, unique=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
+    is_event = models.BooleanField(default=False, verbose_name='Is Event')
 
     class Meta:
         app_label = APP_LABEL
