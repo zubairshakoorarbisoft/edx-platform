@@ -238,24 +238,28 @@ def create_clearesult_course(destination_course_key, source_course_key=None, sit
     ClearesultCourse.objects.create(course_id=destination_course_key, site=site)
 
 
-def get_site_for_clearesult_course(course_id):
+def get_clearesult_course_site_and_event(course_id):
     """
-    Return site if you find any site linked to the course.
-    Return 'Public' if course is public.
-    Return None if there is no relation of course with site has been saved.
+    Returns data dict containing site and is_event value of the course.
 
-    If course is not linked to a site, it means course is public.
-    If course is linked to a site, it means course it is private.
+    If course is not linked to a site, it means course is public - set site value as "Public".
+    If course is linked to a site, it means course it is private - set site value as site.domain.
     """
+    data = {
+        "site": None,
+        "event": None
+    }
     try:
-        site = ClearesultCourse.objects.get(course_id=course_id).site
-        if site is None:
-            site = 'Public'
-            return site
+        obj = ClearesultCourse.objects.get(course_id=course_id)
+        data.update({
+            "site": "Public" if not obj.site else obj.site.domain,
+            "event": obj.is_event
+        })
 
-        return site.domain
     except ClearesultCourse.DoesNotExist:
-        return None
+        pass
+
+    return data
 
 
 def is_mandatory_course(enrollment):

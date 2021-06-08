@@ -68,8 +68,9 @@ class ClearesultCourseAdmin(admin.ModelAdmin):
     """
     Admin config clearesult courses.
     """
-    list_display = ('course_id', 'site')
-    search_fields = ('course_id', 'site')
+    list_display = ('course_id', 'site', 'is_event')
+    list_filter = ('is_event', 'site')
+    search_fields = ('course_id',)
 
     # disable change functionality
     def has_change_permission(self, request, obj=None):
