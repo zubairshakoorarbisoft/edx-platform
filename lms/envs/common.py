@@ -2845,6 +2845,8 @@ CLEARESULT_AVAILABLE_SITES_MAPPING = {
         'lms_root_url': '#'
     }
 }
+
+CLEARESULT_REPORTS_TZ = 'America/Jamaica' # EST timezone
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
