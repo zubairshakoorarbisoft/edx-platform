@@ -1544,6 +1544,8 @@ CLEARESULT_AVAILABLE_SITES_MAPPING = {
         'lms_root_url': '#'
     }
 }
+
+CLEARESULT_REPORTS_TZ = 'America/Jamaica' # EST timezone
 ################# EDX MARKETING SITE ##################################
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'

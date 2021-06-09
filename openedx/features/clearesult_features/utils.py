@@ -20,6 +20,7 @@ from django.test import RequestFactory
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.timezone import pytz
 from opaque_keys.edx.keys import CourseKey
 from student.models import CourseEnrollment
 
@@ -920,9 +921,15 @@ def is_block_contains_scorm(block):
     return False
 
 
-def add_timezone_to_datetime(datetime):
+def add_timezone_to_datetime(date_time, custom_tz=None):
     """
     Gets a datetime object and append timezone information in it
     """
-    return timezone.datetime(year=datetime.year, month=datetime.month, day=datetime.day, hour=datetime.hour,
-                             minute=datetime.minute, second=datetime.second, tzinfo=timezone.get_current_timezone())
+
+    utc_datetime = date_time.replace(tzinfo=timezone.get_current_timezone(), microsecond=0)
+
+    if not custom_tz:
+        return utc_datetime
+
+    local_tz = pytz.timezone(custom_tz)
+    return utc_datetime.astimezone(local_tz)

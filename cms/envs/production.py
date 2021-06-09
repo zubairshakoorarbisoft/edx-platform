@@ -556,6 +556,10 @@ CLEARESULT_AVAILABLE_SITES_MAPPING = ENV_TOKENS.get(
     'CLEARESULT_AVAILABLE_SITES_MAPPING',
     CLEARESULT_AVAILABLE_SITES_MAPPING
 )
+CLEARESULT_REPORTS_TZ = ENV_TOKENS.get(
+    'CLEARESULT_REPORTS_TZ',
+    CLEARESULT_REPORTS_TZ
+)
 ####################### Plugin Settings ##########################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
