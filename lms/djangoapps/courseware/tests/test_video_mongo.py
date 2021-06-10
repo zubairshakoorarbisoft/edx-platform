@@ -136,6 +136,7 @@ class TestVideoYouTube(TestVideo):  # pylint: disable=test-inherits-tests
             ],
             'poster': 'null',
         }
+
         self.assertEqual(
             get_context_dict_from_string(context),
             get_context_dict_from_string(
@@ -2366,6 +2367,7 @@ class TestAutoAdvanceVideo(TestVideo):
         to the passed context.
         Helper function to avoid code repetition.
         """
+
         with override_settings(FEATURES=self.FEATURES):
             content = self.item_descriptor.render(STUDENT_VIEW).content
 

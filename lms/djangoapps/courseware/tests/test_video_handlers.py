@@ -189,6 +189,7 @@ class TestVideo(BaseTestVideoXBlock):
         self.assertEqual(self.item_descriptor.global_speed, 1.0)
 
     def test_handle_ajax(self):
+
         data = [
             {u'speed': 2.0},
             {u'saved_video_position': "00:00:10"},
@@ -225,7 +226,7 @@ class TestVideo(BaseTestVideoXBlock):
         self.assertEqual(self.item_descriptor.is_complete, False)
         self.item_descriptor.handle_ajax('save_user_state', {'is_complete': True})
         self.assertEqual(self.item_descriptor.is_complete, True)
-        
+
         with freezegun.freeze_time(now()):
             self.assertEqual(self.item_descriptor.bumper_last_view_date, None)
             self.item_descriptor.handle_ajax('save_user_state', {'bumper_last_view_date': True})

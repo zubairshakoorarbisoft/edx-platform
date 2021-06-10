@@ -515,7 +515,7 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS, _, Time) {
     function onEnded() {
         var time = this.videoPlayer.duration();
 
-        
+
         this.trigger('videoProgressSlider.notifyThroughHandleEnd', {
             end: true
         });
