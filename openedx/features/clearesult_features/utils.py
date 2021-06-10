@@ -31,11 +31,7 @@ from lms.djangoapps.courseware.courses import get_course_by_id
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.lib.celery.task_utils import emulate_http_request
-from openedx.features.clearesult_features.message_types import (
-    MandatoryCoursesNotification,
-    MandatoryCoursesApproachingDueDatesNotification,
-    MandatoryCoursesPassedDueDatesNotification
-)
+from openedx.features.clearesult_features.constants import MESSAGE_TYPES
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
@@ -483,12 +479,6 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
     Returns:
         a boolean variable indicating email response.
     """
-    message_types = {
-        'mandatory_courses': MandatoryCoursesNotification,
-        'mandatory_courses_approaching_due_date': MandatoryCoursesApproachingDueDatesNotification,
-        'mandatory_courses_passed_due_date': MandatoryCoursesPassedDueDatesNotification
-    }
-
     if not current_site:
         current_site = get_current_site()
 
@@ -499,7 +489,7 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
 
     content = json.dumps(message_context)
 
-    message_class = message_types[message_type]
+    message_class = MESSAGE_TYPES[message_type]
     return_value = False
 
     base_root_url = current_site.configuration.get_value('LMS_ROOT_URL')
@@ -877,6 +867,25 @@ def send_course_due_date_approching_email(request, config, enrollment):
         "course_url": course_url
     }
     return send_notification(key, email_params, subject, [enrollment.user.email], request.user, site)
+
+
+def send_course_pass_email_to_learner(user, course_id):
+    site = get_current_site()
+    key = "course_passed"
+    subject = "Course Passed"
+
+    logger.info("Send course passed email to user: {}".format(user.email))
+
+    course = get_course_by_id(course_id)
+    root_url = site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    course_progress_url = "{}{}".format(root_url, reverse('progress', kwargs={'course_id': course_id}))
+
+    email_params = {
+        "full_name": user.first_name + " " + user.last_name,
+        "display_name": course.display_name_with_default,
+        "course_progress_url": course_progress_url
+    }
+    return send_notification(key, email_params, subject, [user.email], user, site)
 
 
 def send_due_date_passed_email_to_admins(passed_due_dates_site_users):

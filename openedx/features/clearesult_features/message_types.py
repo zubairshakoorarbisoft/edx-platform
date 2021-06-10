@@ -19,3 +19,10 @@ class MandatoryCoursesPassedDueDatesNotification(BaseMessageType):
     A message for notifying Admins about mandatory courses passed due dates.
     """
     pass
+
+
+class CoursePassedNotification(BaseMessageType):
+    """
+    A message for notifying learner that he has passed a course.
+    """
+    pass
