@@ -1,0 +1,24 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}You have been automatically enrolled in the following training(s) on the {{ platform_name }} portal:{% endblocktrans %}
+
+{% if courses %}
+{% blocktrans %}Course(s){% endblocktrans %}
+{% for course in courses %}
+    {{ course }}
+{% endfor %}
+{% endif %}
+
+{% if events %}
+{% blocktrans %}Event(s){% endblocktrans %}
+{% for event in events %}
+    {{ event.name}} on {{ event.date }}
+{% endfor %}
+
+{% blocktrans %}Don't forget to mark your calendar with the events. Go to your dashboard to see the calendar invites.{% endblocktrans %}
+{% endif %}
+{% blocktrans %}Please note that this training is mandatory.{% endblocktrans %}
+{% blocktrans %}View your dashboard to get more details: {% endblocktrans %} {{dashboard_url}}.
+
+----
+{% blocktrans %}This email was automatically sent from {{ platform_name }} to {{ email }}.{% endblocktrans %}
+{% endautoescape %}

@@ -32,7 +32,7 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
     """
     from lms.djangoapps.instructor.views.api import students_update_enrollment
     from openedx.features.clearesult_features.utils import (
-        send_mandatory_courses_emails, update_clearesult_enrollment_date
+        send_mandatory_courses_enrollment_email, update_clearesult_enrollment_date
     )
 
     log.info("TASK: enroll student to mandatory courses has been called.")
@@ -94,7 +94,7 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
     for key, value in email_course_data.items():
         if value:
             log.info("user: {} has been seccussfully enrolled in following courses: {}".format(key, value))
-            send_mandatory_courses_emails([key], value, request_user, request_site)
+            send_mandatory_courses_enrollment_email([key], value, request_user, request_site)
 
 
 @task(base=LoggedTask)

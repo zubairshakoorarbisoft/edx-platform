@@ -882,6 +882,8 @@ def course_about(request, course_id):
     """
     Display the course's about page.
     """
+    from openedx.features.clearesult_features.utils import is_event
+
     course_key = CourseKey.from_string(course_id)
 
     # If a user is not able to enroll in a course then redirect
@@ -994,7 +996,8 @@ def course_about(request, course_id):
             'reviews_fragment_view': reviews_fragment_view,
             'sidebar_html_enabled': sidebar_html_enabled,
             'allow_anonymous': allow_anonymous,
-            'course_credits': get_course_credits_list(course.id)
+            'course_credits': get_course_credits_list(course.id),
+            'is_event': is_event(course.id)
         }
 
         return render_to_response('courseware/course_about.html', context)
