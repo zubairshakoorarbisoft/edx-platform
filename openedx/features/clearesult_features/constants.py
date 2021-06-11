@@ -1,3 +1,5 @@
+from openedx.features.clearesult_features import message_types
+
 # CLEARESULT CACHE CONSTANTS
 
 # it will be used with user's username
@@ -9,3 +11,11 @@ ALLOWED_SITES_NAMES_CACHE_TIMEOUT = 864000  # 864000 seconds = 10 days is the ca
 # e.g: ali@example.com_clearesult_session
 USER_SESSION_CACHE_KEY_SUFFIX = '_clearesult_sessions'
 USER_SESSION_CACHE_TIMEOUT = 864000  # 864000 seconds = 10 days is the cache timeout
+
+# CLEARESULT MESSAGE TYPES FOR EMAILS
+MESSAGE_TYPES = {
+        'mandatory_courses': message_types.MandatoryCoursesNotification,
+        'mandatory_courses_approaching_due_date': message_types.MandatoryCoursesApproachingDueDatesNotification,
+        'mandatory_courses_passed_due_date': message_types.MandatoryCoursesPassedDueDatesNotification,
+        'course_passed': message_types.CoursePassedNotification
+    }

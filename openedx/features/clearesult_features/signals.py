@@ -30,7 +30,8 @@ from openedx.features.clearesult_features.instructor_reports.utils import (
 from openedx.features.clearesult_features.utils import (
     generate_clearesult_course_completion,
     update_clearesult_course_completion,
-    is_course_graded, is_lms_site
+    is_course_graded, is_lms_site,
+    send_course_pass_email_to_leaner,
 )
 
 logger = getLogger(__name__)
@@ -222,3 +223,13 @@ def check_and_remove_existing_local_admins_from_the_courses(sender, instance, **
     users = [admin.user for admin in existing_local_admins]
     # remove instructor role of existing local admins from the course-team
     _remove_users_instructor_access_from_course(instance.course_id, users)
+
+@receiver(pre_save, sender=ClearesultCourseCompletion)
+def send_email_to_learner_on_passing_course(sender, instance, **kwargs):
+    try:
+        old_instance = ClearesultCourseCompletion.objects.get(id=instance.id)
+        if instance.pass_date and instance.pass_date != old_instance.pass_date:
+            send_course_pass_email_to_leaner(instance.user, instance.course_id)
+    except ClearesultCourseCompletion.DoesNotExist:
+        if instance.pass_date:
+            send_course_pass_email_to_leaner(instance.user, instance.course_id)
