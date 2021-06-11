@@ -31,7 +31,7 @@ from openedx.features.clearesult_features.utils import (
     generate_clearesult_course_completion,
     update_clearesult_course_completion,
     is_course_graded, is_lms_site,
-    send_course_pass_email_to_leaner,
+    send_course_pass_email_to_learner,
 )
 
 logger = getLogger(__name__)
@@ -229,7 +229,7 @@ def send_email_to_learner_on_passing_course(sender, instance, **kwargs):
     try:
         old_instance = ClearesultCourseCompletion.objects.get(id=instance.id)
         if instance.pass_date and instance.pass_date != old_instance.pass_date:
-            send_course_pass_email_to_leaner(instance.user, instance.course_id)
+            send_course_pass_email_to_learner(instance.user, instance.course_id)
     except ClearesultCourseCompletion.DoesNotExist:
         if instance.pass_date:
-            send_course_pass_email_to_leaner(instance.user, instance.course_id)
+            send_course_pass_email_to_learner(instance.user, instance.course_id)
