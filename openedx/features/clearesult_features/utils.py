@@ -8,6 +8,8 @@ import six
 import copy
 from csv import Error, DictReader, Sniffer
 from datetime import datetime, timedelta
+from pymongo import DESCENDING
+from xmodule.contentstore.django import contentstore
 
 from edx_ace import ace
 from edx_ace.recipient import Recipient
@@ -29,6 +31,7 @@ from lms.djangoapps.instructor.enrollment import (
 )
 from lms.djangoapps.courseware.courses import get_course_by_id
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.clearesult_features.constants import MESSAGE_TYPES
@@ -529,18 +532,35 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
     return return_value
 
 
-def send_mandatory_courses_emails(dest_emails, courses, request_user, request_site):
+def send_mandatory_courses_enrollment_email(dest_emails, courses, request_user, request_site):
     email_params = {}
-    subject = "Mandatory Courses Enrollment"
+    subject = "Mandatory Training(s) Enrollment"
 
     logger.info("send mandatory course email to users: {}".format(dest_emails))
 
-    key = "mandatory_courses"
-    courses_data = [get_course_by_id(CourseKey.from_string(course_id)).display_name_with_default for course_id in courses]
+    key = "mandatory_courses_enrollment"
+    courses_data = []
+    events_data = []
+
+    for course_id in courses:
+        name = get_course_by_id(CourseKey.from_string(course_id)).display_name_with_default
+        course_overview = CourseOverview.get_from_id(course_id)
+        event_date = add_timezone_to_datetime(course_overview.start_date, settings.CLEARESULT_REPORTS_TZ)
+        if is_event(course_id):
+            events_data.append(
+                {
+                    "name": name,
+                    "date": event_date.strftime("%A, %B %d at %H:%M")
+                }
+            )
+        else:
+            courses_data.append(name)
 
     data = {
-        "courses": courses_data
+        "courses": courses_data,
+        "events": events_data
     }
+
     send_notification(key, data, subject, dest_emails, request_user, request_site)
 
 
@@ -942,3 +962,48 @@ def add_timezone_to_datetime(date_time, custom_tz=None):
 
     local_tz = pytz.timezone(custom_tz)
     return utc_datetime.astimezone(local_tz)
+
+
+def get_event_file(course_key):
+    filter_parameters = {"$or": [{"contentType": "text/calendar"}]}
+    files = contentstore().get_all_content_for_course(
+        course_key, filter_params=filter_parameters, sort=[("uploadDate", DESCENDING)])
+    if files[1] > 0:
+        return files[0][0].get("filename")
+
+
+def is_event(course_id):
+    try:
+        clearesult_course = ClearesultCourse.objects.get(course_id=course_id)
+        return clearesult_course.is_event
+    except Exception as e:
+        logger.error("Unable to find ClearesultCourse for id: ".format(course_id))
+        logger.error(e)
+        return None
+
+
+def send_enrollment_email(enrollment, request_user, request_site):
+    email_params = {}
+
+    course = get_course_by_id(enrollment.course_id)
+    root_url = request_site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    course_url = "{}{}".format(root_url, reverse('course_root', kwargs={'course_id': enrollment.course_id}))
+
+    data = {
+        "full_name": request_user.first_name + " " + request_user.last_name,
+        "display_name": course.display_name_with_default,
+        "course_url": course_url,
+        "event_url": "{}/{}".format(root_url, get_event_file(enrollment.course_id))
+    }
+
+    if is_event(enrollment.course_id):
+        subject = "Event Registration"
+        key = "event_enrollment"
+        course_overview = CourseOverview.get_from_id(enrollment.course_id)
+        event_date = add_timezone_to_datetime(course_overview.start_date, settings.CLEARESULT_REPORTS_TZ)
+        data.update({"event_info": event_date.strftime("%A, %B %d at %H:%M")})
+    else:
+        subject = "Course Enrollment"
+        key = "course_enrollment"
+
+    send_notification(key, data, subject, [enrollment.user.email], request_user, request_site)
