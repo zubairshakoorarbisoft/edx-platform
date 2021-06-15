@@ -11,13 +11,19 @@
             <p>{% blocktrans %}You have successfully registered for the following event. {% endblocktrans %}</p>
 
             <ul>
-                <li><span style="font-weight:bold">Event Name: </span>{{ display_name }}</li>
-                <li><span style="font-weight:bold">Event Date: </span>{{ event_info }}</li>
+                <li style="display:flex">
+                    <span style="font-weight:bold;flex:1">Event Name: </span>
+                    <span style="flex:2">{{ display_name }}</span>
+                </li>
+                 <li style="display:flex">
+                    <span style="font-weight:bold;flex:1">Event Date: </span>
+                    <span style="flex:2">{{ event_info }}</span>
+                </li>
             </ul>
 
             <p>{% blocktrans %} Don't forget to mark your calendar <a href="{{ event_url }}">Download File (ics)</a>{% endblocktrans %}.</p>
 
-            <p>{% blocktrans %}Sign in to your Training portal to view dashboard. {% endblocktrans %}</p>
+            <p>{% blocktrans %}Sign in to your Training portal to view dashboard: {% endblocktrans %}</p>
             <a
                 href="{{ dashboard_url }}"
                 class="blue pull-right"
