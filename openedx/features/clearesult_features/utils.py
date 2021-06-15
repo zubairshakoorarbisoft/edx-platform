@@ -299,11 +299,19 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
         if is_mandatory:
             due_date = get_calculated_due_date(request, enrollment)
 
+        is_course_event = is_event(enrollment.course_id)
+        course_event_link = None
+        if is_course_event:
+            course_event_link = '//' + request.site.domain + '/' + get_event_file(enrollment.course_id)
+
+
         data.append({
             'progress': get_course_progress(request, enrollment.course),
             'is_mandatory': is_mandatory,
             'is_free': enrollment.mode in ['honor', 'audit'],
-            'mandatory_course_due_date': due_date
+            'mandatory_course_due_date': due_date,
+            'is_course_event': is_course_event,
+            'course_event_link': course_event_link,
         })
 
     return data
