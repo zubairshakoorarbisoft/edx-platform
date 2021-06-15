@@ -300,10 +300,11 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
             due_date = get_calculated_due_date(request, enrollment)
 
         is_course_event = is_event(enrollment.course_id)
-        course_event_link = None
+        course_event_link = '#'
         if is_course_event:
-            course_event_link = '//' + request.site.domain + '/' + get_event_file(enrollment.course_id)
-
+            relative_event_link = get_event_file(enrollment.course_id)
+            if relative_event_link:
+                course_event_link = '//' + request.site.domain + '/' + get_event_file(enrollment.course_id)
 
         data.append({
             'progress': get_course_progress(request, enrollment.course),
