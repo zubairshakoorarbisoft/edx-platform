@@ -27,12 +27,20 @@
                 {% endfor %}
                 </ul>
 
-                <p>{% blocktrans %}Don't forget to add the event(s) to your calendar. Go to your dashboard to see the calendar invites.{% endblocktrans %}</p>
             {% endif %}
 
             <p>{% blocktrans %}Please note that this training is mandatory.{% endblocktrans %}</p>
 
-            <p>{% blocktrans %}View your dashboard to get more details.{% endblocktrans %}</p>
+            <p>
+                {% if events and courses %}
+                  {% blocktrans %}Don't forget to add the event(s) to your calendar. Go to your dashboard to view the calendar invite(s) and training details.{% endblocktrans %}
+                {% elif events %}
+                  {% blocktrans %}Don't forget to add the event(s) to your calendar. Go to your dashboard to download the calendar invite(s).{% endblocktrans %}
+                {% else %}
+                  {% blocktrans %}View your dashboard to get more details.{% endblocktrans %}
+                {% endif %}
+            </p>
+
             <a
                 href="{{ dashboard_url }}"
                 class="blue pull-right"

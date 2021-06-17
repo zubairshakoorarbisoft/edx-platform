@@ -1,7 +1,7 @@
 {% load i18n %}{% autoescape off %}
 {% blocktrans %}Dear {% endblocktrans %}{{ full_name }},
 
-{% blocktrans %}You have been successfully registered for the following event.{% endblocktrans %}
+{% blocktrans %}You have been successfully registered for the following event:{% endblocktrans %}
 
 {% blocktrans %}Event Name: {% endblocktrans %}"{{ display_name }}".
 {% blocktrans %}Event Date: {% endblocktrans %}"{{ event_info }}".
