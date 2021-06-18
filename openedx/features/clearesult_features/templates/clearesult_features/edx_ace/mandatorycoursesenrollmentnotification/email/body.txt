@@ -13,11 +13,19 @@
 {% for event in events %}
     {{ event.name}} on {{ event.date }}
 {% endfor %}
-
-{% blocktrans %}Don't forget to mark your calendar with the events. Go to your dashboard to see the calendar invites.{% endblocktrans %}
 {% endif %}
 {% blocktrans %}Please note that this training is mandatory.{% endblocktrans %}
-{% blocktrans %}View your dashboard to get more details: {% endblocktrans %} {{dashboard_url}}.
+
+{% if events and courses %}
+{% blocktrans %}Don't forget to add the event(s) to your calendar. Go to your dashboard to view the calendar invite(s) and training details.{% endblocktrans %}
+{% elif events %}
+{% blocktrans %}Don't forget to add the event(s) to your calendar. Go to your dashboard to download the calendar invite(s).{% endblocktrans %}
+{% else %}
+{% blocktrans %}View your dashboard to get more details.{% endblocktrans %}
+{% endif %}
+
+
+{{dashboard_url}}.
 
 ----
 {% blocktrans %}This email was automatically sent from {{ platform_name }} to {{ email }}.{% endblocktrans %}
