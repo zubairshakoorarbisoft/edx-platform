@@ -10,6 +10,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from student.models import CourseEnrollment
@@ -116,6 +117,19 @@ class ClearesultUserProfile(models.Model):
 
     def __str__(self):
         return 'Clearesult user profile for {}.'.format(self.user.username)
+
+    def get_associated_sites(self):
+        sites = []
+        site_identifiers = self.get_identifiers()
+        for site_identifier in site_identifiers:
+            try:
+                domain = settings.CLEARESULT_AVAILABLE_SITES_MAPPING[site_identifier]['lms_root_url'].split('//')[1]
+                site = Site.objects.get(domain=domain)
+                sites.append(site)
+            except Site.DoesNotExist:
+                logger.info('The site for the identifier {} does not exist.'.format(site_identifier))
+        return sites
+
 
     @staticmethod
     def get_site_related_profiles(site_name, select_related_users=True):

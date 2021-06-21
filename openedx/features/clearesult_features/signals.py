@@ -1,6 +1,7 @@
 """
 Signals for clearesult features django app.
 """
+import six
 from logging import getLogger
 
 from completion.models import BlockCompletion
@@ -31,8 +32,8 @@ from openedx.features.clearesult_features.utils import (
     generate_clearesult_course_completion,
     update_clearesult_course_completion,
     is_course_graded, is_lms_site,
-    send_course_pass_email_to_learner,
 )
+from openedx.features.clearesult_features.tasks import send_course_pass_email_to_learner
 
 logger = getLogger(__name__)
 
@@ -224,12 +225,15 @@ def check_and_remove_existing_local_admins_from_the_courses(sender, instance, **
     # remove instructor role of existing local admins from the course-team
     _remove_users_instructor_access_from_course(instance.course_id, users)
 
+
 @receiver(pre_save, sender=ClearesultCourseCompletion)
 def send_email_to_learner_on_passing_course(sender, instance, **kwargs):
     try:
         old_instance = ClearesultCourseCompletion.objects.get(id=instance.id)
         if instance.pass_date and instance.pass_date != old_instance.pass_date:
-            send_course_pass_email_to_learner(instance.user, instance.course_id)
+            course_key_string = six.text_type(instance.course_id)
+            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string)
     except ClearesultCourseCompletion.DoesNotExist:
         if instance.pass_date:
-            send_course_pass_email_to_learner(instance.user, instance.course_id)
+            course_key_string = six.text_type(instance.course_id)
+            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string)

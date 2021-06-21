@@ -10,7 +10,9 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from student.models import CourseEnrollment
 from django.test import RequestFactory
+from django.urls import reverse
 
+from lms.djangoapps.courseware.courses import get_course_by_id
 from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
@@ -192,3 +194,32 @@ def update_magento_user_info_from_drupal(email, magento_base_url, magento_token)
                 log.info("Unable to update address due to missing region - firstname and lastname is already updated".format(email))
     else:
         log.error("Task Error - Unable to fetch magento customer from Magento.")
+
+
+@task(base=LoggedTask)
+def send_course_pass_email_to_learner(user_id, course_key_string):
+    user = User.objects.get(id=user_id)
+    associated_sites = user.clearesult_profile.get_associated_sites()
+    if not associated_sites:
+        log.exception("No associated sites are available for {}.".format(user.email))
+        return
+
+    course_id = CourseKey.from_string(course_key_string)
+    site = associated_sites[0]
+    with emulate_http_request(site=site, user=user):
+        key = "course_passed"
+        subject = "Course Passed"
+
+        log.info("Send course passed email to user: {}".format(user.email))
+
+        course = get_course_by_id(course_id)
+        root_url = site.configuration.get_value("LMS_ROOT_URL").strip("/")
+        course_progress_url = "{}{}".format(root_url, reverse('progress', kwargs={'course_id': course_id}))
+
+        email_params = {
+            "full_name": user.first_name + " " + user.last_name,
+            "display_name": course.display_name_with_default,
+            "course_progress_url": course_progress_url
+        }
+        from openedx.features.clearesult_features.utils import send_notification
+        return send_notification(key, email_params, subject, [user.email], user, site)
