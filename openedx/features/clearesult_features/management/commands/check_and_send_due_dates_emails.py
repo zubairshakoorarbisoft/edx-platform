@@ -43,7 +43,7 @@ class Command(BaseCommand):
         all_mandatory_courses = ClearesultCourse.objects.none()
         linkage_with_mandatory_courses = ClearesultGroupLinkedCatalogs.objects.exclude(mandatory_courses=None)
         for linkage in linkage_with_mandatory_courses:
-            all_mandatory_courses |= linkage.mandatory_courses.all()
+            all_mandatory_courses |= linkage.mandatory_courses.filter(is_event=False)
 
         all_mandatory_courses = all_mandatory_courses.distinct()
 
