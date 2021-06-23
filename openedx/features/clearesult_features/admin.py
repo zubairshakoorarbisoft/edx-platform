@@ -158,7 +158,7 @@ class BlockCompleteionAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'context_key', 'block_key', 'block_type', 'completion', )
 
 class ClearesultCourseConfigAdmin(admin.ModelAdmin):
-    list_display = ('id', 'course_id', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
+    list_display = ('id', 'course_id', 'site', 'mandatory_courses_allotted_time', 'mandatory_courses_notification_period')
 
 class ClearesultCourseEnrollmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_user_email', 'get_course_id', 'enrollment', 'updated_date')
