@@ -8,7 +8,7 @@
         <td>
             <p>{% blocktrans %}Dear {% endblocktrans %}{{ full_name }},</p>
 
-            <p>{% blocktrans %}We will like to remind you that "{{ display_name }}" event is around the corner as it will begin in <span style="font-weight:bold;">{{ days_left }}</span> day(s).{% endblocktrans %}</p>
+            <p>{% blocktrans %}This email is to remind you that that you are registred for the "{{ display_name }}" which will begin in <span style="font-weight:bold;">{{ days_left }}</span> day(s).{% endblocktrans %}</p>
 
             <p>{% blocktrans %}Followings are the event details:{% endblocktrans %}</p>
 
@@ -27,7 +27,7 @@
                 </li>
             </ul>
 
-            <p>{% blocktrans %}You are already registered for the event so don't forget to mark your calendar.{% endblocktrans %}</p>
+            <p>{% blocktrans %}Don't forget to mark your calendar.{% endblocktrans %}</p>
             <p><a href="{{ event_url }}">Download calendar event (ics)</a></p>
 
             <p>{% blocktrans %}Sign in to the Training portal to view your dashboard.{% endblocktrans %}</p>
