@@ -904,7 +904,7 @@ def send_due_date_passed_email_to_admins(passed_due_dates_site_users):
     """
     email_key = "mandatory_courses_passed_due_date"
     subject = "Mandatory Courses Due Date Passed"
-    request_user = User.objects.filter(is_active=True, is_superuser=True).first()
+    request_user = User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK)
 
     for key, value in passed_due_dates_site_users.items():
         try:
@@ -997,3 +997,56 @@ def send_enrollment_email(enrollment, request_user, request_site):
         key = "course_enrollment"
 
     send_notification(key, data, subject, [enrollment.user.email], request_user, request_site)
+
+
+def send_course_end_reminder_email(users, training, request, days_left, emails_error_for_courses):
+    subject = "Course end-date approaching"
+    key = "course_end_reminder"
+
+    course = get_course_by_id(training.course_id)
+    root_url = request.site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    course_url = "{}{}".format(root_url, reverse('course_root', kwargs={'course_id': training.course_id}))
+
+    email_params = {
+        "display_name": course.display_name_with_default,
+        "course_url": course_url,
+        "days_left": days_left
+    }
+
+    for user in users:
+        email_params.update({
+            "full_name": user.first_name + " " + user.last_name,
+        })
+        if not send_notification(key, email_params, subject, [user.email], request.user, request.site):
+            emails_error_for_courses.append((user.email, six.text_type(training.course_id)))
+
+
+def send_event_start_reminder_email(users, training, request, days_left, emails_error_for_events):
+    subject = "Event Reminder"
+    key = "event_start_reminder"
+
+    try:
+        course_overview = CourseOverview.get_from_id(training.course_id)
+    except CourseOverview.DoesNotExist:
+        logger.error("Unable to find Course Overview object for id: ".format(training.course_id))
+        return None
+
+    course = get_course_by_id(training.course_id)
+    root_url = request.site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    event_start_date = add_timezone_to_datetime(course_overview.start_date, settings.CLEARESULT_REPORTS_TZ)
+    event_end_date = add_timezone_to_datetime(course_overview.end_date, settings.CLEARESULT_REPORTS_TZ)
+
+    email_params = {
+        "display_name": course.display_name_with_default,
+        "days_left": days_left,
+        "event_url": "{}/{}".format(root_url, get_event_file(training.course_id)),
+        "event_start_info": event_start_date.strftime("%A, %B %d at %H:%M"),
+        "event_end_info": event_end_date.strftime("%A, %B %d at %H:%M")
+    }
+
+    for user in users:
+        email_params.update({
+            "full_name": user.first_name + " " + user.last_name,
+        })
+        if not send_notification(key, email_params, subject, [user.email], request.user, request.site):
+            emails_error_for_courses.append((user.email, six.text_type(training.course_id)))

@@ -41,14 +41,14 @@ logger = getLogger(__name__)
 def _add_users_as_instructor_to_course(course_id, users):
     role = CourseStaffRole(course_id)
     for user in users:
-        auth.add_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, user)
+        auth.add_users(User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK), role, user)
 
 
 def _remove_users_instructor_access_from_course(course_id, users):
     role = CourseStaffRole(course_id)
     for user in users:
         if role.has_user(user, check_user_activation=False):
-            auth.remove_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, user)
+            auth.remove_users(User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK), role, user)
 
 
 @receiver(post_save, sender=CourseOverview)

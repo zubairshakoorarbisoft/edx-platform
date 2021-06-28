@@ -1,5 +1,5 @@
 """
-Django admin command to manually verify the users.
+Django admin command to send mandatory courses due date emails.
 """
 import six
 from completion.models import BlockCompletion

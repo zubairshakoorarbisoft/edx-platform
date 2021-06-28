@@ -14,10 +14,12 @@ USER_SESSION_CACHE_TIMEOUT = 864000  # 864000 seconds = 10 days is the cache tim
 
 # CLEARESULT MESSAGE TYPES FOR EMAILS
 MESSAGE_TYPES = {
-        'mandatory_courses_enrollment': message_types.MandatoryCoursesEnrollmentNotification,
-        'mandatory_courses_approaching_due_date': message_types.MandatoryCoursesApproachingDueDatesNotification,
-        'mandatory_courses_passed_due_date': message_types.MandatoryCoursesPassedDueDatesNotification,
-        'course_passed': message_types.CoursePassedNotification,
-        'event_enrollment': message_types.EventEnrollmentNotification,
-        'course_enrollment': message_types.CourseEnrollmentNotification
-    }
+    'mandatory_courses_enrollment': message_types.MandatoryCoursesEnrollmentNotification,
+    'mandatory_courses_approaching_due_date': message_types.MandatoryCoursesApproachingDueDatesNotification,
+    'mandatory_courses_passed_due_date': message_types.MandatoryCoursesPassedDueDatesNotification,
+    'course_passed': message_types.CoursePassedNotification,
+    'event_enrollment': message_types.EventEnrollmentNotification,
+    'course_enrollment': message_types.CourseEnrollmentNotification,
+    'course_end_reminder': message_types.CourseEndReminderNotification,
+    'event_start_reminder': message_types.EventStartReminderNotification
+}
