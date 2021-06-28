@@ -40,3 +40,17 @@ class CourseEnrollmentNotification(BaseMessageType):
     A message for notifying user about course enrollment.
     """
     pass
+
+
+class CourseEndReminderNotification(BaseMessageType):
+    """
+    A message for notifying enrolled users about course end date.
+    """
+    pass
+
+
+class EventStartReminderNotification(BaseMessageType):
+    """
+    A message for notifying enrolled users about event start date.
+    """
+    pass

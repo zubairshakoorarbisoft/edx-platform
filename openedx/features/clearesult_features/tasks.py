@@ -46,7 +46,7 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
             request_user = User.objects.get(id=request_user_id)
         else:
             # any super user
-            request_user = User.objects.filter(is_superuser=True)[0]
+            request_user = User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK)
 
     except (User.DoesNotExist, Site.DoesNotExist):
         log.info("TASK Error: email task can not be called without request_user and request_site.")
