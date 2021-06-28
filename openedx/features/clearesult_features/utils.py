@@ -276,7 +276,7 @@ def get_calculated_due_date(request, enrollment):
     try:
         config = get_mandatory_courses_due_date_config(request, enrollment)
         enrollment_date = enrollment.clearesultcourseenrollment.updated_date.date()
-        due_date = enrollment_date + timedelta(days=int(config.get("mandatory_courses_alotted_time")))
+        due_date = enrollment_date + timedelta(days=int(config.get("mandatory_courses_allotted_time")))
     except Exception as ex:
         logger.error("Error has occured while calculating due_date of enrollment: {}, user: {}, course: {}".format(
             str(enrollment.id),
@@ -790,7 +790,7 @@ def get_site_prefered_mandatory_courses_due_dates_config(site, course_id):
 
     Returns config dict as follows:
     {
-        "mandatory_courses_alotted_time": 10,
+        "mandatory_courses_allotted_time": 10,
         "mandatory_courses_notification_period": 2,
         "site": <Site obj>
     }
@@ -799,14 +799,14 @@ def get_site_prefered_mandatory_courses_due_dates_config(site, course_id):
     try:
         course_config = ClearesultCourseConfig.objects.get(site=site, course_id=course_id)
         config = {
-            "mandatory_courses_alotted_time": course_config.mandatory_courses_alotted_time,
+            "mandatory_courses_allotted_time": course_config.mandatory_courses_allotted_time,
             "mandatory_courses_notification_period": course_config.mandatory_courses_notification_period
         }
 
     except ClearesultCourseConfig.DoesNotExist:
         site_config = site.clearesult_configuration.latest('change_date')
         config = {
-            "mandatory_courses_alotted_time": site_config.mandatory_courses_alotted_time,
+            "mandatory_courses_allotted_time": site_config.mandatory_courses_allotted_time,
             "mandatory_courses_notification_period": site_config.mandatory_courses_notification_period
         }
 
@@ -816,9 +816,9 @@ def get_site_prefered_mandatory_courses_due_dates_config(site, course_id):
 
 def get_shortest_config(sites_list, course_id):
     """
-    Find mandatory courses config with shortest alotted time.
+    Find mandatory courses config with shortest allotted time.
 
-    let's say, Site-A has alotted time 10 days and Site-B has 20 days for course-abc which is mandatory for both
+    let's say, Site-A has allotted time 10 days and Site-B has 20 days for course-abc which is mandatory for both
     sites then Site-A config should be user as 10 < 20.
     """
     total_sites = len(sites_list)
@@ -831,7 +831,7 @@ def get_shortest_config(sites_list, course_id):
             config = {}
             for site in sites_list:
                 site_config = get_site_prefered_mandatory_courses_due_dates_config(site, course_id)
-                if site_config.get("mandatory_courses_alotted_time", 999999) < config.get("mandatory_courses_alotted_time", 999999):
+                if site_config.get("mandatory_courses_allotted_time", 999999) < config.get("mandatory_courses_allotted_time", 999999):
                     config = site_config
             return config
 

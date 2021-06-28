@@ -2,20 +2,20 @@ import React from 'react';
 const MandatoryCoursesConfigTable = ({selectedSite, siteMandatoryCourses, editBtnClickHandler, resetBtnClickHandler}) => {
 
     const renderHeader = () => {
-        let headerElement = ['#', 'course id', 'course name', 'alotted completion time', 'notification period', 'actions']
+        let headerElement = ['#', 'course id', 'course name', 'allotted completion time', 'notification period', 'actions']
         return headerElement.map((key, index) => {
             return <th className={( key === 'actions')? 'actions': ''} key={index}>{key.toUpperCase()}</th>
         })
     }
 
     const renderBody = () => {
-        let mandatory_courses_alotted_time = ""
+        let mandatory_courses_allotted_time = ""
         let mandatory_courses_notification_period = ""
         return siteMandatoryCourses.map(({id, course_id, course_name, course_config}) => {
-            mandatory_courses_alotted_time = selectedSite.mandatory_courses_alotted_time
+            mandatory_courses_allotted_time = selectedSite.mandatory_courses_allotted_time
             mandatory_courses_notification_period = selectedSite.mandatory_courses_notification_period
             if (course_config){
-                mandatory_courses_alotted_time = course_config.mandatory_courses_alotted_time
+                mandatory_courses_allotted_time = course_config.mandatory_courses_allotted_time
                 mandatory_courses_notification_period = course_config.mandatory_courses_notification_period
             }
 
@@ -23,7 +23,7 @@ const MandatoryCoursesConfigTable = ({selectedSite, siteMandatoryCourses, editBt
                 <td>{id}</td>
                 <td>{course_id}</td>
                 <td>{course_name}</td>
-                <td>{mandatory_courses_alotted_time}</td>
+                <td>{mandatory_courses_allotted_time}</td>
                 <td>{mandatory_courses_notification_period}</td>
                 <td className='actions'>
                     <button
@@ -49,6 +49,7 @@ const MandatoryCoursesConfigTable = ({selectedSite, siteMandatoryCourses, editBt
 
     return (
         <div>
+            <h2>Mandatory Courses Due Date</h2>
             <div className='table-responsive'>
                 <table id='catalogs' className="table">
                     <thead>

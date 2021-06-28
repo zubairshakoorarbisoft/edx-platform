@@ -56,7 +56,7 @@ class Command(BaseCommand):
     def _update_passed_due_dates_site_users_data(self, passed_due_dates_site_users, site, enrollment, due_date):
         """
         The passed_due_dates_site_users is a dict which will be used to send compiled email to local admins and superusers
-        containing users data who haven't completed the mandatory courses in the alotted time.
+        containing users data who haven't completed the mandatory courses in the allotted time.
 
         Sample data is as follows:
         passed_due_dates_site_users = {

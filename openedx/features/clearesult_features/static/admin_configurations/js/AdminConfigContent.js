@@ -15,8 +15,12 @@ export default function AdminConfigContent({context}) {
     const [selectedSite, setSelectedSite] = useState("")
     const [selectedCourse, setSelectedCourse] = useState("")
 
-    const [alottedTime, setAlottedTime] = useState("")
+    const [allottedTime, setAllottedTime] = useState("")
     const [notificationTime, setNotificationTime] = useState("")
+
+    const [notificationTimeNormalCourses, setNotificationTimeNormalCourses] = useState("")
+    const [notificationTimeEventCourses, setNotificationTimeEventCourses] = useState("")
+
 
     const [isSiteConfig, setIsSiteConfig] = useState(true)
 
@@ -40,8 +44,10 @@ export default function AdminConfigContent({context}) {
 
     const fetchMandatoryCoursesConfigs = async (site) => {
         try {
-                setAlottedTime(site.mandatory_courses_alotted_time)
+                setAllottedTime(site.mandatory_courses_allotted_time)
                 setNotificationTime(site.mandatory_courses_notification_period)
+                setNotificationTimeNormalCourses(site.courses_notification_period)
+                setNotificationTimeEventCourses(site.events_notification_period)
                 setSelectedSite(site)
 
                 const mandatory_courses_data = (await client.get(`${context.SITE_MANDATORY_COURSES_LIST_URL}${site.id}/`)).data
@@ -58,8 +64,10 @@ export default function AdminConfigContent({context}) {
 
     const updateMandatoryCoursesSiteLevelConfig = async () => {
         const updatedSiteConfig = (await client.post(`${context.MANDATORY_COURSES_SITE_LEVEL_CONFIG_URL}${selectedSite.id}/`, {
-            mandatory_courses_alotted_time: alottedTime,
-            mandatory_courses_notification_period: notificationTime
+            mandatory_courses_allotted_time: allottedTime,
+            notification_period_mandatory_courses: notificationTime,
+            notification_period_event_courses: notificationTimeEventCourses,
+            notification_period_normal_courses: notificationTimeNormalCourses
         })).data
         setAvailableSites(
             availableSites.map((siteConfig) => updatedSiteConfig.id == siteConfig.id ? updatedSiteConfig : siteConfig)
@@ -72,13 +80,13 @@ export default function AdminConfigContent({context}) {
         if (selectedCourse.course_config)
         {
             updatedCourseConfig = (await client.patch(`${context.MANDATORY_COURSES_COURSE_LEVEL_CONFIG_URL}${selectedSite.id}/${selectedCourse.course_config.id}/`, {
-                mandatory_courses_alotted_time: alottedTime,
+                mandatory_courses_allotted_time: allottedTime,
                 mandatory_courses_notification_period: notificationTime
             })).data
         }
         else {
             updatedCourseConfig = (await client.post(`${context.MANDATORY_COURSES_COURSE_LEVEL_CONFIG_URL}${selectedSite.id}/`, {
-                mandatory_courses_alotted_time: alottedTime,
+                mandatory_courses_allotted_time: allottedTime,
                 mandatory_courses_notification_period: notificationTime,
                 course_id: selectedCourse.course_id,
                 site: selectedSite.id
@@ -87,7 +95,7 @@ export default function AdminConfigContent({context}) {
         let updatedMandatoryCourse = selectedCourse
         updatedMandatoryCourse.course_config = {
             id: updatedCourseConfig.id,
-            mandatory_courses_alotted_time: updatedCourseConfig.mandatory_courses_alotted_time,
+            mandatory_courses_allotted_time: updatedCourseConfig.mandatory_courses_allotted_time,
             mandatory_courses_notification_period: updatedCourseConfig.mandatory_courses_notification_period,
         }
         setSiteMandatoryCourses(
@@ -149,14 +157,14 @@ export default function AdminConfigContent({context}) {
             setSelectedCourse(mandatoryCourse)
             if(mandatoryCourse.course_config)
             {
-                setAlottedTime(mandatoryCourse.course_config.mandatory_courses_alotted_time)
+                setAllottedTime(mandatoryCourse.course_config.mandatory_courses_allotted_time)
                 setNotificationTime(mandatoryCourse.course_config.mandatory_courses_notification_period)
             } else{
-                setAlottedTime(selectedSite.mandatory_courses_alotted_time)
+                setAllottedTime(selectedSite.mandatory_courses_allotted_time)
                 setNotificationTime(selectedSite.mandatory_courses_notification_period)
             }
         } else {
-            setAlottedTime(selectedSite.mandatory_courses_alotted_time)
+            setAllottedTime(selectedSite.mandatory_courses_allotted_time)
             setNotificationTime(selectedSite.mandatory_courses_notification_period)
         }
         setIsSiteConfig(isSite)
@@ -167,16 +175,21 @@ export default function AdminConfigContent({context}) {
             <MandatoryCoursesConfig
                 availableSites={availableSites}
                 changedSiteHandler={changedSiteHandler}
-                dueDateConfigbtnText={(isSiteConfig && alottedTime == "" && notificationTime == "") ? "Add": "Update"}
+                dueDateConfigbtnText={(isSiteConfig && allottedTime == "" && notificationTime == "") ? "Add Config": "Update Config"}
                 editBtnClickHandler={editBtnClickHandler}
             />
             <MandatoryCoursesConfigModal
-                alottedTime={alottedTime}
-                setAlottedTime={setAlottedTime}
+                allottedTime={allottedTime}
+                setAllottedTime={setAllottedTime}
                 notificationTime={notificationTime}
+                notificationTimeNormalCourses={notificationTimeNormalCourses}
+                setNotificationTimeNormalCourses={setNotificationTimeNormalCourses}
+                notificationTimeEventCourses={notificationTimeEventCourses}
+                setNotificationTimeEventCourses={setNotificationTimeEventCourses}
                 setNotificationTime={setNotificationTime}
                 title={isSiteConfig ? selectedSite.domain: selectedCourse.course_name}
                 updateMandatoryCoursesConfig={updateMandatoryCoursesConfig}
+                isSiteConfig={isSiteConfig}
             />
             <MandatoryCoursesConfigTable
                 selectedSite={selectedSite}

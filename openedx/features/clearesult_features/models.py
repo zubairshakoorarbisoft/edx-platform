@@ -266,8 +266,10 @@ class ClearesultSiteConfiguration(ConfigurationModel):
     security_code_required = models.BooleanField(default=True)
     security_code = EncryptedTextField(max_length=20, verbose_name="Site security code", null=True, blank=True)
     default_group = models.ForeignKey(ClearesultGroupLinkage, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
-    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
+    mandatory_courses_allotted_time = models.IntegerField(blank=True, null=True, default=20)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True, default=2)
+    courses_notification_period = models.IntegerField(blank=True, null=True, default=2)
+    events_notification_period = models.IntegerField(blank=True, null=True, default=2)
 
     class Meta:
         app_label = APP_LABEL
@@ -352,7 +354,7 @@ class ClearesultCourseConfig(models.Model):
     """
     course_id = CourseKeyField(max_length=255, db_index=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_allotted_time = models.IntegerField(blank=True, null=True)
     mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
 
     class Meta:
