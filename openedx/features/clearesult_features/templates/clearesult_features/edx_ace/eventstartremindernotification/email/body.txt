@@ -1,7 +1,7 @@
 {% load i18n %}{% autoescape off %}
 {% blocktrans %}Dear {% endblocktrans %}{{ full_name }},
 
-{% blocktrans %}We will like to remind you that "{{ display_name }}" event is around the corner as it will begin in {{ days_left }} day(s).{% endblocktrans %}
+{% blocktrans %}This email is to remind you that that you are registred for the "{{ display_name }}" event which will begin in {{ days_left }} day(s).{% endblocktrans %}
 
 {% blocktrans %}Followings are the event details:{% endblocktrans %}
 {% blocktrans %}Event Name: {% endblocktrans %}"{{ display_name }}"

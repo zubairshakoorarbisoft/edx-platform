@@ -56,6 +56,7 @@ def check_and_send_reminder_emails():
     emails_error_for_courses = []
     emails_error_for_events = []
     processing_error_on_trainings = []
+    about_to_expire_trainings = []
 
     for site in sites:
         request.site = site
@@ -66,7 +67,7 @@ def check_and_send_reminder_emails():
         )
         site_courses = get_site_courses(site_groups)
         site_users = get_site_users(site)
-        about_to_expire_trainings = get_about_to_expire_trainings(site_config, site_courses)
+        about_to_expire_trainings.extend(get_about_to_expire_trainings(site_config, site_courses))
         for training in about_to_expire_trainings:
             try:
                 enrollments = CourseEnrollment.objects.filter(
