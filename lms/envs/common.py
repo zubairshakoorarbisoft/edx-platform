@@ -2831,16 +2831,22 @@ DRUPAL_API_CREDENTIALS = {
 
 CLEARESULT_AVAILABLE_SITES_MAPPING = {
     'black-hills-energy-swepco': {
-        'theme': 'blackhillsswepco'
+        'theme': 'blackhillsswepco',
+        'lms_root_url': '#',
+        'time_zone': 'US/Central'
     },
     'bayren': {
-        'theme': 'bayren'
+        'theme': 'bayren',
+        'lms_root_url': '#',
+        'time_zone': 'US/Pacific'
     },
     'georgia-power': {
-        'theme': 'georgia_power'
+        'theme': 'georgia_power',
+        'lms_root_url': '#'
     }
 }
 
+CLEARESULT_REPORTS_TZ = 'America/Jamaica' # EST timezone
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
@@ -4000,6 +4006,8 @@ GLOBALLY_ENABLED_SSO_PROVIDERS = [
 ######################## Default Email Params ################################
 DEFAULT_LOGO = '/static/clearesult/images/clearesulttrainingservices.png'
 DEFAULT_REGISTERATION_URL = ''
+
+ADMIN_USERNAME_FOR_EMAIL_TASK = ''
 
 ######################  Site Deafult Group Name  ###################
 SITE_DEFAULT_GROUP_NAME = "DEFAULT"

@@ -24,7 +24,7 @@ from openedx.features.clearesult_features.models import (
 from openedx.features.clearesult_features.models import ClearesultCourse, ClearesultGroupLinkage
 from openedx.features.clearesult_features.utils import (
     get_course_progress, get_site_linked_courses_and_groups,
-    get_group_users, get_site_users
+    get_group_users, get_site_users, add_timezone_to_datetime
 )
 
 logger = getLogger(__name__)
@@ -144,15 +144,15 @@ def get_user_credits_profile_data_for_credits_report(allowed_sites, provider_fil
     return user_credits_profiles
 
 
-def check_date_with_filter(pass_date_filter, date):
+def check_date_with_filter(date_filter, date):
     is_valid = True
     if not date or date == 'N/A':
         is_valid = False
-    elif pass_date_filter:
-        if pass_date_filter.get('start') and (date < pass_date_filter.get('start')):
+    elif date_filter:
+        if date_filter.get('start') and (date < date_filter.get('start')):
             is_valid = False
 
-        if pass_date_filter.get('end') and (date > pass_date_filter.get('end')):
+        if date_filter.get('end') and (date > date_filter.get('end')):
             is_valid = False
     return is_valid
 
@@ -220,9 +220,10 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
                     pass_date = None
 
                 if pass_date:
+                    pass_datetime = pass_date
                     pass_date = pass_date.date()
                 else:
-                    pass_date = 'N/A'
+                    pass_datetime = pass_date = 'N/A'
 
                 if pass_date_filter.get('start') or pass_date_filter.get('end'):
                     is_pass_date_valid_with_filter = check_date_with_filter(pass_date_filter, pass_date)
@@ -241,7 +242,7 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
                         'earned_credits': course_credit.credit_value,
                         'grade_percent': course_grade.percent,
                         'letter_grade': course_grade.letter_grade,
-                        'pass_date': pass_date
+                        'pass_date': add_timezone_to_datetime(pass_datetime, settings.CLEARESULT_REPORTS_TZ)
                     }
                     data_list.append(data)
         else:
@@ -266,7 +267,7 @@ def list_user_credits_for_report(course_key, allowed_sites, provider_filter=None
 
 def list_user_total_credits_for_report(course_key, allowed_sites, provider_filter=None):
     """
-    Return info about user accumulative earned credits. It will also apply filteration on the basis of
+    Return info about user accumulative earned credits. It will also apply filtration on the basis of
     given provider_filter.
 
     list_user_total_credits_for_report(course_key, provider_filter)
@@ -402,12 +403,12 @@ def list_all_course_enrolled_users_progress_for_report(allowed_sites, course_id,
             'course_name': enrollment.course.display_name,
             'enrollment_status': "enrolled" if CourseEnrollment.is_enrolled(user, course_id) else "unenrolled",
             'enrollment_mode': enrollment.mode,
-            'enrollment_date':  enrollment.created.date(),
+            'enrollment_date':  add_timezone_to_datetime(enrollment.created, settings.CLEARESULT_REPORTS_TZ),
             'progress_percent': "{} %".format(progress),
             'grade_percent': "{} %".format(course_grade.percent * 100),
             'letter_grade': course_grade.letter_grade,
-            'completion_date': completion_date.date() if (completion_date and progress == 100) else 'N/A',
-            'pass_date': pass_date.date() if pass_date else 'N/A',
+            'completion_date': add_timezone_to_datetime(completion_date, settings.CLEARESULT_REPORTS_TZ) if (completion_date and progress == 100) else 'N/A',
+            'pass_date': add_timezone_to_datetime(pass_date, settings.CLEARESULT_REPORTS_TZ) if pass_date else 'N/A',
             'certificate_eligible': 'Y' if course_grade.passed else 'N',
             'certificate_delivered': 'Y' if certificate_status == CertificateStatuses.downloadable else 'N'
         }
@@ -417,7 +418,7 @@ def list_all_course_enrolled_users_progress_for_report(allowed_sites, course_id,
     return data
 
 
-def list_all_site_wise_registered_users_for_report(site, is_site_level):
+def list_all_site_wise_registered_users_for_report(site, is_site_level, date_joined_filter=None):
     """
     Return info of the users' registration
 
@@ -446,19 +447,33 @@ def list_all_site_wise_registered_users_for_report(site, is_site_level):
         if user.is_active:
             sites_associated = ''
             try:
-                sites_associated = user.clearesult_profile.job_title
+                sites_associated = user.clearesult_profile.site_identifiers
             except ClearesultUserProfile.DoesNotExist:
                 pass
 
-            user_info = {
-                'user_id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'date_joined': user.date_joined.date(),
-                'sites_associated': sites_associated
-            }
-            data.append(user_info)
+            actual_joined_date = user.date_joined.date()
+            if date_joined_filter.get('start') or date_joined_filter.get('end'):
+                if check_date_with_filter(date_joined_filter, actual_joined_date):
+                    user_info = {
+                        'user_id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'date_joined': add_timezone_to_datetime(user.date_joined, settings.CLEARESULT_REPORTS_TZ),
+                        'sites_associated': sites_associated
+                    }
+                    data.append(user_info)
+            else:
+                user_info = {
+                    'user_id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'date_joined': add_timezone_to_datetime(user.date_joined, settings.CLEARESULT_REPORTS_TZ),
+                    'sites_associated': sites_associated
+                }
+                data.append(user_info)
 
     return data

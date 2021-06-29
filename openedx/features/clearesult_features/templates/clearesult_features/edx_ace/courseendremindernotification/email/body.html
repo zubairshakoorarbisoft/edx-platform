@@ -6,19 +6,13 @@
 <table width="100%" align="left" border="0" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
         <td>
-            <p>
-                {% blocktrans %}You have been automatically enrolled in the following course(s) on the {{ platform_name }} portal:{% endblocktrans %}
-            </p>
+            <p>{% blocktrans %}Dear {% endblocktrans %}{{ full_name }},</p>
 
-            <ul>
-            {% for course in courses %}
-                <li>{{ course }}</li>
-            {% endfor %}
-            </ul>
-            <p>Please note that this training is mandatory.</p>
-            <p>{% blocktrans %}View your dashboard to get more details and start the course(s).{% endblocktrans %}</p>
+            <p>{% blocktrans %}You are enrolled in the course "{{ display_name }}" and have <span style="font-weight:bold;">{{ days_left }}</span> day(s) left to complete it.{% endblocktrans %}</p>
+
+            <p>{% blocktrans %}Please sign in to your Training portal to view the course:{% endblocktrans %}</p>
             <a
-                href="{{ dashboard_url }}"
+                href="{{ course_url }}"
                 class="blue pull-right"
 
                 style="
@@ -35,7 +29,7 @@
                     display: inline-block;
                 "
             >
-                {% blocktrans %} <font color="#ffffff"><b>View Dashboard</b></font>{% endblocktrans %}
+                {% blocktrans %} <font color="#ffffff"><b>View Course</b></font>{% endblocktrans %}
             </a>
 
             <p style="color: rgba(0,0,0,.75);">

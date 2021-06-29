@@ -264,7 +264,7 @@ class MandatoryCoursesConfigSerializer(serializers.ModelSerializer):
             courseConfig = ClearesultCourseConfig.objects.get(course_id=obj.course_id, site__id=site_id)
             return {
                 "id": courseConfig.id,
-                "mandatory_courses_alotted_time": courseConfig.mandatory_courses_alotted_time,
+                "mandatory_courses_allotted_time": courseConfig.mandatory_courses_allotted_time,
                 "mandatory_courses_notification_period": courseConfig.mandatory_courses_notification_period
             }
         except ClearesultCourseConfig.DoesNotExist:
@@ -276,7 +276,7 @@ class ClearesultCourseConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClearesultCourseConfig
-        fields = ('id', 'course_id', 'course_name', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
+        fields = ('id', 'course_id', 'course_name', 'site', 'mandatory_courses_allotted_time', 'mandatory_courses_notification_period')
         read_only_fields = ('id', 'course_name')
         extra_kwargs = {
             'site': {'write_only': True},

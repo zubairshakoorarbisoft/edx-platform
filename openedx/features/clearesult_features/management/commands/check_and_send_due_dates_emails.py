@@ -1,5 +1,5 @@
 """
-Django admin command to manually verify the users.
+Django admin command to send mandatory courses due date emails.
 """
 import six
 from completion.models import BlockCompletion
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         all_mandatory_courses = ClearesultCourse.objects.none()
         linkage_with_mandatory_courses = ClearesultGroupLinkedCatalogs.objects.exclude(mandatory_courses=None)
         for linkage in linkage_with_mandatory_courses:
-            all_mandatory_courses |= linkage.mandatory_courses.all()
+            all_mandatory_courses |= linkage.mandatory_courses.filter(is_event=False)
 
         all_mandatory_courses = all_mandatory_courses.distinct()
 
@@ -56,7 +56,7 @@ class Command(BaseCommand):
     def _update_passed_due_dates_site_users_data(self, passed_due_dates_site_users, site, enrollment, due_date):
         """
         The passed_due_dates_site_users is a dict which will be used to send compiled email to local admins and superusers
-        containing users data who haven't completed the mandatory courses in the alotted time.
+        containing users data who haven't completed the mandatory courses in the allotted time.
 
         Sample data is as follows:
         passed_due_dates_site_users = {

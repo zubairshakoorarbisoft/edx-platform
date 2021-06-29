@@ -1,6 +1,7 @@
 """
 Signals for clearesult features django app.
 """
+import six
 from logging import getLogger
 
 from completion.models import BlockCompletion
@@ -30,8 +31,9 @@ from openedx.features.clearesult_features.instructor_reports.utils import (
 from openedx.features.clearesult_features.utils import (
     generate_clearesult_course_completion,
     update_clearesult_course_completion,
-    is_course_graded, is_lms_site
+    is_course_graded, is_lms_site,
 )
+from openedx.features.clearesult_features.tasks import send_course_pass_email_to_learner
 
 logger = getLogger(__name__)
 
@@ -39,14 +41,14 @@ logger = getLogger(__name__)
 def _add_users_as_instructor_to_course(course_id, users):
     role = CourseStaffRole(course_id)
     for user in users:
-        auth.add_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, user)
+        auth.add_users(User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK), role, user)
 
 
 def _remove_users_instructor_access_from_course(course_id, users):
     role = CourseStaffRole(course_id)
     for user in users:
         if role.has_user(user, check_user_activation=False):
-            auth.remove_users(User.objects.filter(is_superuser=True, is_active=True)[0], role, user)
+            auth.remove_users(User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK), role, user)
 
 
 @receiver(post_save, sender=CourseOverview)
@@ -222,3 +224,16 @@ def check_and_remove_existing_local_admins_from_the_courses(sender, instance, **
     users = [admin.user for admin in existing_local_admins]
     # remove instructor role of existing local admins from the course-team
     _remove_users_instructor_access_from_course(instance.course_id, users)
+
+
+@receiver(pre_save, sender=ClearesultCourseCompletion)
+def send_email_to_learner_on_passing_course(sender, instance, **kwargs):
+    try:
+        old_instance = ClearesultCourseCompletion.objects.get(id=instance.id)
+        if instance.pass_date and instance.pass_date != old_instance.pass_date:
+            course_key_string = six.text_type(instance.course_id)
+            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string)
+    except ClearesultCourseCompletion.DoesNotExist:
+        if instance.pass_date:
+            course_key_string = six.text_type(instance.course_id)
+            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string)

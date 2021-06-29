@@ -144,6 +144,11 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                        instructorPacedButton = this.$('#course-pace-instructor-paced'),
                        paceToggleTip = this.$('#course-pace-toggle-tip');
                    (this.model.get('self_paced') ? selfPacedButton : instructorPacedButton).attr('checked', true);
+
+                   var eventTrueButton = this.$('#course-event-true'),
+                       eventFalseButton = this.$('#course-event-false');
+                   (this.model.get('is_event') ? eventTrueButton : eventFalseButton).attr('checked', true);
+
                    if (this.model.canTogglePace()) {
                        selfPacedButton.removeAttr('disabled');
                        instructorPacedButton.removeAttr('disabled');
@@ -476,6 +481,13 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                    case 'course-pace-instructor-paced':
                        this.model.set('self_paced', JSON.parse(event.currentTarget.value));
                        break;
+
+                    case 'course-event-false':
+                    // Fallthrough to handle both radio buttons
+                    case 'course-event-true':
+                        this.model.set('is_event', JSON.parse(event.currentTarget.value));
+                        break;
+
                    case 'course-language':
                    case 'course-effort':
                    case 'course-title':

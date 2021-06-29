@@ -22,7 +22,8 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
     }
 
     function renderButton() {
-        if (document.referrer.includes('clearesult/site_security')) {
+        if (document.referrer.includes('clearesult/site_security')
+            || document.referrer.includes('/register')) {
           return (
             <button
                 className="btn btn-primary"
