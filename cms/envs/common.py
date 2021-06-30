@@ -1546,6 +1546,9 @@ CLEARESULT_AVAILABLE_SITES_MAPPING = {
 }
 
 CLEARESULT_REPORTS_TZ = 'America/Jamaica' # EST timezone
+
+ADMIN_USERNAME_FOR_EMAIL_TASK = ''
+
 ################# EDX MARKETING SITE ##################################
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'
