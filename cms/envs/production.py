@@ -560,6 +560,11 @@ CLEARESULT_REPORTS_TZ = ENV_TOKENS.get(
     'CLEARESULT_REPORTS_TZ',
     CLEARESULT_REPORTS_TZ
 )
+
+ADMIN_USERNAME_FOR_EMAIL_TASK = ENV_TOKENS.get(
+    'ADMIN_USERNAME_FOR_EMAIL_TASK',
+    ADMIN_USERNAME_FOR_EMAIL_TASK
+)
 ####################### Plugin Settings ##########################
 
 # This is at the bottom because it is going to load more settings after base settings are loaded
