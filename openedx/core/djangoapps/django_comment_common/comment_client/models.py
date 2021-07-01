@@ -136,6 +136,11 @@ class Model(object):
             if params:
                 request_params.update(params)
             url = self.url(action='put', params=self.attributes)
+            log.info('--------------------');
+            log.info( u"URL : {url}".format( url=url ) )
+            log.info( u"Request Parameter : {request_params}".format( request_params=request_params ) )
+
+
             response = perform_request(
                 'put',
                 url,
