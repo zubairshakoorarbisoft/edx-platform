@@ -1049,4 +1049,4 @@ def send_event_start_reminder_email(users, training, request, days_left, emails_
             "full_name": user.first_name + " " + user.last_name,
         })
         if not send_notification(key, email_params, subject, [user.email], request.user, request.site):
-            emails_error_for_courses.append((user.email, six.text_type(training.course_id)))
+            emails_error_for_events.append((user.email, six.text_type(training.course_id)))
