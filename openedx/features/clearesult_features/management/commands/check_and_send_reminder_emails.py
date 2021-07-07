@@ -3,7 +3,7 @@ Django admin command to send reminder emails.
 """
 from logging import getLogger
 from django.core.management.base import BaseCommand
-from openedx.features.clearesult_features.emails.tasks import check_and_send_reminder_emails
+from openedx.features.clearesult_features.tasks import check_and_send_reminder_emails
 
 logger = getLogger(__name__)
 

@@ -171,7 +171,6 @@ class Command(BaseCommand):
         request = RequestFactory().get(u'/')
 
         for enrollment in mandatory_courses_enrollments:
-            logger.info('\n')
             logger.info("------> {} Checking for user: {}, course: {}".format(
                 enrollment.id, enrollment.user.email, six.text_type(enrollment.course_id))
             )
