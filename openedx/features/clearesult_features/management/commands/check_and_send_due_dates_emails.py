@@ -183,14 +183,14 @@ class Command(BaseCommand):
                     logger.info("=> Result - course not completed")
 
                     config = get_mandatory_courses_due_date_config(request, enrollment)
-                    alotted_time = config.get("mandatory_courses_alotted_time")
+                    allotted_time = config.get("mandatory_courses_allotted_time")
                     notification_period = config.get("mandatory_courses_notification_period")
                     site = config.get("site")
 
-                    if alotted_time and notification_period and site:
+                    if allotted_time and notification_period and site:
                         # calculate estimated due date for the enrollment.
                         enrollment_date = enrollment.clearesultcourseenrollment.updated_date.date()
-                        due_date = enrollment_date + timedelta(days=int(alotted_time))
+                        due_date = enrollment_date + timedelta(days=int(allotted_time))
                         logger.info("enrollment date: {}, calculated due date: {} using site: {} config".format(
                             enrollment_date, due_date, site.domain))
 
