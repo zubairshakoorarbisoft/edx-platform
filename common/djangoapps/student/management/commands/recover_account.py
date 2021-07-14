@@ -56,24 +56,30 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """ Main handler for the command."""
-        file_path = options['csv_file_path']
-        if file_path:
-            if not path.isfile(file_path):
-                raise CommandError('File not found.')
+        # file_path = options['csv_file_path']
+        # if file_path:
+        #     if not path.isfile(file_path):
+        #         raise CommandError('File not found.')
 
-            with open(file_path, 'rb') as csv_file:
-                csv_reader = list(unicodecsv.DictReader(csv_file))
-        else:
-            csv_file = AccountRecoveryConfiguration.current().csv_file
-            if not csv_file:
-                logger.error('No csv file found. Please make sure csv file is uploaded')
-                return
-            csv_reader = list(unicodecsv.DictReader(csv_file))
+        #     with open(file_path, 'rb') as csv_file:
+        #         csv_reader = list(unicodecsv.DictReader(csv_file))
+        # else:
+        #     csv_file = AccountRecoveryConfiguration.current().csv_file
+        #     if not csv_file:
+        #         logger.error('No csv file found. Please make sure csv file is uploaded')
+        #         return
+        #     csv_reader = list(unicodecsv.DictReader(csv_file))
 
         successful_updates = []
         failed_updates = []
         site = Site.objects.get_current()
-
+        csv_reader = [
+            {
+                'username': 'taimoor_sub',
+                'email': 'taimoor.ahmed+greensub@edly.io',
+                'new_email': 'taimoor.ahmed+greentest@edly.io'
+            }
+        ]
         for row in csv_reader:
             username = row['username']
             email = row['email']
