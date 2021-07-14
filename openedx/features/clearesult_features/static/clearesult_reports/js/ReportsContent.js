@@ -6,6 +6,7 @@ function ReportsContent() {
     const [ sites, setSites ] = useState([]);
     const [ selectedSite, setSelectedSite ] = useState({});
     const [ filteredCourses, setFilteredCourses ] = useState([]);
+    const [ selectedCourse, setSelectedCourse ] = useState("");
     const [ courseReportLink, setCourseReportLink ] = useState("");
     const [ siteReportLink, setSiteReportLink ] = useState("");
     const [ courseBtnState, setCourseBtnState ] = useState(false);
@@ -38,11 +39,13 @@ function ReportsContent() {
             if (data.length > 0) {
                 setSiteReportLink(formatReportLink(data[0].course_id, site.domain));
                 setCourseReportLink(formatReportLink(data[0].course_id, site.domain));
+                setSelectedCourse(data[0].course_id);
                 setSiteBtnState(true);
                 setCourseBtnState(true);
             } else {
                 setCourseReportLink("");
                 setSiteReportLink("");
+                setSelectedCourse("");
             }
         } catch (exp) {
             console.error(exp);
@@ -73,6 +76,7 @@ function ReportsContent() {
     }
 
     const handleCourseSelect = (courseId) => {
+        setSelectedCourse(courseId);
         setCourseReportLink(formatReportLink(courseId, selectedSite.domain));
         setCourseBtnState(true);
     }
@@ -95,7 +99,7 @@ function ReportsContent() {
                 </div>
                 <div>
                     <h3>Or find a report for a specific course:</h3>
-                    <select className="form-control" onChange={(e) => handleCourseSelect(e.target.value)}>
+                    <select className="form-control" value={selectedCourse} onChange={(e) => handleCourseSelect(e.target.value)}>
                         {filteredCourses.map((course) => <option key={course.course_id} value={course.course_id}>{course.course_name}</option>)}
                     </select>
                     <a href={courseReportLink} className={`btn btn-primary ${courseBtnState ? "" : "disabled"}`}>Go</a>
