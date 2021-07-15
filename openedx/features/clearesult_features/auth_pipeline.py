@@ -19,7 +19,7 @@ from openedx.features.clearesult_features.auth_backend import ClearesultAzureADO
 from openedx.features.clearesult_features.models import ClearesultUserProfile
 from  openedx.features.clearesult_features.utils import (
     add_user_to_site_default_group, set_user_first_and_last_name,
-    get_site_from_site_identifier
+    get_site_from_site_identifier, get_affiliation_information
 )
 from openedx.features.clearesult_features.tasks import update_magento_user_info_from_drupal
 
@@ -115,7 +115,7 @@ def _set_user_time_zone(clearesult_user_profile, incoming_site_identifiers):
         is_time_zone_set = False
         fallback_identifier = None
         for incoming_site_identifier in incoming_site_identifiers:
-            if settings.CLEARESULT_AVAILABLE_SITES_MAPPING.get(incoming_site_identifier):
+            if get_affiliation_information(incoming_site_identifier):
                 fallback_identifier = incoming_site_identifier
 
             if not clearesult_user_profile.has_identifier(incoming_site_identifier):
@@ -130,7 +130,7 @@ def _set_user_time_zone(clearesult_user_profile, incoming_site_identifiers):
 
 
 def _set_user_time_zone_per_site_identifier(user, site_identifier):
-    time_zone = settings.CLEARESULT_AVAILABLE_SITES_MAPPING.get(site_identifier).get('time_zone')
+    time_zone = get_affiliation_information(site_identifier).get('time_zone')
     if time_zone:
         try:
             preference = UserPreference.objects.get(user=user, key='time_zone')

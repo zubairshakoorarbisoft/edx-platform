@@ -6,6 +6,7 @@ from openedx.features.clearesult_features import message_types
 # e.g: ali_allowed_site_names
 ALLOWED_SITES_NAMES_CACHE_KEY_SUFFIX = '_allowed_sites_names'
 ALLOWED_SITES_NAMES_CACHE_TIMEOUT = 864000  # 864000 seconds = 10 days is the cache timeout
+AFFILIATION_INFO_TIMEOUT = 240 # 240 seconds = 4 minutes is the cache timeout
 
 # it will be used with user's email
 # e.g: ali@example.com_clearesult_session

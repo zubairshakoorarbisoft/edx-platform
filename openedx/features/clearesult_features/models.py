@@ -119,15 +119,15 @@ class ClearesultUserProfile(models.Model):
         return 'Clearesult user profile for {}.'.format(self.user.username)
 
     def get_associated_sites(self):
+        # To avoid circular import,
+        from  openedx.features.clearesult_features.utils import get_affiliation_information
         sites = []
         site_identifiers = self.get_identifiers()
         for site_identifier in site_identifiers:
-            try:
-                domain = settings.CLEARESULT_AVAILABLE_SITES_MAPPING[site_identifier]['lms_root_url'].split('//')[1]
-                site = Site.objects.get(domain=domain)
-                sites.append(site)
-            except Site.DoesNotExist:
-                logger.info('The site for the identifier {} does not exist.'.format(site_identifier))
+            affiliation_information = get_affiliation_information(site_identifier)
+            site = Site.objects.get(id=affiliation_information.get('site_id'))
+            sites.append(site)
+
         return sites
 
 
