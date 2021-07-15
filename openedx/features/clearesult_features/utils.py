@@ -14,6 +14,7 @@ from xmodule.contentstore.django import contentstore
 from edx_ace import ace
 from edx_ace.recipient import Recipient
 from django.conf import settings
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
@@ -34,7 +35,7 @@ from openedx.core.djangoapps.ace_common.template_context import get_base_templat
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.lib.celery.task_utils import emulate_http_request
-from openedx.features.clearesult_features.constants import MESSAGE_TYPES
+from openedx.features.clearesult_features.constants import MESSAGE_TYPES, AFFILIATION_INFO_TIMEOUT
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
@@ -1050,3 +1051,35 @@ def send_event_start_reminder_email(users, training, request, days_left, emails_
         })
         if not send_notification(key, email_params, subject, [user.email], request.user, request.site):
             emails_error_for_events.append((user.email, six.text_type(training.course_id)))
+
+
+def get_affiliation_information(site_identifier):
+    """
+    Drupal sends affiliation code through Azure AD B2C.
+    Using this code we determine that which user belongs to which site.
+
+    Sometimes we need to use information which is linked to the code, like
+    what is it's theme, site, time_zone e.t.c
+    So in order to avoid more db queries we're saving that info in cache in
+    a better format for easy access.
+    """
+    affiliation_info = cache.get(site_identifier, None)
+    if affiliation_info:
+        return affiliation_info
+
+    sites = Site.objects.filter(name='{} - LMS'.format(site_identifier)).prefetch_related('themes', 'configuration')
+
+    if not sites:
+        logger.info('Site affiliation information for {} does not exit'.format(site_identifier))
+        return None
+
+    site = sites[0]
+    affiliation_info = {
+        'theme': site.themes.first().theme_dir_name,
+        'lms_root_url': site.configuration.get_value('LMS_ROOT_URL', '#'),
+        'time_zone': site.configuration.get_value('TIME_ZONE', 'America/Jamaica'),
+        'site_id': site.id
+    }
+
+    cache.set(site_identifier, AFFILIATION_INFO_TIMEOUT)
+    return affiliation_info
