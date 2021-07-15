@@ -1081,5 +1081,5 @@ def get_affiliation_information(site_identifier):
         'site_id': site.id
     }
 
-    cache.set(site_identifier, AFFILIATION_INFO_TIMEOUT)
+    cache.set(site_identifier, affiliation_info, AFFILIATION_INFO_TIMEOUT)
     return affiliation_info
