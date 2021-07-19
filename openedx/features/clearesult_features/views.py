@@ -17,6 +17,12 @@ def render_reports(request):
 
 @login_required
 @local_admin_required
+def render_participation_code(request):
+    return render_to_response('clearesult/participation_code.html', {'uses_bootstrap': True})
+
+
+@login_required
+@local_admin_required
 def render_catalogs_manager(request):
     return render_to_response(
         'clearesult/catalogs_manager.html',
