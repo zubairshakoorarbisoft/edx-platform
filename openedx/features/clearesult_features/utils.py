@@ -112,32 +112,54 @@ def get_csv_file_control(file_path):
     return {'csv_file': csv_file, 'csv_reader': csv_reader}
 
 
-def get_enrollments_and_completions(request, enrollments):
+def get_completed_and_in_progres_enrollments(request, enrollments):
     """
     Returns user enrollment list for completed courses and incomplete courses
     and course completion dates as well.
     """
     complete_enrollments = []
     incomplete_enrollments = [enrollment for enrollment in enrollments]
-    course_completions = {}
     for enrollment in enrollments:
         course_id_string = six.text_type(enrollment.course.id)
         course_outline_blocks = get_course_outline_block_tree(
             request, course_id_string, request.user
         )
-        if course_outline_blocks:
+        is_course_event = is_event(enrollment.course_id)
+
+        if course_outline_blocks or is_course_event:
             if course_outline_blocks.get('complete'):
                 incomplete_enrollments.remove(enrollment)
-                completion_date, pass_date = get_course_completion_and_pass_date(
-                    enrollment.user, enrollment.course_id, is_graded=course_outline_blocks.get('graded')
-                )
-                course_completions[enrollment.id] = {
-                        'completion_date': completion_date.date() if completion_date else None,
-                        'pass_date': pass_date.date() if pass_date else None,
-                }
                 complete_enrollments.append(enrollment)
+            elif is_course_event and enrollment.course:
+                end_date = enrollment.course.end_date
+                if end_date and end_date < datetime.now(pytz.utc):
+                    incomplete_enrollments.remove(enrollment)
+                    complete_enrollments.append(enrollment)
 
-    return complete_enrollments, incomplete_enrollments, course_completions
+    return complete_enrollments, incomplete_enrollments
+
+
+def get_complete_enrollments_clearesult_dashboard_data(request, enrollments):
+    """
+    Returns list of data that clearesult needs on student dahboard for incomplete/in-progress courses section
+    """
+    data = {}
+
+    for enrollment in enrollments:
+        course_id_string = six.text_type(enrollment.course.id)
+        course_outline_blocks = get_course_outline_block_tree(
+            request, course_id_string, request.user
+        )
+        completion_date, pass_date = get_course_completion_and_pass_date(
+            enrollment.user, enrollment.course_id, is_graded=course_outline_blocks.get('graded')
+        )
+        is_course_event = is_event(enrollment.course_id)
+        data[enrollment.id] = {
+            'completion_date': completion_date.date() if completion_date else None,
+            'pass_date': pass_date.date() if pass_date else None,
+            'is_course_event': is_course_event
+        }
+    return data
 
 
 def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_UNIT):
@@ -291,9 +313,10 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
     """
     Returns list of data that clearesult needs on student dahboard for incomplete/in-progress courses section
     """
-    data = []
+    data = {}
 
     for enrollment in enrollments:
+        progress = None
         due_date = ""
         is_mandatory = is_mandatory_course(enrollment)
 
@@ -302,20 +325,22 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
 
         is_course_event = is_event(enrollment.course_id)
         course_event_link = '#'
+
         if is_course_event:
             relative_event_link = get_event_file(enrollment.course_id)
             if relative_event_link:
                 course_event_link = '//' + request.site.domain + '/' + get_event_file(enrollment.course_id)
+        else:
+            progress = get_course_progress(request, enrollment.course)
 
-        data.append({
-            'progress': get_course_progress(request, enrollment.course),
+        data[enrollment.id] = {
+            'progress': progress,
             'is_mandatory': is_mandatory,
             'is_free': enrollment.mode in ['honor', 'audit'],
             'mandatory_course_due_date': due_date,
             'is_course_event': is_course_event,
             'course_event_link': course_event_link,
-        })
-
+        }
     return data
 
 
