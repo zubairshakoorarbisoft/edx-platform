@@ -374,3 +374,14 @@ class ClearesultCourseEnrollment(models.Model):
 
     class Meta:
         app_label = APP_LABEL
+
+
+class ParticipationGroupCode(models.Model):
+    """
+    This model will save the participation group codes.
+    """
+    group = models.OneToOneField(ClearesultGroupLinkage, on_delete=models.CASCADE)
+    code = models.CharField(max_length=255, unique=True)
+
+    class Meta:
+        app_label = APP_LABEL
