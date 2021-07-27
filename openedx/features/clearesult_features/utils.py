@@ -455,7 +455,7 @@ def add_user_to_site_default_group(request, user, site):
                 name=settings.SITE_DEFAULT_GROUP_NAME,
                 site=site
             )
-            self.add_user_to_group(user, site_default_group, request)
+            add_user_to_group(user, site_default_group, request)
 
         except ClearesultGroupLinkage.DoesNotExist:
             logger.error("Default group for site: {} doesn't exist".format(site.domain))
@@ -1088,3 +1088,8 @@ def get_affiliation_information(site_identifier):
 
     cache.set(site_identifier, affiliation_info, AFFILIATION_INFO_TIMEOUT)
     return affiliation_info
+
+
+def get_clearesult_profile_extension_value(key, default_value):
+    user = get_current_user()
+    return user.get_extension_value(key, default_value)

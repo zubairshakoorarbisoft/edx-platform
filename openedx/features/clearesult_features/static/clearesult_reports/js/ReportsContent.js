@@ -87,23 +87,21 @@ function ReportsContent() {
 
     return (
         <div className="clearesult-reports">
-            <div className="clearesult-reports-main">
-                <div>
-                    <h3>Find a report for the entire site:</h3>
-                    <select className="form-control" onChange={handleSiteSelect}>
-                        {
-                            sites.map((site) => <option key={site.id} value={site.id}>{site.domain}</option>)
-                        }
-                    </select>
-                    <a href={siteReportLink} className={`btn btn-primary ${siteBtnState ? "" : "disabled"}`}>Go</a>
-                </div>
-                <div>
-                    <h3>Or find a report for a specific course:</h3>
-                    <select className="form-control" value={selectedCourse} onChange={(e) => handleCourseSelect(e.target.value)}>
-                        {filteredCourses.map((course) => <option key={course.course_id} value={course.course_id}>{course.course_name}</option>)}
-                    </select>
-                    <a href={courseReportLink} className={`btn btn-primary ${courseBtnState ? "" : "disabled"}`}>Go</a>
-                </div>
+            <div>
+                <h3>Find a report for the entire site:</h3>
+                <select className="form-control" onChange={handleSiteSelect}>
+                    {
+                        sites.map((site) => <option key={site.id} value={site.id}>{site.domain}</option>)
+                    }
+                </select>
+                <a href={siteReportLink} className={`btn btn-primary ${siteBtnState ? "" : "disabled"}`}>Go</a>
+            </div>
+            <div>
+                <h3>Or find a report for a specific course:</h3>
+                <select className="form-control" value={selectedCourse} onChange={(e) => handleCourseSelect(e.target.value)}>
+                    {filteredCourses.map((course) => <option key={course.course_id} value={course.course_id}>{course.course_name}</option>)}
+                </select>
+                <a href={courseReportLink} className={`btn btn-primary ${courseBtnState ? "" : "disabled"}`}>Go</a>
             </div>
         </div>
     )

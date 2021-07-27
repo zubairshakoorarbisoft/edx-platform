@@ -1302,7 +1302,7 @@ class UserParticipationGroups(generics.ListAPIView):
         )
 
     def get_serializer_context(self):
-        context = super(ParticipationGroupCodeViewset, self).get_serializer_context()
+        context = super(UserParticipationGroups, self).get_serializer_context()
         context.update({'fields': ['name']})
         return context
 

@@ -133,6 +133,7 @@ export default function ContinuingEducationForm({ context }) {
                             choices={availableProviders}
                             handleAddProvider={handleAddProvider}
                             handleOnSkipClick={handleOnSkipClick}
+                            visitingForSecondTime={context.VISITING_FOR_SECOND_TIME}
                         />
                     </div>
                 )}
