@@ -16,7 +16,7 @@ from third_party_auth import pipeline
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.user_api.models import UserPreference
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
-from openedx.features.clearesult_features.models import ClearesultUserProfile
+from openedx.features.clearesult_features.models import ClearesultUserProfile, ClearesultSiteConfiguration
 from  openedx.features.clearesult_features.utils import (
     add_user_to_site_default_group, set_user_first_and_last_name,
     get_site_from_site_identifier, get_affiliation_information
@@ -52,13 +52,17 @@ def replace_old_clearesult_app_uid(backend, uid, details, response, *args, **kwa
             logger.info('Could not fetch email from facebook against uid: {}.'.format(uid))
 
 
-def redirect_to_continuing_education(user=None, *_, **__):
+def redirect_to_participation_code(request, user=None, *_, **__):
     """
-    Redirect a new registered user to "Continuing Education" page.
+    Redirect a new registered user to "Participation Code" page.
     """
-    if user and not user.clearesult_profile.get_extension_value('has_visited_continuing_education_form', False):
-        user.clearesult_profile.set_extension_value('has_visited_continuing_education_form', True)
-        return redirect(reverse('clearesult_features:continuing_education'))
+    clearesult_site_config = ClearesultSiteConfiguration.current(request.site)
+    if clearesult_site_config.participation_code_required:
+        if user and not user.clearesult_profile.get_extension_value('has_visited_participation_code', False):
+            return redirect(reverse('clearesult_features:participation_code'))
+    else:
+        if user and not user.clearesult_profile.get_extension_value('has_visited_continuing_education_form', False):
+            return redirect(reverse('clearesult_features:continuing_education'))
 
 
 def update_clearesult_user_and_profile(request, response, user=None, *args, **kwargs):

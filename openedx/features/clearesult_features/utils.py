@@ -480,12 +480,17 @@ def add_user_to_site_default_group(request, user, site):
                 name=settings.SITE_DEFAULT_GROUP_NAME,
                 site=site
             )
-            if user not in site_default_group.users.all():
-                site_default_group.users.add(user)
-                check_and_enroll_group_users_to_mandatory_courses.delay(
-                    site_default_group.id, [user.id], site_default_group.site.id, request.user.id)
+            add_user_to_group(user, site_default_group, request)
+
         except ClearesultGroupLinkage.DoesNotExist:
             logger.error("Default group for site: {} doesn't exist".format(site.domain))
+
+
+def add_user_to_group(user, group, request):
+    if user not in group.users.all():
+        group.users.add(user)
+        check_and_enroll_group_users_to_mandatory_courses.delay(
+            group.id, [user.id], group.site.id, request.user.id)
 
 
 def is_lms_site(site):
@@ -1108,3 +1113,8 @@ def get_affiliation_information(site_identifier):
 
     cache.set(site_identifier, affiliation_info, AFFILIATION_INFO_TIMEOUT)
     return affiliation_info
+
+
+def get_clearesult_profile_extension_value(key, default_value):
+    user = get_current_user()
+    return user.get_extension_value(key, default_value)

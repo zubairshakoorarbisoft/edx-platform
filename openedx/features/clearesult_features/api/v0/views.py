@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.db import IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -38,19 +39,21 @@ from openedx.features.clearesult_features.utils import (
     get_site_users,
     is_local_admin_or_superuser,
     get_site_linked_courses_and_groups,
-    get_site_linked_any_course
+    get_site_linked_any_course,
+    add_user_to_group
 )
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
     ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage,
     ClearesultGroupLinkedCatalogs, ClearesultUserSession, ClearesultCourseCompletion,
-    ClearesultSiteConfiguration, ClearesultCourseConfig
+    ClearesultSiteConfiguration, ClearesultCourseConfig, ParticipationGroupCode
 )
 from openedx.features.clearesult_features.api.v0.serializers import (
     UserCreditsProfileSerializer, ClearesultCreditProviderSerializer,
     ClearesultCatalogSerializer, ClearesultCourseSerializer,
     UserSerializer, SiteSerializer, ClearesultGroupsSerializer,
-    ClearesultMandatoryCoursesSerializer, ClearesultCourseConfigSerializer, MandatoryCoursesConfigSerializer
+    ClearesultMandatoryCoursesSerializer, ClearesultCourseConfigSerializer,
+    MandatoryCoursesConfigSerializer, ParticipationGroupCodeSerializer
 )
 from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
@@ -1283,3 +1286,38 @@ class SiteMandatoryCoursesView(generics.ListAPIView):
         context = super(SiteMandatoryCoursesView, self).get_serializer_context()
         context.update({'site_id': self.kwargs.get('site_pk')})
         return context
+
+
+class UserParticipationGroups(generics.ListAPIView):
+    serializer_class = ClearesultGroupsSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        participation_groups = ParticipationGroupCode.objects.all()
+        participation_group_ids = [ participation_group.group.id for participation_group in participation_groups ]
+        return ClearesultGroupLinkage.objects.filter(
+            site=self.request.site,
+            users__username=self.request.user.username,
+            id__in=participation_group_ids
+        )
+
+    def get_serializer_context(self):
+        context = super(UserParticipationGroups, self).get_serializer_context()
+        context.update({'fields': ['name']})
+        return context
+
+
+class ParticipationGroupCodeVerification(generics.CreateAPIView):
+    serializer_class = ParticipationGroupCodeSerializer
+    pagination_class = None
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            participation = serializer.save()
+            add_user_to_group(request.user, participation.group, request)
+            return Response({
+                "message": "User has been added to the group."
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

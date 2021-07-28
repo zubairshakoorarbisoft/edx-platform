@@ -6,7 +6,7 @@ from django.conf.urls import url, include
 from openedx.features.clearesult_features.views import (
     render_continuing_education, render_catalogs_manager,
     render_groups_manager, render_group_catalogs_manager,
-    render_admin_configurations, render_reports
+    render_admin_configurations, render_reports, render_participation_code
 )
 
 from openedx.features.clearesult_features.authentication.views import SiteSecurityView
@@ -29,6 +29,11 @@ urlpatterns = (
         r'^site_security/$',
         SiteSecurityView.as_view(),
         name="site_security_code"
+    ),
+    url(
+        r'^participation_code/$',
+        render_participation_code,
+        name="participation_code"
     ),
     url(
         r'^api/v0/',
