@@ -59,9 +59,11 @@ def redirect_to_participation_code(request, user=None, *_, **__):
     clearesult_site_config = ClearesultSiteConfiguration.current(request.site)
     if clearesult_site_config.participation_code_required:
         if user and not user.clearesult_profile.get_extension_value('has_visited_participation_code', False):
+            user.clearesult_profile.set_extension_value('has_visited_participation_code', True)
             return redirect(reverse('clearesult_features:participation_code'))
     else:
         if user and not user.clearesult_profile.get_extension_value('has_visited_continuing_education_form', False):
+            user.clearesult_profile.set_extension_value('has_visited_continuing_education_form', True)
             return redirect(reverse('clearesult_features:continuing_education'))
 
 
