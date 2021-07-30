@@ -57,7 +57,7 @@ export default function ParticipationCodeContent({ context }) {
   }, []);
 
   const renderContinueBtn = () => {
-    if (document.referrer.includes('clearesult/site_security')
+    if (window.location.search.includes('first_time=true')
         || document.referrer.includes('/register')) {
           return (
             <a className="btn btn-primary" onClick={handleContinueBtn}>
