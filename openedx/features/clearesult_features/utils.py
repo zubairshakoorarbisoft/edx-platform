@@ -1107,7 +1107,6 @@ def get_affiliation_information(site_identifier):
     affiliation_info = {
         'theme': site.themes.first().theme_dir_name,
         'lms_root_url': site.configuration.get_value('LMS_ROOT_URL', '#'),
-        'time_zone': site.configuration.get_value('TIME_ZONE', 'America/Jamaica'),
         'site_id': site.id
     }
 
