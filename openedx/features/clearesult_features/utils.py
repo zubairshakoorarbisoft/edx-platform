@@ -14,6 +14,7 @@ from xmodule.contentstore.django import contentstore
 from edx_ace import ace
 from edx_ace.recipient import Recipient
 from django.conf import settings
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
@@ -34,7 +35,7 @@ from openedx.core.djangoapps.ace_common.template_context import get_base_templat
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.lib.celery.task_utils import emulate_http_request
-from openedx.features.clearesult_features.constants import MESSAGE_TYPES
+from openedx.features.clearesult_features.constants import MESSAGE_TYPES, AFFILIATION_INFO_TIMEOUT
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
@@ -111,32 +112,54 @@ def get_csv_file_control(file_path):
     return {'csv_file': csv_file, 'csv_reader': csv_reader}
 
 
-def get_enrollments_and_completions(request, enrollments):
+def get_completed_and_in_progres_enrollments(request, enrollments):
     """
     Returns user enrollment list for completed courses and incomplete courses
     and course completion dates as well.
     """
     complete_enrollments = []
     incomplete_enrollments = [enrollment for enrollment in enrollments]
-    course_completions = {}
     for enrollment in enrollments:
         course_id_string = six.text_type(enrollment.course.id)
         course_outline_blocks = get_course_outline_block_tree(
             request, course_id_string, request.user
         )
-        if course_outline_blocks:
+        is_course_event = is_event(enrollment.course_id)
+
+        if course_outline_blocks or is_course_event:
             if course_outline_blocks.get('complete'):
                 incomplete_enrollments.remove(enrollment)
-                completion_date, pass_date = get_course_completion_and_pass_date(
-                    enrollment.user, enrollment.course_id, is_graded=course_outline_blocks.get('graded')
-                )
-                course_completions[enrollment.id] = {
-                        'completion_date': completion_date.date() if completion_date else None,
-                        'pass_date': pass_date.date() if pass_date else None,
-                }
                 complete_enrollments.append(enrollment)
+            elif is_course_event and enrollment.course:
+                end_date = enrollment.course.end_date
+                if end_date and end_date < datetime.now(pytz.utc):
+                    incomplete_enrollments.remove(enrollment)
+                    complete_enrollments.append(enrollment)
 
-    return complete_enrollments, incomplete_enrollments, course_completions
+    return complete_enrollments, incomplete_enrollments
+
+
+def get_complete_enrollments_clearesult_dashboard_data(request, enrollments):
+    """
+    Returns list of data that clearesult needs on student dahboard for incomplete/in-progress courses section
+    """
+    data = {}
+
+    for enrollment in enrollments:
+        course_id_string = six.text_type(enrollment.course.id)
+        course_outline_blocks = get_course_outline_block_tree(
+            request, course_id_string, request.user
+        )
+        completion_date, pass_date = get_course_completion_and_pass_date(
+            enrollment.user, enrollment.course_id, is_graded=course_outline_blocks.get('graded')
+        )
+        is_course_event = is_event(enrollment.course_id)
+        data[enrollment.id] = {
+            'completion_date': completion_date.date() if completion_date else None,
+            'pass_date': pass_date.date() if pass_date else None,
+            'is_course_event': is_course_event
+        }
+    return data
 
 
 def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_UNIT):
@@ -290,9 +313,10 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
     """
     Returns list of data that clearesult needs on student dahboard for incomplete/in-progress courses section
     """
-    data = []
+    data = {}
 
     for enrollment in enrollments:
+        progress = None
         due_date = ""
         is_mandatory = is_mandatory_course(enrollment)
 
@@ -301,20 +325,22 @@ def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
 
         is_course_event = is_event(enrollment.course_id)
         course_event_link = '#'
+
         if is_course_event:
             relative_event_link = get_event_file(enrollment.course_id)
             if relative_event_link:
                 course_event_link = '//' + request.site.domain + '/' + get_event_file(enrollment.course_id)
+        else:
+            progress = get_course_progress(request, enrollment.course)
 
-        data.append({
-            'progress': get_course_progress(request, enrollment.course),
+        data[enrollment.id] = {
+            'progress': progress,
             'is_mandatory': is_mandatory,
             'is_free': enrollment.mode in ['honor', 'audit'],
             'mandatory_course_due_date': due_date,
             'is_course_event': is_course_event,
             'course_event_link': course_event_link,
-        })
-
+        }
     return data
 
 
@@ -454,12 +480,17 @@ def add_user_to_site_default_group(request, user, site):
                 name=settings.SITE_DEFAULT_GROUP_NAME,
                 site=site
             )
-            if user not in site_default_group.users.all():
-                site_default_group.users.add(user)
-                check_and_enroll_group_users_to_mandatory_courses.delay(
-                    site_default_group.id, [user.id], site_default_group.site.id, request.user.id)
+            add_user_to_group(user, site_default_group, request)
+
         except ClearesultGroupLinkage.DoesNotExist:
             logger.error("Default group for site: {} doesn't exist".format(site.domain))
+
+
+def add_user_to_group(user, group, request):
+    if user not in group.users.all():
+        group.users.add(user)
+        check_and_enroll_group_users_to_mandatory_courses.delay(
+            group.id, [user.id], group.site.id, request.user.id)
 
 
 def is_lms_site(site):
@@ -1050,3 +1081,39 @@ def send_event_start_reminder_email(users, training, request, days_left, emails_
         })
         if not send_notification(key, email_params, subject, [user.email], request.user, request.site):
             emails_error_for_events.append((user.email, six.text_type(training.course_id)))
+
+
+def get_affiliation_information(site_identifier):
+    """
+    Drupal sends affiliation code through Azure AD B2C.
+    Using this code we determine that which user belongs to which site.
+
+    Sometimes we need to use information which is linked to the code, like
+    what is it's theme, site, time_zone e.t.c
+    So in order to avoid more db queries we're saving that info in cache in
+    a better format for easy access.
+    """
+    affiliation_info = cache.get(site_identifier, None)
+    if affiliation_info:
+        return affiliation_info
+
+    sites = Site.objects.filter(name='{} - LMS'.format(site_identifier)).prefetch_related('themes', 'configuration')
+
+    if not sites:
+        logger.info('Site affiliation information for {} does not exit'.format(site_identifier))
+        return None
+
+    site = sites[0]
+    affiliation_info = {
+        'theme': site.themes.first().theme_dir_name,
+        'lms_root_url': site.configuration.get_value('LMS_ROOT_URL', '#'),
+        'site_id': site.id
+    }
+
+    cache.set(site_identifier, affiliation_info, AFFILIATION_INFO_TIMEOUT)
+    return affiliation_info
+
+
+def get_clearesult_profile_extension_value(key, default_value):
+    user = get_current_user()
+    return user.get_extension_value(key, default_value)

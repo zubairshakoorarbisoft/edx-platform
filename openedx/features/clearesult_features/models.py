@@ -119,15 +119,15 @@ class ClearesultUserProfile(models.Model):
         return 'Clearesult user profile for {}.'.format(self.user.username)
 
     def get_associated_sites(self):
+        # To avoid circular import,
+        from  openedx.features.clearesult_features.utils import get_affiliation_information
         sites = []
         site_identifiers = self.get_identifiers()
         for site_identifier in site_identifiers:
-            try:
-                domain = settings.CLEARESULT_AVAILABLE_SITES_MAPPING[site_identifier]['lms_root_url'].split('//')[1]
-                site = Site.objects.get(domain=domain)
-                sites.append(site)
-            except Site.DoesNotExist:
-                logger.info('The site for the identifier {} does not exist.'.format(site_identifier))
+            affiliation_information = get_affiliation_information(site_identifier)
+            site = Site.objects.get(id=affiliation_information.get('site_id'))
+            sites.append(site)
+
         return sites
 
 
@@ -265,6 +265,7 @@ class ClearesultSiteConfiguration(ConfigurationModel):
 
     security_code_required = models.BooleanField(default=True)
     security_code = EncryptedTextField(max_length=20, verbose_name="Site security code", null=True, blank=True)
+    participation_code_required = models.BooleanField(default=False)
     default_group = models.ForeignKey(ClearesultGroupLinkage, null=True, blank=True, on_delete=models.SET_NULL, default=None)
     mandatory_courses_allotted_time = models.IntegerField(blank=True, null=True, default=20)
     mandatory_courses_notification_period = models.IntegerField(blank=True, null=True, default=2)
@@ -370,6 +371,17 @@ class ClearesultCourseEnrollment(models.Model):
     """
     enrollment = models.OneToOneField(CourseEnrollment, on_delete=models.CASCADE)
     updated_date = models.DateTimeField()
+
+    class Meta:
+        app_label = APP_LABEL
+
+
+class ParticipationGroupCode(models.Model):
+    """
+    This model will save the participation group codes.
+    """
+    group = models.OneToOneField(ClearesultGroupLinkage, on_delete=models.CASCADE)
+    code = models.CharField(max_length=255, unique=True)
 
     class Meta:
         app_label = APP_LABEL

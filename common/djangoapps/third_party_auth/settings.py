@@ -68,7 +68,7 @@ def apply_settings(django_settings):
         'third_party_auth.pipeline.set_id_verification_status',
         'third_party_auth.pipeline.set_logged_in_cookies',
         'third_party_auth.pipeline.login_analytics',
-        'openedx.features.clearesult_features.auth_pipeline.redirect_to_continuing_education'
+        'openedx.features.clearesult_features.auth_pipeline.redirect_to_participation_code'
     ]
 
     # Add enterprise pipeline elements if the enterprise app is installed

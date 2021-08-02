@@ -16,7 +16,7 @@ from third_party_auth import pipeline
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.user_api.models import UserPreference
 from openedx.features.clearesult_features.auth_backend import ClearesultAzureADOAuth2
-from openedx.features.clearesult_features.models import ClearesultUserProfile
+from openedx.features.clearesult_features.models import ClearesultUserProfile, ClearesultSiteConfiguration
 from  openedx.features.clearesult_features.utils import (
     add_user_to_site_default_group, set_user_first_and_last_name,
     get_site_from_site_identifier
@@ -52,13 +52,19 @@ def replace_old_clearesult_app_uid(backend, uid, details, response, *args, **kwa
             logger.info('Could not fetch email from facebook against uid: {}.'.format(uid))
 
 
-def redirect_to_continuing_education(user=None, *_, **__):
+def redirect_to_participation_code(request, user=None, *_, **__):
     """
-    Redirect a new registered user to "Continuing Education" page.
+    Redirect a new registered user to "Participation Code" page.
     """
-    if user and not user.clearesult_profile.get_extension_value('has_visited_continuing_education_form', False):
-        user.clearesult_profile.set_extension_value('has_visited_continuing_education_form', True)
-        return redirect(reverse('clearesult_features:continuing_education'))
+    clearesult_site_config = ClearesultSiteConfiguration.current(request.site)
+    if clearesult_site_config.participation_code_required:
+        if user and not user.clearesult_profile.get_extension_value('has_visited_participation_code', False):
+            user.clearesult_profile.set_extension_value('has_visited_participation_code', True)
+            return redirect(reverse('clearesult_features:participation_code'))
+    else:
+        if user and not user.clearesult_profile.get_extension_value('has_visited_continuing_education_form', False):
+            user.clearesult_profile.set_extension_value('has_visited_continuing_education_form', True)
+            return redirect(reverse('clearesult_features:continuing_education'))
 
 
 def update_clearesult_user_and_profile(request, response, user=None, *args, **kwargs):
@@ -99,46 +105,12 @@ def _set_user_site_identifiers(request, clearesult_user_profile, incoming_site_i
     if incoming_site_identifiers.strip() != '':
         incoming_site_identifiers_list = incoming_site_identifiers.split(',')
         if len(incoming_site_identifiers_list) > 0:
-            _set_user_time_zone(clearesult_user_profile, incoming_site_identifiers_list)
             clearesult_user_profile.site_identifiers = incoming_site_identifiers
             clearesult_user_profile.save()
             for site_identifier in incoming_site_identifiers_list:
                 site = get_site_from_site_identifier(clearesult_user_profile.user, site_identifier)
                 if site:
                     add_user_to_site_default_group(request, clearesult_user_profile.user, site)
-
-
-def _set_user_time_zone(clearesult_user_profile, incoming_site_identifiers):
-    if len(incoming_site_identifiers) == 1:
-        _set_user_time_zone_per_site_identifier(clearesult_user_profile.user, incoming_site_identifiers[0])
-    elif len(incoming_site_identifiers) > 0:
-        is_time_zone_set = False
-        fallback_identifier = None
-        for incoming_site_identifier in incoming_site_identifiers:
-            if settings.CLEARESULT_AVAILABLE_SITES_MAPPING.get(incoming_site_identifier):
-                fallback_identifier = incoming_site_identifier
-
-            if not clearesult_user_profile.has_identifier(incoming_site_identifier):
-                if fallback_identifier != incoming_site_identifier:
-                    continue
-                is_time_zone_set = True
-                _set_user_time_zone_per_site_identifier(clearesult_user_profile.user, incoming_site_identifier)
-                break
-
-        if not is_time_zone_set and fallback_identifier:
-            _set_user_time_zone_per_site_identifier(clearesult_user_profile.user, fallback_identifier)
-
-
-def _set_user_time_zone_per_site_identifier(user, site_identifier):
-    time_zone = settings.CLEARESULT_AVAILABLE_SITES_MAPPING.get(site_identifier).get('time_zone')
-    if time_zone:
-        try:
-            preference = UserPreference.objects.get(user=user, key='time_zone')
-            if preference.value != time_zone:
-                preference.value = time_zone
-                preference.save()
-        except UserPreference.DoesNotExist:
-            UserPreference.objects.create(user=user, key='time_zone', value=time_zone)
 
 
 def block_user_to_access_restricted_site(request, response, user=None, *args, **kwargs):

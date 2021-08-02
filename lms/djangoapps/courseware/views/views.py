@@ -1123,7 +1123,7 @@ def _progress(request, course_key, student_id):
         except ValueError:
             raise Http404
 
-    course = get_course_with_access(request.user, 'load', course_key)
+    course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
 
     staff_access = bool(has_access(request.user, 'staff', course))
     can_masquerade = request.user.has_perm(MASQUERADE_AS_STUDENT, course)
