@@ -35,7 +35,7 @@ export default function ParticipationCodeContent({ context }) {
       setParticipationCode("");
       loadInitialData();
     } catch (e) {
-      alert("Unable to add user in the participated group. Please verify that you are entering the valid code.");
+      alert("Oops! Looks like you entered an invalid code. Please try again.");
     }
   };
 
