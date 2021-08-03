@@ -1317,7 +1317,7 @@ class ParticipationGroupCodeVerification(generics.CreateAPIView):
             participation = serializer.save()
             add_user_to_group(request.user, participation.group, request)
             return Response({
-                "message": "User has been added to the group."
+                "message": "Success! You have been added to the group."
             }, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
