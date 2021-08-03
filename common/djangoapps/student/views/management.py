@@ -51,11 +51,8 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from openedx.core.djangoapps.theming import helpers as theming_helpers
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
 from openedx.core.djangolib.markup import HTML, Text
-from openedx.features.clearesult_features.utils import (
-    filter_courses_for_index_page_per_site,
-    update_clearesult_enrollment_date,
-    send_enrollment_email
-)
+from openedx.features.clearesult_features.utils import filter_courses_for_index_page_per_site
+from openedx.features.clearesult_features.tasks import post_enrollment_task
 from student.helpers import DISABLE_UNENROLL_CERT_STATES, cert_info, generate_activation_email_context
 from student.message_types import AccountActivation, EmailChange, EmailChangeConfirmation, RecoveryEmailCreate
 from student.models import (
@@ -370,9 +367,9 @@ def change_enrollment(request, check_access=True):
                 enroll_mode = CourseMode.auto_enroll_mode(course_id, available_modes)
                 if enroll_mode:
                     enrollment = CourseEnrollment.enroll(user, course_id, check_access=check_access, mode=enroll_mode)
-                    send_enrollment_email(enrollment, request.user, request.site)
-                    # update enrollment date as user status changed from unenrolled to enrolled
-                    update_clearesult_enrollment_date(enrollment)
+                    post_enrollment_task.delay(
+                        user.email, six.text_type(course_id), request.user.email, request.site.id
+                    )
             except Exception:  # pylint: disable=broad-except
                 return HttpResponseBadRequest(_("Could not enroll"))
 

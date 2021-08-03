@@ -308,3 +308,43 @@ def send_course_pass_email_to_learner(user_id, course_key_string):
         }
         from openedx.features.clearesult_features.utils import send_notification
         return send_notification(key, email_params, subject, [user.email], user, site)
+
+
+@task(base=LoggedTask)
+def post_enrollment_task(enrollment_user_email, enrollment_course_id_str, request_user_email, request_site_id):
+    from openedx.features.clearesult_features.utils import (
+        update_clearesult_enrollment_date,
+        send_enrollment_email
+    )
+    try:
+        request_user = User.objects.get(email=request_user_email)
+    except User.DoesNotExist:
+        log.error("Task Error - post enrollment - Request User with email {} does not exist".format(request_user_email))
+        return
+
+    try:
+        request_site = Site.objects.get(id=request_site_id)
+    except Site.DoesNotExist:
+        log.error("Task Error - post enrollment - Site with id {} does not exist".format(request_site_id))
+        return
+
+    try:
+        user = User.objects.get(email=enrollment_user_email)
+    except User.DoesNotExist:
+        log.error("Task Error - post enrollment - Enrollment User with email {} does not exist".format(enrollment_user_email))
+        return
+
+    try:
+        enrollment = CourseEnrollment.get_enrollment(user, CourseKey.from_string(enrollment_course_id_str))
+    except CourseEnrollment.DoesNotExist:
+        log.error(
+            "Task Error - post enrollment - Unable to find enrollment for email {} course: {}".format(
+                enrollment_user_email, enrollment_course_id_str
+            )
+        )
+        return
+
+    with emulate_http_request(site=request_site, user=request_user):
+        send_enrollment_email(enrollment, request_user, request_site)
+        # update enrollment date as user status changed from unenrolled to enrolled
+        update_clearesult_enrollment_date(enrollment)
