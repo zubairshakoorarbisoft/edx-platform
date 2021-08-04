@@ -35,9 +35,7 @@ from openedx.core.lib.api.permissions import ApiKeyHeaderPermission, ApiKeyHeade
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
 from openedx.core.lib.exceptions import CourseNotFoundError
 from openedx.core.lib.log_utils import audit_log
-from openedx.features.clearesult_features.tasks import (
-    post_enrollment_task
-)
+from openedx.features.clearesult_features.utils import handle_post_enrollment
 from openedx.features.enterprise_support.api import (
     ConsentApiServiceClient,
     EnterpriseApiException,
@@ -821,9 +819,15 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
                     enrollment_attributes=enrollment_attributes
                 )
                 if user:
-                    post_enrollment_task.delay(
-                        user.email, text_type(course_id), request.user.email, request.site.id
-                    )
+                    enrollment = CourseEnrollment.get_enrollment(user, course_id)
+
+                    # In-here we only want to handle paid courses.
+                    if enrollment and enrollment.mode in ['verified','professional']:
+                        handle_post_enrollment(enrollment, request.user, request.site)
+                    else:
+                        log.error(
+                            u'Enrollment Email Error - Unable to find Enrollment object for username: [%s] and course: [%s].',
+                            username, text_type(course_id))
                 else:
                     log.error(u'Enrollment Email Error - Unable to find User for username: [%s].', username)
 
