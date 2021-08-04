@@ -822,7 +822,7 @@ class EnrollmentListView(APIView, ApiKeyPermissionMixIn):
                     enrollment = CourseEnrollment.get_enrollment(user, course_id)
 
                     # In-here we only want to handle paid courses.
-                    if enrollment and enrollment.mode in ['verified','professional']:
+                    if enrollment and enrollment.mode in ['verified','no-id-professional']:
                         handle_post_enrollment(enrollment, request.user, request.site)
                     else:
                         log.error(
