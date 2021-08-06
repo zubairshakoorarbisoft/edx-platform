@@ -1117,3 +1117,9 @@ def get_affiliation_information(site_identifier):
 def get_clearesult_profile_extension_value(key, default_value):
     user = get_current_user()
     return user.get_extension_value(key, default_value)
+
+
+def handle_post_enrollment(enrollment, request_user, request_site):
+    send_enrollment_email(enrollment, request_user, request_site)
+    # update enrollment date as user status changed from unenrolled to enrolled
+    update_clearesult_enrollment_date(enrollment)
