@@ -212,11 +212,11 @@ def set_global_course_creator_status(request, user, set_global_creator):
     course_creator.admin = request_user
     course_creator.save()
     edly_user_info_cookie = request.COOKIES.get(settings.EDLY_USER_INFO_COOKIE_NAME, None)
-    edx_org = get_edx_org_from_cookie(edly_user_info_cookie)
+    edly_sub_org = get_edly_sub_org_from_cookie(edly_user_info_cookie)
     if set_global_creator:
-        GlobalCourseCreatorRole(edx_org).add_users(user)
+        GlobalCourseCreatorRole(edly_sub_org).add_users(user)
     else:
-        GlobalCourseCreatorRole(edx_org).remove_users(user)
+        GlobalCourseCreatorRole(edly_sub_org).remove_users(user)
 
 
 def user_belongs_to_edly_sub_organization(request, user):
