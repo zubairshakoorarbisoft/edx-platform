@@ -142,12 +142,12 @@ def get_enabled_organizations(request):
         return get_organizations()
 
     try:
-        studio_site_edx_organization = model_to_dict(request.site.edly_sub_org_for_studio.edx_organization)
+        studio_site_edx_organizations = request.site.edly_sub_org_for_studio.edx_organizations.all()
     except EdlySubOrganization.DoesNotExist:
         LOGGER.exception('No EdlySubOrganization found for site %s', request.site)
         return []
 
-    return [studio_site_edx_organization]
+    return studio_site_edx_organizations.values()
 
 
 def create_user_link_with_edly_sub_organization(request, user):
