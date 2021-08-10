@@ -1011,7 +1011,7 @@ def send_enrollment_email(enrollment, request_user, request_site):
     course_url = "{}{}".format(root_url, reverse('course_root', kwargs={'course_id': enrollment.course_id}))
 
     data = {
-        "full_name": request_user.first_name + " " + request_user.last_name,
+        "full_name": enrollment.user.first_name + " " + enrollment.user.last_name,
         "display_name": course.display_name_with_default,
         "course_url": course_url,
         "event_url": "{}/{}".format(root_url, get_event_file(enrollment.course_id))
