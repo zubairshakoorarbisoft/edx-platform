@@ -141,11 +141,9 @@ def get_enabled_organizations(request):
     if not waffle.switch_is_active(settings.ENABLE_EDLY_ORGANIZATIONS_SWITCH):
         return get_organizations()
 
-    try:
-        studio_site_edx_organizations = request.site.edly_sub_org_for_studio.edx_organizations.all()
-    except EdlySubOrganization.DoesNotExist:
+    studio_site_edx_organizations = request.site.edly_sub_org_for_studio.edx_organizations.all()
+    if not studio_site_edx_organizations:
         LOGGER.exception('No EdlySubOrganization found for site %s', request.site)
-        return []
 
     return studio_site_edx_organizations.values()
 
