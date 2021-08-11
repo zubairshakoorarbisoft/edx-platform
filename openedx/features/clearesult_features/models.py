@@ -201,6 +201,7 @@ class ClearesultCourse(models.Model):
     course_id = CourseKeyField(max_length=255, db_index=True, unique=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
     is_event = models.BooleanField(default=False, verbose_name='Is Event')
+    meta_tags = models.CharField(max_length=255, default='')
 
     class Meta:
         app_label = APP_LABEL
@@ -208,6 +209,11 @@ class ClearesultCourse(models.Model):
 
     def __str__(self):
         return '{} - {}'.format( self.course_id, self.site)
+
+    def get_meta_tags(self):
+        if self.meta_tags.strip() == "":
+            return []
+        return self.meta_tags.split(',')
 
 
 class ClearesultCatalog(models.Model):
@@ -385,3 +391,11 @@ class ParticipationGroupCode(models.Model):
 
     class Meta:
         app_label = APP_LABEL
+
+
+class ClearesultCourseMetaTag(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+
+    def save(self, *args, **kwargs):
+        self.title = self.title.strip().upper()
+        super(ClearesultCourseMetaTag, self).save(*args, **kwargs)

@@ -1,9 +1,11 @@
 $(document).ready(function() {
     let courseLibraryItems = document.getElementsByClassName('course');
+    let courseMetaTags = [];
     var courseLibraryIndices = {};
     let adjuster = 1;
     for (let courseItem of courseLibraryItems) {
         courseLibraryIndices[courseItem.getAttribute('aria-label') + adjuster] = courseItem.parentElement;
+        courseMetaTags[courseItem.getAttribute('aria-label') + adjuster] = courseItem.getAttribute('aria-tags');
         adjuster++;
     }
 
@@ -15,7 +17,8 @@ $(document).ready(function() {
         let courseKeys = Object.keys(courseLibraryIndices);
         let filteredCourses = [];
         for (let courseKey of courseKeys) {
-            if (insensitiveSearch(searchKey, courseKey)) {
+            if (insensitiveSearch(searchKey, courseKey)
+                || insensitiveSearch(searchKey, courseMetaTags[courseKey])) {
                 filteredCourses.push(courseKey);
             }
         }

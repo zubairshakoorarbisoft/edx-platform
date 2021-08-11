@@ -4,9 +4,14 @@
 from django.utils.translation import ugettext as _
 from django.urls import reverse
 from six import text_type
+from openedx.features.clearesult_features.models import ClearesultCourse
 %>
 <%page args="course" expression_filter="h"/>
-<article class="course" id="${course.id}" role="region" aria-label="${course.display_name_with_default}">
+
+<%
+  meta_tags = ClearesultCourse.objects.get(course_id=course.id).meta_tags
+%>
+<article class="course" id="${course.id}" role="region" aria-label="${course.display_name_with_default}" aria-tags="${meta_tags}">
   <a href="${reverse('about_course', args=[text_type(course.id)])}">
     <header class="course-image">
       <div class="cover-image">
