@@ -63,6 +63,10 @@ def perform_request(method, url, data_or_params=None, raw=False,
         data = None
         params = data_or_params.copy()
         params.update(request_id_dict)
+
+    log.info('-------------------------------------------------------')
+    log.info('URL {}'.format(url))
+    log.info('-------------------------------------------------------')
     response = requests.request(
         method,
         url,
