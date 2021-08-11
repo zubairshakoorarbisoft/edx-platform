@@ -15,6 +15,7 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                    'change textarea': 'updateModel',
                    'change select': 'updateModel',
                    'click .remove-course-introduction-video': 'removeVideo',
+                   'change #available-course-meta-tags': 'addMetaTagToSelectedList',
                    'focus #course-overview': 'codeMirrorize',
                    'focus #course-about-sidebar-html': 'codeMirrorize',
                    'mouseover .timezone': 'updateTime',
@@ -25,7 +26,8 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                    'click .add-course-learning-info': 'addLearningFields',
                    'click .add-course-instructor-info': 'addInstructorFields',
                    'click .add-course-credits-field': 'addCourseCreditsFields',
-                   'click .remove-course-credits-field': 'removeCourseCreditsField'
+                   'click .remove-course-credits-field': 'removeCourseCreditsField',
+                   'click .course-meta-tags-list-item': 'removeMetaTag',
                },
 
                initialize: function(options) {
@@ -314,6 +316,27 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                         this.updateModel(event);
                     }
                },
+               removeMetaTag: function(event) {
+                this.model.get('associated_meta_tags').pop(event.target.textContent)
+                event.target.remove();
+                this.updateModel(event);
+               },
+
+                addMetaTagToSelectedList: function(event) {
+                    if (event.target.value == ""
+                    || (document.getElementById("associated-tag-" + event.target.value) != null
+                    && document.getElementById("associated-tag-" + event.target.value) != undefined)) {
+                        return;
+                    }
+                    var meta_tag_list = document.getElementById("course-meta-tags-list");
+                    var meta_tag_list_item = document.createElement("li");
+                    meta_tag_list_item.setAttribute("class", "course-meta-tags-list-item");
+                    meta_tag_list_item.setAttribute("id", "associated-tag-" + event.target.value);
+                    meta_tag_list_item.appendChild(document.createTextNode(event.target.value));
+                    meta_tag_list.appendChild(meta_tag_list_item);
+                    this.model.get("associated_meta_tags").push(event.target.value);
+                },
+
 
                addLearningFields: function() {
         /*

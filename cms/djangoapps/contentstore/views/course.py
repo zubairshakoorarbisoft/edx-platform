@@ -71,7 +71,7 @@ from openedx.core.lib.course_tabs import CourseTabPluginManager
 from openedx.core.lib.courses import course_image_url
 from openedx.features.clearesult_features.api.v0.validators import validate_sites_for_local_admin
 from openedx.features.clearesult_features.models import (
-    ClearesultCourseCredit, ClearesultCreditProvider, ClearesultCourse
+    ClearesultCourseCredit, ClearesultCreditProvider, ClearesultCourse, ClearesultCourseMetaTag
 )
 from openedx.features.clearesult_features.instructor_reports.utils import (
     get_all_credits_provider_list,
@@ -1143,8 +1143,12 @@ def settings_handler(request, course_key_string):
                 'enable_extended_course_details': enable_extended_course_details,
                 'upgrade_deadline': upgrade_deadline,
                 'available_clearesult_providers': get_available_credits_provider_list(course_key_string),
+                'available_course_meta_tags': [
+                    i[0] for i in  ClearesultCourseMetaTag.objects.all().values_list('title')
+                ],
+                'associated_meta_tags': ClearesultCourse.objects.get(course_id=course_key).get_meta_tags(),
                 'course_credits': get_course_credits_list(course_key_string),
-                'course_site': clearesult_course_data.get("site")
+                'course_site': clearesult_course_data.get("site"),
             }
             if is_prerequisite_courses_enabled():
                 courses, in_process_course_actions = get_courses_accessible_to_user(request)
@@ -1184,6 +1188,10 @@ def settings_handler(request, course_key_string):
 
                 data.update({
                     'available_clearesult_providers': get_available_credits_provider_list(course_key_string),
+                    'available_course_meta_tags': [
+                        i[0] for i in  ClearesultCourseMetaTag.objects.all().values_list('title')
+                    ],
+                    'associated_meta_tags': ClearesultCourse.objects.get(course_id=course_key).get_meta_tags(),
                     'course_credits': get_course_credits_list(course_key_string),
                     'all_clearesult_providers': get_all_credits_provider_list(),
                     'course_site': clearesult_course_data.get("site"),
@@ -1272,11 +1280,13 @@ def settings_handler(request, course_key_string):
                         )
                         course_credit.save()
 
-                # update is_event settings
+                # update is_event and meta-tags settings settings
                 is_event = request.json.get('is_event', False)
+                meta_tags = ','.join(request.json.get('associated_meta_tags', []))
                 try:
                     clearesult_course = ClearesultCourse.objects.get(course_id=course_key_string)
                     clearesult_course.is_event = is_event
+                    clearesult_course.meta_tags = meta_tags
                     clearesult_course.save()
                 except ClearesultCourse.DoesNotExist:
                     log.exception("Clearesult Course object does not exist for course_id: {}".format(

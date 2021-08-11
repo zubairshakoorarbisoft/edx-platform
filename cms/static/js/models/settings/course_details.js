@@ -40,7 +40,9 @@ define(['backbone', 'underscore', 'gettext', 'js/models/validation_helpers', 'js
                 is_event: false,
                 course_credits: [],
                 available_clearesult_providers: [],
-                all_clearesult_providers: []
+                all_clearesult_providers: [],
+                available_course_meta_tags: [],
+                associated_meta_tags: []
             },
 
             validate: function(newattrs) {
