@@ -26,7 +26,8 @@ from openedx.features.clearesult_features.models import (
     ClearesultCourseCompletion,
     ClearesultCourseConfig,
     ClearesultCourseEnrollment,
-    ParticipationGroupCode
+    ParticipationGroupCode,
+    ClearesultCourseMetaTag
 )
 
 
@@ -180,6 +181,12 @@ class ParticipationGroupCodeAdmin(admin.ModelAdmin):
     list_display = ('id', 'group', 'code')
     search_fields = ('code',)
 
+
+class ClearesultCourseMetaTagAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title')
+    search_fields = ('title',)
+
+
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
 admin.site.register(UserCreditsProfile, UserCreditsProfileAdmin)
@@ -196,3 +203,4 @@ admin.site.register(BlockCompletion, BlockCompleteionAdmin)
 admin.site.register(ClearesultCourseConfig, ClearesultCourseConfigAdmin)
 admin.site.register(ClearesultCourseEnrollment, ClearesultCourseEnrollmentAdmin)
 admin.site.register(ParticipationGroupCode, ParticipationGroupCodeAdmin)
+admin.site.register(ClearesultCourseMetaTag, ClearesultCourseMetaTagAdmin)
