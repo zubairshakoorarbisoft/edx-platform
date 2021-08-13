@@ -127,7 +127,7 @@ def get_edx_org_from_cookie(encoded_cookie_data):
         return ''
 
     decoded_cookie_data = decode_edly_user_info_cookie(encoded_cookie_data)
-    return decoded_cookie_data['edx-org']
+    return decoded_cookie_data['edx-orgs']
 
 
 def get_enabled_organizations(request):
@@ -320,9 +320,9 @@ def filter_courses_based_on_org(request, all_courses):
     """
 
     edly_user_info_cookie = request.COOKIES.get(settings.EDLY_USER_INFO_COOKIE_NAME, None)
-    edx_org = get_edx_org_from_cookie(edly_user_info_cookie)
+    edx_orgs = get_edx_org_from_cookie(edly_user_info_cookie)
 
-    filtered_courses = [course for course in list(all_courses) if course.org == edx_org]
+    filtered_courses = [course for course in list(all_courses) if course.org in edx_orgs]
 
     return filtered_courses
 
@@ -429,7 +429,7 @@ def is_course_org_same_as_site_org(site, course_id):
         LOGGER.info('No Edly sub organization found for site %s', site)
         return False
 
-    if edly_sub_org.edx_organization.short_name == course_id.org:
+    if course_id.org in edly_sub_org.get_edx_organizations:
         return True
 
     LOGGER.info('Course organization does not match site organization')
