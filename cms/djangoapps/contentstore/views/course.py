@@ -444,7 +444,8 @@ def _accessible_courses_summary_iter(request, org=None):
             orgs.extend(org)
         else:
             orgs.append(org)
-        courses_summary = [] if org == '' else CourseOverview.get_all_courses(orgs=orgs)
+
+        courses_summary = CourseOverview.get_all_courses(orgs=orgs)
     else:
         courses_summary = modulestore().get_course_summaries()
     courses_summary = six.moves.filter(course_filter, courses_summary)
