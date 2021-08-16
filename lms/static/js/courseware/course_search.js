@@ -36,6 +36,11 @@ $(document).ready(function() {
         $(".courses-listing").empty();
 
         let filteredCourses = filterCourses(courseLibraryIndices, searchKey);
+        if (filteredCourses.length < 1) {
+            $("#no-search-results").toggleClass('no-search-result');
+            $("#no-search-results").toggleClass('hidden');
+        }
+
         for (let courseKey of filteredCourses) {
             $(".courses-listing").append(courseLibraryIndices[courseKey]);
         }
@@ -55,6 +60,9 @@ $(document).ready(function() {
         $("#cancel-course-library-search").toggleClass("hidden");
         $("#course-library-search-field").val("");
         $(".courses-listing").empty();
+        $("#no-search-results").toggleClass('no-search-result');
+        $("#no-search-results").toggleClass('hidden');
+        $("#no-search-results").css({display: 'none'});
         let courseKeys = Object.keys(courseLibraryIndices);
         for (let courseKey of courseKeys) {
             $(".courses-listing").append(courseLibraryIndices[courseKey]);
