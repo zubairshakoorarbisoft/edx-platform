@@ -578,7 +578,7 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
             # make sure we've honored that filter when
             # integrating in-transit records
             if org_target:
-                if record.index['org'] != org_target:
+                if record.index['org'] not in org_target:
                     continue
 
             if course_keys:
