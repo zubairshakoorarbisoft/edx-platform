@@ -29,7 +29,8 @@ class EdlySubOrganization(TimeStampedModel):
     slug = models.CharField(max_length=50, unique=True, validators=[EDLY_SLUG_VALIDATOR])
 
     edly_organization = models.ForeignKey(EdlyOrganization, on_delete=models.CASCADE)
-    edx_organizations = models.ManyToManyField(Organization)
+    edx_organization = models.OneToOneField(Organization, on_delete=models.CASCADE, null=True, blank=True)
+    edx_organizations = models.ManyToManyField(Organization, related_name='edx_organizations')
     lms_site = models.OneToOneField(Site, related_name='edly_sub_org_for_lms', on_delete=models.CASCADE)
     studio_site = models.OneToOneField(Site, related_name='edly_sub_org_for_studio', on_delete=models.CASCADE)
     preview_site = models.OneToOneField(

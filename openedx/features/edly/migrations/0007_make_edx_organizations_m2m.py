@@ -6,6 +6,20 @@ import django.core.validators
 from django.db import migrations, models
 
 
+def seed_edx_organizations(apps, schema_editor):
+    EdlySubOrganization = apps.get_model('edly', 'EdlySubOrganization')
+    for edly_sub_org in EdlySubOrganization.objects.all():
+        edly_sub_org.edx_organizations.add(edly_sub_org.edx_organization)
+        edly_sub_org.save()
+
+
+def unseed_edx_organizations(apps, schema_editor):
+    EdlySubOrganization = apps.get_model('edly', 'EdlySubOrganization')
+    for edly_sub_org in EdlySubOrganization.objects.all():
+        edly_sub_org.edx_organization = edly_sub_org.edx_organizations.first()
+        edly_sub_org.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -23,7 +37,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='edlysuborganization',
             name='edx_organizations',
-            field=models.ManyToManyField(to='organizations.Organization'),
+            field=models.ManyToManyField(to='organizations.Organization', related_name='edx_organizations'),
+        ),
+        migrations.RunPython(
+            seed_edx_organizations,
+            reverse_code=unseed_edx_organizations
         ),
         migrations.AlterField(
             model_name='edlysuborganization',
@@ -35,8 +53,11 @@ class Migration(migrations.Migration):
             name='edlysuborganization',
             unique_together=set(),
         ),
-        migrations.RemoveField(
+        migrations.AlterField(
             model_name='edlysuborganization',
             name='edx_organization',
+            field=models.OneToOneField(
+                to='organizations.Organization', on_delete=models.CASCADE, null=True, blank=True
+            ),
         ),
     ]
