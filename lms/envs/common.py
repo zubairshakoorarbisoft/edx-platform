@@ -2121,7 +2121,8 @@ DEBUG_TOOLBAR_PATCH_SETTINGS = False
 # Tasks are only registered when the module they are defined in is imported.
 CELERY_IMPORTS = (
     'openedx.core.djangoapps.programs.tasks.v1.tasks',
-    'poll.tasks'
+    'poll.tasks',
+    'openedx.features.clearesult_features.tasks'
 )
 
 # Message configuration
@@ -2829,18 +2830,7 @@ DRUPAL_API_CREDENTIALS = {
     'url': ''
 }
 
-CLEARESULT_AVAILABLE_SITES_MAPPING = {
-    'black-hills-energy-swepco': {
-        'theme': 'blackhillsswepco'
-    },
-    'bayren': {
-        'theme': 'bayren'
-    },
-    'georgia-power': {
-        'theme': 'georgia_power'
-    }
-}
-
+CLEARESULT_REPORTS_TZ = 'America/Jamaica' # EST timezone
 ###################### Registration ##################################
 
 # For each of the fields, give one of the following values:
@@ -4000,6 +3990,8 @@ GLOBALLY_ENABLED_SSO_PROVIDERS = [
 ######################## Default Email Params ################################
 DEFAULT_LOGO = '/static/clearesult/images/clearesulttrainingservices.png'
 DEFAULT_REGISTERATION_URL = ''
+
+ADMIN_USERNAME_FOR_EMAIL_TASK = ''
 
 ######################  Site Deafult Group Name  ###################
 SITE_DEFAULT_GROUP_NAME = "DEFAULT"

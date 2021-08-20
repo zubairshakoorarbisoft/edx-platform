@@ -15,6 +15,7 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                    'change textarea': 'updateModel',
                    'change select': 'updateModel',
                    'click .remove-course-introduction-video': 'removeVideo',
+                   'change #available-course-meta-tags': 'addMetaTagToSelectedList',
                    'focus #course-overview': 'codeMirrorize',
                    'focus #course-about-sidebar-html': 'codeMirrorize',
                    'mouseover .timezone': 'updateTime',
@@ -25,7 +26,8 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                    'click .add-course-learning-info': 'addLearningFields',
                    'click .add-course-instructor-info': 'addInstructorFields',
                    'click .add-course-credits-field': 'addCourseCreditsFields',
-                   'click .remove-course-credits-field': 'removeCourseCreditsField'
+                   'click .remove-course-credits-field': 'removeCourseCreditsField',
+                   'click .course-meta-tags-list-item': 'removeMetaTag',
                },
 
                initialize: function(options) {
@@ -144,6 +146,11 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                        instructorPacedButton = this.$('#course-pace-instructor-paced'),
                        paceToggleTip = this.$('#course-pace-toggle-tip');
                    (this.model.get('self_paced') ? selfPacedButton : instructorPacedButton).attr('checked', true);
+
+                   var eventTrueButton = this.$('#course-event-true'),
+                       eventFalseButton = this.$('#course-event-false');
+                   (this.model.get('is_event') ? eventTrueButton : eventFalseButton).attr('checked', true);
+
                    if (this.model.canTogglePace()) {
                        selfPacedButton.removeAttr('disabled');
                        instructorPacedButton.removeAttr('disabled');
@@ -309,6 +316,27 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                         this.updateModel(event);
                     }
                },
+               removeMetaTag: function(event) {
+                this.model.get('associated_meta_tags').pop(event.target.textContent)
+                event.target.remove();
+                this.updateModel(event);
+               },
+
+                addMetaTagToSelectedList: function(event) {
+                    if (event.target.value == ""
+                    || (document.getElementById("associated-tag-" + event.target.value) != null
+                    && document.getElementById("associated-tag-" + event.target.value) != undefined)) {
+                        return;
+                    }
+                    var meta_tag_list = document.getElementById("course-meta-tags-list");
+                    var meta_tag_list_item = document.createElement("li");
+                    meta_tag_list_item.setAttribute("class", "course-meta-tags-list-item");
+                    meta_tag_list_item.setAttribute("id", "associated-tag-" + event.target.value);
+                    meta_tag_list_item.appendChild(document.createTextNode(event.target.value));
+                    meta_tag_list.appendChild(meta_tag_list_item);
+                    this.model.get("associated_meta_tags").push(event.target.value);
+                },
+
 
                addLearningFields: function() {
         /*
@@ -476,6 +504,13 @@ define(['js/views/validation', 'codemirror', 'underscore', 'jquery', 'jquery.ui'
                    case 'course-pace-instructor-paced':
                        this.model.set('self_paced', JSON.parse(event.currentTarget.value));
                        break;
+
+                    case 'course-event-false':
+                    // Fallthrough to handle both radio buttons
+                    case 'course-event-true':
+                        this.model.set('is_event', JSON.parse(event.currentTarget.value));
+                        break;
+
                    case 'course-language':
                    case 'course-effort':
                    case 'course-title':

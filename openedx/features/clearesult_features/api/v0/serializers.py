@@ -15,7 +15,7 @@ from rest_framework import serializers
 from openedx.features.clearesult_features.models import (
     UserCreditsProfile, ClearesultCreditProvider, ClearesultCatalog,
     ClearesultCourse, ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
-    ClearesultSiteConfiguration, ClearesultCourseConfig
+    ClearesultSiteConfiguration, ClearesultCourseConfig, ParticipationGroupCode
 )
 from openedx.features.clearesult_features.api.v0.validators import validate_user_for_site
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
@@ -120,7 +120,6 @@ class ClearesultGroupsSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response['site'] = SiteSerializer(instance.site).data
 
         fields = self.context.get('fields', ['id', 'name', 'site', 'users'])
         if "catalogs" in fields:
@@ -128,6 +127,10 @@ class ClearesultGroupsSerializer(serializers.ModelSerializer):
                 ClearesultGroupLinkedCatalogs.objects.filter(group=instance), many=True).data
         if "users" in fields:
             response['users'] = UserSerializer(instance.users.all(), many=True).data
+
+        if "site" in fields:
+            response['site'] = SiteSerializer(instance.site).data
+
         return response
 
     class Meta:
@@ -264,7 +267,7 @@ class MandatoryCoursesConfigSerializer(serializers.ModelSerializer):
             courseConfig = ClearesultCourseConfig.objects.get(course_id=obj.course_id, site__id=site_id)
             return {
                 "id": courseConfig.id,
-                "mandatory_courses_alotted_time": courseConfig.mandatory_courses_alotted_time,
+                "mandatory_courses_allotted_time": courseConfig.mandatory_courses_allotted_time,
                 "mandatory_courses_notification_period": courseConfig.mandatory_courses_notification_period
             }
         except ClearesultCourseConfig.DoesNotExist:
@@ -276,7 +279,7 @@ class ClearesultCourseConfigSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClearesultCourseConfig
-        fields = ('id', 'course_id', 'course_name', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
+        fields = ('id', 'course_id', 'course_name', 'site', 'mandatory_courses_allotted_time', 'mandatory_courses_notification_period')
         read_only_fields = ('id', 'course_name')
         extra_kwargs = {
             'site': {'write_only': True},
@@ -291,3 +294,29 @@ class ClearesultCourseConfigSerializer(serializers.ModelSerializer):
             raise NotFound(err)
 
         return display_name
+
+
+class ParticipationGroupCodeSerializer(serializers.Serializer):
+    code = serializers.CharField()
+
+    def validate_code(self, code):
+        try:
+            participation = ParticipationGroupCode.objects.get(code=code)
+            request = self.context.get("request")
+            if not request:
+                raise serializers.ValidationError(
+                    u'Invalid site - missing site info in request'
+                )
+            if participation.group.site != request.site:
+                raise serializers.ValidationError(
+                    u'Invalid code - code does not exist for the given site'
+                )
+            return code
+
+        except ParticipationGroupCode.DoesNotExist:
+            raise serializers.ValidationError(
+                u'Invalid code - participation code does not exist'
+            )
+
+    def create(self, validated_data):
+        return ParticipationGroupCode.objects.get(code=validated_data.get("code"))

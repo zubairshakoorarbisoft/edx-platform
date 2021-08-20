@@ -1,9 +1,11 @@
 $(document).ready(function() {
     let courseLibraryItems = document.getElementsByClassName('course');
+    let courseMetaTags = [];
     var courseLibraryIndices = {};
     let adjuster = 1;
     for (let courseItem of courseLibraryItems) {
         courseLibraryIndices[courseItem.getAttribute('aria-label') + adjuster] = courseItem.parentElement;
+        courseMetaTags[courseItem.getAttribute('aria-label') + adjuster] = courseItem.getAttribute('aria-tags');
         adjuster++;
     }
 
@@ -15,7 +17,8 @@ $(document).ready(function() {
         let courseKeys = Object.keys(courseLibraryIndices);
         let filteredCourses = [];
         for (let courseKey of courseKeys) {
-            if (insensitiveSearch(searchKey, courseKey)) {
+            if (insensitiveSearch(searchKey, courseKey)
+                || insensitiveSearch(searchKey, courseMetaTags[courseKey])) {
                 filteredCourses.push(courseKey);
             }
         }
@@ -33,6 +36,11 @@ $(document).ready(function() {
         $(".courses-listing").empty();
 
         let filteredCourses = filterCourses(courseLibraryIndices, searchKey);
+        if (filteredCourses.length < 1) {
+            $("#no-search-results").toggleClass('no-search-result');
+            $("#no-search-results").toggleClass('hidden');
+        }
+
         for (let courseKey of filteredCourses) {
             $(".courses-listing").append(courseLibraryIndices[courseKey]);
         }
@@ -52,6 +60,9 @@ $(document).ready(function() {
         $("#cancel-course-library-search").toggleClass("hidden");
         $("#course-library-search-field").val("");
         $(".courses-listing").empty();
+        $("#no-search-results").toggleClass('no-search-result');
+        $("#no-search-results").toggleClass('hidden');
+        $("#no-search-results").css({display: 'none'});
         let courseKeys = Object.keys(courseLibraryIndices);
         for (let courseKey of courseKeys) {
             $(".courses-listing").append(courseLibraryIndices[courseKey]);

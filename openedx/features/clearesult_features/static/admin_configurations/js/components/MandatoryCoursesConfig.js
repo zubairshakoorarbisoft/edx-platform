@@ -10,7 +10,6 @@ export default function MandatoryCoursesConfig({availableSites, changedSiteHandl
     )
     return (
         <div className='admin-header'>
-            <h2>Mandatory Courses Due Date</h2>
             <div className='form-inline'>
                 <span> Site:
                     <select className='form-control' onChange={(e) => changedSiteHandler(e.target.value)}>

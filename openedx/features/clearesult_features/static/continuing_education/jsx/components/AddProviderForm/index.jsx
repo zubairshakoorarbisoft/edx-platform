@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export default function AddProviderForm({ choices, handleAddProvider, handleOnSkipClick }) {
+export default function AddProviderForm({ choices, handleAddProvider, handleOnSkipClick, visitingForSecondTime }) {
     const [selected, setSelected] = useState("");
     const [providerId, setProviderId] = useState("");
 
@@ -22,7 +22,8 @@ export default function AddProviderForm({ choices, handleAddProvider, handleOnSk
     }
 
     function renderButton() {
-        if (document.referrer.includes('clearesult/site_security')) {
+        if (window.location.search.includes('first_time=true')
+            || document.referrer.includes('/register')) {
           return (
             <button
                 className="btn btn-primary"

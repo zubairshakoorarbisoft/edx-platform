@@ -10,6 +10,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from opaque_keys.edx.django.models import CourseKeyField
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from student.models import CourseEnrollment
@@ -86,7 +87,24 @@ class ClearesultUserProfile(models.Model):
 
     user = models.OneToOneField(User, unique=True, db_index=True,
                                 related_name='clearesult_profile', on_delete=models.CASCADE)
-    job_title = models.CharField(max_length=255, blank=True)
+    site_identifiers = models.CharField(max_length=255, blank=True)
+    # * Drupal is sending affiliation ids of users in "jobTitle" field through azure ad b2c
+    # we're saving that in the site_identifiers field. The data is received in this format:
+    # "clearesult,bayren,clearesultpowerandlight"
+    # BUT we save it in this format, adding an extra comma at the end
+    # to avoid any error in search query
+    # "clearesult,bayren,clearesult,"
+    #
+    # We are doing so because if we perform icontains query on "clearsultpowerandlight,bayren"
+    # it would return data BUT in actual we are looking specifically for "clearesult,bayren"
+    #
+    # Adding "," we will perform search using "clearesult," as a key
+    # To achieve this, we need to make sure that the site_identifiers always have an extra comma at the end
+    # to do so we have overridden the save method
+    # ans some extra methods including
+    # def has_identifier():
+    # &
+    # def get_site_related_profiles():
     company = models.CharField(max_length=255, blank=True)
     state_or_province = models.CharField(max_length=255, blank=True)
     postal_code = models.CharField(max_length=50, blank=True)
@@ -99,6 +117,47 @@ class ClearesultUserProfile(models.Model):
 
     def __str__(self):
         return 'Clearesult user profile for {}.'.format(self.user.username)
+
+    def get_associated_sites(self):
+        # To avoid circular import,
+        from  openedx.features.clearesult_features.utils import get_affiliation_information
+        sites = []
+        site_identifiers = self.get_identifiers()
+        for site_identifier in site_identifiers:
+            affiliation_information = get_affiliation_information(site_identifier)
+            site = Site.objects.get(id=affiliation_information.get('site_id'))
+            sites.append(site)
+
+        return sites
+
+
+    @staticmethod
+    def get_site_related_profiles(site_name, select_related_users=True):
+        site_name = '{},'.format(site_name)
+        if select_related_users:
+            return ClearesultUserProfile.objects.filter(site_identifiers__icontains=site_name).select_related("user")
+
+        return ClearesultUserProfile.objects.filter(site_identifiers__icontains=site_name)
+
+    def save(self, *args, **kwargs):
+        # modify site_identifiers
+        site_identifiers = self.site_identifiers.strip()
+        if site_identifiers and not site_identifiers.endswith(','):
+            self.site_identifiers = site_identifiers + ','
+
+        if not self.extensions:
+            self.extensions = collections.OrderedDict()
+
+        super(ClearesultUserProfile, self).save(*args, **kwargs)
+
+    def has_identifier(self, identifier):
+        if '{},'.format(identifier) in self.site_identifiers:
+            return True
+        return False
+
+    def get_identifiers(self):
+        identifiers = self.site_identifiers.split(',')
+        return list(filter(lambda a: a != '', identifiers))
 
     def get_extension_value(self, name, default=None):
         try:
@@ -141,6 +200,8 @@ class ClearesultCourse(models.Model):
 
     course_id = CourseKeyField(max_length=255, db_index=True, unique=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
+    is_event = models.BooleanField(default=False, verbose_name='Is Event')
+    meta_tags = models.CharField(max_length=255, default='')
 
     class Meta:
         app_label = APP_LABEL
@@ -148,6 +209,11 @@ class ClearesultCourse(models.Model):
 
     def __str__(self):
         return '{} - {}'.format( self.course_id, self.site)
+
+    def get_meta_tags(self):
+        if self.meta_tags.strip() == "":
+            return []
+        return self.meta_tags.split(',')
 
 
 class ClearesultCatalog(models.Model):
@@ -205,9 +271,12 @@ class ClearesultSiteConfiguration(ConfigurationModel):
 
     security_code_required = models.BooleanField(default=True)
     security_code = EncryptedTextField(max_length=20, verbose_name="Site security code", null=True, blank=True)
+    participation_code_required = models.BooleanField(default=False)
     default_group = models.ForeignKey(ClearesultGroupLinkage, null=True, blank=True, on_delete=models.SET_NULL, default=None)
-    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
-    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
+    mandatory_courses_allotted_time = models.IntegerField(blank=True, null=True, default=20)
+    mandatory_courses_notification_period = models.IntegerField(blank=True, null=True, default=2)
+    courses_notification_period = models.IntegerField(blank=True, null=True, default=2)
+    events_notification_period = models.IntegerField(blank=True, null=True, default=2)
 
     class Meta:
         app_label = APP_LABEL
@@ -292,7 +361,7 @@ class ClearesultCourseConfig(models.Model):
     """
     course_id = CourseKeyField(max_length=255, db_index=True)
     site = models.ForeignKey(Site, on_delete=models.CASCADE)
-    mandatory_courses_alotted_time = models.IntegerField(blank=True, null=True)
+    mandatory_courses_allotted_time = models.IntegerField(blank=True, null=True)
     mandatory_courses_notification_period = models.IntegerField(blank=True, null=True)
 
     class Meta:
@@ -311,3 +380,22 @@ class ClearesultCourseEnrollment(models.Model):
 
     class Meta:
         app_label = APP_LABEL
+
+
+class ParticipationGroupCode(models.Model):
+    """
+    This model will save the participation group codes.
+    """
+    group = models.OneToOneField(ClearesultGroupLinkage, on_delete=models.CASCADE)
+    code = models.CharField(max_length=255, unique=True)
+
+    class Meta:
+        app_label = APP_LABEL
+
+
+class ClearesultCourseMetaTag(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+
+    def save(self, *args, **kwargs):
+        self.title = self.title.strip().upper()
+        super(ClearesultCourseMetaTag, self).save(*args, **kwargs)

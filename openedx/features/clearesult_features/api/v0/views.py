@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.db import IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -38,19 +39,21 @@ from openedx.features.clearesult_features.utils import (
     get_site_users,
     is_local_admin_or_superuser,
     get_site_linked_courses_and_groups,
-    get_site_linked_any_course
+    get_site_linked_any_course,
+    add_user_to_group
 )
 from openedx.features.clearesult_features.models import (
     ClearesultCreditProvider, UserCreditsProfile, ClearesultCatalog,
     ClearesultCourse, ClearesultLocalAdmin, ClearesultGroupLinkage,
     ClearesultGroupLinkedCatalogs, ClearesultUserSession, ClearesultCourseCompletion,
-    ClearesultSiteConfiguration, ClearesultCourseConfig
+    ClearesultSiteConfiguration, ClearesultCourseConfig, ParticipationGroupCode
 )
 from openedx.features.clearesult_features.api.v0.serializers import (
     UserCreditsProfileSerializer, ClearesultCreditProviderSerializer,
     ClearesultCatalogSerializer, ClearesultCourseSerializer,
     UserSerializer, SiteSerializer, ClearesultGroupsSerializer,
-    ClearesultMandatoryCoursesSerializer, ClearesultCourseConfigSerializer, MandatoryCoursesConfigSerializer
+    ClearesultMandatoryCoursesSerializer, ClearesultCourseConfigSerializer,
+    MandatoryCoursesConfigSerializer, ParticipationGroupCodeSerializer
 )
 from openedx.features.clearesult_features.api.v0.validators import (
     validate_data_for_catalog_creation, validate_data_for_catalog_updation, validate_clearesult_catalog_pk,
@@ -1092,7 +1095,7 @@ class ClearesultSiteDefaultConfigViewset(viewsets.ViewSet):
             {
                 "id": 1,
                 "domain": "localhost:18000",
-                "mandatory_courses_alotted_time": "",
+                "mandatory_courses_allotted_time": "",
                 "mandatory_courses_notification_period": ""
             }
             ...
@@ -1107,12 +1110,11 @@ class ClearesultSiteDefaultConfigViewset(viewsets.ViewSet):
 
         clearesult_site = site.clearesult_configuration.latest('change_date')
 
-        updated_aloted_time = request.data.get("mandatory_courses_alotted_time")
-        updated_notification_period = request.data.get("mandatory_courses_notification_period")
-
         try:
-            clearesult_site.mandatory_courses_alotted_time = updated_aloted_time
-            clearesult_site.mandatory_courses_notification_period = updated_notification_period
+            clearesult_site.mandatory_courses_allotted_time = request.data.get("mandatory_courses_allotted_time")
+            clearesult_site.mandatory_courses_notification_period = request.data.get("notification_period_mandatory_courses")
+            clearesult_site.courses_notification_period = request.data.get("notification_period_normal_courses")
+            clearesult_site.events_notification_period = request.data.get("notification_period_event_courses")
             clearesult_site.save()
         except:
             return Response(
@@ -1125,7 +1127,7 @@ class ClearesultSiteDefaultConfigViewset(viewsets.ViewSet):
                 "id": site.id,
                 "domain": site.domain,
                 "mandatory_courses_notification_period": clearesult_site.mandatory_courses_notification_period or  "",
-                "mandatory_courses_alotted_time": clearesult_site.mandatory_courses_alotted_time or ""
+                "mandatory_courses_allotted_time": clearesult_site.mandatory_courses_allotted_time or ""
             }
         )
 
@@ -1133,14 +1135,15 @@ class ClearesultSiteDefaultConfigViewset(viewsets.ViewSet):
     def list(self, request):
         """
         Return the list of available sites due dates
-        GET /clearesult/api/v0/sites_mandatory_configs/
+        GET /clearesult/api/v0/clearesult_site_config/
 
         [
             {
                 "id": 1,
                 "domain": "localhost:18000",
-                "mandatory_courses_alotted_time": "",
-                "mandatory_courses_notification_period": ""
+                "mandatory_courses_allotted_time": "",
+                "mandatory_courses_notification_period": "",
+                "courses_notification_period: ""
             }
             ...
             ...
@@ -1165,7 +1168,9 @@ class ClearesultSiteDefaultConfigViewset(viewsets.ViewSet):
                 "id": site.id,
                 "domain": site.domain,
                 "mandatory_courses_notification_period": clearesult_site.mandatory_courses_notification_period or  "",
-                "mandatory_courses_alotted_time": clearesult_site.mandatory_courses_alotted_time or ""
+                "mandatory_courses_allotted_time": clearesult_site.mandatory_courses_allotted_time or "",
+                "courses_notification_period": clearesult_site.courses_notification_period,
+                "events_notification_period": clearesult_site.events_notification_period
             }
             data.append(data_dict)
 
@@ -1181,7 +1186,7 @@ class ClearesultCoursesConfigViewset(viewsets.ModelViewSet):
                 "id": 20,
                 "course_id": "course-v1:edX+def12+def12",
                 "course_name": "default course 12",
-                "mandatory_courses_alotted_time": 20,
+                "mandatory_courses_allotted_time": 20,
                 "mandatory_courses_notification_period": 10
             }
             ...
@@ -1194,13 +1199,13 @@ class ClearesultCoursesConfigViewset(viewsets.ModelViewSet):
             "id": 20,
             "course_id": "course-v1:edX+def12+def12",
             "course_name": "default course 12",
-            "mandatory_courses_alotted_time": 20,
+            "mandatory_courses_allotted_time": 20,
             "mandatory_courses_notification_period": 10
         }
 
         PATCH /clearesult/api/v0/mandatory_courses_configs_per_course/site_pk/pk/
         Payload = {
-            "mandatory_courses_alotted_time": 20,
+            "mandatory_courses_allotted_time": 20,
             "mandatory_courses_notification_period": 10
         }
         Returns updated object
@@ -1208,7 +1213,7 @@ class ClearesultCoursesConfigViewset(viewsets.ModelViewSet):
             "id": 20,
             "course_id": "course-v1:edX+def12+def12",
             "course_name": "default course 12",
-            "mandatory_courses_alotted_time": 20,
+            "mandatory_courses_allotted_time": 20,
             "mandatory_courses_notification_period": 20
         }
 
@@ -1240,7 +1245,7 @@ class SiteMandatoryCoursesView(generics.ListAPIView):
                 "course_id": "course-v1:edX+def12+def12",
                 "course_name": "default course 12",
                 "course_config": {
-                    "mandatory_courses_alotted_time": 10,
+                    "mandatory_courses_allotted_time": 10,
                     "mandatory_courses_notification_period": 12,
                     "id": 14
                 }
@@ -1281,3 +1286,38 @@ class SiteMandatoryCoursesView(generics.ListAPIView):
         context = super(SiteMandatoryCoursesView, self).get_serializer_context()
         context.update({'site_id': self.kwargs.get('site_pk')})
         return context
+
+
+class UserParticipationGroups(generics.ListAPIView):
+    serializer_class = ClearesultGroupsSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        participation_groups = ParticipationGroupCode.objects.all()
+        participation_group_ids = [ participation_group.group.id for participation_group in participation_groups ]
+        return ClearesultGroupLinkage.objects.filter(
+            site=self.request.site,
+            users__username=self.request.user.username,
+            id__in=participation_group_ids
+        )
+
+    def get_serializer_context(self):
+        context = super(UserParticipationGroups, self).get_serializer_context()
+        context.update({'fields': ['name']})
+        return context
+
+
+class ParticipationGroupCodeVerification(generics.CreateAPIView):
+    serializer_class = ParticipationGroupCodeSerializer
+    pagination_class = None
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            participation = serializer.save()
+            add_user_to_group(request.user, participation.group, request)
+            return Response({
+                "message": "Success! You have been added to the group."
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

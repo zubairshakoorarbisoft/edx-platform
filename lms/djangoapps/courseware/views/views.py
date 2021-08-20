@@ -384,9 +384,11 @@ def jump_to(_request, course_id, location):
     try:
         redirect_url = get_redirect_url(course_key, usage_key, _request)
     except ItemNotFoundError:
-        raise Http404(u"No data at this location: {0}".format(usage_key))
+        log.warning(u"No data at this location: {0}. Redirecting to course home page.".format(usage_key))
+        redirect_url = reverse('openedx.course_experience.course_home', kwargs={'course_id': course_id,})
     except NoPathToItem:
-        raise Http404(u"This location is not in any class: {0}".format(usage_key))
+        log.warning(u"This location is not in any class: {0}. Redirecting to course home page.".format(usage_key))
+        redirect_url = reverse('openedx.course_experience.course_home', kwargs={'course_id': course_id,})
 
     return redirect(redirect_url)
 
@@ -882,6 +884,8 @@ def course_about(request, course_id):
     """
     Display the course's about page.
     """
+    from openedx.features.clearesult_features.utils import is_event
+
     course_key = CourseKey.from_string(course_id)
 
     # If a user is not able to enroll in a course then redirect
@@ -994,7 +998,8 @@ def course_about(request, course_id):
             'reviews_fragment_view': reviews_fragment_view,
             'sidebar_html_enabled': sidebar_html_enabled,
             'allow_anonymous': allow_anonymous,
-            'course_credits': get_course_credits_list(course.id)
+            'course_credits': get_course_credits_list(course.id),
+            'is_event': is_event(course.id)
         }
 
         return render_to_response('courseware/course_about.html', context)
@@ -1118,7 +1123,7 @@ def _progress(request, course_key, student_id):
         except ValueError:
             raise Http404
 
-    course = get_course_with_access(request.user, 'load', course_key)
+    course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
 
     staff_access = bool(has_access(request.user, 'staff', course))
     can_masquerade = request.user.has_perm(MASQUERADE_AS_STUDENT, course)

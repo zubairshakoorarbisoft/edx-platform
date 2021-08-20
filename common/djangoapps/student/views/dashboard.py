@@ -45,8 +45,9 @@ from openedx.core.djangoapps.util.maintenance_banner import add_maintenance_bann
 from openedx.core.djangoapps.waffle_utils import WaffleFlag, WaffleFlagNamespace
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.features.clearesult_features.utils import(
-    get_enrollments_and_completions,
-    get_incomplete_enrollments_clearesult_dashboard_data
+    get_completed_and_in_progres_enrollments,
+    get_incomplete_enrollments_clearesult_dashboard_data,
+    get_complete_enrollments_clearesult_dashboard_data
 )
 from openedx.features.enterprise_support.api import get_dashboard_consent_notification
 from shoppingcart.models import CourseRegistrationCode, DonationConfiguration
@@ -603,7 +604,7 @@ def student_dashboard(request):
     # Get the org whitelist or the org blacklist for the current site
     site_org_whitelist, site_org_blacklist = get_org_black_and_whitelist_for_site()
     course_enrollments = list(get_course_enrollments(user, site_org_whitelist, site_org_blacklist, course_limit))
-    complete_enrollments, incomplete_enrollments, course_completions = get_enrollments_and_completions(
+    complete_enrollments, incomplete_enrollments = get_completed_and_in_progres_enrollments(
         request, course_enrollments
     )
     course_enrollments = incomplete_enrollments + complete_enrollments
@@ -888,9 +889,11 @@ def student_dashboard(request):
         # TODO START: clean up as part of REVEM-199 (END)
         'complete_enrollments': complete_enrollments,
         'incomplete_enrollments': incomplete_enrollments,
-        'course_completions': course_completions,
         'incomplete_courses_clearesult_data': get_incomplete_enrollments_clearesult_dashboard_data(
             request, incomplete_enrollments
+        ),
+        'complete_courses_clearesult_data': get_complete_enrollments_clearesult_dashboard_data(
+            request, complete_enrollments
         )
     }
 

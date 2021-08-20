@@ -1528,20 +1528,10 @@ CLEARESULT_CREDIT_PROVIDERS = [
     'LEED'
 ]
 
-CLEARESULT_AVAILABLE_SITES_MAPPING = {
-    'black-hills-energy-swepco': {
-        'theme': 'blackhillsswepco',
-        'lms_root_url': '#'
-    },
-    'bayren': {
-        'theme': 'bayren',
-        'lms_root_url': '#'
-    },
-    'georgia-power': {
-        'theme': 'georgia_power',
-        'lms_root_url': '#'
-    }
-}
+CLEARESULT_REPORTS_TZ = 'America/Jamaica' # EST timezone
+
+ADMIN_USERNAME_FOR_EMAIL_TASK = ''
+
 ################# EDX MARKETING SITE ##################################
 
 EDXMKTG_LOGGED_IN_COOKIE_NAME = 'edxloggedin'

@@ -7,5 +7,5 @@ class ClearesultFeaturesConfig(AppConfig):
     name = 'openedx.features.clearesult_features'
 
     def ready(self):
-        super(ClearesultFeaturesConfig, self).ready()
         from . import signals  # pylint: disable=unused-import
+        from . import tasks  # pylint: disable=unused-import

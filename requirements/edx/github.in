@@ -79,7 +79,7 @@ git+https://github.com/Zegocover/enmerkar.git@dbc113798aa4beabdfa2d00e6fef48248e
 -e git+https://github.com/technige/py2neo.git@py2neo-3.1.2#egg=py2neo==3.1.2
 
 # Installing this scorm version from edly as the original one is not updated
--e git+https://github.com/edly-io/edx_xblock_scorm.git@v1.0.9#egg=scorm-xblock
+-e git+https://github.com/edly-io/edx_xblock_scorm.git@v1.1.1#egg=scorm-xblock
 
 # Why install sorl-thumbnail directly from github? To use a Django 2.2 compatible version before Python 3.5 support was dropped
 git+https://github.com/jazzband/sorl-thumbnail.git@13bedfb7d2970809eda597e3ef79318a6fa80ac2#egg=sorl-thumbnail

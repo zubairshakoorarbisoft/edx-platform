@@ -5,12 +5,15 @@ import six
 
 from celery import task
 from celery_utils.logged_task import LoggedTask
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from student.models import CourseEnrollment
 from django.test import RequestFactory
+from django.urls import reverse
 
+from lms.djangoapps.courseware.courses import get_course_by_id
 from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
@@ -21,9 +24,93 @@ from opaque_keys.edx.keys import CourseKey
 from lms.djangoapps.instructor.enrollment import enroll_email
 from openedx.features.clearesult_features.magento.client import MagentoClient
 from openedx.features.clearesult_features.drupal.client import DrupalClient, InvalidDrupalCredentials
-
+from openedx.features.clearesult_features.emails.task_utils import (
+    get_site_courses, get_about_to_expire_trainings,
+    get_eligible_enrolled_users_for_reminder_emails
+)
 
 log = logging.getLogger('edx.celery.task')
+
+
+def _log_reminder_emails_report(expire_trainings, error_trainings, courses_emails_count, events_emails_count, events_error_emails, courses_error_emails):
+    log.info('\n\n\n')
+    log.info("--------------------- REMINDER EMAILS STATS - {} ---------------------".format(
+        datetime.now().date().strftime("%m-%d-%Y")
+    ))
+
+    log.info('Total number of about to expire trainings: {}'.format(len(expire_trainings)))
+    log.info('Trainings encountered processing error: {}'.format(len(error_trainings)))
+
+    log.info('Total number users who should get reminder email of courses: {}'.format(courses_emails_count))
+    log.info('Total number users who should get reminder email of events: {}'.format(events_emails_count))
+
+    log.info('Error encountered for event reminder emails: {}'.format(len(events_error_emails)))
+    log.info('Error encountered for courses reminder emails: {}'.format(len(courses_error_emails)))
+
+    log.info('Unable to send reminder emails of events: {}'.format(events_error_emails))
+    log.info('Unable to send reminder emails of courses: {}'.format(courses_error_emails))
+
+
+@task(base=LoggedTask)
+def check_and_send_reminder_emails():
+    from openedx.features.clearesult_features.utils import (
+        get_site_users,
+        send_course_end_reminder_email,
+        send_event_start_reminder_email
+    )
+    request = RequestFactory().get(u'/')
+    sites = Site.objects.filter(name__icontains="LMS")
+
+    # super user that will be used to send emails
+    request.user = User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK)
+
+    #some variables for starts
+    email_count_for_courses = email_count_for_events = 0
+    emails_error_for_courses = []
+    emails_error_for_events = []
+    processing_error_on_trainings = []
+    about_to_expire_trainings = []
+
+    for site in sites:
+        request.site = site
+        site_config = site.clearesult_configuration.latest('change_date')
+        site_groups = ClearesultGroupLinkage.objects.filter(site=site).prefetch_related(
+            'clearesultgrouplinkedcatalogs_set__catalog',
+            'clearesultgrouplinkedcatalogs_set__mandatory_courses'
+        )
+        site_courses = get_site_courses(site_groups)
+        site_users = get_site_users(site)
+        site_expire_trainings = get_about_to_expire_trainings(site_config, site_courses)
+        about_to_expire_trainings.extend(site_expire_trainings)
+        for training in site_expire_trainings:
+            try:
+                enrollments = CourseEnrollment.objects.filter(
+                    is_active=True,
+                    course_id=training.course_id,
+                    user__in=site_users
+                )
+                if training.is_event:
+                    # for event - send reminder email to all registered users
+                    users = [enrollment.user for enrollment in enrollments]
+                    email_count_for_events += len(users)
+                    send_event_start_reminder_email(users, training, request, site_config.events_notification_period, emails_error_for_events)
+
+                else:
+                    # enrollments are only eligible for the emails if course is not mandatory for that user
+                    # and enrolled user has not completed course.
+                    users = get_eligible_enrolled_users_for_reminder_emails(request, training, enrollments, site_groups)
+                    email_count_for_courses += len(users)
+                    send_course_end_reminder_email(
+                        users, training, request, site_config.courses_notification_period, emails_error_for_courses)
+            except Exception as ex:
+                log.error(ex)
+                processing_error_on_trainings.append(six.text_type(training.course_id))
+
+    _log_reminder_emails_report(
+        about_to_expire_trainings, processing_error_on_trainings, email_count_for_courses,
+        email_count_for_events, emails_error_for_events, emails_error_for_courses
+    )
+
 
 @task(base=LoggedTask)
 def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, request_user_id=None):
@@ -32,7 +119,7 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
     """
     from lms.djangoapps.instructor.views.api import students_update_enrollment
     from openedx.features.clearesult_features.utils import (
-        send_mandatory_courses_emails, update_clearesult_enrollment_date
+        send_mandatory_courses_enrollment_email, update_clearesult_enrollment_date
     )
 
     log.info("TASK: enroll student to mandatory courses has been called.")
@@ -44,7 +131,7 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
             request_user = User.objects.get(id=request_user_id)
         else:
             # any super user
-            request_user = User.objects.filter(is_superuser=True)[0]
+            request_user = User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK)
 
     except (User.DoesNotExist, Site.DoesNotExist):
         log.info("TASK Error: email task can not be called without request_user and request_site.")
@@ -94,7 +181,7 @@ def enroll_students_to_mandatory_courses(user_ids, course_ids, request_site_id, 
     for key, value in email_course_data.items():
         if value:
             log.info("user: {} has been seccussfully enrolled in following courses: {}".format(key, value))
-            send_mandatory_courses_emails([key], value, request_user, request_site)
+            send_mandatory_courses_enrollment_email([key], value, request_user, request_site)
 
 
 @task(base=LoggedTask)
@@ -192,3 +279,32 @@ def update_magento_user_info_from_drupal(email, magento_base_url, magento_token)
                 log.info("Unable to update address due to missing region - firstname and lastname is already updated".format(email))
     else:
         log.error("Task Error - Unable to fetch magento customer from Magento.")
+
+
+@task(base=LoggedTask)
+def send_course_pass_email_to_learner(user_id, course_key_string):
+    user = User.objects.get(id=user_id)
+    associated_sites = user.clearesult_profile.get_associated_sites()
+    if not associated_sites:
+        log.exception("No associated sites are available for {}.".format(user.email))
+        return
+
+    course_id = CourseKey.from_string(course_key_string)
+    site = associated_sites[0]
+    with emulate_http_request(site=site, user=user):
+        key = "course_passed"
+        subject = "Course Passed"
+
+        log.info("Send course passed email to user: {}".format(user.email))
+
+        course = get_course_by_id(course_id)
+        root_url = site.configuration.get_value("LMS_ROOT_URL").strip("/")
+        course_progress_url = "{}{}".format(root_url, reverse('progress', kwargs={'course_id': course_id}))
+
+        email_params = {
+            "full_name": user.first_name + " " + user.last_name,
+            "display_name": course.display_name_with_default,
+            "course_progress_url": course_progress_url
+        }
+        from openedx.features.clearesult_features.utils import send_notification
+        return send_notification(key, email_params, subject, [user.email], user, site)

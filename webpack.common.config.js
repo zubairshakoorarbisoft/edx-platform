@@ -130,6 +130,8 @@ module.exports = Merge.smart({
 
             Reports: './openedx/features/clearesult_features/static/clearesult_reports/js/' +
                 'Reports.js',
+            ParticipationCode: './openedx/features/clearesult_features/static/participation_code/js/' +
+                'ParticipationCode.js',
             // Common
             ReactRenderer: './common/static/js/src/ReactRenderer.jsx',
             XModuleShim: 'xmodule/js/src/xmodule.js',

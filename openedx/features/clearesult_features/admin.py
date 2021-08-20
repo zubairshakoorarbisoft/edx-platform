@@ -1,6 +1,7 @@
 """
 Admin registration for Clearesult.
 """
+import six
 from config_models.admin import KeyedConfigurationModelAdmin
 from completion.models import BlockCompletion
 from django.contrib.auth.models import User
@@ -24,7 +25,9 @@ from openedx.features.clearesult_features.models import (
     ClearesultGroupLinkedCatalogs,
     ClearesultCourseCompletion,
     ClearesultCourseConfig,
-    ClearesultCourseEnrollment
+    ClearesultCourseEnrollment,
+    ParticipationGroupCode,
+    ClearesultCourseMetaTag
 )
 
 
@@ -67,8 +70,9 @@ class ClearesultCourseAdmin(admin.ModelAdmin):
     """
     Admin config clearesult courses.
     """
-    list_display = ('course_id', 'site')
-    search_fields = ('course_id', 'site')
+    list_display = ('course_id', 'site', 'is_event')
+    list_filter = ('is_event', 'site')
+    search_fields = ('course_id',)
 
     # disable change functionality
     def has_change_permission(self, request, obj=None):
@@ -143,17 +147,45 @@ class ClearesultCourseCompletionAdmin(admin.ModelAdmin):
 
 
 class ClearesultUserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'job_title', 'company', 'state_or_province', 'postal_code', 'extensions')
+    readonly_fields=('get_user_email',)
+    list_display = ('user', 'get_user_email', 'site_identifiers', 'extensions')
+
+    def get_user_email(self, obj):
+        return obj.user.email
+
+    get_user_email.short_description = 'Email'
 
 
 class BlockCompleteionAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'context_key', 'block_key', 'block_type', 'completion', )
 
 class ClearesultCourseConfigAdmin(admin.ModelAdmin):
-    list_display = ('id', 'course_id', 'site', 'mandatory_courses_alotted_time', 'mandatory_courses_notification_period')
+    list_display = ('id', 'course_id', 'site', 'mandatory_courses_allotted_time', 'mandatory_courses_notification_period')
 
 class ClearesultCourseEnrollmentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'enrollment', 'updated_date')
+    list_display = ('id', 'get_user_email', 'get_course_id', 'enrollment', 'updated_date')
+    search_fields = ('enrollment__user__email',)
+    readonly_fields=('get_user_email', 'get_course_id',)
+
+    def get_user_email(self, obj):
+        return obj.enrollment.user.email
+
+    def get_course_id(self, obj):
+        return six.text_type(obj.enrollment.course_id)
+
+    get_user_email.short_description = 'Email'
+    get_course_id.short_description = 'Course'
+
+
+class ParticipationGroupCodeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'group', 'code')
+    search_fields = ('code',)
+
+
+class ClearesultCourseMetaTagAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title')
+    search_fields = ('title',)
+
 
 admin.site.register(ClearesultCourseCredit, ClearesultCourseCreditsAdmin)
 admin.site.register(ClearesultCreditProvider, ClearesultCreditProviderAdmin)
@@ -170,3 +202,5 @@ admin.site.register(ClearesultCourseCompletion, ClearesultCourseCompletionAdmin)
 admin.site.register(BlockCompletion, BlockCompleteionAdmin)
 admin.site.register(ClearesultCourseConfig, ClearesultCourseConfigAdmin)
 admin.site.register(ClearesultCourseEnrollment, ClearesultCourseEnrollmentAdmin)
+admin.site.register(ParticipationGroupCode, ParticipationGroupCodeAdmin)
+admin.site.register(ClearesultCourseMetaTag, ClearesultCourseMetaTagAdmin)

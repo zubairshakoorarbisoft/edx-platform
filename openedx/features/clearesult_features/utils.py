@@ -8,10 +8,13 @@ import six
 import copy
 from csv import Error, DictReader, Sniffer
 from datetime import datetime, timedelta
+from pymongo import DESCENDING
+from xmodule.contentstore.django import contentstore
 
 from edx_ace import ace
 from edx_ace.recipient import Recipient
 from django.conf import settings
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import Sum, Case, When, IntegerField
@@ -19,6 +22,8 @@ from django.db.models.functions import Coalesce
 from django.test import RequestFactory
 from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.timezone import pytz
 from opaque_keys.edx.keys import CourseKey
 from student.models import CourseEnrollment
 
@@ -27,13 +32,10 @@ from lms.djangoapps.instructor.enrollment import (
 )
 from lms.djangoapps.courseware.courses import get_course_by_id
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from openedx.core.lib.celery.task_utils import emulate_http_request
-from openedx.features.clearesult_features.message_types import (
-    MandatoryCoursesNotification,
-    MandatoryCoursesApproachingDueDatesNotification,
-    MandatoryCoursesPassedDueDatesNotification
-)
+from openedx.features.clearesult_features.constants import MESSAGE_TYPES, AFFILIATION_INFO_TIMEOUT
 from openedx.features.clearesult_features.models import (
     ClearesultUserProfile, ClearesultCourse,
     ClearesultGroupLinkage, ClearesultGroupLinkedCatalogs,
@@ -110,32 +112,54 @@ def get_csv_file_control(file_path):
     return {'csv_file': csv_file, 'csv_reader': csv_reader}
 
 
-def get_enrollments_and_completions(request, enrollments):
+def get_completed_and_in_progres_enrollments(request, enrollments):
     """
     Returns user enrollment list for completed courses and incomplete courses
     and course completion dates as well.
     """
     complete_enrollments = []
     incomplete_enrollments = [enrollment for enrollment in enrollments]
-    course_completions = {}
     for enrollment in enrollments:
         course_id_string = six.text_type(enrollment.course.id)
         course_outline_blocks = get_course_outline_block_tree(
             request, course_id_string, request.user
         )
-        if course_outline_blocks:
+        is_course_event = is_event(enrollment.course_id)
+
+        if course_outline_blocks or is_course_event:
             if course_outline_blocks.get('complete'):
                 incomplete_enrollments.remove(enrollment)
-                completion_date, pass_date = get_course_completion_and_pass_date(
-                    enrollment.user, enrollment.course_id, is_graded=course_outline_blocks.get('graded')
-                )
-                course_completions[enrollment.id] = {
-                        'completion_date': completion_date.date() if completion_date else None,
-                        'pass_date': pass_date.date() if pass_date else None,
-                }
                 complete_enrollments.append(enrollment)
+            elif is_course_event and enrollment.course:
+                end_date = enrollment.course.end_date
+                if end_date and end_date < datetime.now(pytz.utc):
+                    incomplete_enrollments.remove(enrollment)
+                    complete_enrollments.append(enrollment)
 
-    return complete_enrollments, incomplete_enrollments, course_completions
+    return complete_enrollments, incomplete_enrollments
+
+
+def get_complete_enrollments_clearesult_dashboard_data(request, enrollments):
+    """
+    Returns list of data that clearesult needs on student dahboard for incomplete/in-progress courses section
+    """
+    data = {}
+
+    for enrollment in enrollments:
+        course_id_string = six.text_type(enrollment.course.id)
+        course_outline_blocks = get_course_outline_block_tree(
+            request, course_id_string, request.user
+        )
+        completion_date, pass_date = get_course_completion_and_pass_date(
+            enrollment.user, enrollment.course_id, is_graded=course_outline_blocks.get('graded')
+        )
+        is_course_event = is_event(enrollment.course_id)
+        data[enrollment.id] = {
+            'completion_date': completion_date.date() if completion_date else None,
+            'pass_date': pass_date.date() if pass_date else None,
+            'is_course_event': is_course_event
+        }
+    return data
 
 
 def get_course_block_progress(course_block, CORE_BLOCK_TYPES, FILTER_BLOCKS_IN_UNIT):
@@ -197,13 +221,13 @@ def get_site_users(site):
     site_users = []
     site_name = "-".join(site.name.split('-')[:-1]).rstrip()
 
-    # ! Note: site name must contain "-" otherwise it will return emty string.
+    # ! Note: site name must contain "-" otherwise it will return empty string.
     if not site_name:
         logger.info("Site name ({}) is not in a correct format.".format(site.name))
         logger.info("Correct format is <site_name> - <site_type> i.e. 'blackhills - LMS'.")
         return site_users
 
-    clearesult_user_profiles = ClearesultUserProfile.objects.filter(job_title__icontains=site_name).select_related("user")
+    clearesult_user_profiles = ClearesultUserProfile.get_site_related_profiles(site_name)
 
     for profile in clearesult_user_profiles:
         site_users.append(profile.user)
@@ -238,24 +262,28 @@ def create_clearesult_course(destination_course_key, source_course_key=None, sit
     ClearesultCourse.objects.create(course_id=destination_course_key, site=site)
 
 
-def get_site_for_clearesult_course(course_id):
+def get_clearesult_course_site_and_event(course_id):
     """
-    Return site if you find any site linked to the course.
-    Return 'Public' if course is public.
-    Return None if there is no relation of course with site has been saved.
+    Returns data dict containing site and is_event value of the course.
 
-    If course is not linked to a site, it means course is public.
-    If course is linked to a site, it means course it is private.
+    If course is not linked to a site, it means course is public - set site value as "Public".
+    If course is linked to a site, it means course it is private - set site value as site.domain.
     """
+    data = {
+        "site": None,
+        "event": None
+    }
     try:
-        site = ClearesultCourse.objects.get(course_id=course_id).site
-        if site is None:
-            site = 'Public'
-            return site
+        obj = ClearesultCourse.objects.get(course_id=course_id)
+        data.update({
+            "site": "Public" if not obj.site else obj.site.domain,
+            "event": obj.is_event
+        })
 
-        return site.domain
     except ClearesultCourse.DoesNotExist:
-        return None
+        pass
+
+    return data
 
 
 def is_mandatory_course(enrollment):
@@ -271,7 +299,7 @@ def get_calculated_due_date(request, enrollment):
     try:
         config = get_mandatory_courses_due_date_config(request, enrollment)
         enrollment_date = enrollment.clearesultcourseenrollment.updated_date.date()
-        due_date = enrollment_date + timedelta(days=int(config.get("mandatory_courses_alotted_time")))
+        due_date = enrollment_date + timedelta(days=int(config.get("mandatory_courses_allotted_time")))
     except Exception as ex:
         logger.error("Error has occured while calculating due_date of enrollment: {}, user: {}, course: {}".format(
             str(enrollment.id),
@@ -283,18 +311,36 @@ def get_calculated_due_date(request, enrollment):
 
 def get_incomplete_enrollments_clearesult_dashboard_data(request, enrollments):
     """
-    Returns list of data that clearesult needs on student dahboard for incomeplete/in-progress courses section
+    Returns list of data that clearesult needs on student dahboard for incomplete/in-progress courses section
     """
-    data = []
+    data = {}
 
     for enrollment in enrollments:
-        data.append({
-            'progress': get_course_progress(request, enrollment.course),
-            'is_mandatory': is_mandatory_course(enrollment),
-            'is_free': enrollment.mode in ['honor', 'audit'],
-            'mandatory_course_due_date': get_calculated_due_date(request, enrollment)
-        })
+        progress = None
+        due_date = ""
+        is_mandatory = is_mandatory_course(enrollment)
 
+        if is_mandatory:
+            due_date = get_calculated_due_date(request, enrollment)
+
+        is_course_event = is_event(enrollment.course_id)
+        course_event_link = '#'
+
+        if is_course_event:
+            relative_event_link = get_event_file(enrollment.course_id)
+            if relative_event_link:
+                course_event_link = '//' + request.site.domain + '/' + get_event_file(enrollment.course_id)
+        else:
+            progress = get_course_progress(request, enrollment.course)
+
+        data[enrollment.id] = {
+            'progress': progress,
+            'is_mandatory': is_mandatory,
+            'is_free': enrollment.mode in ['honor', 'audit'],
+            'mandatory_course_due_date': due_date,
+            'is_course_event': is_course_event,
+            'course_event_link': course_event_link,
+        }
     return data
 
 
@@ -434,12 +480,17 @@ def add_user_to_site_default_group(request, user, site):
                 name=settings.SITE_DEFAULT_GROUP_NAME,
                 site=site
             )
-            if user not in site_default_group.users.all():
-                site_default_group.users.add(user)
-                check_and_enroll_group_users_to_mandatory_courses.delay(
-                    site_default_group.id, [user.id], site_default_group.site.id, request.user.id)
+            add_user_to_group(user, site_default_group, request)
+
         except ClearesultGroupLinkage.DoesNotExist:
             logger.error("Default group for site: {} doesn't exist".format(site.domain))
+
+
+def add_user_to_group(user, group, request):
+    if user not in group.users.all():
+        group.users.add(user)
+        check_and_enroll_group_users_to_mandatory_courses.delay(
+            group.id, [user.id], group.site.id, request.user.id)
 
 
 def is_lms_site(site):
@@ -471,12 +522,6 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
     Returns:
         a boolean variable indicating email response.
     """
-    message_types = {
-        'mandatory_courses': MandatoryCoursesNotification,
-        'mandatory_courses_approaching_due_date': MandatoryCoursesApproachingDueDatesNotification,
-        'mandatory_courses_passed_due_date': MandatoryCoursesPassedDueDatesNotification
-    }
-
     if not current_site:
         current_site = get_current_site()
 
@@ -487,7 +532,7 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
 
     content = json.dumps(message_context)
 
-    message_class = message_types[message_type]
+    message_class = MESSAGE_TYPES[message_type]
     return_value = False
 
     base_root_url = current_site.configuration.get_value('LMS_ROOT_URL')
@@ -527,18 +572,35 @@ def send_notification(message_type, data, subject, dest_emails, request_user, cu
     return return_value
 
 
-def send_mandatory_courses_emails(dest_emails, courses, request_user, request_site):
+def send_mandatory_courses_enrollment_email(dest_emails, courses, request_user, request_site):
     email_params = {}
-    subject = "Mandatory Courses Enrollment"
+    subject = "Mandatory Training(s) Enrollment"
 
     logger.info("send mandatory course email to users: {}".format(dest_emails))
 
-    key = "mandatory_courses"
-    courses_data = [get_course_by_id(CourseKey.from_string(course_id)).display_name_with_default for course_id in courses]
+    key = "mandatory_courses_enrollment"
+    courses_data = []
+    events_data = []
+
+    for course_id in courses:
+        name = get_course_by_id(CourseKey.from_string(course_id)).display_name_with_default
+        course_overview = CourseOverview.get_from_id(course_id)
+        event_date = add_timezone_to_datetime(course_overview.start_date, settings.CLEARESULT_REPORTS_TZ)
+        if is_event(course_id):
+            events_data.append(
+                {
+                    "name": name,
+                    "date": event_date.strftime("%A, %B %d at %H:%M")
+                }
+            )
+        else:
+            courses_data.append(name)
 
     data = {
-        "courses": courses_data
+        "courses": courses_data,
+        "events": events_data
     }
+
     send_notification(key, data, subject, dest_emails, request_user, request_site)
 
 
@@ -759,7 +821,7 @@ def get_site_prefered_mandatory_courses_due_dates_config(site, course_id):
 
     Returns config dict as follows:
     {
-        "mandatory_courses_alotted_time": 10,
+        "mandatory_courses_allotted_time": 10,
         "mandatory_courses_notification_period": 2,
         "site": <Site obj>
     }
@@ -768,14 +830,14 @@ def get_site_prefered_mandatory_courses_due_dates_config(site, course_id):
     try:
         course_config = ClearesultCourseConfig.objects.get(site=site, course_id=course_id)
         config = {
-            "mandatory_courses_alotted_time": course_config.mandatory_courses_alotted_time,
+            "mandatory_courses_allotted_time": course_config.mandatory_courses_allotted_time,
             "mandatory_courses_notification_period": course_config.mandatory_courses_notification_period
         }
 
     except ClearesultCourseConfig.DoesNotExist:
         site_config = site.clearesult_configuration.latest('change_date')
         config = {
-            "mandatory_courses_alotted_time": site_config.mandatory_courses_alotted_time,
+            "mandatory_courses_allotted_time": site_config.mandatory_courses_allotted_time,
             "mandatory_courses_notification_period": site_config.mandatory_courses_notification_period
         }
 
@@ -785,9 +847,9 @@ def get_site_prefered_mandatory_courses_due_dates_config(site, course_id):
 
 def get_shortest_config(sites_list, course_id):
     """
-    Find mandatory courses config with shortest alotted time.
+    Find mandatory courses config with shortest allotted time.
 
-    let's say, Site-A has alotted time 10 days and Site-B has 20 days for course-abc which is mandatory for both
+    let's say, Site-A has allotted time 10 days and Site-B has 20 days for course-abc which is mandatory for both
     sites then Site-A config should be user as 10 < 20.
     """
     total_sites = len(sites_list)
@@ -800,7 +862,7 @@ def get_shortest_config(sites_list, course_id):
             config = {}
             for site in sites_list:
                 site_config = get_site_prefered_mandatory_courses_due_dates_config(site, course_id)
-                if site_config.get("mandatory_courses_alotted_time", 999999) < config.get("mandatory_courses_alotted_time", 999999):
+                if site_config.get("mandatory_courses_allotted_time", 999999) < config.get("mandatory_courses_allotted_time", 999999):
                     config = site_config
             return config
 
@@ -873,7 +935,7 @@ def send_due_date_passed_email_to_admins(passed_due_dates_site_users):
     """
     email_key = "mandatory_courses_passed_due_date"
     subject = "Mandatory Courses Due Date Passed"
-    request_user = User.objects.filter(is_active=True, is_superuser=True).first()
+    request_user = User.objects.get(username=settings.ADMIN_USERNAME_FOR_EMAIL_TASK)
 
     for key, value in passed_due_dates_site_users.items():
         try:
@@ -907,3 +969,157 @@ def is_block_contains_scorm(block):
             return True
 
     return False
+
+
+def add_timezone_to_datetime(date_time, custom_tz=None):
+    """
+    Gets a datetime object and append timezone information in it
+    """
+
+    utc_datetime = date_time.replace(tzinfo=timezone.get_current_timezone(), microsecond=0)
+
+    if not custom_tz:
+        return utc_datetime
+
+    local_tz = pytz.timezone(custom_tz)
+    return utc_datetime.astimezone(local_tz)
+
+
+def get_event_file(course_key):
+    filter_parameters = {"$or": [{"contentType": "text/calendar"}]}
+    files = contentstore().get_all_content_for_course(
+        course_key, filter_params=filter_parameters, sort=[("uploadDate", DESCENDING)])
+    if files[1] > 0:
+        return files[0][0].get("filename")
+
+
+def is_event(course_id):
+    try:
+        clearesult_course = ClearesultCourse.objects.get(course_id=course_id)
+        return clearesult_course.is_event
+    except Exception as e:
+        logger.error("Unable to find ClearesultCourse for id: ".format(course_id))
+        logger.error(e)
+        return None
+
+
+def send_enrollment_email(enrollment, request_user, request_site):
+    email_params = {}
+
+    course = get_course_by_id(enrollment.course_id)
+    root_url = request_site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    course_url = "{}{}".format(root_url, reverse('course_root', kwargs={'course_id': enrollment.course_id}))
+
+    data = {
+        "full_name": enrollment.user.first_name + " " + enrollment.user.last_name,
+        "display_name": course.display_name_with_default,
+        "course_url": course_url,
+        "event_url": "{}/{}".format(root_url, get_event_file(enrollment.course_id))
+    }
+
+    if is_event(enrollment.course_id):
+        subject = "Event Registration"
+        key = "event_enrollment"
+        course_overview = CourseOverview.get_from_id(enrollment.course_id)
+        event_date = add_timezone_to_datetime(course_overview.start_date, settings.CLEARESULT_REPORTS_TZ)
+        data.update({"event_info": event_date.strftime("%A, %B %d at %H:%M")})
+    else:
+        subject = "Course Enrollment"
+        key = "course_enrollment"
+
+    send_notification(key, data, subject, [enrollment.user.email], request_user, request_site)
+
+
+def send_course_end_reminder_email(users, training, request, days_left, emails_error_for_courses):
+    subject = "Course end-date approaching"
+    key = "course_end_reminder"
+
+    course = get_course_by_id(training.course_id)
+    root_url = request.site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    course_url = "{}{}".format(root_url, reverse('course_root', kwargs={'course_id': training.course_id}))
+
+    email_params = {
+        "display_name": course.display_name_with_default,
+        "course_url": course_url,
+        "days_left": days_left
+    }
+
+    for user in users:
+        email_params.update({
+            "full_name": user.first_name + " " + user.last_name,
+        })
+        if not send_notification(key, email_params, subject, [user.email], request.user, request.site):
+            emails_error_for_courses.append((user.email, six.text_type(training.course_id)))
+
+
+def send_event_start_reminder_email(users, training, request, days_left, emails_error_for_events):
+    subject = "Event Reminder"
+    key = "event_start_reminder"
+
+    try:
+        course_overview = CourseOverview.get_from_id(training.course_id)
+    except CourseOverview.DoesNotExist:
+        logger.error("Unable to find Course Overview object for id: ".format(training.course_id))
+        return None
+
+    course = get_course_by_id(training.course_id)
+    root_url = request.site.configuration.get_value("LMS_ROOT_URL").strip("/")
+    event_start_date = add_timezone_to_datetime(course_overview.start_date, settings.CLEARESULT_REPORTS_TZ)
+    event_end_date = add_timezone_to_datetime(course_overview.end_date, settings.CLEARESULT_REPORTS_TZ)
+
+    email_params = {
+        "display_name": course.display_name_with_default,
+        "days_left": days_left,
+        "event_url": "{}/{}".format(root_url, get_event_file(training.course_id)),
+        "event_start_info": event_start_date.strftime("%A, %B %d at %H:%M"),
+        "event_end_info": event_end_date.strftime("%A, %B %d at %H:%M")
+    }
+
+    for user in users:
+        email_params.update({
+            "full_name": user.first_name + " " + user.last_name,
+        })
+        if not send_notification(key, email_params, subject, [user.email], request.user, request.site):
+            emails_error_for_events.append((user.email, six.text_type(training.course_id)))
+
+
+def get_affiliation_information(site_identifier):
+    """
+    Drupal sends affiliation code through Azure AD B2C.
+    Using this code we determine that which user belongs to which site.
+
+    Sometimes we need to use information which is linked to the code, like
+    what is it's theme, site, time_zone e.t.c
+    So in order to avoid more db queries we're saving that info in cache in
+    a better format for easy access.
+    """
+    affiliation_info = cache.get(site_identifier, None)
+    if affiliation_info:
+        return affiliation_info
+
+    sites = Site.objects.filter(name='{} - LMS'.format(site_identifier)).prefetch_related('themes', 'configuration')
+
+    if not sites:
+        logger.info('Site affiliation information for {} does not exit'.format(site_identifier))
+        return None
+
+    site = sites[0]
+    affiliation_info = {
+        'theme': site.themes.first().theme_dir_name,
+        'lms_root_url': site.configuration.get_value('LMS_ROOT_URL', '#'),
+        'site_id': site.id
+    }
+
+    cache.set(site_identifier, affiliation_info, AFFILIATION_INFO_TIMEOUT)
+    return affiliation_info
+
+
+def get_clearesult_profile_extension_value(key, default_value):
+    user = get_current_user()
+    return user.get_extension_value(key, default_value)
+
+
+def handle_post_enrollment(enrollment, request_user, request_site):
+    send_enrollment_email(enrollment, request_user, request_site)
+    # update enrollment date as user status changed from unenrolled to enrolled
+    update_clearesult_enrollment_date(enrollment)

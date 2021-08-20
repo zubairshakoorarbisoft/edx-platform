@@ -10,7 +10,8 @@ from openedx.features.clearesult_features.api.v0.views import (
     SiteLinkedObjectsListView, ClearesultUpdateGroupCatalogsViewset,
     ClearesultMandatoryCoursesViewset, ClearesultLogoutView, retake_course,
     ClearesultCreditReportView, ClearesultSiteDefaultConfigViewset,
-    ClearesultCoursesConfigViewset, SiteMandatoryCoursesView
+    ClearesultCoursesConfigViewset, SiteMandatoryCoursesView, UserParticipationGroups,
+    ParticipationGroupCodeVerification
 )
 
 
@@ -169,5 +170,15 @@ urlpatterns = (
         r'^site_mandatory_courses/(?P<site_pk>\d+)/$',
         SiteMandatoryCoursesView.as_view(),
         name="site_mandatory_courses_list"
+    ),
+    url(
+        r'^user_participation_groups/$',
+        UserParticipationGroups.as_view(),
+        name="user_participation_groups"
+    ),
+    url(
+        r'^verify_participation_group_code/$',
+        ParticipationGroupCodeVerification.as_view(),
+        name="verify_participation_group_code"
     )
 )

@@ -128,7 +128,7 @@ class ClearesultAuthenticationMiddleware(MiddlewareMixin):
                 return False
 
             try:
-                clearesult_allowed_site_names = user.clearesult_profile.get_extension_value('site_identifier', [])
+                clearesult_allowed_site_names = user.clearesult_profile.get_identifiers()
             except ClearesultUserProfile.DoesNotExist:
                 return False
 

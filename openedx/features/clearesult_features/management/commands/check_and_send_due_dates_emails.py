@@ -1,5 +1,5 @@
 """
-Django admin command to manually verify the users.
+Django admin command to send mandatory courses due date emails.
 """
 import six
 from completion.models import BlockCompletion
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         all_mandatory_courses = ClearesultCourse.objects.none()
         linkage_with_mandatory_courses = ClearesultGroupLinkedCatalogs.objects.exclude(mandatory_courses=None)
         for linkage in linkage_with_mandatory_courses:
-            all_mandatory_courses |= linkage.mandatory_courses.all()
+            all_mandatory_courses |= linkage.mandatory_courses.filter(is_event=False)
 
         all_mandatory_courses = all_mandatory_courses.distinct()
 
@@ -56,7 +56,7 @@ class Command(BaseCommand):
     def _update_passed_due_dates_site_users_data(self, passed_due_dates_site_users, site, enrollment, due_date):
         """
         The passed_due_dates_site_users is a dict which will be used to send compiled email to local admins and superusers
-        containing users data who haven't completed the mandatory courses in the alotted time.
+        containing users data who haven't completed the mandatory courses in the allotted time.
 
         Sample data is as follows:
         passed_due_dates_site_users = {
@@ -183,14 +183,14 @@ class Command(BaseCommand):
                     logger.info("=> Result - course not completed")
 
                     config = get_mandatory_courses_due_date_config(request, enrollment)
-                    alotted_time = config.get("mandatory_courses_alotted_time")
+                    allotted_time = config.get("mandatory_courses_allotted_time")
                     notification_period = config.get("mandatory_courses_notification_period")
                     site = config.get("site")
 
-                    if alotted_time and notification_period and site:
+                    if allotted_time and notification_period and site:
                         # calculate estimated due date for the enrollment.
                         enrollment_date = enrollment.clearesultcourseenrollment.updated_date.date()
-                        due_date = enrollment_date + timedelta(days=int(alotted_time))
+                        due_date = enrollment_date + timedelta(days=int(allotted_time))
                         logger.info("enrollment date: {}, calculated due date: {} using site: {} config".format(
                             enrollment_date, due_date, site.domain))
 

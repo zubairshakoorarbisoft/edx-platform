@@ -4,8 +4,9 @@ import HttpClient from "../../continuing_education/js/client";
 
 function ReportsContent() {
     const [ sites, setSites ] = useState([]);
-    const [ siteForCourseReport, setSiteForCourseReport ] = useState({});
+    const [ selectedSite, setSelectedSite ] = useState({});
     const [ filteredCourses, setFilteredCourses ] = useState([]);
+    const [ selectedCourse, setSelectedCourse ] = useState("");
     const [ courseReportLink, setCourseReportLink ] = useState("");
     const [ siteReportLink, setSiteReportLink ] = useState("");
     const [ courseBtnState, setCourseBtnState ] = useState(false);
@@ -22,6 +23,10 @@ function ReportsContent() {
         try {
             let data = (await client.get(context.SITES_URL)).data;
             setSites(data);
+            if (data.length > 0) {
+                loadSiteLinkedCourses(data[0]);
+                setSelectedSite(data[0]);
+            }
         } catch (exp) {
             console.error(exp);
         }
@@ -32,23 +37,15 @@ function ReportsContent() {
             let data = (await client.get(context.SITE_LINKED_COURSES_URL + site.id)).data;
             setFilteredCourses(data);
             if (data.length > 0) {
+                setSiteReportLink(formatReportLink(data[0].course_id, site.domain));
                 setCourseReportLink(formatReportLink(data[0].course_id, site.domain));
+                setSelectedCourse(data[0].course_id);
+                setSiteBtnState(true);
+                setCourseBtnState(true);
             } else {
                 setCourseReportLink("");
-            }
-        } catch (exp) {
-            console.error(exp);
-        }
-    }
-
-    const loadSiteLinkedCourse = async (site) => {
-        try {
-            let data = (await client.get(context.SITE_LINKED_COURSE_URL + site.id)).data;
-            if (data.length > 0) {
-                setSiteReportLink(formatReportLink(data[0].course_id, site.domain));
-                setSiteBtnState(true);
-            } else {
                 setSiteReportLink("");
+                setSelectedCourse("");
             }
         } catch (exp) {
             console.error(exp);
@@ -70,37 +67,18 @@ function ReportsContent() {
         }
     }
 
-    const handleSiteSelectForCourseReport = (event) => {
+    const handleSiteSelect = (event) => {
         let site = getSiteObject(event);
-        setCourseBtnState(false);
-        setFilteredCourses([])
-        if(!isNaN(site.id)) {
-            setSiteForCourseReport(site);
-            loadSiteLinkedCourses(site);
-        } else {
-            setSiteForCourseReport(site);
-            setCourseReportLink("");
-        }
-    }
-
-    const handleSiteSelectForSiteReport = (event) => {
-        let site = getSiteObject(event);
+        setSelectedSite(site);
         setSiteBtnState(false);
-        if(!isNaN(site.id)) {
-            loadSiteLinkedCourse(site);
-        } else {
-            setSiteReportLink("");
-        }
+        setCourseBtnState(false);
+        loadSiteLinkedCourses(site);
     }
 
     const handleCourseSelect = (courseId) => {
-        if(courseId.includes('----')) {
-            setCourseBtnState(false);
-            setCourseReportLink("");
-        } else {
-            setCourseReportLink(formatReportLink(courseId, siteForCourseReport.domain));
-            setCourseBtnState(true);
-        }
+        setSelectedCourse(courseId);
+        setCourseReportLink(formatReportLink(courseId, selectedSite.domain));
+        setCourseBtnState(true);
     }
 
     useEffect(() => {
@@ -109,34 +87,21 @@ function ReportsContent() {
 
     return (
         <div className="clearesult-reports">
-            <div className="clearesult-reports-main">
-                <div className="site-level-reports">
-                    <h2>Site level reports</h2>
-                    <h3>Select site:</h3>
-                    <select className="form-control" onChange={handleSiteSelectForSiteReport}>
-                        <option value="----">----</option>
-                        {
-                            sites.map((site) => <option key={site.id} value={site.id}>{site.domain}</option>)
-                        }
-                    </select>
-                    <a href={siteReportLink} className={`btn btn-primary ${siteBtnState ? "" : "disabled"}`}>Get Report</a>
-                </div>
-                <div className="course-level-section">
-                    <h2>Course level reports</h2>
-                    <h3>Select site:</h3>
-                    <select className="form-control" onChange={handleSiteSelectForCourseReport}>
-                        <option value="----">----</option>
-                        {
-                            sites.map((site) => <option key={site.id} value={site.id}>{site.domain}</option>)
-                        }
-                    </select>
-                    <h3>Select course:</h3>
-                    <select className="form-control" onChange={(e) => handleCourseSelect(e.target.value)}>
-                        <option value="----">----</option>
-                        {filteredCourses.map((course) => <option key={course.course_id} value={course.course_id}>{course.course_name}</option>)}
-                    </select>
-                    <a href={courseReportLink} className={`btn btn-primary ${courseBtnState ? "" : "disabled"}`}>Get Report</a>
-                </div>
+            <div>
+                <h3>Find a report for the entire site:</h3>
+                <select className="form-control" onChange={handleSiteSelect}>
+                    {
+                        sites.map((site) => <option key={site.id} value={site.id}>{site.domain}</option>)
+                    }
+                </select>
+                <a href={siteReportLink} className={`btn btn-primary ${siteBtnState ? "" : "disabled"}`}>Go</a>
+            </div>
+            <div>
+                <h3>Or find a report for a specific course:</h3>
+                <select className="form-control" value={selectedCourse} onChange={(e) => handleCourseSelect(e.target.value)}>
+                    {filteredCourses.map((course) => <option key={course.course_id} value={course.course_id}>{course.course_name}</option>)}
+                </select>
+                <a href={courseReportLink} className={`btn btn-primary ${courseBtnState ? "" : "disabled"}`}>Go</a>
             </div>
         </div>
     )
