@@ -28,6 +28,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RemoveField(
+            model_name='edlysuborganization',
+            name='edx_organizations',
+        ),
         migrations.AlterField(
             model_name='edlyorganization',
             name='slug',
