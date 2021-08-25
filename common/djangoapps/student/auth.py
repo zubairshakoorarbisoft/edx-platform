@@ -8,6 +8,7 @@ to decide whether to check course creator role, and other such functions.
 
 from ccx_keys.locator import CCXBlockUsageLocator, CCXLocator
 from django.conf import settings
+import logging
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from opaque_keys.edx.locator import LibraryLocator
 
@@ -26,6 +27,8 @@ from student.roles import (
     OrgLibraryUserRole,
     OrgStaffRole
 )
+
+LOGGER = logging.getLogger(__name__)
 
 # Studio permissions:
 STUDIO_EDIT_ROLES = 8
@@ -81,10 +84,16 @@ def get_user_permissions(user, course_key, org=None):
     """
     if org is None:
         org = course_key.org
-        organization = Organization.objects.get(short_name=org)
         try:
-            edly_sub_org = organization.edx_organizations.first().slug
+            organization = Organization.objects.get(short_name=org)
+            edly_sub_org = organization.edx_organizations.first()
+            if edly_sub_org:
+                edly_sub_org.slug
+            else:
+                LOGGER.exception('No edly sub organization exists for organization %s', org)
+
         except ObjectDoesNotExist:
+            LOGGER.exception('No edx organization exist for short name %s', org)
             edly_sub_org = None
 
         course_key = course_key.for_branch(None)
