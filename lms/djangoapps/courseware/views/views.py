@@ -127,6 +127,7 @@ from util.db import outer_atomic
 from util.milestones_helpers import get_prerequisite_courses_display
 from util.views import ensure_valid_course_key, ensure_valid_usage_key
 from xmodule.course_module import COURSE_VISIBILITY_PUBLIC, COURSE_VISIBILITY_PUBLIC_OUTLINE
+from xmodule.modulestore import Location, mongo
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import ItemNotFoundError, NoPathToItem
 from xmodule.tabs import CourseTabList
@@ -360,8 +361,17 @@ def jump_to_id(request, course_id, module_id):
             text_type(items[0].location)
         )
 
-    return jump_to(request, course_id, text_type(items[0].location))
+    location = items[0].location
 
+    # If a DraftModuleStore is used, the draft revision is actually stripped
+    # from the item location in `get_items()`, but is needed later in
+    # `path_to_location()` in order to find the draft item in the store. So the
+    # draft revision is re-added here.
+    # See https://github.com/edx/edx-platform/pull/3679.
+    if getattr(items[0], 'is_draft', False):
+        location = mongo.draft.as_draft(location)
+
+    return jump_to(request, course_id, location.to_deprecated_string())
 
 @ensure_csrf_cookie
 def jump_to(_request, course_id, location):
