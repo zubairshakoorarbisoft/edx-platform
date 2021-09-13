@@ -100,6 +100,10 @@ def in_preview_mode():
     """
     hostname = get_current_request_hostname()
     preview_lms_base = settings.FEATURES.get('PREVIEW_LMS_BASE', None)
+
+    log.info("----------------------------------------------------------------")
+    log.info("preview_lms_base = {preview_lms_base}".format(preview_lms_base=preview_lms_base))
+    log.info("----------------------------------------------------------------")
     return bool(preview_lms_base and hostname and hostname.split(':')[0] == preview_lms_base.split(':')[0])
 
 
