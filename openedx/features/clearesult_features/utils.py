@@ -157,7 +157,8 @@ def get_complete_enrollments_clearesult_dashboard_data(request, enrollments):
         data[enrollment.id] = {
             'completion_date': completion_date.date() if completion_date else None,
             'pass_date': pass_date.date() if pass_date else None,
-            'is_course_event': is_course_event
+            'is_course_event': is_course_event,
+            'is_course_graded': course_outline_blocks.get('num_graded_problems') > 0
         }
     return data
 
