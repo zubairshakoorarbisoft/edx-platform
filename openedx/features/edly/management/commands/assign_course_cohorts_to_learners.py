@@ -42,11 +42,11 @@ class Command(BaseCommand):
                 raise CommandError('Course ID %s is incorrect' % course_id)
 
             course_cohorts = get_course_cohorts(course_id=course_key)
-            logger.info('%s cohorts found for %s', course_cohorts.count(), course_id)
+            logger.info('%s cohorts found for %s', len(course_cohorts), course_id)
             for cohort in course_cohorts:
                 logger.info('%s users found for cohort %s', cohort.users.all().count(), cohort.name)
                 for user in cohort.users.all():
-                    logger.info('Adding %s to cohort %s', user.email, cohort.name)
+                    logger.info('Adding %s to cohort %s', '{} ({})'.format(user.username, user.email), cohort.name)
                     try:
                         cohort_user, previous_cohort, __ = add_user_to_cohort(cohort, user)
                         if previous_cohort:
