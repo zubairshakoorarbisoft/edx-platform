@@ -232,8 +232,10 @@ def send_email_to_learner_on_passing_course(sender, instance, **kwargs):
         old_instance = ClearesultCourseCompletion.objects.get(id=instance.id)
         if instance.pass_date and instance.pass_date != old_instance.pass_date:
             course_key_string = six.text_type(instance.course_id)
-            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string)
+            is_graded = is_course_graded(course_key_string, instance.user)
+            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string, is_graded)
     except ClearesultCourseCompletion.DoesNotExist:
         if instance.pass_date:
             course_key_string = six.text_type(instance.course_id)
-            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string)
+            is_graded = is_course_graded(course_key_string, instance.user)
+            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string, is_graded)
