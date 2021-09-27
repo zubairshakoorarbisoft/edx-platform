@@ -282,7 +282,7 @@ def update_magento_user_info_from_drupal(email, magento_base_url, magento_token)
 
 
 @task(base=LoggedTask)
-def send_course_pass_email_to_learner(user_id, course_key_string):
+def send_course_pass_email_to_learner(user_id, course_key_string, is_course_graded):
     user = User.objects.get(id=user_id)
     associated_sites = user.clearesult_profile.get_associated_sites()
     if not associated_sites:
@@ -304,7 +304,8 @@ def send_course_pass_email_to_learner(user_id, course_key_string):
         email_params = {
             "full_name": user.first_name + " " + user.last_name,
             "display_name": course.display_name_with_default,
-            "course_progress_url": course_progress_url
+            "course_progress_url": course_progress_url,
+            "is_course_graded": is_course_graded
         }
         from openedx.features.clearesult_features.utils import send_notification
         return send_notification(key, email_params, subject, [user.email], user, site)
