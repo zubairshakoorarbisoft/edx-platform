@@ -7,6 +7,7 @@ from logging import getLogger
 from completion.models import BlockCompletion
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.dispatch import receiver
 from django.db.models import Q
 from django.db.models.signals import post_save, pre_delete, pre_save
@@ -228,14 +229,16 @@ def check_and_remove_existing_local_admins_from_the_courses(sender, instance, **
 
 @receiver(pre_save, sender=ClearesultCourseCompletion)
 def send_email_to_learner_on_passing_course(sender, instance, **kwargs):
-    try:
-        old_instance = ClearesultCourseCompletion.objects.get(id=instance.id)
-        if instance.pass_date and instance.pass_date != old_instance.pass_date:
-            course_key_string = six.text_type(instance.course_id)
-            is_graded = is_course_graded(course_key_string, instance.user)
-            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string, is_graded)
-    except ClearesultCourseCompletion.DoesNotExist:
-        if instance.pass_date:
-            course_key_string = six.text_type(instance.course_id)
-            is_graded = is_course_graded(course_key_string, instance.user)
-            send_course_pass_email_to_learner.delay(instance.user.id, course_key_string, is_graded)
+    course_key_string = six.text_type(instance.course_id)
+    pass_email_sent = cache.get('pass_email_{}_{}'.format(course_key_string, instance.user.id))
+    if not pass_email_sent:
+        cache.set('pass_email_{}_{}'.format(course_key_string, instance.user.id), True, 60)
+        try:
+            old_instance = ClearesultCourseCompletion.objects.get(id=instance.id)
+            if instance.pass_date and instance.pass_date != old_instance.pass_date:
+                is_graded = is_course_graded(course_key_string, instance.user)
+                send_course_pass_email_to_learner.delay(instance.user.id, course_key_string, is_graded)
+        except ClearesultCourseCompletion.DoesNotExist:
+            if instance.pass_date:
+                is_graded = is_course_graded(course_key_string, instance.user)
+                send_course_pass_email_to_learner.delay(instance.user.id, course_key_string, is_graded)
