@@ -444,7 +444,7 @@ def _accessible_courses_summary_iter(request, org=None):
             orgs.extend(org)
         else:
             orgs.append(org)
-
+        log.info('orgs for courses %s', orgs)
         courses_summary = CourseOverview.get_all_courses(orgs=orgs)
     else:
         courses_summary = modulestore().get_course_summaries()
@@ -560,7 +560,7 @@ def course_listing(request):
     """
     List all courses and libraries available to the logged in user
     """
-
+    log.info('i am here')
     optimization_enabled = GlobalStaff().has_user(request.user) and \
         WaffleSwitchNamespace(name=WAFFLE_NAMESPACE).is_enabled(u'enable_global_staff_optimization')
     org = request.GET.get('org', '') if optimization_enabled else None
@@ -570,7 +570,7 @@ def course_listing(request):
 
     edly_user_info_cookie = request.COOKIES.get(settings.EDLY_USER_INFO_COOKIE_NAME, None)
     org = get_edx_org_from_cookie(edly_user_info_cookie)
-
+    log.info('edly org is %s', org)
     courses_iter, in_process_course_actions = get_courses_accessible_to_user(request, org)
     user = request.user
     libraries = _accessible_libraries_iter(request.user, org) if LIBRARIES_ENABLED else []
@@ -755,15 +755,21 @@ def get_courses_accessible_to_user(request, org=None):
             specified org will be returned. The default value is None.
     """
     if GlobalStaff().has_user(request.user):
+        log.info('global staff access')
         # user has global access so no need to get courses from django groups
         courses, in_process_course_actions = _accessible_courses_summary_iter(request, org)
     else:
         try:
+            log.info('course list from groups')
             courses, in_process_course_actions = _accessible_courses_list_from_groups(request)
         except AccessListFallback:
             # user have some old groups or there was some error getting courses from django groups
             # so fallback to iterating through all courses
+            log.info('fallback to all courses')
             courses, in_process_course_actions = _accessible_courses_summary_iter(request, org)
+    log.info('courses list %s', courses)
+    for course in courses:
+        log.info('course %s', course)
     return courses, in_process_course_actions
 
 
