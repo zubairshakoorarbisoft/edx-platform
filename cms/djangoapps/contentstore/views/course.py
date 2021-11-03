@@ -560,7 +560,6 @@ def course_listing(request):
     """
     List all courses and libraries available to the logged in user
     """
-    log.info('i am here')
     optimization_enabled = GlobalStaff().has_user(request.user) and \
         WaffleSwitchNamespace(name=WAFFLE_NAMESPACE).is_enabled(u'enable_global_staff_optimization')
     org = request.GET.get('org', '') if optimization_enabled else None
@@ -768,8 +767,6 @@ def get_courses_accessible_to_user(request, org=None):
             log.info('fallback to all courses')
             courses, in_process_course_actions = _accessible_courses_summary_iter(request, org)
     log.info('courses list %s', courses)
-    for course in courses:
-        log.info('course %s', course)
     return courses, in_process_course_actions
 
 
