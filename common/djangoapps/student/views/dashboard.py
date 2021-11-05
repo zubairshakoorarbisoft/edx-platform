@@ -492,7 +492,6 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
         The dashboard response.
 
     """
-    ECOMMERCE_TRANSACTION_COOKIE_NAME = "pendingTransactionCourse"
     user = request.user
     if not UserProfile.objects.filter(user=user).exists():
         return redirect(reverse('account_settings'))
@@ -743,7 +742,7 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
         course_enrollments = [
             enr for enr in course_enrollments if entitlement.enrollment_course_run.course_id != enr.course_id
         ]
-    
+
     context = {
         'urls': urls,
         'programs_data': programs_data,
@@ -816,7 +815,7 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
 
     # Retrieve pendingTransactionCourse cookie to show waiting alert to the learner. It conatain encrypted
     # course_id for which AuthorizeNet transaction has been perfromed but notification is yet to be received.
-    transaction_hash = request.COOKIES.get(ECOMMERCE_TRANSACTION_COOKIE_NAME)
+    transaction_hash = request.COOKIES.get(settings.ECOMMERCE_TRANSACTION_COOKIE_NAME)
     if transaction_hash:
         decoded_course_id = base64.b64decode(transaction_hash[2:-1]).decode("utf-8")
         transaction_course_id = CourseKey.from_string(decoded_course_id)
@@ -844,6 +843,6 @@ def student_dashboard(request):  # lint-amnesty, pylint: disable=too-many-statem
     response = render_to_response('dashboard.html', context)
     if transaction_hash:
         response.delete_cookie(
-            ECOMMERCE_TRANSACTION_COOKIE_NAME, domain='localhost')
+            settings.ECOMMERCE_TRANSACTION_COOKIE_NAME, domain=settings.SESSION_COOKIE_DOMAIN)
 
     return response
