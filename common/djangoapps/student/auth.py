@@ -5,7 +5,7 @@ authorization has authorization to do so, which infers authorization via role hi
 to decide whether to check course creator role, and other such functions.
 """
 
-
+import logging
 from ccx_keys.locator import CCXBlockUsageLocator, CCXLocator
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
@@ -34,7 +34,7 @@ STUDIO_EDIT_CONTENT = 2
 STUDIO_VIEW_CONTENT = 1
 STUDIO_NO_PERMISSIONS = 0
 # In addition to the above, one is always allowed to "demote" oneself to a lower role within a course, or remove oneself
-
+log = logging.getLogger(__name__)
 
 def is_ccx_course(course_key):
     """
@@ -81,6 +81,7 @@ def get_user_permissions(user, course_key, org=None):
     """
     if org is None:
         org = course_key.org
+        log.info('course org is %s', org)
         organization = Organization.objects.get(short_name=org)
         try:
             edly_sub_org = organization.edx_organizations.first().slug
