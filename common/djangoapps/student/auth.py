@@ -82,6 +82,7 @@ def get_user_permissions(user, course_key, org=None):
     if org is None:
         org = course_key.org
         log.info('course org is %s', org)
+        log.info('course orgs %s', Organization.objects.filter(short_name=org))
         organization = Organization.objects.get(short_name=org)
         try:
             edly_sub_org = organization.edx_organizations.first().slug
