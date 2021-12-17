@@ -137,20 +137,6 @@ from pipeline_mako import render_require_js_path_overrides
   <%include file="widgets/optimizely.html" />
   <%include file="widgets/segment-io.html" />
 
-  <% hotjar_tracking_id = static.get_value("HOTJAR_TRACKING_ID", settings.HOTJAR_TRACKING_ID) %>
-  % if hotjar_tracking_id:
-    <script> 
-    (function(h,o,t,j,a,r){ 
-      h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-      h._hjSettings={hjid:"${hotjar_tracking_id}",hjsv:6}; 
-      a=o.getElementsByTagName('head')[0];
-      r=o.createElement('script');r.async=1; 
-      r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv; a.appendChild(r); })
-
-      (window,document,'https://static.hotjar.com/c/hotjar-','.js?sv='); 
-    </script>
-  % endif
-
   <meta name="path_prefix" content="${EDX_ROOT_URL}">
   <% google_site_verification_id = configuration_helpers.get_value('GOOGLE_SITE_VERIFICATION_ID', settings.GOOGLE_SITE_VERIFICATION_ID) %>
   % if google_site_verification_id:
