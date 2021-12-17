@@ -982,7 +982,7 @@ GOOGLE_SITE_VERIFICATION_ID = ''
 GOOGLE_ANALYTICS_LINKEDIN = 'GOOGLE_ANALYTICS_LINKEDIN_DUMMY'
 GOOGLE_ANALYTICS_TRACKING_ID = None
 
-######################## HOTJAR ANALYTICS ###########################
+# HOTJAR ANALYTICS
 HOTJAR_TRACKING_ID = "2673972"
 
 ######################## BRANCH.IO ###########################
