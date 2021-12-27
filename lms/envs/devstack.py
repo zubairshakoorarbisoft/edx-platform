@@ -148,7 +148,7 @@ CC_PROCESSOR = {
 }
 
 # HOTJAR ANALYTICS
-HOTJAR_TRACKING_ID = "2673972"
+HOTJAR_TRACKING_ID = None
 
 ########################### External REST APIs #################################
 FEATURES['ENABLE_OAUTH2_PROVIDER'] = True
