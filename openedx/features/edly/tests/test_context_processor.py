@@ -25,7 +25,7 @@ class EdlyAppContextProcessorTests(TestCase):
         'nav_menu_url': marketing_link('NAV_MENU'),
         'zendesk_widget_url': marketing_link('ZENDESK-WIDGET'),
         'footer_url': marketing_link('FOOTER'),
-        'GTM_ID': 'GTM-XXXXXX'
+        'GTM_ID': 'GTM-XXXXXX',
         'GA_ID': 'G-XXXXXX'
     })
     def test_default_edly_app_context(self):
