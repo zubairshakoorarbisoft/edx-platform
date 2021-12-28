@@ -66,8 +66,8 @@ def edly_app_context(request):  # pylint: disable=unused-argument
             'zendesk_widget_url': marketing_link('ZENDESK-WIDGET'),
             'footer_url': marketing_link('FOOTER'),
             'gtm_id': configuration_helpers.get_value('GTM_ID'),
-            'google_analytics_id': configuration_helpers.get_value('GA_ID'),
-            'hotjar_tracking_id': settings.HOTJAR_TRACKING_ID,
+            'ga_id': configuration_helpers.get_value('GA_ID'),
+            'hotjar_id': settings.HOTJAR_TRACKING_ID,
             'is_mobile_app': is_request_from_mobile_app(request)
         }
     )
