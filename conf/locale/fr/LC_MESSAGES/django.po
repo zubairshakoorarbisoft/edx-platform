@@ -27202,3 +27202,11 @@ msgid ""
 msgstr ""
 "Si vous avez besoin d'aide, veuillez utiliser notre e-mail {start_anchor_email}"
 "{formatted_support_email}{end_anchor}."
+
+#: openedx/core/djangoapps/user_authn/templates/user_authn/edx_ace/passwordreset/email/body.html
+#: themes/adroit/lms/templates/user_authn/edx_ace/passwordreset/email/body.html
+#: themes/gestalt/lms/templates/user_authn/edx_ace/passwordreset/email/body.html
+#: themes/st-lutherx/lms/templates/user_authn/edx_ace/passwordreset/email/body.html
+#: themes/st-normanx/lms/templates/user_authn/edx_ace/passwordreset/email/body.html
+msgid "Change my Password"
+msgstr "Créer un mot de passe"
