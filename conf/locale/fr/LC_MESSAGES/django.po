@@ -16149,8 +16149,6 @@ msgid ""
 "account. Required fields are noted by {strong_start}bold text and an "
 "asterisk (*){strong_end}."
 msgstr ""
-"Les champs obligatoires sont signalés par {strong_indicator}en gras et par "
-"un astérisque (*) {strong_close}."
 
 #: lms/templates/login.html lms/templates/provider_login.html
 #: lms/templates/register-shib.html lms/templates/signup_modal.html
@@ -16276,8 +16274,6 @@ msgid ""
 " fix it as soon as possible. Please email us at {tech_support_email} to "
 "report any problems or downtime."
 msgstr ""
-"Nous sommes désolés, ce module est temporairement indisponible. Notre "
-"personnel s'efforce de résoudre ce problème le plus rapidement possible."
 
 #: lms/templates/module-error.html
 msgid "Raw data:"
@@ -16453,8 +16449,6 @@ msgid ""
 "Required fields are noted by {strong_start}bold text and an asterisk "
 "(*){strong_end}."
 msgstr ""
-"Les champs obligatoires sont signalés par {strong_indicator}en gras et par "
-"un astérisque (*) {strong_close}."
 
 #: lms/templates/register-shib.html lms/templates/signup_modal.html
 #: themes/stanford-style/lms/templates/register-shib.html
@@ -16764,7 +16758,7 @@ msgstr "Page suivante"
 #: lms/templates/sysadmin_dashboard.html
 #: lms/templates/sysadmin_dashboard_gitlogs.html
 msgid "Sysadmin Dashboard"
-msgstr "Tableau de bord {name}"
+msgstr "Tableau de bord"
 
 #: lms/templates/sysadmin_dashboard.html
 #: lms/templates/sysadmin_dashboard_gitlogs.html
@@ -17969,7 +17963,7 @@ msgstr "Vous n'avez pas été désinscrit des courriels pour {org} {course}."
 
 #: lms/templates/bulk_email/unsubscribe_success.html
 msgid "{link_start}Return to edX.org{link_end}"
-msgstr "{link_start}Retour à {platform_name}{link_end}"
+msgstr "{link_start}Retour à {link_end}"
 
 #: lms/templates/calculator/toggle_calculator.html
 msgid "Open Calculator"
@@ -18157,7 +18151,7 @@ msgstr "Nommer votre CCX"
 
 #: lms/templates/ccx/coach_dashboard.html
 msgid "Create a new Custom Course for edX"
-msgstr "Créer un cours sur mesure pour {platform_name}"
+msgstr "Créer un cours sur mesure pour edX"
 
 #: lms/templates/ccx/coach_dashboard.html
 #: lms/templates/ccx/grading_policy.html
@@ -20056,7 +20050,7 @@ msgstr ""
 #: themes/st-lutherx/lms/templates/dashboard/_dashboard_course_listing.html
 #: themes/st-normanx/lms/templates/dashboard/_dashboard_course_listing.html
 msgid "You have successfully verified your ID with edX"
-msgstr "Votre identité a été vérifiée par {platform_name} avec succès."
+msgstr "Votre identité a été vérifiée par edX avec succès."
 
 #: lms/templates/dashboard/_dashboard_course_listing.html
 #: themes/adroit/lms/templates/dashboard/_dashboard_course_listing.html
@@ -20223,8 +20217,6 @@ msgid ""
 "Your edX verification has been approved. Your verification is effective for "
 "one year after submission."
 msgstr ""
-"Votre vérification d'identité {platform_name} a été approuvée. Votre "
-"vérification d'identité est effective pendant deux ans après la soumission."
 
 #: lms/templates/dashboard/_dashboard_status_verification.html
 msgid ""
@@ -20250,8 +20242,6 @@ msgid ""
 "Your edX ID verification is pending. Your verification information has been "
 "submitted and will be reviewed shortly."
 msgstr ""
-"Votre vérification d'identité {platform_name} est en cours. Vos informations"
-" de vérification d'identité ont été soumises et seront examinées sous peu."
 
 #: lms/templates/dashboard/_dashboard_status_verification.html
 msgid "Current Verification Status: Denied"
@@ -20757,7 +20747,7 @@ msgstr ""
 #. tags in place.
 #: lms/templates/emails/business_order_confirmation_email.txt
 msgid "<p>Sincerely,</p><p>[[Your Signature]]</p>"
-msgstr "<p>Cordialement,</p><p>[[Your Signature]]</p>"
+msgstr ""
 
 #: lms/templates/emails/failed_verification_email.txt
 msgid ""
@@ -20822,7 +20812,7 @@ msgstr "Félicitations ! Votre attestation est prête."
 #: lms/templates/emails/passed_verification_email.txt
 msgid ""
 "Your verification is effective for one year. It will expire on {expiry_date}"
-msgstr "Votre statut de vérifié est valide jusqu'au {date}."
+msgstr "Votre statut de vérifié est valide jusqu'au {expiry_date}."
 
 #: lms/templates/emails/photo_submission_confirmation.txt
 msgid "Hi {full_name},"
@@ -20847,7 +20837,7 @@ msgstr ""
 
 #: lms/templates/emails/registration_codes_sale_email.txt
 msgid "Thank you for purchasing enrollments in {course_name}."
-msgstr "L'organisation qui a acheté des inscriptions dans ce cours"
+msgstr ""
 
 #: lms/templates/emails/registration_codes_sale_email.txt
 msgid ""
@@ -20903,7 +20893,7 @@ msgstr ""
 msgid ""
 "Sincerely,\n"
 "[[Your Signature]]"
-msgstr "<p>Cordialement,</p><p>[[Your Signature]]</p>"
+msgstr ""
 
 #: lms/templates/emails/registration_codes_sale_invoice_attachment.txt
 msgid "INVOICE"
@@ -20931,7 +20921,7 @@ msgstr ""
 
 #: lms/templates/emails/registration_codes_sale_invoice_attachment.txt
 msgid "Customer Reference Number: {reference_number}"
-msgstr "Numéro de commande: {order_number}"
+msgstr "Numéro de commande: {reference_number}"
 
 #: lms/templates/emails/registration_codes_sale_invoice_attachment.txt
 msgid "Balance Due: {currency_symbol}{sale_price}"
@@ -20951,7 +20941,6 @@ msgstr ""
 #: lms/templates/emails/registration_codes_sale_invoice_attachment.txt
 msgid "Total:      {currency_symbol}{sale_price}"
 msgstr ""
-"Total facturé à la carte de crédit/débit : {currency_symbol}{total_cost}"
 
 #: lms/templates/emails/registration_codes_sale_invoice_attachment.txt
 msgid "Payment Instructions"
@@ -20969,7 +20958,7 @@ msgstr ""
 msgid "For payment questions, contact {contact_email}"
 msgstr ""
 "Si vous avez des questions concernant la facturation, veuillez contacter "
-"{billing_email}."
+"{contact_email}."
 
 #: lms/templates/emails/reject_name_change.txt
 msgid ""
@@ -21904,7 +21893,7 @@ msgstr ""
 
 #: lms/templates/instructor/instructor_dashboard_2/e-commerce.html
 msgid "{description}"
-msgstr "Description"
+msgstr ""
 
 #: lms/templates/instructor/instructor_dashboard_2/e-commerce.html
 msgid "{discount}"
@@ -23566,7 +23555,7 @@ msgstr ""
 #: lms/templates/shoppingcart/registration_code_receipt.html
 #: lms/templates/shoppingcart/registration_code_redemption.html
 msgid "{course_number} {course_title} Cover Image"
-msgstr "{course_number} {course_name} Image de couverture"
+msgstr "{course_number} {course_title} Image de couverture"
 
 #: lms/templates/shoppingcart/registration_code_receipt.html
 #: lms/templates/shoppingcart/registration_code_redemption.html
@@ -24383,7 +24372,7 @@ msgstr "Une erreur est survenue. Essayerz de rafraichir la page de nouveau."
 #: themes/st-normanx/lms/templates/emails/account_access_denied.txt
 #: themes/st-normanx/lms/templates/emails/account_access_granted.txt
 msgid "Hi {user},"
-msgstr "Bonjour {name},"
+msgstr "Bonjour {user},"
 
 #: themes/adroit/cms/templates/emails/account_access_denied.txt
 #: themes/adroit/lms/templates/emails/account_access_denied.txt
@@ -24397,9 +24386,8 @@ msgid ""
 "Your account on {platform_name} [{url}] has been deactivated. If you think "
 "this was done in error, please reach out to us at {email}"
 msgstr ""
-"Votre requête d'accès à l'API du catalogue de cours {platform_name} a été "
-"refusée. Si vous croyez que ce soit une erreur, ou pour d'autres questions "
-"sur l'utilisation de ce API, communiquer avec {api_support_email_link}."
+"Votre compte sur {platform_name} [{url}] a été désactivé. Si vous pensezcela"
+" a été fait par erreur, veuillez nous contacter à {email}"
 
 #: themes/adroit/cms/templates/emails/account_access_denied.txt
 #: themes/adroit/cms/templates/emails/account_access_granted.txt
@@ -24545,7 +24533,7 @@ msgstr "Suivant"
 #: themes/st-lutherx/lms/templates/courseware/accordion.html
 #: themes/st-normanx/lms/templates/courseware/accordion.html
 msgid "{section} current chapter"
-msgstr "chapitre en cours {chapter}"
+msgstr "chapitre en cours {section}"
 
 #: themes/adroit/lms/templates/dashboard/_dashboard_course_listing.html
 #: themes/gestalt/lms/templates/dashboard/_dashboard_course_listing.html
@@ -24604,7 +24592,7 @@ msgid ""
 "{support_email}."
 msgstr ""
 "Si vous avez des questions concernant la facturation, veuillez contacter "
-"{billing_email}."
+"{support_email}."
 
 #: themes/adroit/lms/templates/emails/activation_email.txt
 #: themes/gestalt/lms/templates/emails/activation_email.txt
@@ -24619,7 +24607,7 @@ msgstr ""
 #: themes/st-lutherx/lms/templates/learner_dashboard/_dashboard_navigation_programs.html
 #: themes/st-normanx/lms/templates/learner_dashboard/_dashboard_navigation_programs.html
 msgid "Programs Dashboard"
-msgstr "Tableau de bord {name}"
+msgstr "Tableau de bord"
 
 #: themes/adroit/lms/templates/learner_dashboard/programs.html
 #: themes/gestalt/lms/templates/learner_dashboard/_dashboard_navigation_programs.html
@@ -24906,8 +24894,6 @@ msgid ""
 "Required fields are noted by {strong_indicator}bold text and an asterisk "
 "(*).{strong_close}"
 msgstr ""
-"Les champs obligatoires sont signalés par {strong_indicator}en gras et par "
-"un astérisque (*) {strong_close}."
 
 #: themes/stanford-style/lms/templates/register-sidebar.html
 msgid "Registration Help"
@@ -25732,9 +25718,6 @@ msgid ""
 " still having problems accessing things, please feel free to "
 "{link_start}contact {studio_name} support{link_end} for further help."
 msgstr ""
-"Nous sommes désolés. Nous n'avons pas trouvé la page {studio_name} que vous "
-"recherchez. Vous pouvez revenir au Tableau de bord {studio_name} et "
-"réessayer."
 
 #: cms/templates/error.html
 msgid "The Server Encountered an Error"
@@ -25748,9 +25731,6 @@ msgid ""
 "please feel free to {link_start}contact {studio_name} support{link_end} for "
 "further help."
 msgstr ""
-"Nous sommes désolés. Il ya eu un problème avec le serveur lors du traitement"
-" de votre dernière demande. Vous pouvez revenir au Tableau de bord "
-"{studio_name} ou relancer cette demande."
 
 #: cms/templates/error.html
 msgid "Back to dashboard"
@@ -27536,8 +27516,6 @@ msgstr "Dernier jour pour s'inscrire"
 #: cms/templates/settings.html
 msgid "Contact your edX partner manager to update these settings."
 msgstr ""
-"Contactez le gestionnaire du partenaire {platform_name} pour mettre à jour "
-"ces paramètres."
 
 #: cms/templates/settings.html
 msgid "Enrollment End Time"
