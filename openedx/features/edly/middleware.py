@@ -10,7 +10,11 @@ from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-from openedx.features.edly.utils import user_has_edly_organization_access
+from openedx.features.edly.utils import (
+    user_has_edly_organization_access,
+    is_edly_sub_org_active,
+    get_marketing_url_from_current_site_configurations,
+)
 
 logger = getLogger(__name__)
 
@@ -24,6 +28,16 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         """
         Validate logged in user's access based on request site and its linked edly sub organization.
         """
+        if not is_edly_sub_org_active(request):
+            logger.exception('EdlySubOrganization for site %s is disabled. ' % (request.site))
+            marketing_url = get_marketing_url_from_current_site_configurations().get('marketing_url', None)
+            if marketing_url:
+                marketing_disabled_url = marketing_url + "/disabled"
+                return HttpResponseRedirect(marketing_disabled_url)
+            else:
+                logger.exception('Marketing Root URL not found in Site Configurations for %s site. ' % (request.site))
+                return HttpResponseRedirect(reverse('logout'))
+
         if request.user.is_superuser or request.user.is_staff:
             return
 
