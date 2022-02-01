@@ -45,7 +45,7 @@ def is_edly_sub_org_active(request):
             Q(preview_site=current_site)
         )
     except EdlySubOrganization.DoesNotExist:
-        return False
+        return True
     
     return edly_sub_org.is_active
 
