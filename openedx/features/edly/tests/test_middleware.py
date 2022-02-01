@@ -55,14 +55,14 @@ class EdlyOrganizationAccessMiddlewareTests(TestCase):
         """
         Test disabled Edly Organization access for a user.
         """
-        EdlySubOrganizationFactory(lms_site=self.request.site, is_active = False)
+        EdlySubOrganizationFactory(lms_site=self.request.site, is_active=False)
         self.client.cookies.load(
             {
                 settings.EDLY_USER_INFO_COOKIE_NAME: cookies._get_edly_user_info_cookie_string(self.request)
             }
         )
         response = self.client.get('/')
-        assert response.status_code !=200
+        assert response.status_code != 200
 
     def test_user_with_edly_organization_access(self):
         """
