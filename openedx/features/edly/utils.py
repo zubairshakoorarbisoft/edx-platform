@@ -29,15 +29,15 @@ LOGGER = logging.getLogger(__name__)
 def is_edly_sub_org_active(request):
     """
     Checks if the request EdlySubOrganization is enabled or disabled.
-    
+
     Arguments:
         request: HTTP request object
-    
+
     Returns:
         bool: Returns True if site is enabled and False if the site is disabled or DoesNotExist
     """
     current_site = request.site
-    
+
     try:
         edly_sub_org = EdlySubOrganization.objects.get(
             Q(lms_site=current_site) |
@@ -46,7 +46,7 @@ def is_edly_sub_org_active(request):
         )
     except EdlySubOrganization.DoesNotExist:
         return True
-    
+
     return edly_sub_org.is_active
 
 
