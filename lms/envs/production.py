@@ -48,7 +48,7 @@ def get_env_setting(setting):
 
 ################################ ALWAYS THE SAME ##############################
 
-DEBUG = False
+DEBUG = True
 DEFAULT_TEMPLATE_ENGINE['OPTIONS']['debug'] = False
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
@@ -994,6 +994,7 @@ if ACTIVE_DJANGO_DEBUG_TOOLBAR:
     }
 
     def should_show_debug_toolbar(request):
+        return True
         if request.path.endswith(DDT_WHITELIST_PATHS):
             return False
         return True
