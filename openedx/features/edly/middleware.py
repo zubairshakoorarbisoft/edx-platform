@@ -5,15 +5,17 @@ from logging import getLogger
 
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from openedx.features.edly.models import EdlySubOrganization
 from openedx.features.edly.utils import (
-    user_has_edly_organization_access,
-    is_edly_sub_org_active,
     get_marketing_url_from_current_site_configurations,
+    is_edly_sub_org_active,
+    user_has_edly_organization_access,
 )
 
 logger = getLogger(__name__)
@@ -28,18 +30,28 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         """
         Validate logged in user's access based on request site and its linked edly sub organization.
         """
-        if not is_edly_sub_org_active(request):
-            logger.exception('EdlySubOrganization for site %s is disabled. ', request.site)
-            marketing_url = get_marketing_url_from_current_site_configurations().get('marketing_url', None)
-            if marketing_url:
-                marketing_disabled_url = marketing_url + "/disabled"
-                return HttpResponseRedirect(marketing_disabled_url)
-            else:
-                logger.exception('Marketing Root URL not found in Site Configurations for %s site. ', request.site)
-                return HttpResponseRedirect(reverse('logout'))
-
         if request.user.is_superuser or request.user.is_staff:
             return
+        
+        try:
+            edly_sub_org = EdlySubOrganization.objects.get(
+                Q(lms_site=request.site) |
+                Q(studio_site=request.site) |
+                Q(preview_site=request.site)
+            )
+
+            if not is_edly_sub_org_active(edly_sub_org):
+                logger.exception('EdlySubOrganization for site %s is disabled. ', request.site)
+                marketing_url = get_marketing_url_from_current_site_configurations()
+                if marketing_url:
+                    marketing_disabled_url = marketing_url + "/disabled"
+                    return HttpResponseRedirect(marketing_disabled_url)
+                else:
+                    logger.exception('Marketing Root URL not found in Site Configurations for %s site. ', request.site)
+                    return HttpResponseRedirect(reverse('logout'))
+
+        except EdlySubOrganization.DoesNotExist:
+            logger.exception('Requested EdlySubOrganization does not exist.')
 
         if request.user.is_authenticated and not user_has_edly_organization_access(request):
             logger.exception('Edly user %s has no access for site %s.' % (request.user.email, request.site))

@@ -26,26 +26,16 @@ from util.organizations_helpers import get_organizations
 LOGGER = logging.getLogger(__name__)
 
 
-def is_edly_sub_org_active(request):
+def is_edly_sub_org_active(edly_sub_org):
     """
     Checks if the request EdlySubOrganization is enabled or disabled.
 
     Arguments:
-        request: HTTP request object
+        request: EdlySubOrganization model class
 
     Returns:
         bool: Returns True if site is enabled and False if the site is disabled or DoesNotExist
     """
-    current_site = request.site
-
-    try:
-        edly_sub_org = EdlySubOrganization.objects.get(
-            Q(lms_site=current_site) |
-            Q(studio_site=current_site) |
-            Q(preview_site=current_site)
-        )
-    except EdlySubOrganization.DoesNotExist:
-        return True
 
     return edly_sub_org.is_active
 
@@ -405,12 +395,11 @@ def get_marketing_url_from_current_site_configurations():
     Returns:
         dict: Context data.
     """
-    context = dict()
     current_site_configuration = get_current_site_configuration()
     if current_site_configuration:
-        context['marketing_url'] = current_site_configuration.get_value('MARKETING_SITE_ROOT')
+        marketing_url = current_site_configuration.get_value('MARKETING_SITE_ROOT')
 
-    return context
+    return marketing_url
 
 def get_logo_from_current_site_configurations():
     """
