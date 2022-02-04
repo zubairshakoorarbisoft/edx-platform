@@ -43,7 +43,7 @@ class EdlySubOrganization(TimeStampedModel):
         null=True, on_delete=models.CASCADE
     )
     is_active = models.BooleanField(
-        default=True, 
+        default=True,
         verbose_name=_('is active'),
         help_text=_('Enable/Disable an Edly SubOrganization Instance.')
     )

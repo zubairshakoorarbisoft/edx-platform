@@ -32,7 +32,7 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         """
         if request.user.is_superuser or request.user.is_staff:
             return
-        
+
         try:
             edly_sub_org = EdlySubOrganization.objects.get(
                 Q(lms_site=request.site) |
