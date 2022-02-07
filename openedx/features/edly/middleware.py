@@ -9,9 +9,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 
+from common.djangoapps.edxmako.shortcuts import marketing_link
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.features.edly.utils import (
-    get_marketing_url_from_current_site_configurations,
     is_edly_sub_org_active,
     user_has_edly_organization_access,
 )
@@ -35,11 +35,10 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         if edly_sub_org:
             if not is_edly_sub_org_active(edly_sub_org):
                 logger.exception('EdlySubOrganization for site %s is disabled. ', request.site)
-                marketing_url = get_marketing_url_from_current_site_configurations()
+                marketing_url = marketing_link('ROOT')
 
                 if marketing_url:
-                    marketing_disabled_url = marketing_url + 'disabled'
-                    return HttpResponseRedirect(marketing_disabled_url)
+                    return HttpResponseRedirect(marketing_url)
                 else:
                     logger.exception('Marketing Root URL not found in Site Configurations for %s site. ', request.site)
                     logout_url = getattr(settings, 'FRONTEND_LOGOUT_URL', None)

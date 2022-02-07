@@ -388,23 +388,6 @@ def get_current_site_invalid_certificate_context(default_html_certificate_config
     return context
 
 
-def get_marketing_url_from_current_site_configurations():
-    """
-    Gets the Marketing URL Root Value from Site Configurations
-
-    Returns:
-        dict: Context data.
-    """
-    current_site_configuration = get_current_site_configuration()
-    if current_site_configuration:
-        marketing_url = current_site_configuration.get_value(
-            'DJANGO_SETTINGS_OVERRIDE',
-            {}
-            ).get('MARKETING_SITE_ROOT', None)
-
-    return marketing_url
-
-
 def get_logo_from_current_site_configurations():
     """
     Gets the "logo" value in "BRANDING" from current site configurations.
