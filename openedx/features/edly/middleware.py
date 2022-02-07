@@ -31,17 +31,14 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         if request.user.is_superuser or request.user.is_staff:
             return
 
-        edly_sub_org = getattr(request.site, 'edly_sub_org_for_studio', None)
-        edly_sub_org = getattr(request.site, 'edly_sub_org_for_lms', edly_sub_org)
-        edly_sub_org = getattr(request.site, 'edly_sub_org_for_preview_site', edly_sub_org)
-
+        edly_sub_org = getattr(request.site, 'edly_sub_org_for_lms', None)
         if edly_sub_org:
             if not is_edly_sub_org_active(edly_sub_org):
                 logger.exception('EdlySubOrganization for site %s is disabled. ', request.site)
                 marketing_url = get_marketing_url_from_current_site_configurations()
 
                 if marketing_url:
-                    marketing_disabled_url = marketing_url + "disabled"
+                    marketing_disabled_url = marketing_url + 'disabled'
                     return HttpResponseRedirect(marketing_disabled_url)
                 else:
                     logger.exception('Marketing Root URL not found in Site Configurations for %s site. ', request.site)

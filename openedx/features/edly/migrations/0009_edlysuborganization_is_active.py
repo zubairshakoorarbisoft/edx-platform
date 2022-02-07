@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
             field=models.BooleanField(
                 default=True,
                 help_text='Enable/Disable an Edly SubOrganization Instance.',
-                verbose_name='is active'),
+                verbose_name='Is Active'),
         ),
     ]
