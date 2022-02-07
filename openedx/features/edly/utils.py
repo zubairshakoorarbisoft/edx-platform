@@ -398,7 +398,7 @@ def get_marketing_url_from_current_site_configurations():
     current_site_configuration = get_current_site_configuration()
     if current_site_configuration:
         marketing_url = current_site_configuration.get_value(
-            'DJANGO_SETTINGS_OVERRIDE', 
+            'DJANGO_SETTINGS_OVERRIDE',
             {}
             ).get('MARKETING_SITE_ROOT', None)
 
