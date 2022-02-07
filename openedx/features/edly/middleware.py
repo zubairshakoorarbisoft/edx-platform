@@ -5,13 +5,11 @@ from logging import getLogger
 
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-from openedx.features.edly.models import EdlySubOrganization
 from openedx.features.edly.utils import (
     get_marketing_url_from_current_site_configurations,
     is_edly_sub_org_active,
