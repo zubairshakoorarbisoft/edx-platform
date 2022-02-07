@@ -34,10 +34,10 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         edly_sub_org = getattr(request.site, 'edly_sub_org_for_lms', None)
         if edly_sub_org:
             if not is_edly_sub_org_active(edly_sub_org):
-                logger.exception('EdlySubOrganization for site %s is disabled. ', request.site)
+                logger.exception('EdlySubOrganization for site %s is disabled.', request.site)
                 marketing_url = marketing_link('ROOT')
 
-                if marketing_url:
+                if marketing_url != '#':
                     return HttpResponseRedirect(marketing_url)
                 else:
                     logger.exception('Marketing Root URL not found in Site Configurations for %s site. ', request.site)
