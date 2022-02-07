@@ -34,7 +34,7 @@ def is_edly_sub_org_active(edly_sub_org):
         request: EdlySubOrganization model class
 
     Returns:
-        bool: Returns True if site is enabled and False if the site is disabled or DoesNotExist
+        bool: Returns True if site is enabled and False if the site is disabled.
     """
 
     return edly_sub_org.is_active
@@ -397,7 +397,7 @@ def get_marketing_url_from_current_site_configurations():
     """
     current_site_configuration = get_current_site_configuration()
     if current_site_configuration:
-        marketing_url = current_site_configuration.get_value('MARKETING_SITE_ROOT')
+        marketing_url = current_site_configuration.get_value('MARKETING_SITE_ROOT', None)
 
     return marketing_url
 

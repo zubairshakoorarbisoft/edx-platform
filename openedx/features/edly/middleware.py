@@ -33,13 +33,11 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         if request.user.is_superuser or request.user.is_staff:
             return
 
-        try:
-            edly_sub_org = EdlySubOrganization.objects.get(
-                Q(lms_site=request.site) |
-                Q(studio_site=request.site) |
-                Q(preview_site=request.site)
-            )
+        edly_sub_org = getattr(self.request.site, 'edly_sub_org_for_studio')
+        edly_sub_org = getattr(self.request.site, 'edly_sub_org_for_lms', edly_sub_org)
+        edly_sub_org = getattr(self.request.site, 'edly_sub_org_for_preview', edly_sub_org)
 
+        if edly_sub_org:
             if not is_edly_sub_org_active(edly_sub_org):
                 logger.exception('EdlySubOrganization for site %s is disabled. ', request.site)
                 marketing_url = get_marketing_url_from_current_site_configurations()
@@ -49,9 +47,6 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
                 else:
                     logger.exception('Marketing Root URL not found in Site Configurations for %s site. ', request.site)
                     return HttpResponseRedirect(reverse('logout'))
-
-        except EdlySubOrganization.DoesNotExist:
-            logger.exception('Requested EdlySubOrganization does not exist.')
 
         if request.user.is_authenticated and not user_has_edly_organization_access(request):
             logger.exception('Edly user %s has no access for site %s.' % (request.user.email, request.site))
