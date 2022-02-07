@@ -396,10 +396,18 @@ def get_marketing_url_from_current_site_configurations():
         dict: Context data.
     """
     current_site_configuration = get_current_site_configuration()
+    print("==========================================")
+    print(current_site_configuration)
+    print("==========================================")
     if current_site_configuration:
-        marketing_url = current_site_configuration.get_value('MARKETING_SITE_ROOT', None)
+        print("Hereeeeeeeeeeeeeee")
+        marketing_url = current_site_configuration.get_value('DJANGO_SETTINGS_OVERRIDE', {}).get('MARKETING_SITE_ROOT', None)
+        print("==========================================")
+        print(marketing_url)
+        print("==========================================")
 
     return marketing_url
+    
 
 def get_logo_from_current_site_configurations():
     """
