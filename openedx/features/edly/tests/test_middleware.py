@@ -51,7 +51,7 @@ class EdlyOrganizationAccessMiddlewareTests(TestCase):
         self.client = Client(SERVER_NAME=self.request.site.domain)
         self.client.login(username=self.user.username, password='test')
 
-    def test_disabbled_edly_sub_orgainzation_access(self):
+    def test_disabled_edly_sub_orgainzation_access(self):
         """
         Test disabled Edly Organization access for a user.
         """
