@@ -118,7 +118,7 @@ REGISTRATION_FAILURE_LOGGING_FLAG = WaffleFlag(
 
 
 @transaction.non_atomic_requests
-def create_account_with_params(request, params):
+def create_account_with_params(request, params, extra_fields=None, login=True):
     """
     Given a request and a dict of parameters (which may or may not have come
     from the request), create an account for the requesting user, including
@@ -157,10 +157,11 @@ def create_account_with_params(request, params):
     params = dict(list(params.items()))
 
     # allow to define custom set of required/optional/hidden fields via configuration
-    extra_fields = configuration_helpers.get_value(
-        'REGISTRATION_EXTRA_FIELDS',
-        getattr(settings, 'REGISTRATION_EXTRA_FIELDS', {})
-    )
+    if not extra_fields:
+        extra_fields = configuration_helpers.get_value(
+            'REGISTRATION_EXTRA_FIELDS',
+            getattr(settings, 'REGISTRATION_EXTRA_FIELDS', {})
+        )
     # registration via third party (Google, Facebook) using mobile application
     # doesn't use social auth pipeline (no redirect uri(s) etc involved).
     # In this case all related info (required for account linking)
@@ -208,10 +209,10 @@ def create_account_with_params(request, params):
         third_party_provider, running_pipeline = _link_user_to_third_party_provider(
             is_third_party_auth_enabled, third_party_auth_credentials_in_api, user, request, params,
         )
-
-        new_user = authenticate_new_user(request, user.username, form.cleaned_data['password'])
-        django_login(request, new_user)
-        request.session.set_expiry(0)
+        if login:
+            new_user = authenticate_new_user(request, user.username, form.cleaned_data['password'])
+            django_login(request, new_user)
+            request.session.set_expiry(0)
 
     create_user_link_with_edly_sub_organization(request, user)
     user = create_learner_link_with_permission_groups(user)
