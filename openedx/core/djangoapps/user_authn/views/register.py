@@ -118,7 +118,7 @@ REGISTRATION_FAILURE_LOGGING_FLAG = WaffleFlag(
 
 
 @transaction.non_atomic_requests
-def create_account_with_params(request, params, extra_fields=None, login=True):
+def create_account_with_params(request, params, extra_fields=None, login=True, tos=True):
     """
     Given a request and a dict of parameters (which may or may not have come
     from the request), create an account for the requesting user, including
@@ -187,10 +187,11 @@ def create_account_with_params(request, params, extra_fields=None, login=True):
     extended_profile_fields = configuration_helpers.get_value('extended_profile_fields', [])
     # Can't have terms of service for certain SHIB users, like at Stanford
     registration_fields = getattr(settings, 'REGISTRATION_EXTRA_FIELDS', {})
-    tos_required = (
-        registration_fields.get('terms_of_service') != 'hidden' or
-        registration_fields.get('honor_code') != 'hidden'
-    )
+    if tos:
+        tos_required = (
+            registration_fields.get('terms_of_service') != 'hidden' or
+            registration_fields.get('honor_code') != 'hidden'
+        )
 
     form = AccountCreationForm(
         data=params,
