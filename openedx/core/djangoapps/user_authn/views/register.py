@@ -192,6 +192,8 @@ def create_account_with_params(request, params, extra_fields=None, login=True, t
             registration_fields.get('terms_of_service') != 'hidden' or
             registration_fields.get('honor_code') != 'hidden'
         )
+    else:
+        tos_required = False
 
     form = AccountCreationForm(
         data=params,
