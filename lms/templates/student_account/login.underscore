@@ -49,9 +49,13 @@
             </h3>
         </div>
     <% } %>
-
+<div>
+    <%- gettext("{email}").replace(/{email}/g, context.prefilledEmail) %>
+</div>
     <%= HtmlUtils.HTML(context.fields) %>
-
+<div>
+    <%- gettext("{email}").replace(/{email}/g, context.prefilledEmail) %>
+</div>
     <button type="submit" class="action action-primary action-update js-login login-button"><%- gettext("Sign in") %></button>
 
     <% if ( context.providers.length > 0 && !context.currentProvider) { %>

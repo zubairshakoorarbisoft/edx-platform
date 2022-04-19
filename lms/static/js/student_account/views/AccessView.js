@@ -71,6 +71,7 @@
                         institution_login: null,
                         hinted_login: null
                     };
+                    this.prefilledEmail = options.prefilled_email;
                     this.platformName = options.platform_name;
                     this.supportURL = options.support_link;
                     this.passwordResetSupportUrl = options.password_reset_support_link;
@@ -160,7 +161,8 @@
                             createAccountOption: this.createAccountOption,
                             hideAuthWarnings: this.hideAuthWarnings,
                             pipelineUserDetails: this.pipelineUserDetails,
-                            enterpriseName: this.enterpriseName
+                            enterpriseName: this.enterpriseName,
+                            prefilledEmail: this.prefilledEmail
                         });
 
                     // Listen for 'password-help' event to toggle sub-views

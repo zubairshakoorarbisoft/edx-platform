@@ -54,6 +54,7 @@
                 this.hideAuthWarnings = data.hideAuthWarnings;
                 this.pipelineUserDetails = data.pipelineUserDetails;
                 this.enterpriseName = data.enterpriseName;
+                this.prefilledEmail = data.prefilledEmail;
 
                 this.listenTo(this.model, 'sync', this.saveSuccess);
                 this.listenTo(this.resetModel, 'sync', this.resetEmail);
@@ -79,7 +80,8 @@
                                 platformName: this.platformName,
                                 createAccountOption: this.createAccountOption,
                                 pipelineUserDetails: this.pipelineUserDetails,
-                                enterpriseName: this.enterpriseName
+                                enterpriseName: this.enterpriseName,
+                                prefilledEmail: this.prefilledEmail
                             }
                         })
                     )
@@ -95,7 +97,7 @@
                 this.$form = this.$container.find('form');
                 this.$formFeedback = this.$container.find('.js-form-feedback');
                 this.$submitButton = this.$container.find(this.submitButton);
-
+                this.$container.find('#login-email').val(this.prefilledEmail);
                 if (this.errorMessage) {
                     formErrorsTitle = _.sprintf(
                         gettext('An error occurred when signing you in to %s.'),
