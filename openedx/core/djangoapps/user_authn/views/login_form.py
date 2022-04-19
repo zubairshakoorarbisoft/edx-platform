@@ -121,6 +121,8 @@ def get_login_session_form(request):
 
     return form_desc
 
+import logging
+logger = logging.getLogger(__name__)
 
 @require_http_methods(['GET'])
 @ensure_csrf_cookie
@@ -186,9 +188,12 @@ def login_and_registration_form(request, initial_mode="login"):
         } for message in messages.get_messages(request) if 'account-recovery' in message.tags
     ]
 
+    prefilled_email = request.GET.get('email', '')
+    logger.info('request get %s', prefilled_email)
     # Otherwise, render the combined login/registration page
     context = {
         'data': {
+            'prefilled_email': prefilled_email,
             'login_redirect_url': redirect_to,
             'initial_mode': initial_mode,
             'third_party_auth': _third_party_auth_context(request, redirect_to, third_party_auth_hint),
