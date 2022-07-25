@@ -384,17 +384,25 @@ class OAuth2ProviderConfig(ProviderConfig):
 
     def get_setting(self, name):
         """ Get the value of a setting, or raise KeyError """
+        print("------------------------ models ---------------------")
         if name == "KEY":
+            print("called for key", self.key)
             return self.key
         if name == "SECRET":
+            print("called for key", self.secret)
             if self.secret:
                 return self.secret
             # To allow instances to avoid storing secrets in the DB, the secret can also be set via Django:
             return getattr(settings, 'SOCIAL_AUTH_OAUTH_SECRETS', {}).get(self.backend_name, '')
         if self.other_settings:
+            print("called for other_setings", json.loads(self.other_settings))
+
             other_settings = json.loads(self.other_settings)
             assert isinstance(other_settings, dict), "other_settings should be a JSON object (dictionary)"
             return other_settings[name]
+
+        print("name called for not found............")
+        print("name:", name)
         raise KeyError
 
 

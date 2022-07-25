@@ -89,6 +89,9 @@ def lti_login_and_complete_view(request, backend, *args, **kwargs):
     if request.method != 'POST':
         return HttpResponseNotAllowed('POST')
 
+    print("---------------- third party views ---------------------")
+    print("backend:", backend)
+    print("request:", request)
     request.backend.start()
     return complete(request, backend, *args, **kwargs)
 

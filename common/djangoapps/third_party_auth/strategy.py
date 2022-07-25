@@ -34,6 +34,19 @@ class ConfigurationModelStrategy(DjangoStrategy):
         if isinstance(backend, OAuthAuth):
             site = Site.objects.get_current(get_current_request())
             provider_config = OAuth2ProviderConfig.current(backend.name, site)
+            print("---------------- strategy ---------------------")
+            print("provider_configs:", provider_config)
+            try:
+                print(dir(provider_config))
+                print(provider_config.enabled)
+            except:
+                pass
+
+            try:
+                print("key:", provider_config.key)
+            except:
+                pass
+
             if not provider_config.enabled_for_current_site:
                 raise Exception("Can't fetch setting of a disabled backend/provider.")
             try:
