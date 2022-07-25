@@ -1,7 +1,7 @@
 """
 Extra views required for SSO
 """
-
+import logging
 
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseServerError
@@ -20,6 +20,8 @@ from student.views import compose_and_send_activation_email
 from third_party_auth import pipeline, provider
 
 from .models import SAMLConfiguration, SAMLProviderConfig
+
+log = logging.getLogger(__name__)
 
 URL_NAMESPACE = getattr(settings, setting_name('URL_NAMESPACE'), None) or 'social'
 
@@ -89,9 +91,9 @@ def lti_login_and_complete_view(request, backend, *args, **kwargs):
     if request.method != 'POST':
         return HttpResponseNotAllowed('POST')
 
-    print("---------------- third party views ---------------------")
-    print("backend:", backend)
-    print("request:", request)
+    log.debug("---------------- third party views ---------------------")
+    log.debug("backend:", backend)
+    log.debug("request:", request)
     request.backend.start()
     return complete(request, backend, *args, **kwargs)
 

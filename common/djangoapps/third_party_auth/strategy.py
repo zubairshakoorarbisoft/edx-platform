@@ -3,6 +3,8 @@ A custom Strategy for python-social-auth that allows us to fetch configuration f
 ConfigurationModels rather than django.settings
 """
 
+import logging
+
 from django.contrib.sites.models import Site
 from social_core.backends.oauth import OAuthAuth
 from social_django.strategy import DjangoStrategy
@@ -14,6 +16,7 @@ from .pipeline import AUTH_ENTRY_CUSTOM
 from .pipeline import get as get_pipeline_from_request
 from .provider import Registry
 
+log = logging.getLogger(__name__)
 
 class ConfigurationModelStrategy(DjangoStrategy):
     """
@@ -34,16 +37,16 @@ class ConfigurationModelStrategy(DjangoStrategy):
         if isinstance(backend, OAuthAuth):
             site = Site.objects.get_current(get_current_request())
             provider_config = OAuth2ProviderConfig.current(backend.name, site)
-            print("---------------- strategy ---------------------")
-            print("provider_configs:", provider_config)
+            log.debug("---------------- strategy ---------------------")
+            log.debug("provider_configs:", provider_config)
             try:
-                print(dir(provider_config))
-                print(provider_config.enabled)
+                log.debug(dir(provider_config))
+                log.debug(provider_config.enabled)
             except:
                 pass
 
             try:
-                print("key:", provider_config.key)
+                log.debug("key:", provider_config.key)
             except:
                 pass
 

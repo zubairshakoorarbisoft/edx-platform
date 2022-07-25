@@ -327,9 +327,9 @@ def _get_url(view_name, backend_name, auth_entry=None, redirect_url=None,
     if extra_params:
         query_params.update(extra_params)
 
-    print("--------------------- pipeline _get_url ---------------------------")
+    logger.debug("--------------------- pipeline _get_url ---------------------------")
     try:
-        print("{url}?{params}".format(
+        logger.debug("{url}?{params}".format(
             url=url,
             params=six.moves.urllib.parse.urlencode(query_params)
         ))
@@ -405,8 +405,8 @@ def get_login_url(provider_id, auth_entry, redirect_url=None):
     """
     assert auth_entry in _AUTH_ENTRY_CHOICES
     enabled_provider = _get_enabled_provider(provider_id)
-    print('---------------------------- pipeline -------------------------')
-    print(enabled_provider.get_url_params())
+    logger.debug('---------------------------- pipeline -------------------------')
+    logger.debug(enabled_provider.get_url_params())
     return _get_url(
         'social:begin',
         enabled_provider.backend_name,
