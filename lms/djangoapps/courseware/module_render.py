@@ -139,6 +139,43 @@ def make_track_function(request):
     return function
 
 
+def _add_completion_toc_chapters(toc_chapters):
+    """
+    Adds completion status of chapters and sections
+    """
+
+    def _get_completion_candidates():
+        """
+        Iterate of chapters and sections to compile a list of key for which we need to get completions
+        """
+        items = []
+        for toc_chapter in toc_chapters:
+            items.append(toc_chapter['chapter'].location)
+            for section in toc_chapter['sections']:
+                items.append(section['location'])
+        return items
+
+    def _attach_completions_with_toc(completions):
+        """
+        Attaches completion status with each chapter and section
+        """
+        for toc_chapter in toc_chapters:
+            toc_chapter['completion'] = completions.get(toc_chapter['chapter'].location, 0)
+            for section in toc_chapter['sections']:
+                section['completion'] = completions.get(section['location'], 0)
+
+    if not toc_chapters:
+        return
+
+    first_chapter = toc_chapters[0]['chapter']
+    completion_service = first_chapter.runtime.service(first_chapter, 'completion')
+    blocks = _get_completion_candidates()
+
+    completions = completion_service.get_completions(blocks)
+    _attach_completions_with_toc(completions)
+    # import pdb; pdb.set_trace()
+
+
 def toc_for_course(user, request, course, active_chapter, active_section, field_data_cache):
     '''
     Create a table of contents from the module store
@@ -222,6 +259,7 @@ def toc_for_course(user, request, course, active_chapter, active_section, field_
                     'due': section.due,
                     'active': is_section_active,
                     'graded': section.graded,
+                    'location': section.location
                 }
                 _add_timed_exam_info(user, course, section, section_context)
 
@@ -244,8 +282,10 @@ def toc_for_course(user, request, course, active_chapter, active_section, field_
                 'display_id': display_id,
                 'url_name': chapter.url_name,
                 'sections': sections,
+                'chapter': chapter,
                 'active': chapter.url_name == active_chapter
             })
+        _add_completion_toc_chapters(toc_chapters)
         return {
             'chapters': toc_chapters,
             'previous_of_active_section': previous_of_active_section,
