@@ -98,7 +98,7 @@ class ProgramDetailsFragmentView(EdxFragmentView):
         except ValueError:
             mobile_only = False
 
-        program_data = ProgramDataExtender(program_data, request.user, mobile_only=mobile_only, request.session).extend()
+        program_data = ProgramDataExtender(program_data, request.user, mobile_only=mobile_only, session=request.session).extend()
         course_data = meter.progress(programs=[program_data], count_only=False)[0]
         certificate_data = get_certificates(request.user, program_data)
 
