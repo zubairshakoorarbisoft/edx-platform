@@ -464,9 +464,10 @@ class ProgramDataExtender(object):
         program_data (dict): Representation of a program.
         user (User): The user whose enrollments to inspect.
     """
-    def __init__(self, program_data, user, mobile_only=False):
+    def __init__(self, program_data, reqeust, mobile_only=False, session=None):
         self.data = program_data
         self.user = user
+        self.session = session
         self.mobile_only = mobile_only
         self.data.update({'is_mobile_only': self.mobile_only})
 
@@ -675,7 +676,7 @@ class ProgramDataExtender(object):
                     api_user = service_user
                     is_anonymous = True
 
-                api = ecommerce_api_client(api_user)
+                api = ecommerce_api_client(api_user, session=self.session)
 
                 # The user specific program price is slow to calculate, so use switch to force the
                 # anonymous price for all users. See LEARNER-5555 for more details.
