@@ -464,7 +464,7 @@ class ProgramDataExtender(object):
         program_data (dict): Representation of a program.
         user (User): The user whose enrollments to inspect.
     """
-    def __init__(self, program_data, reqeust, mobile_only=False, session=None):
+    def __init__(self, program_data, user, mobile_only=False, session=None):
         self.data = program_data
         self.user = user
         self.session = session
