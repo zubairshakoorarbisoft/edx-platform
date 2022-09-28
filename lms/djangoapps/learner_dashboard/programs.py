@@ -4,6 +4,7 @@ Fragments for rendering programs.
 
 
 import json
+import requests
 
 from django.http import Http404
 from django.template.loader import render_to_string
@@ -98,7 +99,9 @@ class ProgramDetailsFragmentView(EdxFragmentView):
         except ValueError:
             mobile_only = False
 
-        program_data = ProgramDataExtender(program_data, request.user, mobile_only=mobile_only, session=request.session).extend()
+        sess = requests.session()
+        sess.cookies.update(request.COOKIES)
+        program_data = ProgramDataExtender(program_data, request.user, mobile_only=mobile_only, session=sess).extend()
         course_data = meter.progress(programs=[program_data], count_only=False)[0]
         certificate_data = get_certificates(request.user, program_data)
 
