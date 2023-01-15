@@ -51,13 +51,14 @@
         font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 14px;
         line-height: 1.5;
-        max-width: 600px;
+        max-width: 650px;
         padding: 0 20px 0 20px;
     ">
         <tr>
             <!-- HEADER -->
             <td class="header" style="
                 padding: 20px 30px;
+                border-bottom: 2px solid #F4F4F4;
             ">
                 <table role="presentation" width="100%" align="left" border="0" cellpadding="0" cellspacing="0">
                     <tr>
@@ -70,11 +71,6 @@
                                     />
                             </a>
                         </td>
-                        <td align="right" style="text-align: {{ LANGUAGE_BIDI|yesno:"left,right" }}; padding-bottom: 6px;">
-                            <a class="login" href="{% with_link_tracking dashboard_url %}" style="color: {{ edly_colors_config.primary }}; text-decoration: none;">
-                                {%  trans "Sign In" %}
-                            </a>
-                        </td>
                     </tr>
                 </table>
             </td>
@@ -82,9 +78,10 @@
 
         <tr>
             <!-- MAIN -->
-            <td class="main" bgcolor="#ffffff" style="
-                padding: 30px 30px 40px;
-                box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+            <td align="center" class="main" bgcolor="#ffffff" style="
+                color: #6f6d6d;
+                padding-top: 30px;
+                border-bottom: 2px solid #F4F4F4;
             ">
                 {% block content %}{% endblock %}
             </td>
@@ -92,7 +89,7 @@
 
         <tr>
             <!-- FOOTER -->
-            <td class="footer" style="padding: 20px; text-align: center;">
+            <td align="left" class="footer" style="padding: 40px 60px;">
                 <table role="presentation" width="100%" align="left" border="0" cellpadding="0" cellspacing="0">
                     <tr>
                         <td>
