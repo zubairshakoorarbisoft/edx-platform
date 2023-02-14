@@ -19,4 +19,5 @@ def configuration_context(request):
         'current_site_url': urlquote_plus(request.build_absolute_uri('/')),
         'settings': settings,
         'zendesk_widget': settings.MKTG_URLS.get('ZENDESK-WIDGET'),
+        'contact_email_address': configuration_helpers.get_value('CONTACT_EMAIL'),
     }
