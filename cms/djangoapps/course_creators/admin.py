@@ -13,9 +13,8 @@ from django.dispatch import receiver
 
 from course_creators.models import CourseCreator, send_admin_notification, send_user_notification, update_creator_state
 from course_creators.views import update_course_creator_group
+from edly_panel_app.models import EdlyUserProfile, EdlySubOrganization
 from edxmako.shortcuts import render_to_string
-from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
-
 
 log = logging.getLogger("studio.coursecreatoradmin")
 
@@ -93,10 +92,15 @@ def send_user_notification_callback(sender, **kwargs):
     """
     user = kwargs['user']
     updated_state = kwargs['state']
+    edly_slug = user.edly_profile.get_linked_edly_sub_organizations[0]
+    site_config = EdlySubOrganization.objects.get(
+        slug=edly_slug,
+    ).studio_site.configuration
 
     studio_request_email = settings.FEATURES.get('STUDIO_REQUEST_EMAIL', '')
     context = {
         'studio_request_email': studio_request_email,
+        'contact_email_address': site_config.get_value('CONTACT_EMAIL'), 
     }
 
     subject = render_to_string('emails/course_creator_subject.txt', context)
