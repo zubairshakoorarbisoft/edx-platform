@@ -13,7 +13,7 @@ from django.dispatch import receiver
 
 from course_creators.models import CourseCreator, send_admin_notification, send_user_notification, update_creator_state
 from course_creators.views import update_course_creator_group
-from edly_panel_app.models import EdlyUserProfile, EdlySubOrganization
+from openedx.features.edly.models import EdlySubOrganization
 from edxmako.shortcuts import render_to_string
 
 log = logging.getLogger("studio.coursecreatoradmin")
