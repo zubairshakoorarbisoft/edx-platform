@@ -540,10 +540,7 @@ def _cert_info(user, course_overview, cert_status):
             # supported in White Labels
             if linkedin_config.enabled and not theming_helpers.is_request_in_themed_site():
                 status_dict['linked_in_url'] = linkedin_config.add_to_profile_url(
-                    course_overview.id,
-                    course_overview.display_name,
-                    cert_status.get('mode'),
-                    cert_status['download_url']
+                    course_overview.display_name, cert_status.get('mode'), cert_status['download_url'],
                 )
 
     if status in {'generating', 'downloadable', 'notpassing', 'restricted', 'auditing', 'unverified'}:

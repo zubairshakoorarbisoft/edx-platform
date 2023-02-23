@@ -2550,33 +2550,35 @@ class LinkedInAddToProfileConfiguration(ConfigurationModel):
         )
     )
 
-    def add_to_profile_url(self, course_key, course_name, cert_mode, cert_url, source="o", target="dashboard"):
-        """Construct the URL for the "add to profile" button.
+    def add_to_profile_url(self, course_name, cert_mode, cert_url, certificate=None):
+        """
+        Construct the URL for the "add to profile" button. This will autofill the form based on
+        the params provided.
 
         Arguments:
-            course_key (CourseKey): The identifier for the course.
-            course_name (unicode): The display name of the course.
+            course_name (str): The display name of the course.
             cert_mode (str): The course mode of the user's certificate (e.g. "verified", "honor", "professional")
-            cert_url (str): The download URL for the certificate.
+            cert_url (str): The URL for the certificate.
 
         Keyword Arguments:
-            source (str): Either "o" (for onsite/UI), "e" (for emails), or "m" (for mobile)
-            target (str): An identifier for the occurrance of the button.
-
+            certificate (GeneratedCertificate): a GeneratedCertificate object for the user and course.
+                If provided, this function will also autofill the certId and issue date for the cert.
         """
-        company_identifier = configuration_helpers.get_value('LINKEDIN_COMPANY_ID', self.company_identifier)
-        params = OrderedDict([
-            ('_ed', company_identifier),
-            ('pfCertificationName', self._cert_name(course_name, cert_mode).encode('utf-8')),
-            ('pfCertificationUrl', cert_url),
-            ('source', source)
-        ])
+        params = {
+            'name': self._cert_name(course_name, cert_mode),
+            'certUrl': cert_url,
+        }
 
-        tracking_code = self._tracking_code(course_key, cert_mode, target)
-        if tracking_code is not None:
-            params['trk'] = tracking_code
+        params.update(self._organization_information())
 
-        return u'http://www.linkedin.com/profile/add?{params}'.format(
+        if certificate:
+            params.update({
+                'certId': certificate.verify_uuid,
+                'issueYear': certificate.created_date.year,
+                'issueMonth': certificate.created_date.month,
+            })
+
+        return 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&{params}'.format(
             params=urlencode(params)
         )
 
@@ -2640,6 +2642,18 @@ class LinkedInAddToProfileConfiguration(ConfigurationModel):
             if self.trk_partner_name else None
         )
 
+    def _organization_information(self):
+        """
+        Returns organization information for use in the URL parameters for add to profile.
+        Returns:
+            dict: Either the organization ID on LinkedIn or the organization's name
+                Will be used to prefill the organization on the add to profile action.
+        """
+        org_id = configuration_helpers.get_value('LINKEDIN_COMPANY_ID', self.company_identifier)
+        # Prefer organization ID per documentation at https://addtoprofile.linkedin.com/
+        if org_id:
+            return {'organizationId': org_id}
+        return {'organizationName': configuration_helpers.get_value('platform_name', settings.PLATFORM_NAME)}
 
 @python_2_unicode_compatible
 class EntranceExamConfiguration(models.Model):
