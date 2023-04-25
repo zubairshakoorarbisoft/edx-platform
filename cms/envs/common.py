@@ -1789,7 +1789,87 @@ ADVANCED_PROBLEM_TYPES = [
         'boilerplate_name': None
     },
     {
-        'component': 'edlyrating',
+        'component': 'annotatable_module',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'google-calendar',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'openassessment',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'done',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'survey',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'vectordraw',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'freetextresponse',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'edx_sga',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'audio',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'table',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'google-document',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'image-explorer',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'poll',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'step-builder',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'problem-builder',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'library_content',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'split_test',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'instruqtxblock',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'feedback',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'h5pxblock',
+        'boilerplate_name': None
+    },
+    {
+        'component': 'kwl',
         'boilerplate_name': None
     }
 ]
