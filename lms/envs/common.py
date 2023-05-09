@@ -1524,6 +1524,9 @@ CREDIT_NOTIFICATION_CACHE_TIMEOUT = 5 * 60 * 60
 ################################# Middleware ###################################
 
 MIDDLEWARE = [
+    # CSP middleware
+    'csp.middleware.CSPMiddleware',
+
     'openedx.core.lib.x_forwarded_for.middleware.XForwardedForMiddleware',
 
     # Avoid issue with https://blog.heroku.com/chrome-changes-samesite-cookie
@@ -1635,6 +1638,34 @@ MIDDLEWARE = [
 
     'wiki.middleware.RequestCache',
 ]
+
+# Content Security Policy
+CSP_DEFAULT_SRC = (
+    "'self'", "'unsafe-inline'",
+    'https://edly-cloud-static-assets.s3.amazonaws.com',
+    'https://edly-edx-theme-files.s3.amazonaws.com',
+    'https://fonts.googleapis.com',
+    'https://fonts.gstatic.com',
+    'https://cdn.jsdelivr.net',
+    '*.segment.io',
+    '*.segment.com',
+    '*.ytimg.com',
+    '*.edly.io',
+)
+CSP_SCRIPT_SRC = (
+    "'self'", "'unsafe-inline'", "'unsafe-eval'",
+    'https://www.googletagmanager.com',
+    'https://www.youtube.com',
+    'https://cdn.jsdelivr.net',
+    'https://static.doubleclick.net',
+    'https://googleads.g.doubleclick.net',
+    'https://www.usetiful.com',
+    'https://static.hotjar.com',
+    '*.cloudfront.net',
+    '*.mxpnl.com',
+    '*.segment.com',
+)
+CSP_FRAME_SRC = ("'self'", '*', )
 
 # Edly Configuration
 ADMIN_CONFIGURATION_USERS_GROUP = 'Admin Configuration Users'

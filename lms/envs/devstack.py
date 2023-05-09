@@ -380,6 +380,34 @@ ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG = ()
 DCS_SESSION_COOKIE_SAMESITE = 'Lax'
 DCS_SESSION_COOKIE_SAMESITE_FORCE_ALL = True
 
+# Content Security Policy
+CSP_DEFAULT_SRC = (
+    "'self'", "'unsafe-inline'",
+    'https://edly-cloud-static-assets.s3.amazonaws.com',
+    'https://edly-edx-theme-files.s3.amazonaws.com',
+    'https://fonts.googleapis.com',
+    'https://fonts.gstatic.com',
+    'https://cdn.jsdelivr.net',
+    '*.segment.io',
+    '*.segment.com',
+    '*.ytimg.com',
+    '*.devstack.lms:9999',
+)
+CSP_SCRIPT_SRC = (
+    "'self'", "'unsafe-inline'", "'unsafe-eval'",
+    'https://www.googletagmanager.com',
+    'https://www.youtube.com',
+    'https://cdn.jsdelivr.net',
+    'https://static.doubleclick.net',
+    'https://googleads.g.doubleclick.net',
+    'https://www.usetiful.com',
+    'https://static.hotjar.com',
+    '*.cloudfront.net',
+    '*.mxpnl.com',
+    '*.segment.com',
+)
+CSP_FRAME_SRC = ("'self'", '*', )
+
 #####################################################################
 # See if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
