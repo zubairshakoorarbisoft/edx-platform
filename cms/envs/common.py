@@ -1574,6 +1574,7 @@ INSTALLED_APPS = [
     'openedx.features.edly',
     'edly_panel_app',
     'openedx.features.subscriptions',
+    'chatgptxblock',
     'openedx.core.djangoapps.external_user_ids',
     # so sample_task is available to celery workers
     'openedx.core.djangoapps.heartbeat',
