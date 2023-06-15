@@ -44,6 +44,9 @@ class UserSitesViewSet(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
         user = request.user
+        print('--------- user', user)
+
+        user = request.user
         access_users = user.edly_multisite_user
 
         context = {
