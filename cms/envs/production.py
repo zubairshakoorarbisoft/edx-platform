@@ -278,6 +278,7 @@ ENV_FEATURES = ENV_TOKENS.get('FEATURES', {})
 for feature, value in ENV_FEATURES.items():
     FEATURES[feature] = value
 
+FEATURES['ENABLE_OPENBADGES'] = False
 # Additional installed apps
 for app in ENV_TOKENS.get('ADDL_INSTALLED_APPS', []):
     INSTALLED_APPS.append(app)
@@ -572,5 +573,3 @@ USETIFUL_TOKEN = ENV_TOKENS.get(
     'USETIFUL_PROJECT_TOKEN',
     None
 )
-
-ENABLE_OPENBADGES = False
