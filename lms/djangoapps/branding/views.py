@@ -254,6 +254,7 @@ def footer(request):
         Accepts: text/html
 
     """
+    log.info('footer data being fetched {0}'.format(request))
     if not branding_api.is_enabled():
         raise Http404
 
@@ -295,6 +296,7 @@ def footer(request):
                     request, show_openedx_logo, include_dependencies, include_language_selector, language
                 )
                 cache.set(cache_key, content, settings.FOOTER_CACHE_TIMEOUT)
+        log.info('footer data being returned {0}'.format(content))
         return HttpResponse(content, status=200, content_type="text/html; charset=utf-8")
 
     elif 'application/json' in accepts:
@@ -309,7 +311,9 @@ def footer(request):
             with translation.override(language):
                 footer_dict = branding_api.get_footer(is_secure=request.is_secure())
                 cache.set(cache_key, footer_dict, settings.FOOTER_CACHE_TIMEOUT)
+        log.info('footer data being returned {0}'.format(footer_dict))
         return JsonResponse(footer_dict, 200, content_type="application/json; charset=utf-8")
 
     else:
+        log.info('footer data erorr')
         return HttpResponse(status=406)
