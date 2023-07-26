@@ -13,6 +13,7 @@ Usage:
 
 Please ensure you have google-cloud-translate==2.0.1
 """
+# pylint: disable=E0401
 import argparse
 import csv
 import logging
