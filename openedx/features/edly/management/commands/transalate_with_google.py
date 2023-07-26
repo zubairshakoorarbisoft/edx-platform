@@ -13,12 +13,13 @@ Usage:
 
 Please ensure you have google-cloud-translate==2.0.1
 """
-import polib
-import csv
-from google.cloud import translate_v2
-import os
-import logging
 import argparse
+import csv
+import logging
+import os
+
+import polib
+from google.cloud import translate_v2
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "path_to_your_.json_credential_file"
 
@@ -26,22 +27,22 @@ COMMENT = "Translated from Google."
 client_instance = translate_v2.Client()
 
 
-def write_to_csv(file_path, msgid, msgstr, source):
+def write_to_csv(path, msgid, msgstr, source):
     """
       Write the translated strings along with the source to a CSV file.
 
       Parameters:
-          file_path (str): The path to the CSV file.
+          path (str): The path to the CSV file.
           msgid (str): The original source string (msgid) to be translated.
           msgstr (str): The translated string (msgstr) for the source.
           source (str): The source of the translation (e.g., "Google Translation" or "Transifex").
       """
     try:
-        with open(file_path, 'a', newline='', encoding='utf-8') as csvfile:
+        with open(path, 'a', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([msgid, msgstr, source])
 
-    except Exception as error:
+    except (IOError, FileNotFoundError, csv.Error) as error:
         logging.error("An error occurred while writing to CSV: %s", error)
 
 
@@ -92,7 +93,7 @@ def translate_with_google(po_file, target_language):
                 entry.comment = COMMENT
                 pofile.save()
 
-        except Exception as error:
+        except (ValueError, IOError) as error:
             logging.error("Error '%s' while writing to .po file for msgid: '%s'.", error, entry.msgid)
 
     logging.info("Translation completed for %s.", target_language)
