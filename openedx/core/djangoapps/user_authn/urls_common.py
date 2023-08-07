@@ -37,6 +37,8 @@ urlpatterns = [
 
     url(r'^login_ajax$', login.login_user, name="login_api"),
 
+    url(r'^auto_login', login.auto_login, name="auto_login"),
+
     # Moved from user_api/legacy_urls.py
     # `user_api` prefix is preserved for backwards compatibility.
     url(r'^user_api/v1/account/login_session/$', login.LoginSessionView.as_view(),

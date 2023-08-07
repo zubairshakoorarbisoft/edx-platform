@@ -5,7 +5,12 @@ Utility functions used during user authentication.
 
 import random
 import string
+import base64
 
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.backends import default_backend
+from cryptography.fernet import Fernet
 from django.conf import settings
 from django.utils import http
 from oauth2_provider.models import Application
@@ -58,3 +63,20 @@ def generate_password(length=12, chars=string.ascii_letters + string.digits):
     password += choice(string.ascii_letters)
     password += ''.join([choice(chars) for _i in range(length - 2)])
     return password
+
+def get_cipher():
+    """Get a Fernet Cipher object"""
+    backend = default_backend()
+    kdf = PBKDF2HMAC(
+        backend=backend,
+        algorithm=hashes.SHA256(),
+        iterations=100000,
+        salt=settings.ENCRYPTION_SALT_FERNET_CIPHER.encode(),
+        length=32
+    )
+    key_base = kdf.derive(
+        settings.ENCRYPTION_KEY_FERNET_CIPHER.encode(),
+    )
+    key = base64.urlsafe_b64encode(key_base)
+    cipher_suite = Fernet(key)
+    return cipher_suite
