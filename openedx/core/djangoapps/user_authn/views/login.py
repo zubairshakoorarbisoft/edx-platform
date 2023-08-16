@@ -477,9 +477,11 @@ def auto_login(request):
         frontend_url, enc_data (email and password)
 
     Example Usage:
-        GET /auto_login?frontend_url=<url>&enc_data=<encrypted-credentials>
+        GET /auto_login?enc_data=<encrypted-credentials>&frontend_url=<url>
+        Note: frontend_url should always be at the end
     """
     enc_data = request.GET.get('enc_data', '')
+    frontend_url = request.GET.get('frontend_url', '')
 
     cipher = get_cipher()
     plaintext = cipher.decrypt(enc_data.encode()).decode()
@@ -492,9 +494,18 @@ def auto_login(request):
         username=user.username,
         password=data['password'],
     )
+    
+    _handle_successful_authentication_and_login(user, request)
 
+    # response = JsonResponse({
+    #         'success': True,
+    #         'redirect_url': frontend_url,
+    #     })
     response = render_to_response('auto_login.html')
-    set_logged_in_cookies(request, response, user)
+    set_custom_metric('login_user_auth_failed_error', False)
+    set_custom_metric('login_user_response_status', response.status_code)
+    set_custom_metric('login_user_redirect_url', frontend_url)
+    response = set_logged_in_cookies(request, response, user)
 
     return response
 
