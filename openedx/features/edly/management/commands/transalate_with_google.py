@@ -146,7 +146,7 @@ if __name__ == "__main__":
         po_file_to_csv("%sdjango_po.csv" % csv_path, file_path)
 
     file = 'djangojs'
-    file_path = "../../../conf/locale/%s/LC_MESSAGES/%s.po" % (language_code, file)
+    file_path = "../../../../../conf/locale/%s/LC_MESSAGES/%s.po" % (language_code, file)
     translate_with_google(file_path, language_code)
     if args.csv:
         po_file_to_csv("%sdjangojs_po.csv" % csv_path, file_path)
