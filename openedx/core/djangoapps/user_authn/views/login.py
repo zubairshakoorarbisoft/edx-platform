@@ -36,7 +36,6 @@ from openedx.core.djangoapps.user_authn.exceptions import AuthFailedError
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
 from openedx.core.djangoapps.user_authn.views.password_reset import send_password_reset_email_for_user
 from openedx.core.djangoapps.user_authn.config.waffle import ENABLE_LOGIN_USING_THIRDPARTY_AUTH_ONLY
-from openedx.core.djangoapps.user_authn.utils import get_cipher
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.features.edly.utils import (
     create_edly_access_role,
@@ -464,50 +463,6 @@ def login_user(request):
         set_custom_metric('login_user_response_status', response.status_code)
         return response
 
-@require_http_methods(['GET'])
-def auto_login(request):
-    """
-    Panel backend, after submitting free trial form, should call this endpoint to auto login
-    and bypass the login form for that site.
-
-    Arguments:
-        request (HttpRequest)
-
-    Required params:
-        frontend_url, enc_data (email and password)
-
-    Example Usage:
-        GET /auto_login?enc_data=<encrypted-credentials>&frontend_url=<url>
-        Note: frontend_url should always be at the end
-    """
-    enc_data = request.GET.get('enc_data', '')
-    frontend_url = request.GET.get('frontend_url', '')
-
-    cipher = get_cipher()
-    plaintext = cipher.decrypt(enc_data.encode()).decode()
-    data = json.loads(plaintext)
-
-    user = User.objects.get(email=data['email'])
-
-    user = authenticate(
-        request=request,
-        username=user.username,
-        password=data['password'],
-    )
-    
-    _handle_successful_authentication_and_login(user, request)
-
-    # response = JsonResponse({
-    #         'success': True,
-    #         'redirect_url': frontend_url,
-    #     })
-    response = render_to_response('auto_login.html')
-    set_custom_metric('login_user_auth_failed_error', False)
-    set_custom_metric('login_user_response_status', response.status_code)
-    set_custom_metric('login_user_redirect_url', frontend_url)
-    response = set_logged_in_cookies(request, response, user)
-
-    return response
 
 # CSRF protection is not needed here because the only side effect
 # of this endpoint is to refresh the cookie-based JWT, and attempting
