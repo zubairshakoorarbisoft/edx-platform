@@ -302,6 +302,9 @@ class BadgrBackend(BadgeBackend):
         LOGGER.info('e-status_code "%s"', response.status_code)
         LOGGER.info('e-response "%s"', response)
         LOGGER.info('e-self._get_headers "%s"', self._get_headers())
+        LOGGER.info('self.badgr_slug "%s"', self.badgr_slug)
+        LOGGER.info('self.badgr_username "%s"', self.badgr_username)
+        LOGGER.info('self.badgr_password "%s"', self.badgr_password)
         if response.status_code != 200:
             self._create_badge(badge_class)
         BadgrBackend.badges.append(slug)
