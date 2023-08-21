@@ -1216,6 +1216,7 @@ def create_course_badge(sender, user, course_key, status, **kwargs):
     """
     Standard signal hook to create course badges when a certificate has been generated.
     """
+    logging.info('create_course_badge')
     course_badge_check(user, course_key)
 
 

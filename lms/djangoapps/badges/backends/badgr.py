@@ -112,6 +112,7 @@ class BadgrBackend(BadgeBackend):
         """
         Create the badge class on Badgr.
         """
+        LOGGER.info('creating bage')
         image = badge_class.image
         # We don't want to bother validating the file any further than making sure we can detect its MIME type,
         # for HTTP. The Badgr-Server should tell us if there's anything in particular wrong with it.
@@ -168,6 +169,7 @@ class BadgrBackend(BadgeBackend):
         """
         Register an assertion with the Badgr server for a particular user for a specific class.
         """
+        LOGGER.info('creating assertion')
         data = {
             "recipient": {
                 "identity": user.email,
@@ -179,12 +181,14 @@ class BadgrBackend(BadgeBackend):
                 }
             ]
         }
+        LOGGER.info('creating assertion "%s"', data)
         response = requests.post(
             self._assertion_url(badge_class.badgr_server_slug),
             headers=self._get_headers(),
             json=data,
             timeout=settings.BADGR_TIMEOUT
         )
+        LOGGER.info('assertion response "%s"', response)
         self._log_if_raised(response, data)
         assertion, __ = BadgeAssertion.objects.get_or_create(user=user, badge_class=badge_class)
         try:
@@ -302,5 +306,6 @@ class BadgrBackend(BadgeBackend):
         """
         Make sure the badge class has been created on the backend, and then award the badge class to the user.
         """
+        LOGGER.info('award backend ')
         self._ensure_badge_created(badge_class)
         return self._create_assertion(badge_class, user, evidence_url)
