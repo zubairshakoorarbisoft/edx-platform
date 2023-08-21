@@ -295,12 +295,13 @@ class BadgrBackend(BadgeBackend):
         Verify a badge has been created for this badge class, and create it if not.
         """
         slug = badge_class.badgr_server_slug
-        LOGGER.info('e-slug "%s', slug)
+        LOGGER.info('e-slug "%s"', slug)
         if slug in BadgrBackend.badges:
             return
         response = requests.get(self._badge_url(slug), headers=self._get_headers(), timeout=settings.BADGR_TIMEOUT)
-        LOGGER.info('e-status_code "%s', response.status_code)
-        LOGGER.info('e-response "%s', response)
+        LOGGER.info('e-status_code "%s"', response.status_code)
+        LOGGER.info('e-response "%s"', response)
+        LOGGER.info('e-self._get_headers "%s"', self._get_headers())
         if response.status_code != 200:
             self._create_badge(badge_class)
         BadgrBackend.badges.append(slug)
