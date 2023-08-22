@@ -2,7 +2,7 @@
 Utility functions used by the badging app.
 """
 
-
+import logging
 from django.conf import settings
 
 
@@ -33,6 +33,8 @@ def badges_enabled(site=None):
     returns a boolean indicating whether or not openbadges are enabled.
     """
     from openedx.features.edly.utils import get_value_from_django_settings_override
+    logging.info('site "%s"', site)
+    logging.info('BADGR_FLAG "%s"',get_value_from_django_settings_override('BADGR_FLAG', False, site))
     return get_value_from_django_settings_override('BADGR_FLAG', False, site)
 
 
