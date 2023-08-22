@@ -86,13 +86,31 @@ def get_completion_badge(course_id, user):
     and get the Course Completion badge.
     """
     from student.models import CourseEnrollment
+    print('qwqwwqqw',  BadgeClass.objects.all())
     badge_classes = CourseEnrollment.objects.filter(
         user=user, course_id=course_id
     ).order_by('-is_active')
+    LOGGER.warning(u'badge_classes "%s"', badge_classes)
     if not badge_classes:
         return None
     mode = badge_classes[0].mode
+    LOGGER.warning(u'mode "%s"', mode)
     course = modulestore().get_course(course_id)
+    LOGGER.warning(u'course.issue_badges "%s"', course.issue_badges)
+    print('imagq qq ', CourseCompleteImageConfiguration.image_for_mode(mode))
+    print('zxzz get ', BadgeClass.objects.get(course_id=course_id))
+    b = BadgeClass.objects.filter(course_id=course_id).values()
+    if b:
+        LOGGER.warning(u'badge_122 "%s"', b[0])
+
+    LOGGER.warning(u'course_slug(course_id, mode) "%s"', course_slug(course_id, mode))
+    LOGGER.warning(u'criteria(course_id) "%s"', criteria(course_id))
+    LOGGER.warning(u'badge_description(course, mode) "%s"', badge_description(course, mode))
+    LOGGER.warning(u'course.display_name "%s"', course.display_name)
+    LOGGER.warning(u'CourseCompleteImageConfiguration.image_for_mode(mode) "%s"',
+                   CourseCompleteImageConfiguration.image_for_mode(mode))
+
+
     if not course.issue_badges:
         return None
     return BadgeClass.get_badge_class(

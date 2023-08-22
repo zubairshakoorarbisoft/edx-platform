@@ -4,6 +4,7 @@ Database models for the badges app
 
 
 from importlib import import_module
+import logging
 
 import six
 from config_models.models import ConfigurationModel
@@ -90,13 +91,18 @@ class BadgeClass(models.Model):
         slug = slug.lower()
         issuing_component = issuing_component.lower()
         if course_id and not modulestore().get_course(course_id).issue_badges:
+            logging.error('Maybe here')
             raise CourseBadgesDisabledError("This course does not have badges enabled.")
         if not course_id:
             course_id = CourseKeyField.Empty
         try:
+            logging.error('Retrun from badge get.. "%s"',
+                          cls.objects.get(slug=slug, issuing_component=issuing_component, course_id=course_id))
+            logging.error('slug > : "%s"', slug)
             return cls.objects.get(slug=slug, issuing_component=issuing_component, course_id=course_id)
         except cls.DoesNotExist:
             if not create:
+                logging.error('Retrun from not create')
                 return None
         badge_class = cls(
             slug=slug,
