@@ -42,6 +42,9 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
   </script>
 % endif
 
+<%! main_css = "style-main-v1" %>
+<%! main_css = "css/bootstrap/lms-main.css" %>
+
 <header class="global-header ${'slim' if course else ''}">
     % if use_cookie_banner:
         ${static.renderReact(
