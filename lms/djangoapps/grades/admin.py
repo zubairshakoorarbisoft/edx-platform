@@ -12,7 +12,7 @@ from lms.djangoapps.grades.config.models import (
     CoursePersistentGradesFlag,
     PersistentGradesEnabledFlag
 )
-
+from lms.djangoapps.grades.models import PersistentCourseGrade
 
 class CoursePersistentGradesAdmin(KeyedConfigurationModelAdmin):
     """
@@ -31,3 +31,4 @@ class CoursePersistentGradesAdmin(KeyedConfigurationModelAdmin):
 admin.site.register(CoursePersistentGradesFlag, CoursePersistentGradesAdmin)
 admin.site.register(PersistentGradesEnabledFlag, ConfigurationModelAdmin)
 admin.site.register(ComputeGradesSetting, ConfigurationModelAdmin)
+admin.site.register(PersistentCourseGrade)
