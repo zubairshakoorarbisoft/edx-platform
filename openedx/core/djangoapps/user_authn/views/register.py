@@ -229,6 +229,9 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     django_login(request, new_user)
     request.session.set_expiry(0)
 
+    user = User.objects.get(id=user.id)
+    log.info(f"\n user in register - {user}")
+
     try:
         _record_is_marketable_attribute(is_marketable, new_user)
     # Don't prevent a user from registering if is_marketable is not being set.
