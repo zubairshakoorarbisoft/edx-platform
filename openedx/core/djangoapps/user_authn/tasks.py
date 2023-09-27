@@ -65,10 +65,8 @@ def send_activation_email(self, msg_string, from_address=None, site_id=None):
     dest_addr = msg.recipient.email_address
     log.info(f"\n\nmsg.recipient.lms_user_id - {msg.recipient.lms_user_id}")
     site = Site.objects.get(id=site_id) if site_id else Site.objects.get_current()
-    try: 
-        user = User.objects.get(id=msg.recipient.lms_user_id)
-    except Exception as e:
-        log.info(f"\n\najshbxjasbxjhasb - {str(e)}")
+    user = User.objects.get(id=msg.recipient.lms_user_id)
+    
 
 
     try:
