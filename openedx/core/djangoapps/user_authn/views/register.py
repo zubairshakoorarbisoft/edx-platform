@@ -217,17 +217,17 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     is_marketable = params.get('marketing_emails_opt_in') in ['true', '1']
 
     # Perform operations within a transaction that are critical to account creation
-    # with transaction.atomic():
+    with transaction.atomic():
         # first, create the account
-    (user, profile, registration) = do_create_account(form, custom_form)
+        (user, profile, registration) = do_create_account(form, custom_form)
 
-    third_party_provider, running_pipeline = _link_user_to_third_party_provider(
-        is_third_party_auth_enabled, third_party_auth_credentials_in_api, user, request, params,
-    )
+        third_party_provider, running_pipeline = _link_user_to_third_party_provider(
+            is_third_party_auth_enabled, third_party_auth_credentials_in_api, user, request, params,
+        )
 
-    new_user = authenticate_new_user(request, user.username, form.cleaned_data['password'])
-    django_login(request, new_user)
-    request.session.set_expiry(0)
+        new_user = authenticate_new_user(request, user.username, form.cleaned_data['password'])
+        django_login(request, new_user)
+        request.session.set_expiry(0)
 
     user = User.objects.get(id=user.id)
     log.info(f"\n user in register - {user}")
@@ -256,7 +256,7 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
         user, running_pipeline, third_party_provider,
     )
     log.info(f"\nskip_email - {skip_email}\n")
-    if skip_email:
+    if False:
         registration.activate()
     else:
         redirect_to, root_url = get_next_url_for_login_page(request, include_host=True)
