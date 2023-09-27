@@ -252,7 +252,7 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     skip_email = _skip_activation_email(
         user, running_pipeline, third_party_provider,
     )
-
+    log.info(f"\nskip_email - {skip_email}\n")
     if skip_email:
         registration.activate()
     else:

@@ -238,7 +238,7 @@ def compose_and_send_activation_email(user, profile, user_registration=None, red
     from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS') or (
         configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
     )
-
+    log.info(f"\n\ncompose_and_send_activation_email_management - msg - {msg}")
     try:
         send_activation_email.delay(str(msg), from_address)
     except Exception:  # pylint: disable=broad-except

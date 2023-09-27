@@ -50,6 +50,7 @@ def send_activation_email(self, msg_string, from_address=None, site_id=None):
     Sending an activation email to the user.
     """
     msg = Message.from_string(msg_string)
+    log.info(f"\n\nsend_activation_email_task - msg - {msg}")
 
     max_retries = settings.RETRY_ACTIVATION_EMAIL_MAX_ATTEMPTS
     retries = self.request.retries
@@ -58,12 +59,17 @@ def send_activation_email(self, msg_string, from_address=None, site_id=None):
         from_address = configuration_helpers.get_value('ACTIVATION_EMAIL_FROM_ADDRESS') or (
             configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL)
         )
+    log.info(f"\n\nfrom_address - {from_address}")
     msg.options['from_address'] = from_address
 
     dest_addr = msg.recipient.email_address
-
+    log.info(f"\n\nmsg.recipient.lms_user_id - {msg.recipient.lms_user_id}")
     site = Site.objects.get(id=site_id) if site_id else Site.objects.get_current()
-    user = User.objects.get(id=msg.recipient.lms_user_id)
+    try: 
+        user = User.objects.get(id=msg.recipient.lms_user_id)
+    except Exception as e:
+        log.info(f"\n\najshbxjasbxjhasb - {str(e)}")
+
 
     try:
         with emulate_http_request(site=site, user=user):
