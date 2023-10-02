@@ -197,7 +197,10 @@ class AccountCreationForm(forms.Form):
             "mailing_address": _("Your mailing address is required"),
             "goals": _("A description of your goals is required"),
             "city": _("A city is required"),
-            "country": _("A country is required")
+            "country": _("A country is required"),
+            "phone_number": _("Your phone number is required"),
+            "date_of_birth": _("Your date of birth is required"),
+            "gender": _("Your gender is required"),
         }
         for field_name, field_value in extra_fields.items():
             if field_name not in self.fields:
@@ -349,6 +352,11 @@ class RegistrationFormFactory:
             "profession",
             "specialty",
             "marketing_emails_opt_in",
+            "phone_number",
+            "national_id",
+            "linkedin_account",
+            "date_of_birth",
+            "gender",
         ]
 
         if settings.ENABLE_COPPA_COMPLIANCE and 'year_of_birth' in self.EXTRA_FIELDS:
@@ -552,6 +560,126 @@ class RegistrationFormFactory:
             required=required
         )
 
+    def _add_phone_number_field(self, form_desc, required=True):
+        """Add a phone number field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's phone number.
+        phone_number_label = _("Phone Number")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's phone number.
+        phone_number_instructions = _("This number will be used to contact you.")
+
+        form_desc.add_field(
+            "phone_number",
+            label=phone_number_label,
+            instructions=phone_number_instructions,
+            restrictions={
+                "max_length": accounts.PHONE_NUMBER_MAX_LENGTH,
+            },
+            required=required
+        )
+    
+    def _add_national_id_field(self, form_desc, required=False):
+        """Add a national id field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to False
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's national id.
+        national_id_label = _("National Id")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's national id.
+        national_id_instructions = _("This field is optional, add your national id here.")
+
+        form_desc.add_field(
+            "national_id",
+            label=national_id_label,
+            instructions=national_id_instructions,
+            restrictions={
+                "max_length": accounts.NATIONAL_ID_MAX_LENGTH,
+            },
+            required=required
+        )
+    
+    def _add_linkedin_account_field(self, form_desc, required=False):
+        """Add a linkedin account field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to False
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's linkedin account.
+        linkedin_account_label = _("LinkedIn Account")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's linkedin account.
+        linkedin_account_instructions = _("This field is optional, add your linkedin account link here.")
+
+        form_desc.add_field(
+            "linkedin_account",
+            label=linkedin_account_label,
+            instructions=linkedin_account_instructions,
+            restrictions={
+                "max_length": accounts.LINKEDIN_ACCOUNT_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_date_of_birth_field(self, form_desc, required=True):
+        """Add a date of birth field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (datefield): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's date of birth.
+        date_of_birth_label = _("Date of birth")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's date of birth.
+        date_of_birth_instructions = _("This field is required, add your date of birth here.")
+
+        form_desc.add_field(
+            "date_of_birth",
+            label=date_of_birth_label,
+            instructions=date_of_birth_instructions,
+            restrictions={},
+            required=required
+        )
+
+    def _add_gender_field(self, form_desc, required=True):
+        """Add a gender field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (datefield): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's gender.
+        gender_label = _("Date of birth")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's gender.
+        gender_instructions = _("This field is required, add your gender here.")
+
+        form_desc.add_field(
+            "gender",
+            label=gender_label,
+            instructions=gender_instructions,
+            restrictions={},
+            required=required
+        )
     def _add_username_field(self, form_desc, required=True):
         """Add a username field to a form description.
         Arguments:

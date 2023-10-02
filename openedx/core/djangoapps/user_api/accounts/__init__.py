@@ -22,6 +22,11 @@ USERNAME_MAX_LENGTH = getattr(settings, 'USERNAME_MAX_LENGTH', 30)
 EMAIL_MIN_LENGTH = 3
 EMAIL_MAX_LENGTH = 254  # Limit per RFCs is 254
 
+# sdaia related constants
+PHONE_NUMBER_MAX_LENGTH = 50
+NATIONAL_ID_MAX_LENGTH = 63
+LINKEDIN_ACCOUNT_MAX_LENGTH = 100
+
 ACCOUNT_VISIBILITY_PREF_KEY = 'account_privacy'
 
 # Indicates the user's preference that all users can view the shareable fields in their account information.

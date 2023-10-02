@@ -164,6 +164,12 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
         'REGISTRATION_EXTRA_FIELDS',
         getattr(settings, 'REGISTRATION_EXTRA_FIELDS', {})
     )
+    extra_fields["phone_number"] = "required"
+    extra_fields["national_id"] = "optional"
+    extra_fields["linkedin_account"] = "optional"
+    extra_fields["date_of_birth"] = "required"
+    extra_fields["gender"] = "required"
+
     if is_registration_api_v1(request):
         if 'confirm_email' in extra_fields:
             del extra_fields['confirm_email']
