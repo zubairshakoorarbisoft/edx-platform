@@ -169,6 +169,14 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     extra_fields["linkedin_account"] = "optional"
     extra_fields["date_of_birth"] = "required"
     extra_fields["gender"] = "required"
+    extra_fields["region"] = "required"
+    extra_fields["city"] = "required"
+    extra_fields["address_line"] = "optional"
+    extra_fields["type_of_degree"] = "required"
+    extra_fields["english_language_level"] = "optional"
+    extra_fields["employment_status"] = "required"
+    extra_fields["work_experience_level"] = "required"
+    extra_fields["job_title"] = "required"
 
     if is_registration_api_v1(request):
         if 'confirm_email' in extra_fields:

@@ -398,46 +398,6 @@ class UserStanding(models.Model):
     standing_last_changed_at = models.DateTimeField(auto_now=True)
 
 
-def default_options():
-    return {
-        "region": [
-            "Riyadh",
-            "Eastern",
-            "Asir",
-            "Jazan",
-            "Medina",
-            "Al-Qassim",
-            "Tabuk",
-            "Ha'il",
-            "Najran",
-            "Al-Jawf",
-            "Al-Bahah",
-            "Northern Borders",
-        ],
-        "type_of_degree": [
-            "Middle School",
-            "High School",
-            "Diploma",
-            "Bachelor",
-            "Master",
-            "Ph.D.",
-        ],
-        "english_language_level": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        "employement_status": [
-            "Public industry",
-            "Private industry",
-            "Job seeker",
-            "Student",
-        ],
-        "work_experience_level": [
-            "Junior level (0-2) years",
-            "Middle level (3-4) years",
-            "Senior level (5-10) years",
-            "Expert (+ 10 years)",
-        ],
-    }
-
-
 class UserProfile(models.Model):
     """This is where we store all the user demographic fields. We have a
     separate table for this rather than extending the built-in Django auth_user.
@@ -592,16 +552,61 @@ class UserProfile(models.Model):
     phone_number = models.CharField(validators=[phone_regex], blank=True, null=True, max_length=50)
 
     # fields related to sdaia - nafath
+    REGION_CHOICES = (
+        ('RD', 'Riyadh'),
+        ('ER', 'Eastern'),
+        ('AI', 'Asir'),
+        ('JA', 'Jazan'),
+        ('MN', 'Medina'),
+        ('AS', 'Al-Qassim'),
+        ('TU', 'Tabuk'),
+        ('HI', "Ha'il"),
+        ('NA', 'Najran'),
+        ('AW', 'Al-Jawf'),
+        ('AA', 'Al-Bahah'),
+        ('NB', 'Northern Borders'),
+    )
+    TYPE_OF_DEGREE_CHOICES = (
+        ('MS', 'Middle School'),
+        ('HS', 'High School'),
+        ('DM', 'Diploma'),
+        ('BS', 'Bachelor'),
+        ('MR', 'Master'),
+        ('PH', 'Ph.D.'),
+    )
+    EMPLOYMENT_STATUS_CHOICES = (
+        ('PU', 'Public industry'),
+        ('PR', 'Private industry'),
+        ('JS', 'Job seeker'),
+        ('ST', 'Student'),
+    )
+    WORK_EXPERIENCE_LEVEL_CHOICES = (
+        ('JL', 'Junior level (0-2) years'),
+        ('ML', 'Middle level (3-4) years'),
+        ('SL', 'Senior level (5-10) years'),
+        ('EL', 'Expert (+ 10 years)'),
+    )
+    ENGLISH_LANGUAGE_LEVEL_CHOICES = (
+        ('0', '0'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
+        ('6', '6'),
+        ('7', '7'),
+        ('8', '8'),
+        ('9', '9'),
+    )
     national_id = models.CharField(blank=True, null=True, max_length=63)
     date_of_birth = models.DateField(default=None, null=True, blank=True)
-    region = models.CharField(blank=True, null=True, max_length=63)
-    address_line = models.CharField(blank=True, null=True, max_length=255)
-    type_of_degree = models.CharField(blank=True, null=True, max_length=63)
-    english_language_level = models.CharField(blank=True, null=True, max_length=3)
-    employement_status = models.CharField(blank=True, null=True, max_length=63)
-    work_experience_level = models.CharField(blank=True, null=True, max_length=63)
+    region = models.CharField(blank=True, null=True, max_length=3, choices=REGION_CHOICES)
+    address_line = models.TextField(blank=True, null=True)
+    type_of_degree = models.CharField(blank=True, null=True, max_length=3, choices=TYPE_OF_DEGREE_CHOICES)
+    english_language_level = models.CharField(blank=True, null=True, max_length=2, choices=ENGLISH_LANGUAGE_LEVEL_CHOICES)
+    employment_status = models.CharField(blank=True, null=True, max_length=3, choices=EMPLOYMENT_STATUS_CHOICES)
+    work_experience_level = models.CharField(blank=True, null=True, max_length=3, choices=WORK_EXPERIENCE_LEVEL_CHOICES)
     job_title = models.CharField(blank=True, null=True, max_length=63)
-    signup_form_options = models.JSONField(default=default_options())
 
 
     @property

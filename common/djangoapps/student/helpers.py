@@ -741,7 +741,9 @@ def do_create_account(form, custom_form=None):
 
     profile_fields = [
         "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
-        "year_of_birth", "national_id", "phone_number", "date_of_birth", "gender",
+        "year_of_birth", "national_id", "phone_number", "date_of_birth", "region", "address_line",
+        "type_of_degree", "english_language_level", "employment_status", "work_experience_level", 
+        "job_title",
     ]
     profile = UserProfile(
         user=user,
@@ -757,7 +759,6 @@ def do_create_account(form, custom_form=None):
         raise
     
     try:
-        social_link_fields = ["platform", "social_link"]
         linkedin_social_link = SocialLink(user_profile=profile, platform="linkedin", social_link=form.cleaned_data.get("linkedin_account"))
         linkedin_social_link.save()
     except Exception:
