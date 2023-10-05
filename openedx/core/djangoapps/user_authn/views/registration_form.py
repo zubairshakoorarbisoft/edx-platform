@@ -358,7 +358,6 @@ class RegistrationFormFactory:
             "date_of_birth",
             "region",
             "address_line",
-            "type_of_degree",
             "english_language_level",
             "employment_status",
             "work_experience_level",
@@ -662,31 +661,6 @@ class RegistrationFormFactory:
             instructions=employment_status_instructions,
             restrictions={
                 "max_length": accounts.EMPLOYMENT_STATUS_MAX_LENGTH,
-            },
-            required=required
-        )
-
-    def _add_type_of_degree_field(self, form_desc, required=True):
-        """Add a Type of degree field to a form description.
-        Arguments:
-            form_desc: A form description
-        Keyword Arguments:
-            required (bool): Whether this field is required; defaults to True
-        """
-        # Translators: This label appears above a field on the registration form
-        # meant to hold the user's Type of degree.
-        type_of_degree_label = _("Type of degree")
-
-        # Translators: These instructions appear on the registration form, immediately
-        # below a field meant to hold the user's Type of degree.
-        type_of_degree_instructions = _("This shows your aquired Type of degree.")
-
-        form_desc.add_field(
-            "type_of_degree",
-            label=type_of_degree_label,
-            instructions=type_of_degree_instructions,
-            restrictions={
-                "max_length": accounts.TYPE_OF_DEGREE_MAX_LENGTH,
             },
             required=required
         )

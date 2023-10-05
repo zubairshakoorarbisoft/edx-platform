@@ -468,20 +468,15 @@ class UserProfile(models.Model):
     # ('p_se', 'Doctorate in science or engineering'),
     # ('p_oth', 'Doctorate in another field'),
     LEVEL_OF_EDUCATION_CHOICES = (
-        ('p', gettext_noop('Doctorate')),
-        ('m', gettext_noop("Master's or professional degree")),
-        ('b', gettext_noop("Bachelor's degree")),
-        ('a', gettext_noop("Associate degree")),
-        ('hs', gettext_noop("Secondary/high school")),
-        ('jhs', gettext_noop("Junior secondary/junior high/middle school")),
-        ('el', gettext_noop("Elementary/primary school")),
-        # Translators: 'None' refers to the student's level of education
-        ('none', gettext_noop("No formal education")),
-        # Translators: 'Other' refers to the student's level of education
-        ('other', gettext_noop("Other education"))
+        ('MS', 'Middle School'),
+        ('HS', 'High School'),
+        ('DM', 'Diploma'),
+        ('BS', 'Bachelor'),
+        ('MR', 'Master'),
+        ('PH', 'Ph.D.'),
     )
     level_of_education = models.CharField(
-        blank=True, null=True, max_length=6, db_index=True,
+        blank=True, null=True, max_length=3, db_index=True,
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
     mailing_address = models.TextField(blank=True, null=True)
@@ -566,14 +561,6 @@ class UserProfile(models.Model):
         ('AA', 'Al-Bahah'),
         ('NB', 'Northern Borders'),
     )
-    TYPE_OF_DEGREE_CHOICES = (
-        ('MS', 'Middle School'),
-        ('HS', 'High School'),
-        ('DM', 'Diploma'),
-        ('BS', 'Bachelor'),
-        ('MR', 'Master'),
-        ('PH', 'Ph.D.'),
-    )
     EMPLOYMENT_STATUS_CHOICES = (
         ('PU', 'Public industry'),
         ('PR', 'Private industry'),
@@ -602,7 +589,6 @@ class UserProfile(models.Model):
     date_of_birth = models.DateField(default=None, null=True, blank=True)
     region = models.CharField(blank=True, null=True, max_length=3, choices=REGION_CHOICES)
     address_line = models.TextField(blank=True, null=True)
-    type_of_degree = models.CharField(blank=True, null=True, max_length=3, choices=TYPE_OF_DEGREE_CHOICES)
     english_language_level = models.CharField(blank=True, null=True, max_length=2, choices=ENGLISH_LANGUAGE_LEVEL_CHOICES)
     employment_status = models.CharField(blank=True, null=True, max_length=3, choices=EMPLOYMENT_STATUS_CHOICES)
     work_experience_level = models.CharField(blank=True, null=True, max_length=3, choices=WORK_EXPERIENCE_LEVEL_CHOICES)
