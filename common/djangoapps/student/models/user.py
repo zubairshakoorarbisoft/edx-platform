@@ -584,6 +584,7 @@ class UserProfile(models.Model):
         ('7', '7'),
         ('8', '8'),
         ('9', '9'),
+        ('10', '10'),
     )
     national_id = models.CharField(blank=True, null=True, max_length=63)
     date_of_birth = models.DateField(default=None, null=True, blank=True)
