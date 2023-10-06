@@ -168,6 +168,7 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     extra_fields["national_id"] = "optional"
     extra_fields["linkedin_account"] = "optional"
     extra_fields["date_of_birth"] = "required"
+    extra_fields["year_of_birth"] = "required"
     extra_fields["gender"] = "required"
     extra_fields["region"] = "required"
     extra_fields["city"] = "required"
