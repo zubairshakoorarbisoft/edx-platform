@@ -178,6 +178,7 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     extra_fields["employment_status"] = "required"
     extra_fields["work_experience_level"] = "required"
     extra_fields["job_title"] = "required"
+    extra_fields["terms_and_conditions"] = "required"
 
     if is_registration_api_v1(request):
         if 'confirm_email' in extra_fields:
@@ -590,6 +591,7 @@ class RegistrationView(APIView):
             )
 
         data = request.POST.copy()
+        data["terms_and_conditions"] = True if data.get("terms_and_conditions")=="true" else False
         self._handle_terms_of_service(data)
 
         try:

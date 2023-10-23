@@ -594,6 +594,7 @@ class UserProfile(models.Model):
     employment_status = models.CharField(blank=True, null=True, max_length=3, choices=EMPLOYMENT_STATUS_CHOICES)
     work_experience_level = models.CharField(blank=True, null=True, max_length=3, choices=WORK_EXPERIENCE_LEVEL_CHOICES)
     job_title = models.CharField(blank=True, null=True, max_length=63)
+    terms_and_conditions = models.BooleanField(default=True)
 
 
     @property

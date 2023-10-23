@@ -742,7 +742,7 @@ def do_create_account(form, custom_form=None):
     profile_fields = [
         "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
         "year_of_birth", "national_id", "phone_number", "date_of_birth", "region", "address_line",
-        "english_language_level", "employment_status", "work_experience_level", "job_title",
+        "english_language_level", "employment_status", "work_experience_level", "job_title", "terms_and_conditions"
     ]
     profile = UserProfile(
         user=user,
