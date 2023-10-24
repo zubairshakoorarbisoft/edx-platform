@@ -129,6 +129,8 @@ def _get_user_by_email_or_username(request, api_version):
     login_fields = ['email', 'password']
     if is_api_v2:
         login_fields = ['email_or_username', 'password']
+    if request.POST.get('is_nafath_user', False):
+        login_fields.remove('password')
 
     if any(f not in request.POST.keys() for f in login_fields):
         raise AuthFailedError(_('There was an error receiving your login information. Please email us.'))
@@ -239,6 +241,11 @@ def _authenticate_first_party(request, unauthenticated_user, third_party_auth_re
     if not third_party_auth_requested:
         _check_user_auth_flow(request.site, unauthenticated_user)
 
+    if request.POST.get('is_nafath_user', False):
+        return authenticate(
+            username=username,
+            request=request
+        )
     password = normalize_password(request.POST['password'])
     return authenticate(
         username=username,

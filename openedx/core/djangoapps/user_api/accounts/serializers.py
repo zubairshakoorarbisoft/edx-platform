@@ -171,6 +171,15 @@ class UserReadOnlySerializer(serializers.Serializer):  # lint-amnesty, pylint: d
             "phone_number": None,
             "pending_name_change": None,
             "verified_name": None,
+            "national_id":None,
+            "date_of_birth": None,
+            "city": None,
+            "region": None,
+            "address_line": None,
+            "english_language_level": None,
+            "employment_status": None,
+            "work_experience_level": None,
+            "job_title": None,
         }
 
         if user_profile:
@@ -200,6 +209,15 @@ class UserReadOnlySerializer(serializers.Serializer):  # lint-amnesty, pylint: d
                     ).data,
                     "extended_profile": get_extended_profile(user_profile),
                     "phone_number": user_profile.phone_number,
+                    "national_id": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.national_id),
+                    "date_of_birth": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.date_of_birth),
+                    "city": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.city),
+                    "region": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.region),
+                    "address_line": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.address_line),
+                    "english_language_level": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.english_language_level),
+                    "employment_status": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.employment_status),
+                    "work_experience_level": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.work_experience_level),
+                    "job_title": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.job_title),
                 }
             )
 
@@ -289,7 +307,8 @@ class AccountLegacyProfileSerializer(serializers.HyperlinkedModelSerializer, Rea
         fields = (
             "name", "gender", "goals", "year_of_birth", "level_of_education", "country", "state", "social_links",
             "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies",
-            "phone_number", "city"
+            "phone_number", "city", "date_of_birth", "region", "city", "address_line", "english_language_level",
+            "employment_status", "work_experience_level", "job_title"
         )
         # Currently no read-only field, but keep this so view code doesn't need to know.
         read_only_fields = ()

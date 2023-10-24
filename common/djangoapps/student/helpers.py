@@ -30,6 +30,7 @@ from common.djangoapps.student.models import (
     Registration,
     UserAttribute,
     UserProfile,
+    SocialLink,
     email_exists_or_retired,
     unique_id_for_user,
     username_exists_or_retired
@@ -740,7 +741,8 @@ def do_create_account(form, custom_form=None):
 
     profile_fields = [
         "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
-        "year_of_birth"
+        "year_of_birth", "national_id", "phone_number", "date_of_birth", "region", "address_line",
+        "english_language_level", "employment_status", "work_experience_level", "job_title", "terms_and_conditions"
     ]
     profile = UserProfile(
         user=user,
@@ -754,6 +756,12 @@ def do_create_account(form, custom_form=None):
     except Exception:
         log.exception(f"UserProfile creation failed for user {user.id}.")
         raise
+    
+    try:
+        linkedin_social_link = SocialLink(user_profile=profile, platform="linkedin", social_link=form.cleaned_data.get("linkedin_account"))
+        linkedin_social_link.save()
+    except Exception:
+        log.exception(f"SocialLink creation failed for user {user.id}.")
 
     return user, profile, registration
 

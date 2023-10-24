@@ -4141,11 +4141,17 @@ ACCOUNT_VISIBILITY_CONFIGURATION["bulk_shareable_fields"] = (
         'bio',
         'course_certificates',
         'country',
+        'city',
+        'region',
         'date_joined',
         'language_proficiencies',
-        "level_of_education",
+        'level_of_education',
         'social_links',
         'time_zone',
+        'english_language_level',
+        'employment_status',
+        'work_experience_level',
+        'job_title',
 
         # Not an actual field, but used to signal whether badges should be public.
         'accomplishments_shared',
@@ -4179,6 +4185,9 @@ ACCOUNT_VISIBILITY_CONFIGURATION["admin_fields"] = (
         "phone_number",
         "activation_key",
         "pending_name_change",
+        "national_id",
+        "date_of_birth",
+        "address_line",
     ]
 )
 

@@ -468,20 +468,15 @@ class UserProfile(models.Model):
     # ('p_se', 'Doctorate in science or engineering'),
     # ('p_oth', 'Doctorate in another field'),
     LEVEL_OF_EDUCATION_CHOICES = (
-        ('p', gettext_noop('Doctorate')),
-        ('m', gettext_noop("Master's or professional degree")),
-        ('b', gettext_noop("Bachelor's degree")),
-        ('a', gettext_noop("Associate degree")),
-        ('hs', gettext_noop("Secondary/high school")),
-        ('jhs', gettext_noop("Junior secondary/junior high/middle school")),
-        ('el', gettext_noop("Elementary/primary school")),
-        # Translators: 'None' refers to the student's level of education
-        ('none', gettext_noop("No formal education")),
-        # Translators: 'Other' refers to the student's level of education
-        ('other', gettext_noop("Other education"))
+        ('MS', 'Middle School'),
+        ('HS', 'High School'),
+        ('DM', 'Diploma'),
+        ('BS', 'Bachelor'),
+        ('MR', 'Master'),
+        ('PH', 'Ph.D.'),
     )
     level_of_education = models.CharField(
-        blank=True, null=True, max_length=6, db_index=True,
+        blank=True, null=True, max_length=3, db_index=True,
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
     mailing_address = models.TextField(blank=True, null=True)
@@ -550,6 +545,57 @@ class UserProfile(models.Model):
     profile_image_uploaded_at = models.DateTimeField(null=True, blank=True)
     phone_regex = RegexValidator(regex=r'^\+?1?\d*$', message="Phone number can only contain numbers.")
     phone_number = models.CharField(validators=[phone_regex], blank=True, null=True, max_length=50)
+
+    # fields related to sdaia - nafath
+    REGION_CHOICES = (
+        ('RD', 'Riyadh'),
+        ('ER', 'Eastern'),
+        ('AI', 'Asir'),
+        ('JA', 'Jazan'),
+        ('MN', 'Medina'),
+        ('AS', 'Al-Qassim'),
+        ('TU', 'Tabuk'),
+        ('HI', "Ha'il"),
+        ('NA', 'Najran'),
+        ('AW', 'Al-Jawf'),
+        ('AA', 'Al-Bahah'),
+        ('NB', 'Northern Borders'),
+    )
+    EMPLOYMENT_STATUS_CHOICES = (
+        ('PU', 'Public industry'),
+        ('PR', 'Private industry'),
+        ('JS', 'Job seeker'),
+        ('ST', 'Student'),
+    )
+    WORK_EXPERIENCE_LEVEL_CHOICES = (
+        ('JL', 'Junior level (0-2) years'),
+        ('ML', 'Middle level (3-4) years'),
+        ('SL', 'Senior level (5-10) years'),
+        ('EL', 'Expert (+ 10 years)'),
+    )
+    ENGLISH_LANGUAGE_LEVEL_CHOICES = (
+        ('0', '0'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
+        ('6', '6'),
+        ('7', '7'),
+        ('8', '8'),
+        ('9', '9'),
+        ('10', '10'),
+    )
+    national_id = models.CharField(blank=True, null=True, max_length=63)
+    date_of_birth = models.DateField(default=None, null=True, blank=True)
+    region = models.CharField(blank=True, null=True, max_length=3, choices=REGION_CHOICES)
+    address_line = models.TextField(blank=True, null=True)
+    english_language_level = models.CharField(blank=True, null=True, max_length=2, choices=ENGLISH_LANGUAGE_LEVEL_CHOICES)
+    employment_status = models.CharField(blank=True, null=True, max_length=3, choices=EMPLOYMENT_STATUS_CHOICES)
+    work_experience_level = models.CharField(blank=True, null=True, max_length=3, choices=WORK_EXPERIENCE_LEVEL_CHOICES)
+    job_title = models.CharField(blank=True, null=True, max_length=63)
+    terms_and_conditions = models.BooleanField(default=True)
+
 
     @property
     def has_profile_image(self):

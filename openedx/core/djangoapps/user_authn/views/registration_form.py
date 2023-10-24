@@ -197,7 +197,10 @@ class AccountCreationForm(forms.Form):
             "mailing_address": _("Your mailing address is required"),
             "goals": _("A description of your goals is required"),
             "city": _("A city is required"),
-            "country": _("A country is required")
+            "country": _("A country is required"),
+            "phone_number": _("Your phone number is required"),
+            "date_of_birth": _("Your date of birth is required"),
+            "gender": _("Your gender is required"),
         }
         for field_name, field_value in extra_fields.items():
             if field_name not in self.fields:
@@ -349,6 +352,16 @@ class RegistrationFormFactory:
             "profession",
             "specialty",
             "marketing_emails_opt_in",
+            "phone_number",
+            "national_id",
+            "linkedin_account",
+            "date_of_birth",
+            "region",
+            "address_line",
+            "english_language_level",
+            "employment_status",
+            "work_experience_level",
+            "job_title",
         ]
 
         if settings.ENABLE_COPPA_COMPLIANCE and 'year_of_birth' in self.EXTRA_FIELDS:
@@ -548,6 +561,252 @@ class RegistrationFormFactory:
             instructions=name_instructions,
             restrictions={
                 "max_length": accounts.NAME_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_phone_number_field(self, form_desc, required=True):
+        """Add a phone number field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's phone number.
+        phone_number_label = _("Phone Number")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's phone number.
+        phone_number_instructions = _("This number will be used to contact you.")
+
+        form_desc.add_field(
+            "phone_number",
+            label=phone_number_label,
+            instructions=phone_number_instructions,
+            restrictions={
+                "max_length": accounts.PHONE_NUMBER_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_job_title_field(self, form_desc, required=True):
+        """Add a job title field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's job title.
+        job_title_label = _("Job Title")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's job title.
+        job_title_instructions = _("This is the title of your current Job")
+
+        form_desc.add_field(
+            "job_title",
+            label=job_title_label,
+            instructions=job_title_instructions,
+            restrictions={
+                "max_length": accounts.JOB_TITLE_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_work_experience_level_field(self, form_desc, required=True):
+        """Add a work experience level field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's work experience level.
+        work_experience_level_label = _("Work Experience Level")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's work experience level.
+        work_experience_level_instructions = _("This show you work experience level")
+
+        form_desc.add_field(
+            "work_experience_level",
+            label=work_experience_level_label,
+            instructions=work_experience_level_instructions,
+            restrictions={
+                "max_length": accounts.WORK_EXPERIENCE_LEVEL_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_employment_status_field(self, form_desc, required=True):
+        """Add a employment status field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's employment status.
+        employment_status_label = _("Employment Status")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's employment status.
+        employment_status_instructions = _("This shows your employment status")
+
+        form_desc.add_field(
+            "employment_status",
+            label=employment_status_label,
+            instructions=employment_status_instructions,
+            restrictions={
+                "max_length": accounts.EMPLOYMENT_STATUS_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_national_id_field(self, form_desc, required=False):
+        """Add a national id field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to False
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's national id.
+        national_id_label = _("National Id")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's national id.
+        national_id_instructions = _("This field is optional, add your national id here.")
+
+        form_desc.add_field(
+            "national_id",
+            label=national_id_label,
+            instructions=national_id_instructions,
+            restrictions={
+                "max_length": accounts.NATIONAL_ID_MAX_LENGTH,
+            },
+            required=required
+        )
+    
+    def _add_linkedin_account_field(self, form_desc, required=False):
+        """Add a linkedin account field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to False
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's linkedin account.
+        linkedin_account_label = _("LinkedIn Account")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's linkedin account.
+        linkedin_account_instructions = _("This field is optional, add your linkedin account link here.")
+
+        form_desc.add_field(
+            "linkedin_account",
+            label=linkedin_account_label,
+            instructions=linkedin_account_instructions,
+            restrictions={
+                "max_length": accounts.LINKEDIN_ACCOUNT_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_english_language_level_field(self, form_desc, required=False):
+        """Add a english language level field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to False
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's english language level.
+        english_language_level_label = _("English Language Level")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's english language level.
+        english_language_level_instructions = _("This field is optional, select your english language level link here.")
+
+        form_desc.add_field(
+            "english_language_level",
+            label=english_language_level_label,
+            instructions=english_language_level_instructions,
+            restrictions={
+                "max_length": accounts.ENGLISH_LANGUAGE_LEVEL_MAX_LENGTH,
+            },
+            required=required
+        )
+
+    def _add_address_line_field(self, form_desc, required=False):
+        """Add a address line field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to False
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's address line.
+        address_line_label = _("Address Line")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's address line.
+        address_line_instructions = _("This field is optional, add your address line here.")
+
+        form_desc.add_field(
+            "address_line",
+            label=address_line_label,
+            instructions=address_line_instructions,
+            restrictions={},
+            required=required
+        )
+
+    def _add_date_of_birth_field(self, form_desc, required=True):
+        """Add a date of birth field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (datefield): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's date of birth.
+        date_of_birth_label = _("Date of birth")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's date of birth.
+        date_of_birth_instructions = _("This field is required, add your date of birth here.")
+
+        form_desc.add_field(
+            "date_of_birth",
+            label=date_of_birth_label,
+            instructions=date_of_birth_instructions,
+            restrictions={},
+            required=required
+        )
+
+    def _add_region_field(self, form_desc, required=True):
+        """Add a region field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (datefield): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's region.
+        region_label = _("Date of birth")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's region.
+        region_instructions = _("This field is required, add your region here.")
+
+        form_desc.add_field(
+            "region",
+            label=region_label,
+            instructions=region_instructions,
+            restrictions={
+                "max_length": accounts.REGION_MAX_LENGTH,
             },
             required=required
         )
