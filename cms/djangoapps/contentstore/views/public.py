@@ -9,6 +9,7 @@ from django.http.response import Http404
 from django.shortcuts import redirect
 
 from common.djangoapps.edxmako.shortcuts import render_to_response
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 
 from ..config.waffle import ENABLE_ACCESSIBILITY_POLICY_PAGE
 
@@ -23,8 +24,11 @@ def register_redirect_to_lms(request):
     This view redirects to the LMS register view. It is used to temporarily keep the old
     Studio signup url alive.
     """
+    frontend_register_url = configuration_helpers.get_value(
+        "FRONTEND_REGISTER_URL", settings.FRONTEND_REGISTER_URL
+    )
     register_url = '{register_url}{params}'.format(
-        register_url=settings.FRONTEND_REGISTER_URL,
+        register_url=frontend_register_url,
         params=_build_next_param(request),
     )
     return redirect(register_url, permanent=True)
@@ -35,8 +39,11 @@ def login_redirect_to_lms(request):
     This view redirects to the LMS login view. It is used for Django's LOGIN_URL
     setting, which is where unauthenticated requests to protected endpoints are redirected.
     """
+    frontend_login_url = configuration_helpers.get_value(
+        "FRONTEND_LOGIN_URL", settings.FRONTEND_LOGIN_URL
+    )
     login_url = '{login_url}{params}'.format(
-        login_url=settings.FRONTEND_LOGIN_URL,
+        login_url=frontend_login_url,
         params=_build_next_param(request),
     )
     return redirect(login_url)
