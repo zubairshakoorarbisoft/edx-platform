@@ -110,7 +110,10 @@ def get_program_marketing_url(programs_config, mobile_only=False):
     if mobile_only:
         marketing_url = 'edxapp://course?programs'
     else:
-        marketing_url = urljoin(settings.MKTG_URLS.get('ROOT'), programs_config.marketing_path).rstrip('/')
+        mktg_urls = configuration_helpers.get_value(
+            "MKTG_URLS", settings.MKTG_URLS
+        )
+        marketing_url = urljoin(mktg_urls.get('ROOT'), programs_config.marketing_path).rstrip('/')
 
     return marketing_url
 
