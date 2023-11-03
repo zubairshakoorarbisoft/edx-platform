@@ -579,6 +579,10 @@ def course_listing(request):
     active_courses, archived_courses = _process_courses_list(courses_iter, in_process_course_actions, split_archived)
     in_process_course_actions = [format_in_process_course_view(uca) for uca in in_process_course_actions]
 
+    library_authoring_mfe_url = configuration_helpers.get_value(
+        'LIBRARY_AUTHORING_MICROFRONTEND_URL', LIBRARY_AUTHORING_MICROFRONTEND_URL
+    )
+    
     return render_to_response('index.html', {
         'courses': active_courses,
         'split_studio_home': split_library_view_on_dashboard(),
@@ -586,7 +590,7 @@ def course_listing(request):
         'in_process_course_actions': in_process_course_actions,
         'libraries_enabled': LIBRARIES_ENABLED,
         'redirect_to_library_authoring_mfe': should_redirect_to_library_authoring_mfe(),
-        'library_authoring_mfe_url': LIBRARY_AUTHORING_MICROFRONTEND_URL,
+        'library_authoring_mfe_url': library_authoring_mfe_url,
         'libraries': [_format_library_for_view(lib, request) for lib in libraries],
         'show_new_library_button': user_can_create_library(user) and not should_redirect_to_library_authoring_mfe(),
         'user': user,
