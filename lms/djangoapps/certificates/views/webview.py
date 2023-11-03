@@ -249,7 +249,7 @@ def _update_course_context(request, context, course, platform_name, course_overv
     Updates context dictionary with course info.
     """
     effort = course_overview and course_overview.effort or '8'
-    context['course_duration'] = convert_number_to_arabic(effort)
+    context['course_duration'] = convert_date_to_arabic(effort)
     context['full_course_image_url'] = request.build_absolute_uri(course_image_url(course))
     course_title_from_cert = context['certificate_data'].get('course_title', '')
     accomplishment_copy_course_name = course_title_from_cert if course_title_from_cert else course.display_name
