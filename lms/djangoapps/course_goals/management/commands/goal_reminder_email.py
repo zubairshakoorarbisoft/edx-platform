@@ -55,7 +55,10 @@ def send_ace_message(goal):
 
     course_home_url = get_learning_mfe_home_url(course_key=goal.course_key, url_fragment='home')
 
-    goals_unsubscribe_url = f'{settings.LEARNING_MICROFRONTEND_URL}/goal-unsubscribe/{goal.unsubscribe_token}'
+    learning_mfe_url = configuration_helpers.get_value(
+        "LEARNING_MICROFRONTEND_URL", settings.LEARNING_MICROFRONTEND_URL
+    )
+    goals_unsubscribe_url = f'{learning_mfe_url}/goal-unsubscribe/{goal.unsubscribe_token}'
 
     language = get_user_preference(user, LANGUAGE_KEY)
 

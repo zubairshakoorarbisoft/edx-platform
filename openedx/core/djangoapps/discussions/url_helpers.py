@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 
 
 def _get_url_with_view_query_params(path: str, view: Optional[str] = None) -> str:
@@ -20,9 +21,12 @@ def _get_url_with_view_query_params(path: str, view: Optional[str] = None) -> st
         (str) URL link for MFE
 
     """
-    if settings.DISCUSSIONS_MICROFRONTEND_URL is None:
+    discussion_mfe_url = configuration_helpers.get_value(
+        "DISCUSSIONS_MICROFRONTEND_URL", settings.DISCUSSIONS_MICROFRONTEND_URL
+    )
+    if discussion_mfe_url is None:
         return ''
-    url = f"{settings.DISCUSSIONS_MICROFRONTEND_URL}/{path}"
+    url = f"{discussion_mfe_url}/{path}"
 
     query_params = {}
     if view == "in_context":

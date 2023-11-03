@@ -219,7 +219,10 @@ def login_and_registration_form(request, initial_mode="login"):
             initial_mode,
             '?' + query_params if query_params else ''
         )
-        return redirect(settings.AUTHN_MICROFRONTEND_URL + url_path)
+        authn_mfe_url = configuration_helpers.get_value(
+            "AUTHN_MICROFRONTEND_URL", settings.AUTHN_MICROFRONTEND_URL
+        )
+        return redirect(authn_mfe_url + url_path)
 
     # Account activation message
     account_activation_messages = [

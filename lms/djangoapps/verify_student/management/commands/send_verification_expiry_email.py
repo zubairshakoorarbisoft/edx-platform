@@ -189,9 +189,12 @@ class Command(BaseCommand):
 
         site = Site.objects.get_current()
         message_context = get_base_template_context(site)
+        account_mfe_url = configuration_helpers.get_value(
+            "ACCOUNT_MICROFRONTEND_URL", settings.ACCOUNT_MICROFRONTEND_URL
+        )
         message_context.update({
             'platform_name': settings.PLATFORM_NAME,
-            'lms_verification_link': f'{settings.ACCOUNT_MICROFRONTEND_URL}/id-verification',
+            'lms_verification_link': f'{account_mfe_url}/id-verification',
             'help_center_link': settings.ID_VERIFICATION_SUPPORT_LINK
         })
 
