@@ -35,6 +35,7 @@ from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.crawlers.models import CrawlersConfig
 from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
 from openedx.core.djangolib.markup import HTML, Text
@@ -448,6 +449,16 @@ class CoursewareIndex(View):
             'disable_accordion': not DISABLE_COURSE_OUTLINE_PAGE_FLAG.is_enabled(self.course.id),
             'show_search': show_search,
         }
+
+        site_config = SiteConfiguration.objects.filter(site=request.site).first()
+        if site_config:
+            bot_settings = site_config.site_values.get('DJANGO_SETTINGS_OVERRIDE').get("CHATLY_BOTS", '')
+            if bot_settings:
+                for item in bot_settings:
+                    if item['course_key'] == self.course_key:
+                        courseware_context['bot_key'] = item['bot_key']
+                        courseware_context['is_active']= item.get('is_active', False)
+
         courseware_context.update(
             get_experiment_user_metadata_context(
                 self.course,
