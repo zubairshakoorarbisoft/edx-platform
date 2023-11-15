@@ -5,7 +5,7 @@
 course_mode_class = course_mode if course_mode else ''
 %>
 
-<main class="accomplishment accomplishment-main">
+<main class="accomplishment accomplishment-main" id="accomplishment_main_print">
 
     <div class="wrapper-accomplishment-rendering">
         <div class="accomplishment-rendering">
@@ -117,3 +117,13 @@ course_mode_class = course_mode if course_mode else ''
     </div>
 
 </main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript">
+    document.getElementById("download_pdf").addEventListener("click", downloadPdf);
+    function downloadPdf(event) {
+       event.preventDefault();
+       let element = document.getElementById('accomplishment_main_print');
+       html2pdf().from(element).save('${document_title}');
+    }
+</script>
