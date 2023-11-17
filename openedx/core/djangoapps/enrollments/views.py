@@ -29,6 +29,10 @@ from common.djangoapps.student.auth import user_has_role
 from common.djangoapps.student.models import CourseEnrollment, User
 from common.djangoapps.student.roles import CourseStaffRole, GlobalStaff
 from common.djangoapps.util.disable_rate_limit import can_disable_rate_limit
+from lms.djangoapps.courseware.access import has_access
+from lms.djangoapps.courseware.courses import get_course_blocks_completion_summary, get_course_with_access
+from lms.djangoapps.grades.api import CourseGradeFactory
+from openedx.core.djangoapps.content.block_structure.api import get_block_structure_manager
 from openedx.core.djangoapps.cors_csrf.authentication import SessionAuthenticationCrossDomainCsrf
 from openedx.core.djangoapps.cors_csrf.decorators import ensure_csrf_cookie_cross_domain
 from openedx.core.djangoapps.course_groups.cohorts import CourseUserGroup, add_user_to_cohort, get_cohort_by_name
@@ -40,8 +44,8 @@ from openedx.core.djangoapps.enrollments.errors import (
     CourseModeNotFoundError
 )
 from openedx.core.djangoapps.enrollments.forms import CourseEnrollmentsApiListForm
-from openedx.core.djangoapps.enrollments.paginators import CourseEnrollmentsApiListPagination
-from openedx.core.djangoapps.enrollments.serializers import CourseEnrollmentsApiListSerializer
+from openedx.core.djangoapps.enrollments.paginators import CourseEnrollmentsApiListPagination, UsersCourseEnrollmentsApiPagination
+from openedx.core.djangoapps.enrollments.serializers import CourseEnrollmentsApiListSerializer, UsersCourseEnrollmentSerializer
 from openedx.core.djangoapps.user_api.accounts.permissions import CanRetireUser
 from openedx.core.djangoapps.user_api.models import UserRetirementStatus
 from openedx.core.djangoapps.user_api.preferences.api import update_email_opt_in
@@ -987,3 +991,181 @@ class CourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
         if usernames:
             queryset = queryset.filter(user__username__in=usernames)
         return queryset
+
+
+@can_disable_rate_limit
+class UsersCourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
+    """
+        **Use Cases**
+
+            Get a list of all course enrollments, optionally filtered by a course ID or list of usernames.
+
+        **Example Requests**
+
+            GET /api/enrollment/v1/enrollments
+
+            GET /api/enrollment/v1/enrollments?course_id={course_id}
+
+            GET /api/enrollment/v1/enrollments?username={username},{username},{username}
+
+            GET /api/enrollment/v1/enrollments?course_id={course_id}&username={username}
+
+        **Query Parameters for GET**
+
+            * course_id: Filters the result to course enrollments for the course corresponding to the
+              given course ID. The value must be URL encoded. Optional.
+
+            * username: List of comma-separated usernames. Filters the result to the course enrollments
+              of the given users. Optional.
+
+            * page_size: Number of results to return per page. Optional.
+
+            * page: Page number to retrieve. Optional.
+
+        **Response Values**
+
+            If the request for information about the course enrollments is successful, an HTTP 200 "OK" response
+            is returned.
+
+            The HTTP 200 response has the following values.
+
+            * results: A list of the course enrollments matching the request.
+
+                * completion_summary: Object containing unit completion counts with the following fields:
+                    complete_count: (float) number of complete units
+                    incomplete_count: (float) number of incomplete units
+                    locked_count: (float) number of units where contains_gated_content is True
+
+                * course_grade: Object containing the following fields:
+                    is_passing: (bool) whether the user's grade is above the passing grade cutoff
+                    letter_grade: (str) the user's letter grade based on the set grade range.
+                                        If user is passing, value may be 'A', 'B', 'C', 'D', 'Pass', otherwise none
+                    percent: (float) the user's total graded percent in the course
+
+
+                * progress: User's Progress of course
+
+                * enrollment_mode: (str) a str representing the enrollment the user has ('audit', 'verified', ...)
+
+                * user_has_passing_grade: (bool) boolean on if the user has a passing grade in the course
+
+                * created: Date and time when the course enrollment was created.
+
+                * mode: Mode for the course enrollment.
+
+                * is_active: Whether the course enrollment is active or not.
+
+                * user: Username of the user in the course enrollment.
+
+                * course_id: Course ID of the course in the course enrollment.
+
+            * next: The URL to the next page of results, or null if this is the
+              last page.
+
+            * previous: The URL to the next page of results, or null if this
+              is the first page.
+
+            If the user is not logged in, a 401 error is returned.
+
+            If the user is not global staff, a 403 error is returned.
+
+            If the specified course_id is not valid or any of the specified usernames
+            are not valid, a 400 error is returned.
+
+            If the specified course_id does not correspond to a valid course or if all the specified
+            usernames do not correspond to valid users, an HTTP 200 "OK" response is returned with an
+            empty 'results' field.
+    """
+    authentication_classes = (
+        JwtAuthentication,
+        BearerAuthenticationAllowInactiveUser,
+        SessionAuthenticationAllowInactiveUser,
+    )
+    permission_classes = (permissions.IsAdminUser,)
+    throttle_classes = (EnrollmentUserThrottle,)
+    serializer_class = UsersCourseEnrollmentSerializer
+    pagination_class = UsersCourseEnrollmentsApiPagination
+
+    def get_queryset(self):
+        """
+        Get all the course enrollments for the given course_id and/or given list of usernames with learner's progress.
+        """
+        form = CourseEnrollmentsApiListForm(self.request.query_params)
+
+        if not form.is_valid():
+            raise ValidationError(form.errors)
+
+        queryset = CourseEnrollment.objects.all()
+        course_id = form.cleaned_data.get('course_id')
+        usernames = form.cleaned_data.get('username')
+
+        if course_id:
+            queryset = queryset.filter(course_id=course_id)
+        if usernames:
+            queryset = queryset.filter(user__username__in=usernames)
+
+        return self.paginate_queryset(queryset)
+
+    def list(self, request):
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        enrollments = self.get_queryset()
+
+        response = []
+
+        for enrollment in enrollments:
+            is_staff = bool(has_access(enrollment.user, 'staff', enrollment.course))
+            course = get_course_with_access(enrollment.user, 'load', enrollment.course.id, check_if_enrolled=False)
+
+            student = enrollment.user
+            course_key = enrollment.course.id
+
+            enrollment_mode = getattr(enrollment, 'mode', None)
+
+            if not (enrollment and enrollment.is_active) and not is_staff:
+                # User not enrolled
+                continue
+
+            # The block structure is used for both the course_grade and has_scheduled content fields
+            # So it is called upfront and reused for optimization purposes
+            collected_block_structure = get_block_structure_manager(
+                enrollment.course.id).get_collected()
+            course_grade = CourseGradeFactory().read(
+                student, collected_block_structure=collected_block_structure)
+
+            # recalculate course grade from visible grades (stored grade was calculated over all grades, visible or not)
+            course_grade.update(visible_grades_only=True,
+                                has_staff_access=is_staff)
+
+            # Get user_has_passing_grade data
+            user_has_passing_grade = False
+            if not student.is_anonymous:
+                user_grade = course_grade.percent
+                user_has_passing_grade = user_grade >= course.lowest_passing_grade
+
+            completion_summary = get_course_blocks_completion_summary(course_key, student)
+            total_units = sum(completion_summary.values())
+            total_units = total_units if total_units > 0 else 1
+
+            data = {
+                'completion_summary': completion_summary,
+                'progress': "{:.2f}".format(completion_summary['complete_count'] / total_units),
+                'course_grade': course_grade,
+                'enrollment_mode': enrollment_mode,
+                'user_has_passing_grade': user_has_passing_grade,
+                'enrollment': enrollment
+            }
+
+            context = self.get_serializer_context()
+            context['staff_access'] = is_staff
+            context['course_key'] = course_key
+            serializer = self.get_serializer_class()(data, context=context)
+            serializer_data = serializer.data
+            course_enrollment = serializer_data.pop('course_enrollment')
+
+            user_progress = {}
+            user_progress.update(serializer_data)
+            user_progress.update(course_enrollment)
+
+            response.append(user_progress)
+
+        return self.get_paginated_response(response)
