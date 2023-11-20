@@ -6,10 +6,11 @@ Serializers for Badges
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
-from lms.djangoapps.badges.models import BadgeAssertion, BadgeClass
+from lms.djangoapps.badges.models import BadgeAssertion, BadgeClass, LeaderboardEntry
 from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 
 User = get_user_model()
+
 
 class BadgeClassSerializer(serializers.ModelSerializer):
     """
@@ -38,26 +39,32 @@ class BadgeUserSerializer(serializers.ModelSerializer):
     Serializer for the BadgeAssertion model.
     """
     name = serializers.CharField(source='profile.name')
+    profile_image_url = serializers.SerializerMethodField()
 
+    def get_profile_image_url(self, instance):
+        """
+        Get the profile image URL for the given user instance.
+
+        Args:
+            instance: The instance of the model representing the user.
+
+        Returns:
+            str: The profile image URL.
+
+        """
+        return get_profile_image_urls_for_user(instance)['medium']
+    
     class Meta:
         model = User
-        fields = ('username', 'name')
-    
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data['profile_image_url'] = get_profile_image_urls_for_user(instance)['medium']
-        return data
+        fields = ('username', 'name', 'profile_image_url')
 
 
-class UserLeaderboardSerializer(serializers.Serializer):
-    user = BadgeUserSerializer()
-    badge_count = serializers.IntegerField()
-    course_badge_count = serializers.IntegerField()
-    event_badge_count = serializers.IntegerField()
-    score = serializers.IntegerField()
-    badges = BadgeAssertionSerializer(many=True)
+class UserLeaderboardSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the BadgeAssertion model.
+    """
+    user = BadgeUserSerializer(read_only=True)
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        return data
-
+    class Meta:
+        model = LeaderboardEntry
+        fields = '__all__'

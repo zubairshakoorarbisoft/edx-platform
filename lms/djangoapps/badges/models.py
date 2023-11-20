@@ -352,5 +352,39 @@ class LeaderboardConfiguration(ConfigurationModel):
         default=EVENT_BADGE_SCORE,
     )
 
+    @classmethod
+    def get_current_or_default_values(cls):
+        """
+        Get the current or default values for course and event badge scores.
+
+        Returns:
+            Tuple[int, int]: A tuple containing the current or default values for
+            course badge score and event badge score, respectively.
+        """
+        leaderboard_conf = cls.current()
+
+        if leaderboard_conf and leaderboard_conf.enabled:
+            course_badge_score = leaderboard_conf.course_badge_score
+            event_badge_score = leaderboard_conf.event_badge_score
+        else:
+            course_badge_score = LeaderboardConfiguration.COURSE_BADGE_SCORE
+            event_badge_score = LeaderboardConfiguration.EVENT_BADGE_SCORE
+
+        return course_badge_score, event_badge_score
+
     class Meta:
         app_label = "badges"
+
+
+class LeaderboardEntry(models.Model):
+    """
+    Model for storing pre-calculated scores for users
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    badge_count = models.IntegerField(default=0)
+    event_badge_count = models.IntegerField(default=0)
+    course_badge_count = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"LeaderboardEntry for {self.user.username}"
