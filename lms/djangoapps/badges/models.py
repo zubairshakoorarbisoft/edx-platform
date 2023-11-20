@@ -334,3 +334,23 @@ class CourseEventBadgesConfiguration(ConfigurationModel):
 
     class Meta:
         app_label = "badges"
+
+
+class LeaderboardConfiguration(ConfigurationModel):
+    """
+    Model for configuring scores for courses and events badges
+    """
+    COURSE_BADGE_SCORE = 50
+    EVENT_BADGE_SCORE = 50
+
+    course_badge_score = models.IntegerField(
+        help_text='Set the score for a course-completion badge',
+        default=COURSE_BADGE_SCORE,
+    )
+    event_badge_score = models.IntegerField(
+        help_text='Set the score for the event badge i.e program badge',
+        default=EVENT_BADGE_SCORE,
+    )
+
+    class Meta:
+        app_label = "badges"

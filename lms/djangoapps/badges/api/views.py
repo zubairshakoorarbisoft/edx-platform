@@ -10,12 +10,18 @@ from opaque_keys.edx.django.models import CourseKeyField
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import generics
 from rest_framework.exceptions import APIException
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
-from lms.djangoapps.badges.models import BadgeAssertion
+from django.db.models import Count, Case, When, Value, IntegerField, Sum
+from django.utils.translation import gettext as _
+from lms.djangoapps.badges.models import BadgeAssertion, LeaderboardConfiguration
 from openedx.core.djangoapps.user_api.permissions import is_field_shared_factory
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
+from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 
-from .serializers import BadgeAssertionSerializer
+from .serializers import BadgeAssertionSerializer, UserLeaderboardSerializer
 
 
 class InvalidCourseKeyError(APIException):
@@ -137,3 +143,60 @@ class UserBadgeAssertions(generics.ListAPIView):
                 badge_class__issuing_component=self.request.query_params.get('issuing_component', '')
             )
         return queryset
+
+
+class LeaderboardView(generics.ListAPIView):
+    """
+    Leaderboard List API View
+    """
+    serializer_class = UserLeaderboardSerializer
+
+    def get_queryset(self):
+        """
+        leaderboard queryset
+        """
+        leaderboard_conf = LeaderboardConfiguration.current()
+
+        if leaderboard_conf and leaderboard_conf.enabled:
+            course_badge_score = leaderboard_conf.course_badge_score
+            event_badge_score = leaderboard_conf.event_badge_score
+        else:
+            course_badge_score = LeaderboardConfiguration.COURSE_BADGE_SCORE
+            event_badge_score = LeaderboardConfiguration.EVENT_BADGE_SCORE
+
+        leaderboard_data = (
+            BadgeAssertion.objects
+            .values('user__username', 'badge_class__issuing_component')
+            .annotate(
+                points=Case(
+                    When(badge_class__issuing_component='', then=Value(course_badge_score)),
+                    When(badge_class__issuing_component='openedx__course', then=Value(event_badge_score)),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ).values('user__username')
+            .annotate(score=Sum('points'))
+            .order_by('-score')
+        )
+
+        formatted_data = []
+        for entry in leaderboard_data:
+            badges = (
+                BadgeAssertion.objects
+                .filter(user__username=entry['user__username'])
+                .order_by('-created')
+            )
+            badge_count = badges.count()
+            event_badge_count = badges.filter(badge_class__issuing_component='openedx__course').count()
+            course_badge_count = badge_count - event_badge_count
+
+            formatted_data.append({
+                'user': badges[0].user,
+                'badge_count':badge_count,
+                'event_badge_count': event_badge_count,
+                'course_badge_count': course_badge_count,
+                'score': entry['score'],
+                'badges': list(badges),
+            })
+
+        return formatted_data
