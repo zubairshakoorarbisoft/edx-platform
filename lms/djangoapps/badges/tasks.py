@@ -7,7 +7,7 @@ from django.db.models import F
 from celery import shared_task
 from celery_utils.logged_task import LoggedTask
 from edx_django_utils.monitoring import set_code_owner_attribute
-from lms.djangoapps.badges.models import BadgeAssertion, LeaderboardConfiguration, LeaderboardEntry
+from lms.djangoapps.badges.models import LeaderboardEntry
 
 
 log = logging.getLogger(__name__)

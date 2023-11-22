@@ -36,7 +36,7 @@ class BadgeAssertionSerializer(serializers.ModelSerializer):
 
 class BadgeUserSerializer(serializers.ModelSerializer):
     """
-    Serializer for the BadgeAssertion model.
+    Serializer for the User model.
     """
     name = serializers.CharField(source='profile.name')
     profile_image_url = serializers.SerializerMethodField()
@@ -61,7 +61,7 @@ class BadgeUserSerializer(serializers.ModelSerializer):
 
 class UserLeaderboardSerializer(serializers.ModelSerializer):
     """
-    Serializer for the BadgeAssertion model.
+    Serializer for the LeaderboardEntry model.
     """
     user = BadgeUserSerializer(read_only=True)
 
