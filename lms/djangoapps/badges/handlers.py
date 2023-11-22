@@ -12,6 +12,7 @@ from common.djangoapps.student.signals import ENROLL_STATUS_CHANGE
 from lms.djangoapps.badges.events.course_meta import award_enrollment_badge
 from lms.djangoapps.badges.models import BadgeAssertion, LeaderboardConfiguration, LeaderboardEntry
 from lms.djangoapps.badges.utils import badges_enabled, calculate_score
+from lms.djangoapps.badges.tasks import update_leaderboard_enties
 
 
 @receiver(ENROLL_STATUS_CHANGE)
@@ -55,12 +56,10 @@ def update_leaderboard_entry(sender, instance, **kwargs):
 def update_leaderboard_scores(sender, instance, **kwargs):
     """
     Update scores for all entries when LeaderboardConfiguration is updated
+    Intiate a Celery task as the update could be time intensive.
     """
-    leaderboard_entries = LeaderboardEntry.objects.all()
     course_badge_score, event_badge_score = instance.course_badge_score, instance.event_badge_score
     if not instance.enabled:
         course_badge_score, event_badge_score = instance.COURSE_BADGE_SCORE, instance.EVENT_BADGE_SCORE
-
-    leaderboard_entries.update(
-        score=F('course_badge_count') * course_badge_score + F('event_badge_count') * event_badge_score
-    )
+    
+    update_leaderboard_enties.delay(course_badge_score, event_badge_score)

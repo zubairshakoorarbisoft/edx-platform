@@ -74,6 +74,9 @@
 @import 'features/content-type-gating';
 @import 'features/course-duration-limits';
 
+// sdaia features
+@import 'features/leaderboard';
+
 // search
 @import 'search/search';
 @import 'search/instant-search';

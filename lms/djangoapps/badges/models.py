@@ -388,3 +388,6 @@ class LeaderboardEntry(models.Model):
 
     def __str__(self):
         return f"LeaderboardEntry for {self.user.username}"
+    
+    class Meta:
+        app_label = "badges"
