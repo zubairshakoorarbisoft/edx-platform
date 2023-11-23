@@ -296,6 +296,25 @@ from common.djangoapps.student.models import CourseEnrollment
           <div id="dashboard-search-results" class="search-results dashboard-search-results"></div>
         % endif
 
+        <div class="leaderboard">
+          <div class="leaderboard-header">
+            <div class="title">${_('Leaderboard')}</div>
+            <!-- <span class="icon fa fa-remove" aria-hidden="true"></span> -->
+            <img class="star-icon" src="${static.url('images/stars.svg')}" alt="Leaderboard">
+          </div>
+          <ul class="header">
+            <li class="header-item">
+              <div class="avatar"></div>
+              <div class="header-info">
+                <div class="col-name">${_('name')}</div>
+              </div>
+              <div class="col-score">${_('score')}</div>
+            </li>
+          </ul>
+          <ul class="user-list" id="userList">
+          </ul>
+        </div>
+        
         <%block name="skip_links">
           % if settings.FEATURES.get('ENABLE_ANNOUNCEMENTS'):
             <a id="announcements-skip" class="nav-skip sr-only sr-only-focusable" href="#announcements">${_("Skip to list of announcements")}</a>
@@ -400,5 +419,7 @@ from common.djangoapps.student.models import CourseEnrollment
     </form>
   </div>
 </div>
+
+<script src="lms/static/js/dashboard/leaderboard.js"></script>
 
 <%include file="dashboard/_dashboard_entitlement_unenrollment_modal.html"/>

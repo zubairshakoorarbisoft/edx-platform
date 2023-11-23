@@ -46,3 +46,19 @@ def deserialize_count_specs(text):
     specs = text.splitlines()
     specs = [line.split(',') for line in specs if line.strip()]
     return {int(num): slug.strip().lower() for num, slug in specs}
+
+
+def calculate_score(course_badge_score, event_badge_score, course_badge_count, event_badge_count):
+    """
+    Calculate the total score for a user based on the provided scores and counts.
+
+    Args:
+        course_badge_score (int): The score assigned to each course completion badge.
+        event_badge_score (int): The score assigned to each event badge (program badge).
+        course_badge_count (int): The count of course completion badges earned by the user.
+        event_badge_count (int): The count of event badges (program badges) earned by the user.
+
+    Returns:
+        int: The calculated total score for the user.
+    """
+    return course_badge_score * course_badge_count + event_badge_score * event_badge_count

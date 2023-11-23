@@ -10,12 +10,17 @@ from opaque_keys.edx.django.models import CourseKeyField
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import generics
 from rest_framework.exceptions import APIException
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
-from lms.djangoapps.badges.models import BadgeAssertion
+from django.db.models import Count, Case, When, Value, IntegerField, Sum
+from django.utils.translation import gettext as _
+from lms.djangoapps.badges.models import BadgeAssertion, LeaderboardEntry
 from openedx.core.djangoapps.user_api.permissions import is_field_shared_factory
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 
-from .serializers import BadgeAssertionSerializer
+from .serializers import BadgeAssertionSerializer, UserLeaderboardSerializer
 
 
 class InvalidCourseKeyError(APIException):
@@ -137,3 +142,11 @@ class UserBadgeAssertions(generics.ListAPIView):
                 badge_class__issuing_component=self.request.query_params.get('issuing_component', '')
             )
         return queryset
+
+
+class LeaderboardView(generics.ListAPIView):
+    """
+    Leaderboard List API View
+    """
+    serializer_class = UserLeaderboardSerializer
+    queryset = LeaderboardEntry.objects.all().order_by('-score')
