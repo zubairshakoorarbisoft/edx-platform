@@ -1,85 +1,77 @@
-// Function to fetch data from the API
-async function fetchData(url) {
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return data; // Assuming the API response is in JSON format
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-}
+var edx = edx || {};
 
-// Function to render a single user item
-function renderUserListItem(data) {
-    const listItem = document.createElement('li');
-    listItem.className = 'user-item';
+(function ($) {
+    'use strict';
 
-    const avatarDiv = document.createElement('div');
-    avatarDiv.className = 'avatar';
-    const avatarImg = document.createElement('img');
-    avatarImg.src = data.user.profile_image_url;
-    avatarImg.alt = 'User Avatar';
-    avatarDiv.appendChild(avatarImg);
+    edx.dashboard = edx.dashboard || {};
+    edx.dashboard.leaderboard = {};
 
-    const userInfoDiv = document.createElement('div');
-    userInfoDiv.className = 'user-info';
-    const userNameDiv = document.createElement('div');
-    userNameDiv.className = 'user-name';
-    userNameDiv.textContent = data.user.name;
-    userInfoDiv.appendChild(userNameDiv);
-
-    const userScoreDiv = document.createElement('div');
-    userScoreDiv.className = 'user-score';
-    userScoreDiv.textContent = data.score;
-
-    listItem.appendChild(avatarDiv);
-    listItem.appendChild(userInfoDiv);
-    listItem.appendChild(userScoreDiv);
-
-    return listItem;
-}
-
-// Function to render user list
-async function renderUserList() {
-    const userListElement = document.getElementById('userList');
-    let nextPageUrl = '/api/badges/v1/leaderboard/';
-
-    // Variable to track if data is currently being fetched to avoid multiple simultaneous requests
-    let fetchingData = false;
-
-    async function fetchAndRenderNextPage() {
-        fetchingData = true;
-
-        // Fetch the next set of data
-        if (nextPageUrl){
-            const nextPageData = await fetchData(nextPageUrl);
-
-            if (nextPageData.results && Array.isArray(nextPageData.results)) {
-                nextPageData.results.forEach(user => {
-                    // Create and append list items for the next set of data
-                    const listItem = renderUserListItem(user);
-                    userListElement.appendChild(listItem);
-                });
-
-                // Update the next page URL
-                nextPageUrl = nextPageData.next;
-            }
-
-            fetchingData = false;
-        }     
-    }
-
-    // Initial rendering
-    await fetchAndRenderNextPage();
-
-    // Add event listener to window scroll
-    window.addEventListener('scroll', async () => {
-        // Check if user has scrolled to the bottom
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000 && !fetchingData) {
-            await fetchAndRenderNextPage();
+    edx.dashboard.leaderboard.fetchData = async function (url) {
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching data:', error);
         }
-    });
-}
+    };
 
-// Call the function to render the initial user list when the page loads
-document.addEventListener('DOMContentLoaded', renderUserList);
+    edx.dashboard.leaderboard.renderUserListItem = function (data) {
+        var listItem = $('<li>').addClass('user-item');
+
+        var avatarDiv = $('<div>').addClass('avatar');
+        var avatarImg = $('<img>').attr('src', data.user.profile_image_url).attr('alt', 'User Avatar');
+        avatarDiv.append(avatarImg);
+
+        var userInfoDiv = $('<div>').addClass('user-info');
+        var userNameDiv = $('<div>').addClass('user-name').text(data.user.name);
+        userInfoDiv.append(userNameDiv);
+
+        var userScoreDiv = $('<div>').addClass('user-score').text(data.score);
+
+        listItem.append(avatarDiv, userInfoDiv, userScoreDiv);
+
+        return listItem;
+    };
+
+    edx.dashboard.leaderboard.renderUserList = async function () {
+        var userListElement = $('#userList');
+        var nextPageUrl = '/api/badges/v1/leaderboard/';
+        var fetchingData = false;
+
+        var fetchAndRenderNextPage = async function () {
+            fetchingData = true;
+
+            if (nextPageUrl) {
+                try {
+                    var nextPageData = await edx.dashboard.leaderboard.fetchData(nextPageUrl);
+
+                    if (nextPageData.results && Array.isArray(nextPageData.results)) {
+                        nextPageData.results.forEach(function (user) {
+                            var listItem = edx.dashboard.leaderboard.renderUserListItem(user);
+                            userListElement.append(listItem);
+                        });
+
+                        nextPageUrl = nextPageData.next;
+                    }
+                } catch (error) {
+                    console.error('Error fetching and rendering data:', error);
+                } finally {
+                    fetchingData = false;
+                }
+            }
+        };
+
+        await fetchAndRenderNextPage();
+
+        $(window).scroll(async function () {
+            if ($(window).height() + $(window).scrollTop() >= $(document).height() - 1000 && !fetchingData) {
+                await fetchAndRenderNextPage();
+            }
+        });
+    };
+
+    $(document).ready(function () {
+        edx.dashboard.leaderboard.renderUserList();
+    });
+}(jQuery));
