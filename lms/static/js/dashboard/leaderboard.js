@@ -6,14 +6,22 @@ var edx = edx || {};
     edx.dashboard = edx.dashboard || {};
     edx.dashboard.leaderboard = {};
 
-    edx.dashboard.leaderboard.fetchData = async function (url) {
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
+    edx.dashboard.leaderboard.fetchData = function (url) {
+        return new Promise(function (resolve, reject) {
+            fetch(url)
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    resolve(data);
+                })
+                .catch(function (error) {
+                    reject(error);
+                });
+        });
     };
 
     edx.dashboard.leaderboard.renderUserListItem = function (data) {
@@ -34,39 +42,40 @@ var edx = edx || {};
         return listItem;
     };
 
-    edx.dashboard.leaderboard.renderUserList = async function () {
+    edx.dashboard.leaderboard.renderUserList = function () {
         var userListElement = $('#userList');
         var nextPageUrl = '/api/badges/v1/leaderboard/';
         var fetchingData = false;
 
-        var fetchAndRenderNextPage = async function () {
+        var fetchAndRenderNextPage = function () {
             fetchingData = true;
 
             if (nextPageUrl) {
-                try {
-                    var nextPageData = await edx.dashboard.leaderboard.fetchData(nextPageUrl);
+                edx.dashboard.leaderboard.fetchData(nextPageUrl)
+                    .then(function (nextPageData) {
+                        if (nextPageData.results && Array.isArray(nextPageData.results)) {
+                            nextPageData.results.forEach(function (user) {
+                                var listItem = edx.dashboard.leaderboard.renderUserListItem(user);
+                                userListElement.append(listItem);
+                            });
 
-                    if (nextPageData.results && Array.isArray(nextPageData.results)) {
-                        nextPageData.results.forEach(function (user) {
-                            var listItem = edx.dashboard.leaderboard.renderUserListItem(user);
-                            userListElement.append(listItem);
-                        });
-
-                        nextPageUrl = nextPageData.next;
-                    }
-                } catch (error) {
-                    console.error('Error fetching and rendering data:', error);
-                } finally {
-                    fetchingData = false;
-                }
+                            nextPageUrl = nextPageData.next;
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error('Error fetching and rendering data:', error);
+                    })
+                    .finally(function () {
+                        fetchingData = false;
+                    });
             }
         };
+        
+        fetchAndRenderNextPage();
 
-        await fetchAndRenderNextPage();
-
-        $(window).scroll(async function () {
+        $(window).scroll(function() {
             if ($(window).height() + $(window).scrollTop() >= $(document).height() - 1000 && !fetchingData) {
-                await fetchAndRenderNextPage();
+                fetchAndRenderNextPage();
             }
         });
     };
