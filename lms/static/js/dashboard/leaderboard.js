@@ -48,6 +48,7 @@ var edx = edx || {};
         var fetchingData = false;
 
         var fetchAndRenderNextPage = function () {
+            debugger;
             if (nextPageUrl && !fetchingData) {
                 fetchingData = true;
                 edx.dashboard.leaderboard.fetchData(nextPageUrl)
