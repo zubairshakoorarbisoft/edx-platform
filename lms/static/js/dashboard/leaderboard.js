@@ -48,7 +48,7 @@ var edx = edx || {};
         var fetchingData = false;
 
         var fetchAndRenderNextPage = function () {
-            debugger;
+            console.log('hello');
             if (nextPageUrl && !fetchingData) {
                 fetchingData = true;
                 edx.dashboard.leaderboard.fetchData(nextPageUrl)
@@ -80,7 +80,7 @@ var edx = edx || {};
         fetchAndRenderNextPage();
     };
 
-    $(document).ready(function () {
-        edx.dashboard.leaderboard.renderUserList();
-    });
+    // $(document).ready(function () {    
+    // });
+    edx.dashboard.leaderboard.renderUserList();
 }(jQuery));
