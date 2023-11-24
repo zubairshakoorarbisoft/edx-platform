@@ -10,6 +10,8 @@ from rest_framework import serializers
 from common.djangoapps.course_modes.models import CourseMode
 from common.djangoapps.student.models import CourseEnrollment
 
+from lms.djangoapps.course_home_api.progress.serializers import CourseGradeSerializer
+
 log = logging.getLogger(__name__)
 
 
@@ -127,3 +129,13 @@ class ModeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     description = serializers.CharField()
     sku = serializers.CharField()
     bulk_sku = serializers.CharField()
+
+
+class UsersCourseEnrollmentSerializer(serializers.Serializer):
+
+    completion_summary = serializers.DictField()
+    progress = serializers.FloatField()
+    course_grade = CourseGradeSerializer()
+    enrollment_mode = serializers.CharField()
+    user_has_passing_grade = serializers.BooleanField()
+    course_enrollment = CourseEnrollmentsApiListSerializer(source='enrollment')

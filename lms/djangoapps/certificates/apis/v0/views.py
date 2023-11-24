@@ -5,12 +5,16 @@ import logging
 
 import edx_api_doc_tools as apidocs
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django_filters.rest_framework import DjangoFilterBackend
 from edx_rest_framework_extensions import permissions
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from edx_rest_framework_extensions.auth.session.authentication import SessionAuthenticationAllowInactiveUser
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import filters
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -19,12 +23,15 @@ from lms.djangoapps.certificates.api import (
     get_certificate_for_user,
     get_certificates_for_user
 )
+from lms.djangoapps.certificates.apis.v0.filters import GeneratedCertificateFilter
 from lms.djangoapps.certificates.apis.v0.permissions import IsOwnerOrPublicCertificates
+from lms.djangoapps.certificates.apis.v0.serializers import GeneratedCertificateSerializer
 from openedx.core.djangoapps.content.course_overviews.api import (
     get_course_overview_or_none,
     get_course_overviews_from_ids,
     get_pseudo_course_overview
 )
+from lms.djangoapps.certificates.models import GeneratedCertificate
 from openedx.core.djangoapps.user_api.accounts.api import visible_fields
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 
@@ -293,3 +300,39 @@ class CertificatesListView(APIView):
 
         viewable_certificates.sort(key=lambda certificate: certificate['created'])
         return viewable_certificates
+
+
+class CertificatesCompletionView(ListAPIView):
+    authentication_classes = (
+        JwtAuthentication,
+        BearerAuthenticationAllowInactiveUser,
+        SessionAuthenticationAllowInactiveUser,
+    )
+    permission_classes = (
+        IsAdminUser,
+        permissions.IsStaff,
+    )
+
+    queryset = GeneratedCertificate.eligible_certificates.all()
+    serializer_class = GeneratedCertificateSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = GeneratedCertificateFilter
+    ordering_fields = ('created_date', )
+    ordering = ('-created_date', )
+    paginate_by = 10
+    paginate_by_param = "page_size"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        course_id = self.request.query_params.get('course_id', None)
+
+        if course_id:
+            try:
+                CourseKey.from_string(course_id)
+            except InvalidKeyError:
+                # lint-amnesty, pylint: disable=raise-missing-from
+                raise ValidationError(f"'{course_id}' is not a valid course id.")
+
+            queryset = queryset.filter(course_id=course_id)
+
+        return queryset
