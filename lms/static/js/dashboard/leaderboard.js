@@ -73,8 +73,8 @@ var edx = edx || {};
         
         fetchAndRenderNextPage();
 
-        $(window).scroll(function() {
-            if ($(window).height() + $(window).scrollTop() >= $(document).height() - 1000 && !fetchingData) {
+        userListElement.scroll(function() {
+            if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight - 1000 && !fetchingData) {
                 fetchAndRenderNextPage();
             }
         });
