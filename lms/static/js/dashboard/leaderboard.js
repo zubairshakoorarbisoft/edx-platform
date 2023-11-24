@@ -48,9 +48,8 @@ var edx = edx || {};
         var fetchingData = false;
 
         var fetchAndRenderNextPage = function () {
-            fetchingData = true;
-
-            if (nextPageUrl) {
+            if (nextPageUrl && !fetchingData) {
+                fetchingData = true;
                 edx.dashboard.leaderboard.fetchData(nextPageUrl)
                     .then(function (nextPageData) {
                         if (nextPageData.results && Array.isArray(nextPageData.results)) {
@@ -70,14 +69,14 @@ var edx = edx || {};
                     });
             }
         };
-        
-        fetchAndRenderNextPage();
 
         userListElement.scroll(function() {
             if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight - 1000 && !fetchingData) {
                 fetchAndRenderNextPage();
             }
         });
+        
+        fetchAndRenderNextPage();
     };
 
     $(document).ready(function () {
