@@ -44,6 +44,7 @@ from common.djangoapps.student.models import CourseEnrollment
   <%static:js group='dashboard'/>
   <script type="text/javascript">
     $(document).ready(function() {
+      edx.dashboard.leaderboard.init();
       edx.dashboard.legacy.init({
         dashboard: "${reverse('dashboard') | n, js_escaped_string}",
         signInUser: "${reverse('signin_user') | n, js_escaped_string}",
@@ -419,7 +420,5 @@ from common.djangoapps.student.models import CourseEnrollment
     </form>
   </div>
 </div>
-
-<script src="lms/static/js/dashboard/leaderboard.js"></script>
 
 <%include file="dashboard/_dashboard_entitlement_unenrollment_modal.html"/>
