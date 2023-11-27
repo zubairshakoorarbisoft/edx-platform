@@ -80,7 +80,8 @@ var edx = edx || {};
         fetchAndRenderNextPage();
     };
 
-    // $(document).ready(function () {    
-    // });
-    edx.dashboard.leaderboard.renderUserList();
+    edx.dashboard.leaderboard.init = function() {
+        edx.dashboard.leaderboard.renderUserList();
+    }
+
 }(jQuery));

@@ -1,6 +1,7 @@
 """
 General view for the Course Home that contains metadata every page needs.
 """
+import logging
 
 from opaque_keys.edx.keys import CourseKey
 from rest_framework.generics import RetrieveAPIView
@@ -22,6 +23,8 @@ from lms.djangoapps.courseware.courses import check_course_access
 from lms.djangoapps.courseware.masquerade import setup_masquerade
 from lms.djangoapps.courseware.tabs import get_course_tab_list
 
+
+log = logging.getLogger(__name__)
 
 class CourseHomeMetadataView(RetrieveAPIView):
     """
@@ -113,7 +116,12 @@ class CourseHomeMetadataView(RetrieveAPIView):
 
         # Record course goals user activity for (web) learning mfe course tabs
         UserActivity.record_user_activity(request.user, course_key)
-
+        
+        log.info("\n\nSTART\n\n")
+        log.info(request.user.username)
+        log.info(get_course_tab_list(request.user, course))
+        log.info("\n\END\n\n")
+        
         data = {
             'course_id': course.id,
             'username': username,
