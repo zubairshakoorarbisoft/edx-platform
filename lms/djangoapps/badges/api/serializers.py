@@ -52,7 +52,7 @@ class BadgeUserSerializer(serializers.ModelSerializer):
             str: The profile image URL.
 
         """
-        return get_profile_image_urls_for_user(instance)['medium']
+        return get_profile_image_urls_for_user(instance, self.context['request'])['medium']
     
     class Meta:
         model = User
