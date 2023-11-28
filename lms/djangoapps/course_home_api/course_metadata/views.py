@@ -11,6 +11,7 @@ from edx_rest_framework_extensions.auth.session.authentication import SessionAut
 from lms.djangoapps.certificates.api import certificates_viewable_for_course
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 from openedx.core.djangoapps.courseware_api.utils import get_celebrations_dict
+from openedx.core.djangoapps.user_api.accounts.image_helpers import get_profile_image_urls_for_user
 
 from common.djangoapps.student.models import CourseEnrollment
 from lms.djangoapps.course_api.api import course_detail
@@ -130,6 +131,7 @@ class CourseHomeMetadataView(RetrieveAPIView):
             'celebrations': celebrations,
             'user_timezone': user_timezone,
             'can_view_certificate': certificates_viewable_for_course(course),
+            'profile_image_url': get_profile_image_urls_for_user(request.user)['medium'],
         }
         context = self.get_serializer_context()
         context['course'] = course
