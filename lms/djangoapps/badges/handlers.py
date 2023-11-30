@@ -25,31 +25,29 @@ def award_badge_on_enrollment(sender, event=None, user=None, **kwargs):  # pylin
 
 
 @receiver(post_save, sender=BadgeAssertion)
-def update_leaderboard_entry(sender, instance, **kwargs):
+def update_leaderboard_entry(sender, instance, created, **kwargs):
     """
-    Update or create a leaderboard entry when a BadgeAssertion is saved.
+    Update or create a leaderboard entry when a BadgeAssertion is created.
     """
-    user = instance.user
-    badges = BadgeAssertion.objects.filter(user=user)
+    if created:
+        user = instance.user
+        issuing_component = instance.badge_class.issuing_component
 
-    course_badge_score, event_badge_score = LeaderboardConfiguration.get_current_or_default_values()
+        course_badge_score, event_badge_score = LeaderboardConfiguration.get_current_or_default_values()
 
-    course_badge_count = badges.filter(badge_class__issuing_component='').count()
-    event_badge_count = badges.filter(badge_class__issuing_component='openedx__course').count()
+        leaderboard_entry, created = LeaderboardEntry.objects.get_or_create(user=user)
+        leaderboard_entry.badge_count += 1
+        leaderboard_entry.event_badge_count += int(issuing_component == 'openedx__course')
+        leaderboard_entry.course_badge_count += int(issuing_component == '')
 
-    leaderboard_entry, created = LeaderboardEntry.objects.get_or_create(user=user)
-    leaderboard_entry.badge_count = badges.count()
-    leaderboard_entry.event_badge_count = event_badge_count
-    leaderboard_entry.course_badge_count = course_badge_count
+        leaderboard_entry.score = calculate_score(
+            course_badge_score,
+            event_badge_score,
+            leaderboard_entry.course_badge_count,
+            leaderboard_entry.event_badge_count
+        )
 
-    leaderboard_entry.score = calculate_score(
-        course_badge_score,
-        event_badge_score,
-        course_badge_count,
-        event_badge_count
-    )
-
-    leaderboard_entry.save()
+        leaderboard_entry.save()
 
 
 @receiver(post_save, sender=LeaderboardConfiguration)
