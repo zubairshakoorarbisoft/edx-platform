@@ -10,7 +10,9 @@
 <%block name="title">${_("{studio_name} Home").format(studio_name=settings.STUDIO_SHORT_NAME)}</%block>
 <%block name="bodyclass">is-signedin index view-dashboard</%block>
 
-
+<%block name="header_extras">
+    <link rel="stylesheet" type="text/css" href="${static.url('css/studio-main-v1.css')}" />
+</%block>
 
 <%block name="content">
     <div id="root" class="container">
