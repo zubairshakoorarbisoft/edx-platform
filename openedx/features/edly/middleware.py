@@ -39,6 +39,7 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
         restricted_group_name = settings.EDLY_USER_ROLES.get('panel_restricted', None)
 
         account_deactivation_url = reverse(account_deactivated_view)
+        logger.info("New User Url {}".format(account_deactivation_url))
         if get_current_plan_from_site_configurations() == DEACTIVATED and \
                 not _is_internal_path(request.path) and request.user.is_authenticated:
             if request.user.groups.filter(name=restricted_group_name).exists():
