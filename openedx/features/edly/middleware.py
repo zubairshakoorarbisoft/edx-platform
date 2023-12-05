@@ -19,6 +19,7 @@ from openedx.features.edly.utils import (
     get_current_plan_from_site_configurations,
     user_has_edly_organization_access,
 )
+from openedx.features.edly.views import account_deactivated_view
 
 logger = getLogger(__name__)
 
@@ -37,7 +38,7 @@ class EdlyOrganizationAccessMiddleware(MiddlewareMixin):
 
         restricted_group_name = settings.EDLY_USER_ROLES.get('panel_restricted', None)
 
-        account_deactivation_url = reverse('edly_app_urls:account_deactivated_view')
+        account_deactivation_url = reverse(account_deactivated_view)
         if get_current_plan_from_site_configurations() == DEACTIVATED and \
                 not _is_internal_path(request.path) and request.user.is_authenticated:
             if request.user.groups.filter(name=restricted_group_name).exists():
