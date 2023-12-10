@@ -19,6 +19,7 @@ import re
 from django.http import HttpResponseBadRequest
 from django.utils.translation import gettext as _
 
+from cms.djangoapps.contentstore.utils import replace_script_tags
 from openedx.core.lib.xblock_utils import get_course_update_items
 from xmodule.html_block import CourseInfoBlock  # lint-amnesty, pylint: disable=wrong-import-order
 from xmodule.modulestore.django import modulestore  # lint-amnesty, pylint: disable=wrong-import-order
@@ -67,7 +68,7 @@ def update_course_updates(location, update, passed_id=None, user=None):
             if course_update_item["id"] == passed_index:
                 course_update_dict = course_update_item
                 course_update_item["date"] = update["date"]
-                course_update_item["content"] = update["content"]
+                course_update_item["content"] = replace_script_tags(update["content"])
                 break
         if course_update_dict is None:
             return HttpResponseBadRequest(_("Invalid course update id."))
@@ -78,7 +79,7 @@ def update_course_updates(location, update, passed_id=None, user=None):
             # if no course updates then the id will be 1 otherwise maxid + 1
             "id": max(course_update_items_ids) + 1 if course_update_items_ids else 1,
             "date": update["date"],
-            "content": update["content"],
+            "content": replace_script_tags(update["content"]),
             "status": CourseInfoBlock.STATUS_VISIBLE
         }
         course_update_items.append(course_update_dict)

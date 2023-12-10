@@ -33,6 +33,7 @@ from xblock.core import XBlock
 from xblock.fields import Scope
 
 from cms.djangoapps.contentstore.config.waffle import SHOW_REVIEW_RULES_FLAG
+from cms.djangoapps.contentstore.utils import replace_script_tags
 from cms.djangoapps.models.settings.course_grading import CourseGradingModel
 from cms.lib.xblock.authoring_mixin import VISIBILITY_VIEW
 from common.djangoapps.edxmako.services import MakoService
@@ -204,7 +205,7 @@ def xblock_handler(request, usage_key_string=None):
             return _save_xblock(
                 request.user,
                 _get_xblock(usage_key, request.user),
-                data=request.json.get('data'),
+                data=replace_script_tags(request.json.get('data')),
                 children_strings=request.json.get('children'),
                 metadata=request.json.get('metadata'),
                 nullout=request.json.get('nullout'),

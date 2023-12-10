@@ -34,6 +34,7 @@ from organizations.api import add_organization_course, ensure_organization
 from organizations.exceptions import InvalidOrganizationException
 from rest_framework.exceptions import ValidationError
 
+from cms.djangoapps.contentstore.utils import replace_script_tags
 from cms.djangoapps.course_creators.views import add_user_with_status_unrequested, get_course_creator_status
 from cms.djangoapps.course_creators.models import CourseCreator
 from cms.djangoapps.models.settings.course_grading import CourseGradingModel
@@ -1876,8 +1877,14 @@ def group_configurations_detail_handler(request, course_key_string, group_config
             configuration = None
 
         if request.method in ('POST', 'PUT'):  # can be either and sometimes django is rewriting one to the other
+            request_data = json.loads(request.body.decode('utf-8'))
+            for group in request_data.get('groups', []):
+                group['name'] = replace_script_tags(group['name'])
+
+            request_data = json.dumps(request_data).encode('utf-8')
+
             try:
-                new_configuration = GroupConfiguration(request.body, course, group_configuration_id).get_user_partition()  # lint-amnesty, pylint: disable=line-too-long
+                new_configuration = GroupConfiguration(request_data, course, group_configuration_id).get_user_partition()  # lint-amnesty, pylint: disable=line-too-long
             except GroupConfigurationsValidationError as err:
                 return JsonResponse({"error": str(err)}, status=400)
 
