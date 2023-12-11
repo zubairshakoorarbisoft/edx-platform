@@ -731,3 +731,9 @@ def translation_language(language):
             translation.activate(previous)
     else:
         yield
+
+
+def replace_script_tags(string):
+    string = string.replace('<script', '<div')
+    string = string.replace('</script>', '</div>')
+    return string
