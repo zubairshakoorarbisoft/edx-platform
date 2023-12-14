@@ -8,9 +8,11 @@ import csv
 import io
 import json
 import logging
+import tempfile
 from contextlib import closing
 from datetime import datetime, timedelta
 from uuid import uuid4
+from google.cloud import storage
 
 from boto import s3
 from django.conf import settings
@@ -220,7 +222,10 @@ def videos_handler(request, course_key_string, edx_video_id=None):
         elif _is_pagination_context_update_request(request):
             return _update_pagination_context(request)
 
-        data, status = videos_post(course, request)
+        if getattr(settings, "ENABLE_GOOGLE_CDN", None):
+            data, status = videos_post_cdn(course, request)
+        else:
+            data, status = videos_post(course, request)
         return JsonResponse(data, status=status)
 
 
@@ -236,7 +241,10 @@ def generate_video_upload_link_handler(request, course_key_string):
     if not course:
         return Response(data='Course Not Found', status=rest_status.HTTP_400_BAD_REQUEST)
 
-    data, status = videos_post(course, request)
+    if getattr(settings, "ENABLE_GOOGLE_CDN", None):
+        data, status = videos_post_cdn(course, request)
+    else:
+        data, status = videos_post(course, request)
     return Response(data, status=status)
 
 
@@ -814,6 +822,139 @@ def videos_post(course, request):
         resp_files.append({'file_name': file_name, 'upload_url': upload_url, 'edx_video_id': edx_video_id})
 
     return {'files': resp_files}, 200
+
+
+def videos_post_cdn(course, request):
+    """
+    Input (JSON):
+    {
+        "files": [{
+            "file_name": "video.mp4",
+            "content_type": "video/mp4"
+        }]
+    }
+
+    Returns (JSON):
+    {
+        "files": [{
+            "file_name": "video.mp4",
+            "upload_url": "http://example.com/put_video"
+        }]
+    }
+
+    The returned array corresponds exactly to the input array.
+    """
+    error = None
+    data = request.json
+    if 'files' not in data:
+        error = "Request object is not JSON or does not contain 'files'"
+    elif any(
+        'file_name' not in file or 'content_type' not in file
+        for file in data['files']
+    ):
+        error = "Request 'files' entry does not contain 'file_name' and 'content_type'"
+    elif any(
+        file['content_type'] not in list(VIDEO_SUPPORTED_FILE_FORMATS.values())
+        for file in data['files']
+    ):
+        error = "Request 'files' entry contain unsupported content_type"
+
+    if error:
+        return {'error': error}, 400
+
+    bucket = cdn_storage_service_bucket()
+    req_files = data['files']
+    resp_files = []
+
+    for req_file in req_files:
+        file_name = req_file['file_name']
+
+        try:
+            file_name.encode('ascii')
+        except UnicodeEncodeError:
+            error_msg = 'The file name for %s must contain only ASCII characters.' % file_name
+            return {'error': error_msg}, 400
+
+        edx_video_id = str(uuid4())
+
+        cdn_key = cdn_storage_service_key(bucket, file_name=edx_video_id)
+
+        metadata_list = [
+            ('client_video_id', file_name),
+            ('course_key', str(course.id)),
+        ]
+
+        is_video_transcript_enabled = VideoTranscriptEnabledFlag.feature_enabled(course.id)
+        if is_video_transcript_enabled:
+            transcript_preferences = get_transcript_preferences(str(course.id))
+            if transcript_preferences is not None:
+                metadata_list.append(('transcript_preferences', json.dumps(transcript_preferences)))
+
+        metadata = {}
+        for metadata_name, value in metadata_list:
+            metadata[metadata_name] = value
+
+        cdn_key.metadata = metadata
+
+        upload_url = cdn_key.generate_signed_url(
+            version="v4",
+            expiration=KEY_EXPIRATION_IN_SECONDS,
+            method="PUT",
+            content_type=req_file['content_type'],
+        )
+
+        # persist edx_video_id in VAL
+        create_video({
+            'edx_video_id': edx_video_id,
+            'status': 'upload',
+            'client_video_id': file_name,
+            'duration': 0,
+            'encoded_videos': [],
+            'courses': [str(course.id)]
+        })
+
+        resp_files.append({'file_name': file_name, 'upload_url': upload_url, 'edx_video_id': edx_video_id})
+
+    return {'files': resp_files}, 200
+
+
+def cdn_storage_service_bucket():
+    """Generates a v4 signed URL for uploading a blob using HTTP PUT.
+
+    Note that this method requires a service account key file. You can not use
+    this if you are using Application Default Credentials from Google Compute
+    Engine or from the Google Cloud SDK.
+    """
+
+    bucket_name = settings.GOOGLE_CDN_BUCKET
+    credentials = settings.GOOGLE_CDN_CREDENTIALS
+
+    # Convert the dictionary to a JSON-formatted string
+    credentials_json = json.dumps(credentials)
+
+    temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False)
+
+    # Write the JSON string to the temporary file
+    temp_file.write(credentials_json)
+
+    # Close the file before passing its path to the function
+    temp_file.close()
+
+    # Use the temporary file path in your function
+    storage_client = storage.Client.from_service_account_json(temp_file.name)
+
+    return storage_client.bucket(bucket_name)
+
+
+def cdn_storage_service_key(bucket, file_name):
+    """
+    Returns an S3 key to the given file in the given bucket.
+    """
+    key_name = "{}/{}".format(
+        settings.VIDEO_UPLOAD_PIPELINE.get("ROOT_PATH", ""),
+        file_name
+    )
+    return bucket.blob(key_name)
 
 
 def storage_service_bucket():

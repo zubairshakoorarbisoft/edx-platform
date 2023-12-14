@@ -567,6 +567,16 @@ class VideoBlock(
         if metadata_was_changed_by_user:
             self.edx_video_id = self.edx_video_id and self.edx_video_id.strip()
 
+            # SDAIA Feature
+            # If sub is set to None, then set source url to Google CDN
+            if self.edx_video_id and not self.sub and getattr(settings, "ENABLE_GOOGLE_CDN", None):
+                source_url = "{}/{}/{}".format(
+                    settings.GOOGLE_CDN_HOST,
+                    settings.VIDEO_UPLOAD_PIPELINE.get("ROOT_PATH", ""),
+                    self.edx_video_id
+                )
+                self.html5_sources=[source_url]
+
             # We want to override `youtube_id_1_0` with val youtube profile in the first place when someone adds/edits
             # an `edx_video_id` or its underlying YT val profile. Without this, override will only happen when a user
             # saves the video second time. This is because of the syncing of basic and advanced video settings which
