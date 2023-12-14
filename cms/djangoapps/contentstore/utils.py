@@ -734,6 +734,7 @@ def translation_language(language):
 
 
 def replace_script_tags(string):
-    string = string.replace('<script', '<div')
-    string = string.replace('</script>', '</div>')
+    if type(string) == str:
+        string = string.replace('<script', '<div')
+        string = string.replace('</script>', '</div>')
     return string
