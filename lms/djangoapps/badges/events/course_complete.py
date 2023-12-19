@@ -80,7 +80,8 @@ def criteria(course_key):
     about_path = reverse('about_course', kwargs={'course_id': str(course_key)})
     return f'{site_prefix()}{about_path}'
 
-
+import logging
+log = logging.getLogger(__name__)
 def get_completion_badge(course_id, user):
     """
     Given a course key and a user, find the user's enrollment mode
@@ -90,12 +91,15 @@ def get_completion_badge(course_id, user):
     badge_classes = CourseEnrollment.objects.filter(
         user=user, course_id=course_id
     ).order_by('-is_active')
+    log.info(f"badge_classes {badge_classes}")
     if not badge_classes:
         return None
     mode = badge_classes[0].mode
     course = modulestore().get_course(course_id)
+    log.info(f"course.issue_badges {course.issue_badges}")
     if not course.issue_badges:
         return None
+    log.info(f"outside get_badge_class")
     return BadgeClass.get_badge_class(
         slug=course_slug(course_id, mode),
         issuing_component='',
@@ -114,10 +118,12 @@ def course_badge_check(user, course_key):
     Takes a GeneratedCertificate instance, and checks to see if a badge exists for this course, creating
     it if not, should conditions be right.
     """
+    LOGGER.info("inside course_badge_check")
     if not modulestore().get_course(course_key).issue_badges:
         LOGGER.info("Course is not configured to issue badges.")
         return
     badge_class = get_completion_badge(course_key, user)
+    LOGGER.info(f"badge_class {badge_class}")
     if not badge_class:
         # We're not configured to make a badge for this course mode.
         return

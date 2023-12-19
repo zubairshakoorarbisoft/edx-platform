@@ -30,7 +30,7 @@ from lms.djangoapps.badges.events.course_complete import course_badge_check
 from lms.djangoapps.badges.events.course_meta import completion_check, course_group_check
 from lms.djangoapps.certificates.data import CertificateStatuses
 from lms.djangoapps.instructor_task.models import InstructorTask
-from openedx.core.djangoapps.signals.signals import COURSE_CERT_AWARDED, COURSE_CERT_CHANGED, COURSE_CERT_REVOKED
+from openedx.core.djangoapps.signals.signals import COURSE_CERT_AWARDED, COURSE_CERT_CHANGED, COURSE_CERT_REVOKED, COURSE_GRADE_NOW_PASSED
 from openedx.core.djangoapps.xmodule_django.models import NoneToEmptyManager
 from openedx.features.name_affirmation_api.utils import get_name_affirmation_service
 
@@ -1235,7 +1235,7 @@ class CertificateTemplateAsset(TimeStampedModel):
         app_label = "certificates"
 
 
-@receiver(COURSE_CERT_AWARDED, sender=GeneratedCertificate)
+@receiver(COURSE_GRADE_NOW_PASSED, sender=GeneratedCertificate)
 # pylint: disable=unused-argument
 def create_course_badge(sender, user, course_key, status, **kwargs):
     """
