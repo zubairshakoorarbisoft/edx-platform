@@ -24,6 +24,12 @@ class EnrollmentsService:
         Returns a list of active enrollments for a course
         """
         return CourseEnrollment.objects.filter(course_id=course_id, is_active=True)
+    
+    def get_active_enrollment_of_user_by_course(self, user_id, course_id):
+        """
+        Returns a list of active enrollments for a course 
+        """
+        return CourseEnrollment.objects.get(user_id=user_id, course_id=course_id, is_active=True)
 
     def _get_enrollments_for_course_proctoring_eligible_modes(self, course_id, allow_honor_mode=False):
         """
