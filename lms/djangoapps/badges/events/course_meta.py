@@ -62,16 +62,16 @@ def course_group_check(user, course_key):
     """
     Awards a badge if a user has completed every course in a defined set.
     """
-    from lms.djangoapps.certificates.data import CertificateStatuses
+    from lms.djangoapps.grades.models import PersistentCourseGrade
     config = CourseEventBadgesConfiguration.current().course_group_settings
     awards = []
     for slug, keys in config.items():
         if course_key in keys:
-            certs = user.generatedcertificate_set.filter(
-                status__in=CertificateStatuses.PASSED_STATUSES,
+            passed_courses = PersistentCourseGrade.objects.filter(
+                passed_timestamp__isnull=False,
                 course_id__in=keys,
-            )
-            if len(certs) == len(keys):
+            ).count()
+            if passed_courses == len(keys):
                 awards.append(slug)
 
     for slug in awards:

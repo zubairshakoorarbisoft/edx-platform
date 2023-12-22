@@ -1252,12 +1252,12 @@ def create_completion_badge(sender, user, course_key, status, **kwargs):  # pyli
     completion_check(user)
 
 
-@receiver(COURSE_CERT_AWARDED, sender=GeneratedCertificate)
-def create_course_group_badge(sender, user, course_key, status, **kwargs):  # pylint: disable=unused-argument
+@receiver(COURSE_GRADE_NOW_PASSED, dispatch_uid="new_passing_learner")
+def create_course_group_badge(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
     """
     Standard signal hook to create badges when a user has completed a prespecified set of courses.
     """
-    course_group_check(user, course_key)
+    course_group_check(user, course_id)
 
 
 class CertificateGenerationCommandConfiguration(ConfigurationModel):
