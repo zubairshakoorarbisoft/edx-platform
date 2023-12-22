@@ -2,10 +2,13 @@
 Events which have to do with a user doing something with more than one course, such
 as enrolling in a certain number, completing a certain number, or completing a specific set of courses.
 """
-
+import logging
 
 from lms.djangoapps.badges.models import BadgeClass, CourseEventBadgesConfiguration
 from lms.djangoapps.badges.utils import requires_badges_enabled
+
+
+log = logging.getLogger(__name__)
 
 
 def award_badge(config, count, user):
@@ -62,8 +65,10 @@ def course_group_check(user, course_key):
     """
     Awards a badge if a user has completed every course in a defined set.
     """
+    log.info("\n\n\n inside course_group_check \n\n\n")
     from lms.djangoapps.grades.models import PersistentCourseGrade
     config = CourseEventBadgesConfiguration.current().course_group_settings
+    log.info(f"\n\n\n config: {config} \n\n\n")
     awards = []
     for slug, keys in config.items():
         if course_key in keys:
@@ -71,9 +76,11 @@ def course_group_check(user, course_key):
                 passed_timestamp__isnull=False,
                 course_id__in=keys,
             ).count()
+            log.info(f"\n\n\n passed_courses: {passed_courses} \n\n\n")
+            log.info(f"\n\n\n len(keys): {len(keys)} \n\n\n")
             if passed_courses == len(keys):
                 awards.append(slug)
-
+    log.info(f"\n\n\n awards: {awards} \n\n\n")
     for slug in awards:
         badge_class = BadgeClass.get_badge_class(
             slug=slug, issuing_component='openedx__course', create=False,
