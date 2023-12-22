@@ -1257,6 +1257,7 @@ def create_course_group_badge(sender, user, course_id, **kwargs):  # pylint: dis
     """
     Standard signal hook to create badges when a user has completed a prespecified set of courses.
     """
+    log.info("\n\n\n inside create_course_group_badge signal")
     course_group_check(user, course_id)
 
 
