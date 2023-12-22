@@ -2,10 +2,13 @@
 Events which have to do with a user doing something with more than one course, such
 as enrolling in a certain number, completing a certain number, or completing a specific set of courses.
 """
-
+import logging
 
 from lms.djangoapps.badges.models import BadgeClass, CourseEventBadgesConfiguration
 from lms.djangoapps.badges.utils import requires_badges_enabled
+
+
+log = logging.getLogger(__name__)
 
 
 def award_badge(config, count, user):
@@ -62,18 +65,48 @@ def course_group_check(user, course_key):
     """
     Awards a badge if a user has completed every course in a defined set.
     """
+    log.info("\n\n\n inside course_group_check \n\n\n")
     from lms.djangoapps.grades.models import PersistentCourseGrade
-    config = CourseEventBadgesConfiguration.current().course_group_settings
+    course_groups = CourseEventBadgesConfiguration.current().course_groups
+    course_groups = course_groups.strip()
+    programs = course_groups.split("\r\n")
+    log.info(f"\n\n\n course_key: {course_key} \n\n\n")
+    log.info(f"\n\n\n programs: {programs} \n\n\n")
     awards = []
-    for slug, keys in config.items():
-        if course_key in keys:
+    for program in programs:
+        group = program.split(",")
+        log.info(f"\n\n\n group: {group} \n\n\n")
+        program_slug = group and group[0] or None
+        log.info(f"\n\n\n program_slug: {program_slug} \n\n\n")
+        courses_in_program = group and len(group) > 1 and group[1:] or None
+        log.info(f"\n\n\n courses_in_program: {courses_in_program} \n\n\n")
+        if course_key in courses_in_program:
+            log.info(f"\n\n\n program: {program} \n\n\n")
             passed_courses = PersistentCourseGrade.objects.filter(
                 passed_timestamp__isnull=False,
-                course_id__in=keys,
-            ).count()
-            if passed_courses == len(keys):
-                awards.append(slug)
+                course_id__in=courses_in_program,
+                user_id=user.id,
+            )
+            log.info(f"\n\n\n passed_courses: {passed_courses} \n\n\n")
+            if passed_courses.count() == len(courses_in_program):
+                awards.append(program_slug)
+            break
 
+    # config = CourseEventBadgesConfiguration.current().course_group_settings
+    # log.info(f"\n\n\n course_key: {course_key} \n\n\n")
+    # log.info(f"\n\n\n config: {config} \n\n\n")
+    # awards = []
+    # for slug, keys in config.items():
+    #     if course_key in keys:
+    #         passed_courses = PersistentCourseGrade.objects.filter(
+    #             passed_timestamp__isnull=False,
+    #             course_id__in=keys,
+    #         ).count()
+    #         log.info(f"\n\n\n passed_courses: {passed_courses} \n\n\n")
+    #         log.info(f"\n\n\n len(keys): {len(keys)} \n\n\n")
+    #         if passed_courses == len(keys):
+    #             awards.append(slug)
+    log.info(f"\n\n\n awards: {awards} \n\n\n")
     for slug in awards:
         badge_class = BadgeClass.get_badge_class(
             slug=slug, issuing_component='openedx__course', create=False,
