@@ -236,6 +236,8 @@ class BadgrBackend(BadgeBackend):
         data = {
             'username': settings.BADGR_USERNAME,
             'password': settings.BADGR_PASSWORD,
+            'grant_type': 'password',
+            'client_id': 'public'
         }
         if refresh_token:
             data = {
