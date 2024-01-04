@@ -99,7 +99,8 @@ def get_profile_image_urls_for_user(user, request=None):
             urls = _get_profile_image_urls(
                 _make_profile_image_name(user.username),
                 get_profile_image_storage(),
-                version=user.profile.profile_image_uploaded_at.strftime("%s"),
+                ###  Remove version for Sdaia Oracle Profile Image Access
+                # version=user.profile.profile_image_uploaded_at.strftime("%s"),
             )
         else:
             urls = _get_default_profile_image_urls()
