@@ -242,7 +242,8 @@ class BadgrBackend(BadgeBackend):
         if refresh_token:
             data = {
                 'grant_type': 'refresh_token',
-                'refresh_token': refresh_token
+                'refresh_token': refresh_token,
+                'client_id': 'public'
             }
 
         oauth_url = "{}/o/token".format(settings.BADGR_BASE_URL)
