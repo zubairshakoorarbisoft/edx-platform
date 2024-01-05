@@ -312,6 +312,8 @@ class BadgrBackend(BadgeBackend):
         Verify a badge has been created for this badge class, and create it if not.
         """
         slug = badge_class.badgr_server_slug
+        if slug != "":
+            return
         response = requests.get(self._badge_url(slug), headers=self._get_headers(), timeout=settings.BADGR_TIMEOUT)
         if response.status_code != 200:
             self._create_badge(badge_class)
