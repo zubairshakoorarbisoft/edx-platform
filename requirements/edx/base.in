@@ -187,3 +187,4 @@ xblock-poll                         # Xblock for polling users
 xblock-drag-and-drop-v2             # Drag and Drop XBlock
 xblock-google-drive                 # XBlock for google docs and calendar
 openedx-django-require
+google-cloud-storage==2.13.0        # SDAIA: Required for uploading content on Google cloud
