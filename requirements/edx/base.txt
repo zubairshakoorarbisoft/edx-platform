@@ -1210,6 +1210,8 @@ zipp==3.15.0
     # via
     #   importlib-metadata
     #   importlib-resources
+google-cloud-storage==2.13.0
+    #   SDAIA: Required for uploading content on Google cloud
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
