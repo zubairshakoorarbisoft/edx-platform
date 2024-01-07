@@ -1,2 +1,2 @@
-{% load i18n %}{% autoescape off %}{% blocktrans %}This is one time OTP {{ activation_code }}. Kindly use this to complete nafath authentication with SDAIA.{% endblocktrans %}
+{% load i18n %}{% autoescape off %}{% blocktrans %}This is one time OTP {{ activation_code }}. Kindly use this to complete nafath authentication with {{ platform_name }}.{% endblocktrans %}
 {% endautoescape %}

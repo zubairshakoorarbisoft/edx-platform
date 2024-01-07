@@ -1,4 +1,4 @@
 {% load i18n %}
 {% autoescape off %}
-{% blocktrans %}SDAIA - Complete Nafath Authentication{% endblocktrans %}
+{% blocktrans %}{{ platform_name }} - Complete Nafath Authentication{% endblocktrans %}
 {% endautoescape %}
