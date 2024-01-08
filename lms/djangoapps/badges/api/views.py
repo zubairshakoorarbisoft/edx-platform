@@ -161,7 +161,7 @@ class LeaderboardView(generics.ListAPIView):
 
 class VerfyTokenView(APIView):
     """
-    Verify LMS token List API View
+    Verify LMS token API View
     """
     def post(self, request):
         token = request.headers.get('token')
