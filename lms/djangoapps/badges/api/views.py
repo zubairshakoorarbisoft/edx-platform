@@ -183,3 +183,4 @@ class VerfyTokenView(APIView):
                 return Response(data={'status': 'invalid token'}, status=403)
 
         return Response(data={'status': 'verified'}, status=200)
+    
