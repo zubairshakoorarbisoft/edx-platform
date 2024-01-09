@@ -3,24 +3,31 @@ API views for badges
 """
 
 
-from edx_rest_framework_extensions.auth.session.authentication import \
-    SessionAuthenticationAllowInactiveUser
+import json
+import logging
+
+from django.conf import settings
+from django.db.models import Case, Count, IntegerField, Sum, Value, When
+from django.utils.translation import gettext as _
+from edx_rest_framework_extensions.auth.session.authentication import SessionAuthenticationAllowInactiveUser
+from jwkest import jwk
+from jwkest.jws import JWS
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.django.models import CourseKeyField
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import generics
 from rest_framework.exceptions import APIException
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
 
-from django.db.models import Count, Case, When, Value, IntegerField, Sum
-from django.utils.translation import gettext as _
 from lms.djangoapps.badges.models import BadgeAssertion, LeaderboardEntry
 from openedx.core.djangoapps.user_api.permissions import is_field_shared_factory
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 
 from .serializers import BadgeAssertionSerializer, UserLeaderboardSerializer
+
+log = logging.getLogger(__name__)
 
 
 class InvalidCourseKeyError(APIException):
@@ -150,3 +157,29 @@ class LeaderboardView(generics.ListAPIView):
     """
     serializer_class = UserLeaderboardSerializer
     queryset = LeaderboardEntry.objects.all().order_by('-score')
+
+
+class VerfyTokenView(APIView):
+    """
+    Verify LMS token API View
+    """
+    def post(self, request):
+        token = request.headers.get('token')
+
+        if not token:
+            return Response(data={'status': 'Token not given'}, status=400)
+
+        try:
+            keys = jwk.KEYS()
+            serialized_keypair = json.loads(settings.JWT_AUTH['JWT_PRIVATE_SIGNING_JWK'])
+            keys.add(serialized_keypair)
+            JWS().verify_compact(token, keys=keys)
+        except Exception as e:
+            try:
+                keys.add({'key': settings.JWT_AUTH['JWT_SECRET_KEY'], 'kty': 'oct'})
+                JWS().verify_compact(token, keys=keys)
+            except Exception as e:
+                log.info(str(e))
+                return Response(data={'status': 'invalid token'}, status=403)
+
+        return Response(data={'status': 'verified'}, status=200)
