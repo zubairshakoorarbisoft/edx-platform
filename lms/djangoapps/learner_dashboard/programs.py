@@ -61,7 +61,8 @@ class ProgramsFragmentView(EdxFragmentView):
         context = {
             'marketing_url': get_program_marketing_url(programs_config, mobile_only),
             'programs': meter.engaged_programs,
-            'progress': meter.progress()
+            'progress': meter.progress(),
+            'mobile_only': bool(mobile_only)
         }
         html = render_to_string('learner_dashboard/programs_fragment.html', context)
         programs_fragment = Fragment(html)
