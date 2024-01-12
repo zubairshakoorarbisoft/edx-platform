@@ -4,6 +4,7 @@
 import json
 import logging
 import math
+import mimetypes
 import re
 from functools import partial
 from urllib.parse import urljoin
@@ -30,7 +31,7 @@ from xmodule.exceptions import NotFoundError  # lint-amnesty, pylint: disable=wr
 from xmodule.modulestore.django import modulestore  # lint-amnesty, pylint: disable=wrong-import-order
 from xmodule.modulestore.exceptions import ItemNotFoundError  # lint-amnesty, pylint: disable=wrong-import-order
 
-from ..exceptions import AssetNotFoundException, AssetSizeTooLargeException
+from ..exceptions import AssetNotFoundException, AssetSizeTooLargeException, InvalidFileTypeException
 from ..utils import reverse_course_url
 
 __all__ = ['assets_handler']
@@ -43,6 +44,10 @@ REQUEST_DEFAULTS = {
     'asset_type': '',
     'text_search': '',
 }
+
+
+mimetypes.init()
+all_mimetypes = list(mimetypes.types_map.values()) + ['text/javascript', 'text/php']
 
 
 @login_required
@@ -445,6 +450,21 @@ def _get_error_if_course_does_not_exist(course_key):  # lint-amnesty, pylint: di
         return HttpResponseBadRequest()
 
 
+def _get_sanitized_filename(filename):
+    splitted_filename = filename.split('.')
+    extension = splitted_filename[-1]
+
+    # for files with multiple extensions
+    filename = splitted_filename[:len(splitted_filename) - 1]
+    filename = "".join(filename)
+    return "".join(x for x in filename if x.isalnum()) + "." + extension
+
+
+def _validate_mimetype(file_content_type):
+    if file_content_type in all_mimetypes: return file_content_type
+    raise InvalidFileTypeException('{} of filetype is not supported'.format(file_content_type))
+
+
 def _get_file_metadata_as_dictionary(upload_file):  # lint-amnesty, pylint: disable=missing-function-docstring
     # compute a 'filename' which is similar to the location formatting; we're
     # using the 'filename' nomenclature since we're using a FileSystem paradigm
@@ -452,8 +472,8 @@ def _get_file_metadata_as_dictionary(upload_file):  # lint-amnesty, pylint: disa
     # keep things a bit more consistent
     return {
         'upload_file': upload_file,
-        'filename': upload_file.name,
-        'mime_type': upload_file.content_type,
+        'filename': _get_sanitized_filename(upload_file.name),
+        'mime_type': _validate_mimetype(upload_file.content_type),
         'upload_file_size': get_file_size(upload_file)
     }
 

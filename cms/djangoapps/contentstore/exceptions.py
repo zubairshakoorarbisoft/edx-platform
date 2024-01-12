@@ -13,3 +13,9 @@ class AssetSizeTooLargeException(Exception):
     """
     Raised when the size of an uploaded asset exceeds the maximum size limit.
     """
+
+
+class InvalidFileTypeException(Exception):
+    """
+    Raised when the type of file is not included in mimetypes
+    """
