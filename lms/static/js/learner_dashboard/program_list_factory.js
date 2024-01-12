@@ -38,5 +38,5 @@ function ProgramListFactory(options) {
         }).render();
     }
 }
-
+}
 export { ProgramListFactory }; // eslint-disable-line import/prefer-default-export
