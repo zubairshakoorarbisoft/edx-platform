@@ -4,7 +4,6 @@
 import json
 import logging
 import math
-import mimetypes
 import re
 from functools import partial
 from urllib.parse import urljoin
@@ -46,8 +45,7 @@ REQUEST_DEFAULTS = {
 }
 
 
-mimetypes.init()
-all_mimetypes = list(mimetypes.types_map.values()) + ['text/javascript', 'text/php']
+allowed_mimetypes = settings.ALLOWED_FILE_TYPES
 
 
 @login_required
@@ -461,7 +459,7 @@ def _get_sanitized_filename(filename):
 
 
 def _validate_mimetype(file_content_type):
-    if file_content_type in all_mimetypes: return file_content_type
+    if file_content_type in allowed_mimetypes: return file_content_type
     raise InvalidFileTypeException('{} of filetype is not supported'.format(file_content_type))
 
 
