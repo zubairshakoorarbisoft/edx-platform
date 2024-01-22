@@ -208,7 +208,7 @@ class BadgrBackend(BadgeBackend):
             response_json = response.json()
             assertion.data = response_json['result'][0]
             assertion.image_url = assertion.data['image']
-            assertion.assertion_url = assertion.data['openBadgeId']
+            assertion.assertion_url = f"{assertion.data['openBadgeId']}?identity__email={user.email}"
             assertion.backend = 'BadgrBackend'
             assertion.save()
             self._send_assertion_created_event(user, assertion)
