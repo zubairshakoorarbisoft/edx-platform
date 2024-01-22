@@ -2714,3 +2714,4 @@ BRAZE_COURSE_ENROLLMENT_CANVAS_ID = ''
 
 DISCUSSIONS_INCONTEXT_FEEDBACK_URL = ''
 DISCUSSIONS_INCONTEXT_LEARNMORE_URL = ''
+ALLOWED_FILE_TYPES = ['image/png', 'image/jpeg', 'application/pdf', 'application/msword', 'video/mp4']
