@@ -4988,7 +4988,7 @@ msgstr "(من أصل {total})"
 #: lms/templates/navigation/bootstrap/navbar-authenticated.html
 #: lms/templates/navigation/navbar-authenticated.html
 msgid "Programs"
-msgstr "برامج"
+msgstr "برامجي"
 
 #: lms/djangoapps/learner_dashboard/programs.py
 #: lms/templates/learner_dashboard/program_details.html
@@ -17456,7 +17456,7 @@ msgstr "العودة إلى لوحة المعلومات"
 #: lms/templates/dashboard/_entitlement_reason_survey.html
 #: lms/templates/dashboard/_reason_survey.html
 msgid "Browse Courses"
-msgstr "تصفّح المساقات"
+msgstr "تصفح الدورات"
 
 #: lms/templates/dashboard/_reason_survey.html
 msgid ""
@@ -19720,7 +19720,7 @@ msgstr ""
 
 #: lms/templates/learner_dashboard/_dashboard_navigation_courses.html
 msgid "My Courses"
-msgstr "مساقاتي"
+msgstr "دوراتي"
 
 #: lms/templates/modal/_modal-settings-language.html
 msgid "Change Preferred Language"
