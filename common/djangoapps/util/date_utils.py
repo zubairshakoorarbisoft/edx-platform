@@ -131,19 +131,19 @@ english_months_list = [
     "November",
     "December",
 ]
-urdu_months_list = [
-    "جنوری",
-    "فروری",
-    "مارچ",
-    "اپریل",
-    "مئی",
-    "جون",
-    "جولائی",
-    "اگست",
-    "ستمبر",
-    "اکتوبر",
-    "نومبر",
-    "دسمبر",
+arabic_months_list = [
+    "يناير",
+    "فبراير",
+    "مارس",
+    "أبريل",
+    "مايو",
+    "يونيو",
+    "يوليو",
+    "أغسطس",
+    "سبتمبر",
+    "أكتوبر",
+    "نوفمبر",
+    "ديسمبر",
 ]
 
 
@@ -164,7 +164,7 @@ def convert_date_to_arabic(date):
 
     for idx, month in enumerate(english_months_list):
         if month in date:
-            date = date.replace(month, urdu_months_list[idx])
+            date = date.replace(month, arabic_months_list[idx])
             break
 
     return date
