@@ -1,0 +1,26 @@
+<!-- {% extends 'ace_common/edx_ace/common/base_body.html' %} -->
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Congratulations {{ full_name }}!{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}You have complated {{ progress_milestone_crossed }}, your current progress for course named '{{ course_name }}' is {{ current_progress }}. {% endblocktrans %}
+    {% endautoescape %}
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}View/Continue your course {% endblocktrans %}<a href="https://apps-stage.tndy.academy/learning/course/{{ course_key }}/progress">here</a>.
+    {% endautoescape %}
+    <br />
+</p>
+{% endblock %}

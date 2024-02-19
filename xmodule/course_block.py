@@ -316,6 +316,18 @@ class TeamsConfigField(Dict):
 
 
 class CourseFields:  # lint-amnesty, pylint: disable=missing-class-docstring
+    allow_course_completion_emails = Boolean(
+        display_name=_("Allow Course Completion emails at different percentages"),
+        help=_("Enter true or false. When true, students will get email when they reach specific percentages mentioned in 'course completion percentages for emails'."),
+        default=False,
+        scope=Scope.settings
+    )
+    course_completion_percentages_for_emails = String(
+        display_name=_("Course Completion Percentages"),
+        help=_("set comma separated percentages at which instructors want to send course completion emails e.g. '60, 70'"),
+        default="60, 70",
+        scope=Scope.settings
+    )
     lti_passports = List(
         display_name=_("LTI Passports"),
         help=_('Enter the passports for course LTI tools in the following format: "id:client_key:client_secret".'),

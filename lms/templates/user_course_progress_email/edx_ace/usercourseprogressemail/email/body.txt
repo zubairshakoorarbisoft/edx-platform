@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}Congratulations {{ full_name }}!{% endblocktrans %}
+{% blocktrans %}You have complated {{ progress_milestone_crossed }}, your current progress for course named '{{ course_name }}' is {{ current_progress }}.{% endblocktrans %}
+{% blocktrans %}View/Continue your course {% endblocktrans %}<a href="https://apps-stage.tndy.academy/learning/course/{{ course_key }}/progress">here</a>.{% endblocktrans %}
+
+{% trans "Enjoy your studies," %}
+{% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
+{% endautoescape %}
