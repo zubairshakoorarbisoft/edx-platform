@@ -18,6 +18,7 @@ from lms.djangoapps.courseware.courses import get_course_blocks_completion_summa
 from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.core.djangoapps.ace_common.message import BaseMessageType
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.sdaia_features.course_progress.models import CourseCompletionEmailHistory
 from xmodule.course_block import CourseFields  # lint-amnesty, pylint: disable=wrong-import-order
@@ -38,13 +39,13 @@ class UserCourseProgressEmail(BaseMessageType):
         self.options['transactional'] = True
 
 @shared_task
-def send_user_course_progress_email(current_progress, progress_last_email_sent_at, course_completion_percentages_for_email, course_key, course_name, user_id):
+def send_user_course_progress_email(current_progress, progress_last_email_sent_at, course_completion_percentages_for_email, course_key, course_name, user_id, platform_name, site_id):
     """
     Sends User Activation Code Via Email
     """
     user = User.objects.get(id=user_id)
 
-    site = Site.objects.first() or Site.objects.get_current()
+    site = Site.objects.get(id=site_id) if site_id else (Site.objects.first() or Site.objects.get_current())
     message_context = get_base_template_context(site)
     course_home_url = get_learning_mfe_home_url(course_key=course_key, url_fragment='home')
 
@@ -52,7 +53,7 @@ def send_user_course_progress_email(current_progress, progress_last_email_sent_a
             'current_progress': current_progress,
             'progress_milestone_crossed': progress_last_email_sent_at,
             'course_key': course_key,
-            'platform_name': "sdaia",
+            'platform_name': platform_name,
             'course_name': course_name,
             'course_home_url': course_home_url,
         }
@@ -107,14 +108,35 @@ class Command(BaseCommand):
             default=True,
             help="If set to False, it'll send emails for archived courses also",
         )
+        parser.add_argument(
+            '--sites',
+            nargs='+',
+            type=str,
+            help="pass list of sites to send progress emails for courses related to only these sites",
+        )
 
     def handle(self, *args, **options):
         skip_archived = options.get('skip-archived')
+        sites = options.get('sites')
+        site_configs = SiteConfiguration.objects.filter(site__domain__in=sites).values('site_values', 'site')
+        
+        org_platform_name_pair = {}
+        org_site_pair = {}
+        for site_config in site_configs:
+            site = site_config.get('site')
+            site_values = site_config.get('site_values', {})
+            org_name = site_values.get("course_org_filter", "")
+            platform_name = site_values.get("PLATFORM_NAME", "") or site_values.get("platform_name", settings.PLATFORM_NAME)
+            if org_name:
+                org_platform_name_pair[org_name] = platform_name
+                org_site_pair[f"{org_name}_site"] = site
 
-        course_ids = [course.id for course in modulestore().get_courses()]
+        courses = [course for course in modulestore().get_courses() if course.org in org_platform_name_pair.keys()]
 
-        for course_key in course_ids:
-            course = modulestore().get_course(course_key)
+        for course in courses:
+            course_key = course.id
+            platform_name = org_platform_name_pair[course.org]
+            site_id = org_site_pair[f"{course.org}_site"]
 
             course_completion_percentages_for_emails = course.course_completion_percentages_for_emails
             if not course.allow_course_completion_emails or not course_completion_percentages_for_emails:
@@ -124,7 +146,7 @@ class Command(BaseCommand):
             try:
                 course_completion_percentages_for_emails = [int(entry.strip()) for entry in course_completion_percentages_for_emails]
             except Exception as e:
-                log.info(f"invalid course_completion_percentages_for_emails for course {CourseKey.from_string(course_key)}")
+                log.info(f"invalid course_completion_percentages_for_emails for course {str(course_key)}")
                 continue
 
             if skip_archived and course.has_ended():
@@ -136,12 +158,13 @@ class Command(BaseCommand):
                 continue
 
             for user in users:
-                user_completion_percentage = get_user_course_progress(user, course_key)
+                site = Site.objects.get(id=site_id) if site_id else (Site.objects.first() or Site.objects.get_current())
+                with emulate_http_request(site, user):
+                    user_completion_percentage = get_user_course_progress(user, course_key)
                 user_completion_progress_email_history, _ = CourseCompletionEmailHistory.objects.get_or_create(user=user, course_key=course_key)
                 progress_last_email_sent_at = user_completion_progress_email_history and user_completion_progress_email_history.last_progress_email_sent
 
                 if user_completion_percentage > progress_last_email_sent_at:
                     for course_completion_percentages_for_email in course_completion_percentages_for_emails:
                         if user_completion_percentage >= course_completion_percentages_for_email > progress_last_email_sent_at:
-                            send_user_course_progress_email.delay(user_completion_percentage, progress_last_email_sent_at, course_completion_percentages_for_email, str(course_key), course.display_name, user.id)
-
+                            send_user_course_progress_email.delay(user_completion_percentage, progress_last_email_sent_at, course_completion_percentages_for_email, str(course_key), course.display_name, user.id, platform_name, site_id)
