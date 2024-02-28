@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender=BlockCompletion)
-def evaluate_subsection_completion_milestones(**kwargs):
+def send_course_progress_milestones_achievement_emails(**kwargs):
     """
     Receives the BlockCompletion signal and sends the email to 
     the user if he completes a specific course progress threshold.
