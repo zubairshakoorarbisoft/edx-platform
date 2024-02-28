@@ -18,7 +18,9 @@ from lms.djangoapps.courseware.courses import get_course_blocks_completion_summa
 from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.core.djangoapps.ace_common.message import BaseMessageType
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
+from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.sdaia_features.course_progress.models import CourseCompletionEmailHistory
 from xmodule.course_block import CourseFields  # lint-amnesty, pylint: disable=wrong-import-order
@@ -58,11 +60,12 @@ def send_user_course_progress_email(current_progress, progress_last_email_sent_a
             'course_home_url': course_home_url,
         }
     message_context.update(context)
+    user_language_pref = get_user_preference(user, LANGUAGE_KEY) or settings.LANGUAGE_CODE
     try:
         with emulate_http_request(site, user):
             msg = UserCourseProgressEmail(context=message_context).personalize(
                 recipient=Recipient(0, user.email),
-                language=settings.LANGUAGE_CODE,
+                language=user_language_pref,
                 user_context={'full_name': user.profile.name}
             )
             ace.send(msg)
@@ -158,11 +161,13 @@ class Command(BaseCommand):
                 continue
 
             for user in users:
+                user_completion_progress_email_history, _ = CourseCompletionEmailHistory.objects.get_or_create(user=user, course_key=course_key)
+                progress_last_email_sent_at = user_completion_progress_email_history and user_completion_progress_email_history.last_progress_email_sent
+                if progress_last_email_sent_at == course_completion_percentages_for_emails[-1]:
+                    continue
                 site = Site.objects.get(id=site_id) if site_id else (Site.objects.first() or Site.objects.get_current())
                 with emulate_http_request(site, user):
                     user_completion_percentage = get_user_course_progress(user, course_key)
-                user_completion_progress_email_history, _ = CourseCompletionEmailHistory.objects.get_or_create(user=user, course_key=course_key)
-                progress_last_email_sent_at = user_completion_progress_email_history and user_completion_progress_email_history.last_progress_email_sent
 
                 if user_completion_percentage > progress_last_email_sent_at:
                     for course_completion_percentages_for_email in course_completion_percentages_for_emails:
