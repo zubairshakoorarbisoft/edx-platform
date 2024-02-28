@@ -30,12 +30,6 @@ def evaluate_subsection_completion_milestones(**kwargs):
     
     course_key = instance.context_key
 
-    p_unit = modulestore().get_item(instance.block_key).parent
-    c_units = modulestore().get_item(p_unit).children
-    completed_units = BlockCompletion.objects.filter(block_key__in=c_units, completion=1.0).count()
-    if not(completed_units == len(c_units)):
-        return
-
     course = modulestore().get_course(course_key)
     course_completion_percentages_for_emails = course.course_completion_percentages_for_emails
     if not course.allow_course_completion_emails or not course_completion_percentages_for_emails:
