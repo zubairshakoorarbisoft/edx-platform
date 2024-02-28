@@ -1,7 +1,6 @@
 {% load i18n %}{% autoescape off %}
-{% blocktrans %}Hi there,{% endblocktrans %}
-{% blocktrans %}Congrats on your progress! You're {{ current_progress }}% through the "{{ course_name }}".{% endblocktrans %}
-{% blocktrans %}Keep it up! Continue your journey <a href="{{ course_home_url }}">here</a>.{% endblocktrans %}
-{% trans "Enjoy your studies," %}
-{% blocktrans %}The {{ platform_name }} Team {% endblocktrans %}
+{% blocktrans %}Great job!{% endblocktrans %}
+{% blocktrans %}{{ full_name }}{% endblocktrans %}
+{% blocktrans %}You’ve completed {{ current_progress }}% of "{{ course_name }}".{% endblocktrans %}
+{% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %}here{% endblocktrans %}</a>.
 {% endautoescape %}

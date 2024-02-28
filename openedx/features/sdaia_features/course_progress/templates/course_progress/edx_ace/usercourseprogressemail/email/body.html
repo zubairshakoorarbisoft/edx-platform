@@ -6,20 +6,28 @@
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}Hi there,{% endblocktrans %}
+    {% blocktrans %}Great job!{% endblocktrans %}
     {% endautoescape %}
     <br />
 </p>
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}Congrats on your progress! You're {{ current_progress }}% through the "{{ course_name }}". {% endblocktrans %}
+    {% blocktrans %}{{full_name}}{% endblocktrans %}
     {% endautoescape %}
+    <br />
 </p>
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}Keep it up! Continue your journey {% endblocktrans %}<a href="{{ course_home_url }}">here</a>.
+    {% blocktrans %}You’ve completed {{ current_progress }}% of "{{ course_name }}". {% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %}here{% endblocktrans %}</a>.
     {% endautoescape %}
     <br />
 </p>
