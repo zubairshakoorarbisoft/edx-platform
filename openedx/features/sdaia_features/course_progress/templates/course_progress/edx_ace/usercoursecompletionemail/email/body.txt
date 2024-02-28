@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}Great job!{% endblocktrans %}
+{% blocktrans %}{{ full_name }}{% endblocktrans %}
+{% blocktrans %}You’ve completed "{{ course_name }}".{% endblocktrans %}
+{% blocktrans %}Your certificate/badge has been issued and is accessible via the following {% endblocktrans %}<a href="{{ course_progress_url }}">{% blocktrans %}URL{% endblocktrans %}</a>.
+{% endautoescape %}

@@ -9,9 +9,10 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User  # lint-amnesty, pylint: disable=imported-auth-user
 from django.contrib.sites.models import Site
 
+from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED
 from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.sdaia_features.course_progress.models import CourseCompletionEmailHistory
-from openedx.features.sdaia_features.course_progress.tasks import send_user_course_progress_email
+from openedx.features.sdaia_features.course_progress.tasks import send_user_course_progress_email, send_user_course_completion_email
 from openedx.features.sdaia_features.course_progress.utils import get_user_course_progress
 from xmodule.modulestore.django import modulestore
 
@@ -24,6 +25,7 @@ def send_course_progress_milestones_achievement_emails(**kwargs):
     Receives the BlockCompletion signal and sends the email to 
     the user if he completes a specific course progress threshold.
     """
+    logger.info(f"\n\n\n inside send_course_progress_milestones_achievement_emails \n\n\n")
     instance = kwargs['instance']
     if not instance.context_key.is_course:
         return  # Content in a library or some other thing that doesn't support milestones
@@ -57,3 +59,12 @@ def send_course_progress_milestones_achievement_emails(**kwargs):
         for course_completion_percentages_for_email in course_completion_percentages_for_emails:
             if user_completion_percentage >= course_completion_percentages_for_email > progress_last_email_sent_at:
                 send_user_course_progress_email.delay(user_completion_percentage, progress_last_email_sent_at, course_completion_percentages_for_email, str(course_key), user_id)
+
+
+@receiver(COURSE_GRADE_NOW_PASSED, dispatch_uid="course_completion")
+def send_course_completion_email(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
+    """
+    Listen for a signal indicating that the user has passed a course run.
+    """
+    logger.info(f"\n\n\n inside send_course_completion_email \n\n\n")
+    send_user_course_completion_email.delay(user.id, str(course_id))

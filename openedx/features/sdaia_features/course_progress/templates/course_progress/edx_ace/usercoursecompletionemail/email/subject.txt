@@ -1,0 +1,4 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans %}{{ platform_name }} - {{ course_name }} | Course Completion 🎉{% endblocktrans %}
+{% endautoescape %}

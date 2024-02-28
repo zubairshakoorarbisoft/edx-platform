@@ -1,0 +1,34 @@
+<!-- {% extends 'ace_common/edx_ace/common/base_body.html' %} -->
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Great job!{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}{{full_name}}{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}You’ve completed "{{ course_name }}". {% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Your certificate/badge has been issued and is accessible via the following {% endblocktrans %}<a href="{{ course_progress_url }}">{% blocktrans %}URL{% endblocktrans %}</a>.
+    {% endautoescape %}
+    <br />
+</p>
+{% endblock %}
