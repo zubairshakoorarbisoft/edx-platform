@@ -8,5 +8,5 @@
 {% endif %}
 {% blocktrans %}{{ full_name }}{% endblocktrans %}
 {% blocktrans %}You’ve completed {{ current_progress }}% of "{{ course_name }}".{% endblocktrans %}
-{% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %}here{% endblocktrans %}</a>.
+{% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %} here{% endblocktrans %}</a>.
 {% endautoescape %}

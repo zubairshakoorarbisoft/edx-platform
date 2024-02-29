@@ -67,7 +67,7 @@ def send_user_course_progress_email(current_progress, progress_last_email_sent_a
     )
 
     context={
-            'current_progress': current_progress,
+            'current_progress': int(current_progress),
             'progress_milestone_crossed': progress_last_email_sent_at,
             'course_key': course_key,
             'platform_name': platform_name,
