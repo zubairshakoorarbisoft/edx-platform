@@ -6,7 +6,13 @@
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}Great job!{% endblocktrans %}
+    {% if current_progress >= 25 and current_progress < 50 %}
+        {% blocktrans %}Well done!{% endblocktrans %}
+    {% elif current_progress >= 50 and current_progress < 75 %}
+        {% blocktrans %}Great job!{% endblocktrans %}
+    {% else %}
+        {% blocktrans %}Awesome!{% endblocktrans %}
+    {% endif %}
     {% endautoescape %}
     <br />
 </p>

@@ -6,7 +6,7 @@
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}Great job!{% endblocktrans %}
+    {% blocktrans %}Congratulations!{% endblocktrans %}
     {% endautoescape %}
     <br />
 </p>
@@ -20,14 +20,29 @@
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}You’ve completed "{{ course_name }}". {% endblocktrans %}
+    {% blocktrans %}You have successfully completed this course! {% endblocktrans %}
     {% endautoescape %}
     <br />
 </p>
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}Your certificate/badge has been issued and is accessible via the following {% endblocktrans %}<a href="{{ course_progress_url }}">{% blocktrans %}URL{% endblocktrans %}</a>.
+    {% blocktrans %}Please click {% endblocktrans %}<a href="{{ course_progress_url }}">{% blocktrans %}here{% endblocktrans %}</a>{% blocktrans %} to view your accreditation. {% endblocktrans %}    
+    {% endautoescape %}
+    <br />
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Thank you. {% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}SDAIA Academy{% endblocktrans %}
     {% endautoescape %}
     <br />
 </p>
