@@ -33,7 +33,7 @@
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %}here{% endblocktrans %}</a>.
+    {% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %} here{% endblocktrans %}</a>.
     {% endautoescape %}
     <br />
 </p>
