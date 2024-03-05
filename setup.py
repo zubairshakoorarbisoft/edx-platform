@@ -151,6 +151,7 @@ setup(
             "program_enrollments = lms.djangoapps.program_enrollments.apps:ProgramEnrollmentsConfig",
             "courseware_api = openedx.core.djangoapps.courseware_api.apps:CoursewareAPIConfig",
             "course_apps = openedx.core.djangoapps.course_apps.apps:CourseAppsConfig",
+            "course_progress = openedx.features.sdaia_features.course_progress.apps:CourseProgressConfig",
         ],
         "cms.djangoapp": [
             "announcements = openedx.features.announcements.apps:AnnouncementsConfig",

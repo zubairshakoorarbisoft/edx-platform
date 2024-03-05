@@ -1,0 +1,40 @@
+<!-- {% extends 'ace_common/edx_ace/common/base_body.html' %} -->
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% if current_progress < 50 %}
+        {% blocktrans %}Well done!{% endblocktrans %}
+    {% elif current_progress >= 50 and current_progress < 75 %}
+        {% blocktrans %}Great job!{% endblocktrans %}
+    {% else %}
+        {% blocktrans %}Awesome!{% endblocktrans %}
+    {% endif %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}{{full_name}}{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}You’ve completed {% endblocktrans %}<span style="color: rgba(255, 0, 0, 0.75);">{{ current_progress }}%</span>{% blocktrans %} of {% endblocktrans %}"{{ course_name }}".
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %} here{% endblocktrans %}</a>.
+    {% endautoescape %}
+    <br />
+</p>
+{% endblock %}

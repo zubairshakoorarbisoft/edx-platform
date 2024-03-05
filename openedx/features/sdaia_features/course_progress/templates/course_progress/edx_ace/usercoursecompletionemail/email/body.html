@@ -1,0 +1,49 @@
+<!-- {% extends 'ace_common/edx_ace/common/base_body.html' %} -->
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Congratulations!{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}{{full_name}}{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}You have successfully completed this course! {% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Please click {% endblocktrans %}<a href="{{ course_progress_url }}">{% blocktrans %}here{% endblocktrans %}</a>{% blocktrans %} to view your accreditation. {% endblocktrans %}    
+    {% endautoescape %}
+    <br />
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}Thank you. {% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}SDAIA Academy{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+{% endblock %}
