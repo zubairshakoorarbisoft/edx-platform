@@ -7,6 +7,6 @@
 {% blocktrans %}Awesome!{% endblocktrans %}
 {% endif %}
 {% blocktrans %}{{ full_name }}{% endblocktrans %}
-{% blocktrans %}You’ve completed {{ current_progress }}% of "{{ course_name }}".{% endblocktrans %}
+{% blocktrans %}You’ve completed {% endblocktrans %}<p style="color: rgba(255, 0, 0, 0.75);">{{ current_progress }}%</p>{% blocktrans %} of {% endblocktrans %}"{{ course_name }}".
 {% blocktrans %}Keep it up! Continue your learning journey {% endblocktrans %}<a href="{{ course_home_url }}">{% blocktrans %} here{% endblocktrans %}</a>.
 {% endautoescape %}

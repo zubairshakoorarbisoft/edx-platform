@@ -26,7 +26,7 @@
 <p style="color: rgba(0,0,0,.75);">
     {% autoescape off %}
     {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
-    {% blocktrans %}You’ve completed {{ current_progress }}% of "{{ course_name }}". {% endblocktrans %}
+    {% blocktrans %}You’ve completed {% endblocktrans %}<p style="color: rgba(255, 0, 0, 0.75);">{{ current_progress }}%</p>{% blocktrans %} of {% endblocktrans %}"{{ course_name }}".
     {% endautoescape %}
     <br />
 </p>
