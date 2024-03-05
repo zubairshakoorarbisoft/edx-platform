@@ -62,7 +62,7 @@ def send_user_course_progress_email(current_progress, progress_last_email_sent_a
         'site_domain',
         settings.LMS_HOST
     )
-    site = Site.objects.get(domain=site_domain)
+    site = Site.objects.filter(domain=site_domain).first() or Site.objects.first() or Site.objects.get_current()
     message_context = get_base_template_context(site)
     course_home_url = get_learning_mfe_home_url(course_key=course_key, url_fragment='home')
     platform_name = configuration_helpers.get_value_for_org(
@@ -104,6 +104,9 @@ def send_user_course_progress_email(current_progress, progress_last_email_sent_a
 def send_user_course_completion_email(user_id, course_key):
     course_id = CourseKey.from_string(course_key)
     user = User.objects.get(id=user_id)
+    user_completion_progress_email_history, _ = CourseCompletionEmailHistory.objects.get_or_create(user=user, course_key=course_key)
+    if user_completion_progress_email_history.is_completion_email_sent:
+        return
     collected_block_structure = get_block_structure_manager(course_id).get_collected()
     course_grade = CourseGradeFactory().read(user, collected_block_structure=collected_block_structure)
     passing_grade = int(course_grade.percent * 100)
@@ -114,7 +117,7 @@ def send_user_course_completion_email(user_id, course_key):
         'site_domain',
         settings.LMS_HOST
     )
-    site = Site.objects.get(domain=site_domain)
+    site = Site.objects.filter(domain=site_domain).first() or Site.objects.first() or Site.objects.get_current()
     message_context = get_base_template_context(site)
     course_progress_url = get_learning_mfe_home_url(course_key=course_key, url_fragment='progress')
     platform_name = configuration_helpers.get_value_for_org(
@@ -140,6 +143,8 @@ def send_user_course_completion_email(user_id, course_key):
                 user_context={'full_name': user.profile.name}
             )
             ace.send(msg)
+            user_completion_progress_email_history.is_completion_email_sent = True
+            user_completion_progress_email_history.save()
             logger.info('course completion email sent to user:')
             return True
     except Exception as e:  # pylint: disable=broad-except
