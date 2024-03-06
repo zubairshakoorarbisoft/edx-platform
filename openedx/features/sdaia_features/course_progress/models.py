@@ -14,3 +14,4 @@ class CourseCompletionEmailHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course_key = CourseKeyField(max_length=255, db_index=True)
     last_progress_email_sent = models.IntegerField(default=0)
+    is_completion_email_sent = models.BooleanField(default=False)
