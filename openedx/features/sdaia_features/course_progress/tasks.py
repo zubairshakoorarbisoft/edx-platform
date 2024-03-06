@@ -60,7 +60,7 @@ def send_user_course_progress_email(current_progress, progress_last_email_sent_a
     site_domain = configuration_helpers.get_value_for_org(
         course.org,
         'site_domain',
-        settings.LMS_HOST
+        settings.LMS_BASE
     )
     site = Site.objects.filter(domain=site_domain).first() or Site.objects.first() or Site.objects.get_current()
     message_context = get_base_template_context(site)
@@ -115,7 +115,7 @@ def send_user_course_completion_email(user_id, course_key):
     site_domain = configuration_helpers.get_value_for_org(
         course.org,
         'site_domain',
-        settings.LMS_HOST
+        settings.LMS_BASE
     )
     site = Site.objects.filter(domain=site_domain).first() or Site.objects.first() or Site.objects.get_current()
     message_context = get_base_template_context(site)
