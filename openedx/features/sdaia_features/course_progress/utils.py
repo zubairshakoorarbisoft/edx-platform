@@ -18,5 +18,5 @@ def get_user_course_progress(user, course_key):
     locked_count = completion_summary.get('locked_count', 0)
     total_count = complete_count + incomplete_count + locked_count
 
-    completion_percentage = (complete_count / total_count) * 100
+    completion_percentage = round((complete_count / total_count) * 100)
     return completion_percentage
