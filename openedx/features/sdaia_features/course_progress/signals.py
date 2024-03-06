@@ -56,9 +56,12 @@ def send_course_progress_milestones_achievement_emails(**kwargs):
         user_completion_percentage = get_user_course_progress(user, course_key)
 
     if user_completion_percentage > progress_last_email_sent_at:
+        percentage_crossed = 0
         for course_completion_percentages_for_email in course_completion_percentages_for_emails:
             if user_completion_percentage >= course_completion_percentages_for_email > progress_last_email_sent_at:
-                send_user_course_progress_email.delay(user_completion_percentage, progress_last_email_sent_at, course_completion_percentages_for_email, str(course_key), user_id)
+                percentage_crossed = course_completion_percentages_for_email
+        if percentage_crossed > 0:
+            send_user_course_progress_email.delay(user_completion_percentage, progress_last_email_sent_at, percentage_crossed, str(course_key), user_id)
 
 
 @receiver(COURSE_GRADE_NOW_PASSED, dispatch_uid="course_completion")

@@ -70,7 +70,8 @@ def send_user_course_progress_email(current_progress, progress_last_email_sent_a
         'PLATFORM_NAME',
         settings.PLATFORM_NAME
     )
-
+    logger.info(f'\n\n Last email was sent at: {progress_last_email_sent_at} \n\n')
+    logger.info(f'\n\n User current progress is: {current_progress} and has crossed milestone of {course_completion_percentages_for_email} \n\n')
     context={
             'current_progress': int(current_progress),
             'progress_milestone_crossed': progress_last_email_sent_at,
