@@ -268,8 +268,8 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     skip_email = _skip_activation_email(
         user, running_pipeline, third_party_provider,
     )
-
-    if skip_email:
+    is_drupal = True if request.GET.get('is_drupal') else False
+    if skip_email or is_drupal:
         registration.activate()
     else:
         redirect_to, root_url = get_next_url_for_login_page(request, include_host=True)
