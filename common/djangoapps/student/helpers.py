@@ -672,7 +672,7 @@ def process_survey_link(survey_link, user):
     return survey_link.format(UNIQUE_ID=unique_id_for_user(user))
 
 
-def do_create_account(form, custom_form=None):
+def do_create_account(form, custom_form=None, is_active=False):
     """
     Given cleaned post variables, create the User and UserProfile objects, as well as the
     registration for this user.
@@ -700,7 +700,7 @@ def do_create_account(form, custom_form=None):
     user = User(
         username=proposed_username,
         email=form.cleaned_data["email"],
-        is_active=False
+        is_active=is_active
     )
     password = normalize_password(form.cleaned_data["password"])
     user.set_password(password)

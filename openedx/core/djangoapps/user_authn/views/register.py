@@ -231,11 +231,11 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
     )
     custom_form = get_registration_extension_form(data=params)
     is_marketable = params.get('marketing_emails_opt_in') in ['true', '1']
-
+    is_drupal = True if request.GET.get('is_drupal') else False
     # Perform operations within a transaction that are critical to account creation
     with outer_atomic():
         # first, create the account
-        (user, profile, registration) = do_create_account(form, custom_form)
+        (user, profile, registration) = do_create_account(form, custom_form, is_drupal)
 
         third_party_provider, running_pipeline = _link_user_to_third_party_provider(
             is_third_party_auth_enabled, third_party_auth_credentials_in_api, user, request, params,
