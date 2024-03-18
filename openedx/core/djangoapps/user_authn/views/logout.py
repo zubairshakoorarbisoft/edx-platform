@@ -16,6 +16,7 @@ from openedx.features.edly.models import EdlyMultiSiteAccess
 from openedx.features.edly.utils import get_edly_sub_org_from_request
 from openedx.core.djangoapps.user_authn.cookies import delete_logged_in_cookies
 from openedx.core.djangoapps.user_authn.utils import is_safe_login_or_logout_redirect
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from common.djangoapps.third_party_auth import pipeline as tpa_pipeline
 
 
@@ -78,11 +79,11 @@ class LogoutView(TemplateView):
             require_https=self.request.is_secure(),
         )
 
-        if self.is_user_panel_admin:
-            return settings.PANEL_ADMIN_LOGOUT_REDIRECT_URL
-
         if use_target_url:
             return target_url
+
+        if self.is_user_panel_admin:
+            return configuration_helpers.get_value('PANEL_NOTIFICATIONS_BASE_URL', self.default_target)
 
         return self.default_target
 
