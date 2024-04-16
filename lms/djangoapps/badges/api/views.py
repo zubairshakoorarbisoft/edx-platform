@@ -7,6 +7,7 @@ import json
 import logging
 
 from django.conf import settings
+from django.http import Http404
 from django.db.models import Case, Count, IntegerField, Sum, Value, When
 from django.utils.translation import gettext as _
 from edx_rest_framework_extensions.auth.session.authentication import SessionAuthenticationAllowInactiveUser
@@ -15,7 +16,7 @@ from jwkest.jws import JWS
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.django.models import CourseKeyField
 from opaque_keys.edx.keys import CourseKey
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.exceptions import APIException
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -151,13 +152,13 @@ class UserBadgeAssertions(generics.ListAPIView):
         return queryset
 
 
-class LeaderboardView(generics.ListAPIView):
+class LeaderboardView(viewsets.ModelViewSet):
     """
     Leaderboard List API View
     """
     serializer_class = UserLeaderboardSerializer
     queryset = LeaderboardEntry.objects.all().order_by('-score')
-
+    lookup_field = "user__username"
 
 class VerfyTokenView(APIView):
     """

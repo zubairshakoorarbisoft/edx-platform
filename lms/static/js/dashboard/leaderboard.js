@@ -42,6 +42,26 @@ var edx = edx || {};
         return listItem;
     };
 
+    edx.dashboard.leaderboard.renderUserScore = function () {
+        var userScoreElement = $("#leaderboard-user-score");
+        var usernmae = $("#leaderboard-username").html();
+        var userScoreURL = `/api/badges/v1/leaderboard/${usernmae}`;
+        var fetchingScoreData = false;
+
+        edx.dashboard.leaderboard.fetchData(userScoreURL)
+            .then(function (userScoreData) {
+               if (userScoreData && userScoreData.score){
+                    userScoreElement.text(userScoreData.score);
+               }
+            })
+            .catch(function (error) {
+                console.error('Error fetching and rendering data:', error);
+            })
+            .finally(function () {
+                fetchingScoreData = false;
+            });
+    };
+
     edx.dashboard.leaderboard.renderUserList = function () {
         var userListElement = $('#userList');
         var nextPageUrl = '/api/badges/v1/leaderboard/';
@@ -80,7 +100,7 @@ var edx = edx || {};
     };
 
     edx.dashboard.leaderboard.init = function() {
+        edx.dashboard.leaderboard.renderUserScore();
         edx.dashboard.leaderboard.renderUserList();
     }
-
 }(jQuery));
