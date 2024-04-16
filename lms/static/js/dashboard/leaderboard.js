@@ -45,7 +45,7 @@ var edx = edx || {};
     edx.dashboard.leaderboard.renderUserScore = function () {
         var userScoreElement = $("#leaderboard-user-score");
         var usernmae = $("#leaderboard-username").html();
-        var userScoreURL = `/api/badges/v1/leaderboard/${usernmae}`;
+        var userScoreURL = '/api/badges/v1/leaderboard/'.concat(usernmae);
         var fetchingScoreData = false;
 
         edx.dashboard.leaderboard.fetchData(userScoreURL)
