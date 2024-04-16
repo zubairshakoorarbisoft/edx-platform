@@ -299,7 +299,13 @@ from common.djangoapps.student.models import CourseEnrollment
 
         <div class="leaderboard">
           <div class="leaderboard-header">
-            <div class="title">${_('Leaderboard')}</div>
+            <div>
+              <div class="title">${_('Leaderboard')}</div>
+              <div>
+                <div id="leaderboard-username" hidden>${user.username}</div>
+                <div>${_('score')}: <span id="leaderboard-user-score">0</span></div>
+              </div>
+            </div>
             <!-- <span class="icon fa fa-remove" aria-hidden="true"></span> -->
             <img class="star-icon" src="${static.url('images/stars.svg')}" alt="Leaderboard">
           </div>
