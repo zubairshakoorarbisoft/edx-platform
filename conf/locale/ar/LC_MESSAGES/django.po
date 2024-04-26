@@ -1,0 +1,270 @@
+# #-#-#-#-#  django-partial.po (edx-platform)  #-#-#-#-#
+# edX community translations have been downloaded from Arabic (http://app.transifex.com/open-edx/edx-platform/language/ar/).
+# Copyright (C) 2023 EdX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+#
+# Translators:
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013
+# abdallah.nassif <abdallah_n@hotmail.com>, 2013
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013-2015
+# abdallah.nassif <abdallah_n@hotmail.com>, 2013
+# Abderraouf Mehdi Bouhali <armbouhali@gmail.com>, 2022
+# Ali Hasan <ahasan@qrf.org>, 2014,2016
+# Ahmad AbdArrahman <mygooglizer@gmail.com>, 2013-2014
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015-2016
+# 11e20772453a5447f86b653d16e71bd3_f829fca <fc1a175da0e051e8f2220ae4e8c37e82_372655>, 2016
+# 11e20772453a5447f86b653d16e71bd3_f829fca <fc1a175da0e051e8f2220ae4e8c37e82_372655>, 2016
+# Ali Hasan <ahasan@qrf.org>, 2014,2016
+# a.nassif <a.nassif@sit-mena.com>, 2013
+# a.nassif <a.nassif@sit-mena.com>, 2013
+# 6e68c7971a89e50e680ae9444d303c8f, 2016
+# AR R1 <e2far1@hotmail.com>, 2016
+# A <smart.9922@hotmail.com>, 2014
+# AzizAhmed <dr.zezo@gmail.com>, 2014
+# Bashar Al-Abdulhadi, 2016
+# Bashar Al-Abdulhadi, 2016
+# Belal A. Nwiran <bnwiran@gmail.com>, 2015
+# طاهر <charaf.le.prince@gmail.com>, 2014
+# Diana Huang <dkh@edx.org>, 2022
+# AzizAhmed <dr.zezo@gmail.com>, 2014
+# e2f_ar r3 <e2f_ar_r3@outlook.com>, 2016-2017
+# e2f_ar t3 <e2f_ar_t3@outlook.com>, 2016
+# Ghassan Maslamani <ghassan.maslamani@gmail.com>, 2021-2022
+# Glib Glugovskiy <glugov1998@gmail.com>, 2021
+# Hamza Madni, 2022
+# HasnaG <hasnaa.elghandor@yahoo.com>, 2014
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# Hassan Husseini <hassan@constructeducation.com>, 2020
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2017
+# Karim ElSayed <karim.mohamed.eg@gmail.com>, 2016
+# Karim ElSayed <karim.mohamed.eg@gmail.com>, 2016
+# Khaled Jalajel <khaledjalajeldode@gmail.com>, 2015
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# 605bd9c9086e2cc17898f1235807d246_5b33f23 <a39715de0964f7985844673f40a14f51_522490>, 2016
+# 605bd9c9086e2cc17898f1235807d246_5b33f23 <a39715de0964f7985844673f40a14f51_522490>, 2016
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# may <may@qordoba.com>, 2013
+# may <may@qordoba.com>, 2013-2015
+# Mohamed, 2014
+# Mohamed, 2014
+# Nabeel El-Dughailib <nabeel@qordoba.com>, 2014-2015
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013
+# Natalia Berdnikov <nberdnikov@edx.org>, 2016
+# Ned Batchelder <ned@edx.org>, 2015-2017
+# NELC Open edX Translation <openedx@elc.edu.sa>, 2020-2021
+# Omar Al-Ithawi <omar.al.dolaimy@gmail.com>, 2014-2016
+# Omar Al-Ithawi <i@omardo.com>, 2021
+# Osama M. Mneina <o.mneina@gmail.com>, 2014,2021
+# RaghadG <raghad_g@yahoo.com>, 2014
+# RaghadG <raghad_g@yahoo.com>, 2014
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# shefaa abu jabel <shefaa.aj@gmail.com>, 2016-2017
+# SiddigSami <siddigsami@live.com>, 2014-2015
+# Soha Assali <soha+transifex@qordoba.com>, 2015-2016
+# soliman osman <solimanosman@windowslive.com>, 2014
+# Tim McCormack, 2022
+# طاهر <charaf.le.prince@gmail.com>, 2014
+# #-#-#-#-#  django-studio.po (edx-platform)  #-#-#-#-#
+# edX community translations have been downloaded from Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/).
+# Copyright (C) 2023 EdX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+#
+# Translators:
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013
+# abdallah.nassif <abdallah_n@hotmail.com>, 2013
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013,2015
+# Abderraouf Mehdi Bouhali <armbouhali@gmail.com>, 2022
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015-2016
+# a.nassif <a.nassif@sit-mena.com>, 2013
+# 6e68c7971a89e50e680ae9444d303c8f, 2016-2017
+# AR R1 <e2far1@hotmail.com>, 2016
+# ASSYASS Mahmoud <mahmoud.assyass@gmail.com>, 2015
+# ASSYASS Mahmoud <mahmoud.assyass@gmail.com>, 2015
+# AzizAhmed <dr.zezo@gmail.com>, 2014
+# AzizAhmed <dr.zezo@gmail.com>, 2014
+# e2f_ar r3 <e2f_ar_r3@outlook.com>, 2017
+# Ghassan Maslamani <ghassan.maslamani@gmail.com>, 2021
+# Hassan Husseini <hassan@constructeducation.com>, 2020
+# Karim ElSayed <karim.mohamed.eg@gmail.com>, 2016
+# Karim ElSayed <karim.mohamed.eg@gmail.com>, 2016
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# may <may@qordoba.com>, 2013-2014
+# may <may@qordoba.com>, 2014
+# wd3bbas <mohed.alabbas@gmail.com>, 2014
+# Nabeel El-Dughailib <nabeel@qordoba.com>, 2014-2015
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013
+# NELC Open edX Translation <openedx@elc.edu.sa>, 2020
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Shadi Naif <shadinaif@gmail.com>, 2018
+# shefaa abu jabel <shefaa.aj@gmail.com>, 2017
+# Soha Assali <soha+transifex@qordoba.com>, 2015-2016
+# soliman osman <solimanosman@windowslive.com>, 2015
+# wd3bbas <mohed.alabbas@gmail.com>, 2014
+# #-#-#-#-#  mako.po (edx-platform)  #-#-#-#-#
+# edX community translations have been downloaded from Arabic (http://app.transifex.com/open-edx/edx-platform/language/ar/)
+# Copyright (C) 2023 edX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+#
+# Translators:
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013
+# abdallah.nassif <abdallah_n@hotmail.com>, 2013
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013-2015
+# abdallah.nassif <abdallah_n@hotmail.com>, 2013
+# Abderraouf Mehdi Bouhali <armbouhali@gmail.com>, 2022
+# Ali Hasan <ahasan@qrf.org>, 2016
+# Ahmad AbdArrahman <mygooglizer@gmail.com>, 2013-2014
+# ahmed hai <a7medpeace@gmail.com>, 2017
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015-2016
+# Ahmed Rizk <mr.rizk@gmail.com>, 2019
+# 11e20772453a5447f86b653d16e71bd3_f829fca <fc1a175da0e051e8f2220ae4e8c37e82_372655>, 2016
+# 11e20772453a5447f86b653d16e71bd3_f829fca <fc1a175da0e051e8f2220ae4e8c37e82_372655>, 2016
+# Ali Hasan <ahasan@qrf.org>, 2016
+# 6e68c7971a89e50e680ae9444d303c8f, 2016-2017
+# AR R1 <e2far1@hotmail.com>, 2016
+# ayshibly <ayshibly@gmail.com>, 2014
+# ayshibly <ayshibly@gmail.com>, 2014
+# baraahadri <baraahadri@gmail.com>, 2014
+# baraahadri <baraahadri@gmail.com>, 2014
+# Belal A. Nwiran <bnwiran@gmail.com>, 2015
+# طاهر <charaf.le.prince@gmail.com>, 2014
+# Deimer Morales, 2023
+# e2f_ar r3 <e2f_ar_r3@outlook.com>, 2017
+# e2f_ar t3 <e2f_ar_t3@outlook.com>, 2016
+# Hamza Madni, 2022
+# Hani <hani0a@hotmail.com>, 2014
+# Hani <hani0a@hotmail.com>, 2014
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# Hassan Husseini <hassan@constructeducation.com>, 2020
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# Jad Freij <jkfreij@gmail.com>, 2014
+# Jad Freij <jkfreij@gmail.com>, 2014
+# Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015
+# Karim ElSayed <karim.mohamed.eg@gmail.com>, 2016
+# Karim ElSayed <karim.mohamed.eg@gmail.com>, 2016
+# keltouma <said.benkrim@gmail.com>, 2016
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# 605bd9c9086e2cc17898f1235807d246_5b33f23 <a39715de0964f7985844673f40a14f51_522490>, 2016
+# 605bd9c9086e2cc17898f1235807d246_5b33f23 <a39715de0964f7985844673f40a14f51_522490>, 2016
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# may <may@qordoba.com>, 2014-2015
+# 4680047a2495ceaebee56dbfbabe4f6f_3681b0d <a5a89166f273f5df5f8e02e07a19abc7_235817>, 2014
+# 4680047a2495ceaebee56dbfbabe4f6f_3681b0d <a5a89166f273f5df5f8e02e07a19abc7_235817>, 2014
+# Nabeel El-Dughailib <nabeel@qordoba.com>, 2014-2015
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013-2014
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013
+# Ned Batchelder <ned@edx.org>, 2016
+# NELC Open edX Translation <openedx@elc.edu.sa>, 2020
+# Omar Al-Ithawi <omar.al.dolaimy@gmail.com>, 2014-2017
+# Osama M. Mneina <o.mneina@gmail.com>, 2014
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Sarina Canelake <sarina@tcril.org>, 2014
+# Shadi Naif <shadinaif@gmail.com>, 2019
+# shefaa abu jabel <shefaa.aj@gmail.com>, 2016-2017
+# Sherif Halawa <shalawa@qrf.org>, 2016
+# Soha Assali <soha+transifex@qordoba.com>, 2015-2016
+# طاهر <charaf.le.prince@gmail.com>, 2014
+# #-#-#-#-#  mako-studio.po (edx-platform)  #-#-#-#-#
+# edX community translations have been downloaded from Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)
+# Copyright (C) 2023 edX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+#
+# Translators:
+# 6e68c7971a89e50e680ae9444d303c8f, 2016
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013
+# abdallah.nassif <abdallah_n@hotmail.com>, 2013
+# Abdallah Nassif <a.nassif012@gmail.com>, 2013-2014
+# Abderraouf Mehdi Bouhali <armbouhali@gmail.com>, 2022
+# Ali Hasan <ahasan@qrf.org>, 2016
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015-2016
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2016
+# Ali Hasan <ahasan@qrf.org>, 2016
+# 6e68c7971a89e50e680ae9444d303c8f, 2016
+# A <smart.9922@hotmail.com>, 2014
+# طاهر <charaf.le.prince@gmail.com>, 2014
+# e2f_ar r3 <e2f_ar_r3@outlook.com>, 2017
+# e2f_ar t3 <e2f_ar_t3@outlook.com>, 2016
+# 93c1d14d51cc4bd666df4469d7037214_dcbe85f <fcc66ba80de7e07e131049ac314020f6_160732>, 2014
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# Hassan Husseini <hassan@constructeducation.com>, 2020
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# Jad Freij <jkfreij@gmail.com>, 2014
+# Jad Freij <jkfreij@gmail.com>, 2014
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# Mahmoud Elkhateeb <eng.elkhteeb@gmail.com>, 2013
+# may <may@qordoba.com>, 2014-2015
+# Mino Basha, 2016
+# Mino Basha, 2016
+# Nabeel El-Dughailib <nabeel@qordoba.com>, 2014-2015
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013
+# Najwan Al Rousan <najwanrousan@gmail.com>, 2013
+# Ned Batchelder <ned@edx.org>, 2016
+# NELC Open edX Translation <openedx@elc.edu.sa>, 2020
+# Omar Al-Ithawi <omar.al.dolaimy@gmail.com>, 2015-2016
+# Roaa Nader <roaanader002005@gmail.com>, 2021
+# 93c1d14d51cc4bd666df4469d7037214_dcbe85f <fcc66ba80de7e07e131049ac314020f6_160732>, 2014
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Sarina Canelake <sarina@tcril.org>, 2014
+# shefaa abu jabel <shefaa.aj@gmail.com>, 2016-2017
+# Soha Assali <soha+transifex@qordoba.com>, 2015-2016
+# soliman osman <solimanosman@windowslive.com>, 2015
+# طاهر <charaf.le.prince@gmail.com>, 2014
+# #-#-#-#-#  wiki.po (edx-platform)  #-#-#-#-#
+# edX community translations have been downloaded from Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)
+# Copyright (C) 2023 edX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+#
+# Translators:
+# Abderraouf Mehdi Bouhali <armbouhali@gmail.com>, 2022
+# Almaazon <Ahmed.Almaazon@hotmail.com>, 2014
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Almaazon <Ahmed.Almaazon@hotmail.com>, 2014
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# Hassan Husseini <hassan@constructeducation.com>, 2020
+# Hassan05 <hassan.upb@gmail.com>, 2014
+# mabdelhaq <mabdelhaq@qou.edu>, 2014
+# mabdelhaq <mabdelhaq@qou.edu>, 2014
+# may <may@qordoba.com>, 2014-2015
+# Nabeel El-Dughailib <nabeel@qordoba.com>, 2014-2015
+# NELC Open edX Translation <openedx@elc.edu.sa>, 2020
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# Sahbi BG <sahbi.g@gmail.com>, 2017
+# SalmaGhazal <salma-ghazal1@hotmail.com>, 2014
+# SalmaGhazal <salma-ghazal1@hotmail.com>, 2014
+# #-#-#-#-#  edx_proctoring_proctortrack.po (0.1a)  #-#-#-#-#
+# edX community translations have been downloaded from Arabic (https://www.transifex.com/open-edx/teams/6205/ar/)
+# Copyright (C) 2023 edX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+# EdX Team <info@edx.org>, 2023.
+#
+# Translators:
+# NELC Open edX Translation <openedx@elc.edu.sa>, 2020
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1a\n"
+"Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
+"POT-Creation-Date: 2023-03-26 20:42+0000\n"
+"PO-Revision-Date: 2019-01-20 20:43+0000\n"
+"Last-Translator: NELC Open edX Translation <openedx@elc.edu.sa>, 2020\n"
+"Language-Team: Arabic (https://www.transifex.com/open-edx/teams/6205/ar/)\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Generated-By: Babel 2.8.0\n"

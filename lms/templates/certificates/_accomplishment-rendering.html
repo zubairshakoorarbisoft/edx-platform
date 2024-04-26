@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- <link href="https://db.onlinewebfonts.com/c/47d92bf6ae3dd16b9babdb8a7580be85?family=DIN+Next+LT+Arabic+Heavy" rel="stylesheet">
+  <link href="https://db.onlinewebfonts.com/c/47d92bf6ae3dd16b9babdb8a7580be85?family=DIN+Next+LT+Arabic+Heavy" rel="stylesheet"> -->
+        <title>SDAIA Academy - Certificate of completion</title>
+    </head>
+    <body>
+        <!-- <div class="certificate-wrapper">
+    <div class="certificate-header">
+      <div class="certificate-header-col">
+        <img src="./../../static/images/SDAIA-Academy-logo.svg" class="sdaia-academy-logo" width="195" alt="SDAIA Academy Logo">
+        <img src="./../../static/images/main.svg" width="132" alt="SDAIA Academy Main">
+      </div>
+      <div class="certificate-header-col">
+        <img src="./../../static/images/SDAIA-logo.svg" width="158" alt="SDAIA Logo">
+      </div>
+    </div>
+    <div class="certificate-body">
+      <div class="certificate-heading text-primary">
+        <h1>شهادة إتمام</h1>
+        <strong class="subtitle">CERTIFICATE OF COMPLETION</strong>
+      </div>
+      <div class="certificate-main">
+        <h2 class="main-title">: الهيئة السعودية للبيانات والذكاء الاصطناعي ( سدايا ) تمنح</h2>
+        <p class="text-secondary">${accomplishment_copy_name}</p>
+        <h2 class="sub-title">هذه الشهادة وذلك لإتمام البرنامج التدريبي </h2>
+        <p class="text-secondary">${accomplishment_copy_course_name}</p>
+        <p class="limited-text"> ومدته<span class="text-secondary">${course_duration} ساعات تدريبية </span> بتاريخ <span class="text-secondary">${certificate_date_issued}</span></p>
+        <p>مع تمنياتنا بدوام التوفيق والنجاح</p>
+        <p>أكاديمية سدايا</p>
+      </div>
+    </div>
+  </div> -->
+
+        <div class="certificateWrapper">
+            <div class="certificateWrapper__header">
+                <img
+                    src="./../../static/images/SDAIA-Academy-logo.svg"
+                    class="sdaia-academy-logo"
+                    alt="SDAIA Academy Logo"
+                />
+                <img src="./../../static/images/SDAIA-logo.svg" class="sdaia-logo" alt="SDAIA Logo" />
+            </div>
+            <div class="certificateWrapper__bodywraper">
+                <div class="certificateWrapper__topWrapper">
+                    <h1 class="certificateWrapper__mainTitleWrap">
+                        <div class="certificateWrapper__titleAr diodrumFontFamily" > <strong> شهادة إتمام    </strong></div>
+                        <div class="certificateWrapper__title">CERTIFICATE OF COMPLETION</div>
+                    </h1>
+
+                    <div class="certificateWrapper__subTitleWrap">
+                        <div class="certificateWrapper__subTitleBody">
+                            <div class="certificateWrapper__subTitle">
+                                Saudi Data and AI Authority (SDAIA) Certifies that
+                            </div>
+                            <div class="certificateWrapper__subTitleAR text-align diodrumFontFamily">
+                                :الهيئة السعودية للبيانات والذكاء الاصطناعي ( سدايا ) تمنح
+                            </div>
+                        </div>
+                        <div class="certificateWrapper__personWrap">
+                            <label class="certificateWrapper__personName">${accomplishment_copy_name} </label>
+                            <label class="certificateWrapper__personName diodrumFontFamily">
+                             ${accomplishment_copy_name}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="certificateWrapper__body">
+                    <div class="certificateWrapper__listWraper">
+                        <div class="certificateWrapper__valueListWrap">
+                            <div class="certificateWrapper__list">
+                                <span> has succsessfully completed the </span>
+                                <span class="diodrumFontFamily text-align"> شهادة إتمام ا لدورة التدريبية </span>
+                            </div>
+                            <div class="certificateWrapper__innerDetailWrap ">
+                                <label class="certificateWrapper__valueName">
+                                    ${accomplishment_copy_course_name}
+                                </label>
+                                <label class="certificateWrapper__valueName text-align diodrumFontFamily"> ${accomplishment_copy_course_name}</label>
+                            </div>
+                        </div>
+                        <div class="certificateWrapper__valueListWrap">
+                            <div class="certificateWrapper__list">
+                                <span class="flex-small">
+                                    Consisting of
+                                    <span class="orange-color">(<strong>${course_duration}</strong>)</span>
+                                    hours</span
+                                >
+                                <span class="flex-small diodrumFontFamily text-align"
+                                    >ساعة تدريبية<span class="orange-color diodrumFontFamily"
+                                        >(<strong>${course_duration}</strong>)</span
+                                    >بمعدل
+                                </span>
+                            </div>
+                            <div class="certificateWrapper__innerDetailWrap">
+                                <label class="certificateWrapper__valueName flex-small">
+                                    <span class="black-color">on</span>
+                                    <span class="orange-color">${certificate_date_issued}</span>
+                                </label>
+                                <label class="certificateWrapper__valueName flex-small">
+                                    <span class="orange-color diodrumFontFamily">${certificate_date_issued}</span>
+                                    <span class="black-color diodrumFontFamily">بتاريخ</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

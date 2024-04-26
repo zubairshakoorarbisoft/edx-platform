@@ -1,0 +1,13 @@
+<!-- {% extends 'ace_common/edx_ace/common/base_body.html' %} -->
+
+{% load i18n %}
+{% load static %}
+{% block content %}
+<p style="color: rgba(0,0,0,.75);">
+    {% autoescape off %}
+    {# xss-lint: disable=django-blocktrans-missing-escape-filter #}
+    {% blocktrans %}This is one time OTP {{ activation_code }}. Kindly use this to complete nafath authentication with {{ platform_name }}.{% endblocktrans %}
+    {% endautoescape %}
+    <br />
+</p>
+{% endblock %}

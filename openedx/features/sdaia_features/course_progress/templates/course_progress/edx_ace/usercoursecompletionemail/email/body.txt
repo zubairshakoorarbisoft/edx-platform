@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}
+{% blocktrans %}Congratulations!{% endblocktrans %}
+{% blocktrans %}{{ full_name }}{% endblocktrans %}
+{% blocktrans %}You have successfully completed this course! {% endblocktrans %}
+{% blocktrans %}Please click {% endblocktrans %}<a href="{{ course_progress_url }}">{% blocktrans %}here{% endblocktrans %}</a>{% blocktrans %} to view your accreditation. {% endblocktrans %}    
+{% blocktrans %}Thank you. {% endblocktrans %}
+{% blocktrans %}SDAIA Academy{% endblocktrans %}
+{% endautoescape %}
