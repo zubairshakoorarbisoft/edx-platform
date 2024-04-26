@@ -189,13 +189,11 @@ class BadgrBackend(BadgeBackend):
                 "identity": user.email,
                 "type": "email"
             },
-            "evidence": [
-                {
-                    "url": evidence_url
-                }
-            ],
             "notify": settings.BADGR_ENABLE_NOTIFICATIONS,
         }
+        if evidence_url:
+            data["evidence"] = [{"url": evidence_url}]
+
         response = requests.post(
             self._assertion_url(badge_class.badgr_server_slug),
             headers=self._get_headers(),
