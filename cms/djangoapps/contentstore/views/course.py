@@ -57,7 +57,7 @@ from openedx.features.content_type_gating.partitions import CONTENT_TYPE_GATING_
 from openedx.features.course_experience.waffle import ENABLE_COURSE_ABOUT_SIDEBAR_HTML
 from openedx.features.course_experience.waffle import waffle as course_experience_waffle
 from openedx.features.edly.models import EdlySubOrganization
-from openedx.features.edly.utils import filter_courses_based_on_org, toggle_lti_user_parameters
+from openedx.features.edly.utils import filter_courses_based_on_org, is_chatly_integrated, get_chatly_token, get_edly_sub_org_from_request, toggle_lti_user_parameters
 from openedx.features.edly.validators import is_courses_limit_reached_for_plan
 from common.djangoapps.student import auth
 from common.djangoapps.student.auth import has_course_author_access, has_studio_read_access, has_studio_write_access
@@ -625,16 +625,30 @@ def course_listing(request):
     site_config = configuration_helpers.get_current_site_configuration()
     tracking_api_url = f"{site_config.get_value('PANEL_NOTIFICATIONS_BASE_URL')}/api/v1/tracking_events/"
     frontent_redirect_url = ''
-    frontend_url = [url for url in settings.CORS_ORIGIN_WHITELIST if 'apps' in url]   
+    frontend_url = [url for url in settings.CORS_ORIGIN_WHITELIST if 'apps' in url]
     if len(frontend_url):
         frontent_redirect_url = '{}/panel/settings/billing'.format(frontend_url[0])
-    
+
+    if 'chatly_token' in request.COOKIES:
+        chatly_token = request.COOKIES['chatly_token']
+        eval_string = "None"
+    else:
+        chatly_token = get_chatly_token()
+        eval_string = 'response.set_cookie("chatly_token", chatly_token, max_age=604600)'
+
     try:
         destination_course_id = DESTINATION_COURSE_ID_PATTERN.format(org[0])
+        chatly_integrated = True
+        if not ("CHATLY" in site_config.site_values["DJANGO_SETTINGS_OVERRIDE"] and
+                site_config.site_values["DJANGO_SETTINGS_OVERRIDE"]["CHATLY"]["chatly_integrated"]):
+            chatly_integrated = is_chatly_integrated(user.email, org[0], chatly_token)
+            site_config.site_values["DJANGO_SETTINGS_OVERRIDE"]["CHATLY"] = {"chatly_integrated": chatly_integrated}
+            site_config.save()
     except Exception:
+        chatly_integrated = False
         destination_course_id = "dummy"
 
-    return render_to_response(u'index.html', {
+    response = render_to_response(u'index.html', {
         u'default_course_id': destination_course_id,
         u'tracking_api_url': tracking_api_url,
         u'courses': active_courses,
@@ -653,8 +667,15 @@ def course_listing(request):
         u'allow_course_reruns': settings.FEATURES.get(u'ALLOW_COURSE_RERUNS', True),
         u'optimization_enabled': optimization_enabled,
         u'is_course_limit_reached':is_courses_limit_reached_for_plan(),
-        u'frontend_redirect_url':frontent_redirect_url
+        u'frontend_redirect_url':frontent_redirect_url,
+        u'org': org,
+        u'sub_org': get_edly_sub_org_from_request(request).slug,
+        u'chatly_token': chatly_token,
+        u'is_chatly_integrated': chatly_integrated,
     })
+
+    eval(eval_string)
+    return response
 
 
 def _get_rerun_link_for_item(course_key):
