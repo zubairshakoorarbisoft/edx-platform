@@ -37,6 +37,7 @@ from openedx.core.djangoapps.crawlers.models import CrawlersConfig
 from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
 from openedx.core.djangoapps.user_api.preferences.api import get_user_preference
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.features.course_experience import (
     COURSE_ENABLE_UNENROLLED_ACCESS_FLAG,
@@ -47,13 +48,13 @@ from openedx.features.course_experience import (
 from openedx.features.course_experience.urls import COURSE_HOME_VIEW_NAME
 from openedx.features.course_experience.views.course_sock import CourseSockFragmentView
 from openedx.features.course_experience.utils import get_course_outline_block_tree
+from openedx.features.edly.models import ChatlyWidget
 from openedx.features.enterprise_support.api import data_sharing_consent_required
 from common.djangoapps.student.models import CourseEnrollment
 from common.djangoapps.util.views import ensure_valid_course_key
 from xmodule.course_module import COURSE_VISIBILITY_PUBLIC
 from xmodule.modulestore.django import modulestore
 from xmodule.x_module import PUBLIC_VIEW, STUDENT_VIEW
-
 from ..access import has_access
 from ..access_utils import check_public_access
 from ..courses import check_course_access_with_redirect, get_course_with_access, get_current_child, get_studio_url
@@ -425,8 +426,22 @@ class CoursewareIndex(View):
             (settings.FEATURES.get('ENABLE_COURSEWARE_SEARCH_FOR_COURSE_STAFF') and self.is_staff)
         )
         staff_access = self.is_staff
+        chatly_widget = ChatlyWidget.objects.filter(
+            course_key=six.text_type(self.course.id)
+        )
+        is_enable = False
+        bot_key = ''
+        if chatly_widget.exists():
+            is_enable = chatly_widget.first().is_enable
+            bot_key = chatly_widget.first().bot_key
+
+        site_config = configuration_helpers.get_current_site_configuration()
+        show_chatly_integration = site_config.site_values["DJANGO_SETTINGS_OVERRIDE"].get("CHATLY",{}).get("show_chatly_integration",True)
 
         courseware_context = {
+            u'show_chatly_integration': show_chatly_integration,
+            'bot_key':bot_key,
+            'is_enable': is_enable,
             'csrf': csrf(self.request)['csrf_token'],
             'course': self.course,
             'course_url': course_url,
