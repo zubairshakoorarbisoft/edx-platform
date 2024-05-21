@@ -788,15 +788,20 @@ def create_user_unsubscribe_url(email, site):
     if not panel_backend_url:
         return None
 
-    fernet = Fernet(settings.EMAIL_UNSUBSCRIPTION_ENCRYPTION_KEY)
-    encrypted_user_data = fernet.encrypt(
-        json.dumps(
-            {
-                "email": email,
-                "sub_org": edly_sub_org.slug,
-            }
-        ).encode()
-    ).decode()
+    try:
+        fernet = Fernet(settings.EMAIL_UNSUBSCRIPTION_ENCRYPTION_KEY)
+        encrypted_user_data = fernet.encrypt(
+            json.dumps(
+                {
+                    "email": email,
+                    "sub_org": edly_sub_org.slug,
+                }
+            ).encode()
+        ).decode()
+
+    except (ValueError, TypeError) as Error:
+        LOGGER.error('Error encrypting email unsubscribe parameter %s', Error)
+        return None
 
     url = "{base_url}{sub_url}?param={param}".format(
         base_url=panel_backend_url,
