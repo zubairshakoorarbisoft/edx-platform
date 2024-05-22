@@ -764,7 +764,10 @@ def has_not_unsubscribe_user_email(site, email):
     except EdlySubOrganization.DoesNotExist:
         edly_sub_org = site.edly_sub_org_for_studio
 
-    return not EdlyMultiSiteAccess.objects.get(sub_org=edly_sub_org, user__email=email).has_unsubscribed_email
+    try:
+        return not EdlyMultiSiteAccess.objects.get(sub_org=edly_sub_org, user__email=email).has_unsubscribed_email
+    except EdlyMultiSiteAccess.DoesNotExist:
+        return True
 
 
 def create_user_unsubscribe_url(email, site):
@@ -788,15 +791,20 @@ def create_user_unsubscribe_url(email, site):
     if not panel_backend_url:
         return None
 
-    fernet = Fernet(settings.EMAIL_UNSUBSCRIPTION_ENCRYPTION_KEY)
-    encrypted_user_data = fernet.encrypt(
-        json.dumps(
-            {
-                "email": email,
-                "sub_org": edly_sub_org.slug,
-            }
-        ).encode()
-    ).decode()
+    try:
+        fernet = Fernet(settings.EMAIL_UNSUBSCRIPTION_ENCRYPTION_KEY)
+        encrypted_user_data = fernet.encrypt(
+            json.dumps(
+                {
+                    "email": email,
+                    "sub_org": edly_sub_org.slug,
+                }
+            ).encode()
+        ).decode()
+
+    except (ValueError, TypeError) as Error:
+        LOGGER.error('Error encrypting email unsubscribe parameter %s', Error)
+        return None
 
     url = "{base_url}{sub_url}?param={param}".format(
         base_url=panel_backend_url,
