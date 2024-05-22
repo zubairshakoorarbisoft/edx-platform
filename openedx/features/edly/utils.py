@@ -764,7 +764,10 @@ def has_not_unsubscribe_user_email(site, email):
     except EdlySubOrganization.DoesNotExist:
         edly_sub_org = site.edly_sub_org_for_studio
 
-    return not EdlyMultiSiteAccess.objects.get(sub_org=edly_sub_org, user__email=email).has_unsubscribed_email
+    try:
+        return not EdlyMultiSiteAccess.objects.get(sub_org=edly_sub_org, user__email=email).has_unsubscribed_email
+    except EdlyMultiSiteAccess.DoesNotExist:
+        return True
 
 
 def create_user_unsubscribe_url(email, site):
