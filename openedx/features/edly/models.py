@@ -6,10 +6,12 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
+from jsonfield.fields import JSONField
 from model_utils.models import TimeStampedModel
 from opaque_keys.edx.django.models import CourseKeyField
-from organizations.models import Organization
 
+from openedx.features.edly.constants import DEFAULT_QA_PROMPT
+from organizations.models import Organization
 from student.roles import GlobalCourseCreatorRole
 
 EDLY_SLUG_VALIDATOR = RegexValidator(r'^[0-9a-z-]*$', 'Only small case alphanumeric and hyphen characters are allowed.')
@@ -143,3 +145,24 @@ class EdlyMultiSiteAccess(TimeStampedModel):
 
     class Meta(object):
         unique_together = (('user', 'sub_org'),)
+
+
+class ChatlyWidget(models.Model):
+    """model for integrating chatly widget to Edly SaaS"""
+
+    last_sync_date = models.DateTimeField(null=True, blank=True)
+    is_enable = models.BooleanField(default=False)
+    course_key = models.CharField(max_length=255, unique=True)
+    bot_key = models.CharField(max_length=255, unique=True, null=True)
+    bot_id = models.IntegerField(null=True, blank=True)
+    allowed_directories = models.IntegerField(null=True, blank=True)
+    unable_to_answer_response = models.CharField(max_length=15, null=True, default='nothing')    
+    temperature = models.DecimalField(decimal_places=1, max_digits=2, default='1.0')
+    prompt = models.TextField(default=DEFAULT_QA_PROMPT)
+    advanced_mode = models.BooleanField(default=False)
+    ai_output_focus = models.CharField(max_length=255, null=True, blank=True)
+    last_sync_json = JSONField(null=True)
+    sync_date = models.DateTimeField(null=True, blank=True)
+    sync_json = JSONField(null=True)
+    sync_status = models.IntegerField(blank=True, null=True, default=1)
+    sync_error = models.CharField(max_length=255, blank=True, null=True)

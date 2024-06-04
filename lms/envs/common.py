@@ -4421,3 +4421,4 @@ PANEL_ADMIN_LOGOUT_REDIRECT_URL = 'http://panel.edx.devstack.lms:9999'
 ############### Fernet Encryption Key For Auto Login ####################
 AUTO_LOGIN_ENCRYPTION_KEY = 'AUTO_LOGIN_ENCRYPTION_KEY'
 EMAIL_UNSUBSCRIPTION_ENCRYPTION_KEY = 'EMAIL_UNSUBSCRIPTION_ENCRYPTION_KEY'
+CHATLY_WIDGET_URL = "https://app.chatly.dev.edly.io/"

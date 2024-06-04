@@ -291,13 +291,64 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 this.refresh();
             },
 
+            handleButtonEnable: function(deltaCount){
+                const btn  = $('.action-export .btn');
+                if(btn.prop("disabled")){
+                    btn.prop("disabled", false);
+                    btn.removeClass('catch-up');
+                }
+                if(deltaCount===0){
+                    btn.addClass("catch-up");
+                    btn.get(0).lastChild.nodeValue = "All Caught Up";
+                    $("#course_unsync_value").text("\uD83C\uDF89");
+                    btn.prop("disabled", true);  
+                }else{
+                    btn.get(0).lastChild.nodeValue = "Sync Course Data";
+                    $("#course_unsync_value").text(deltaCount);
+                }
+            },
+
+            handleDeleteDeltaCount: function(model, parentView){
+                let delta = JSON.parse(localStorage.getItem('CourseDelta'));
+                const span = $("#course_unsync_value");
+                const category = model.get('category'); 
+                if(category==='chapter'){
+                    const findItem = delta.section.find(item => item.id === model.id);
+                    if(findItem){
+                        if(findItem.modified_or_not_exist){
+                            delta.delta_count = Number(delta.delta_count)-1;
+                            span.text(delta.delta_count);
+                        }else{
+                            delta.delta_count = Number(delta.delta_count)+1;
+                            span.text(delta.delta_count);
+                        }
+                        this.handleButtonEnable(delta.delta_count);
+                        delta.section = delta.section.filter(item =>  item.id !== model.id);
+                        this.handleProgressBar(delta);
+                        localStorage.setItem("CourseDelta", JSON.stringify(delta));
+                    }
+                }else if(category==='sequential'){ 
+                    const findItem = delta.section.find(item => item.id === parentView.model.id);
+                    if(findItem){
+                        if(!findItem.modified_or_not_exist){
+                            delta.delta_count = Number(delta.delta_count)+1;
+                            span.text(delta.delta_count);
+                            this.handleButtonEnable(delta.delta_count);
+                            this.handleProgressBar(delta);
+                            localStorage.setItem("CourseDelta", JSON.stringify(delta));
+                        }
+                    }
+                }
+            },
+
             handleDeleteEvent: function(event) {
                 var self = this,
                     parentView = this.parentView,
                     xblockType = XBlockViewUtils.getXBlockType(this.model.get('category'), parentView.model, true);
                 event.preventDefault();
                 XBlockViewUtils.deleteXBlock(this.model, xblockType).done(function() {
-                    if (parentView) {
+                    self.handleDeleteDeltaCount(self.model, self.parentView);
+                    if (parentView){
                         parentView.onChildDeleted(self, event);
                     }
                 });
@@ -332,13 +383,62 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                 XBlockViewUtils.duplicateXBlock(xblockElement, parentElement)
                     .done(function(data) {
                         if (self.parentView) {
+                            self.handleUpdateDeltaCount(
+                                self.model.get('category'),
+                                '',
+                                data.locator,
+                                self.parentView.model.id
+                            );
                             self.parentView.onChildDuplicated(
                                 data.locator,
                                 xblockType,
                                 xblockElement
                             );
+                        }else{
+                            self.handleUpdateDeltaCount(
+                                self.model.get('category'),
+                                '',
+                                data.locator,
+                                ''
+                            );
                         }
                     });
+            },
+
+            handleProgressBar: function(delta){
+                const section_length =  delta.section.length;
+                if (section_length !== 0){
+                    const percent = ((section_length - delta.delta_count) / section_length) * 100;
+                    $('.progress-bar span').css('width', percent + '%');
+                }
+            },
+
+            handleUpdateDeltaCount: function(category, name='', id='', parent_id=''){
+                let delta = JSON.parse(localStorage.getItem('CourseDelta'));
+                const span = $("#course_unsync_value");
+                if(category==='chapter'){
+                    delta.delta_count=Number(delta.delta_count)+1;
+                    span.text(delta.delta_count);
+                    delta.section.push({
+                        name:name, 
+                        modified_or_not_exist:true, 
+                        id:id, 
+                    });
+                    this.handleButtonEnable(delta.delta_count);
+                    this.handleProgressBar(delta);
+                    localStorage.setItem("CourseDelta", JSON.stringify(delta));
+                }
+                else if(category==='sequential'){
+                    const findItem = delta.section.find(item => item.id === parent_id);
+                    if(findItem && !findItem.modified_or_not_exist){
+                        findItem.modified_or_not_exist= true; 
+                        delta.delta_count=Number(delta.delta_count)+1;
+                        span.text(delta.delta_count);
+                        this.handleButtonEnable(delta.delta_count);
+                        this.handleProgressBar(delta);
+                        localStorage.setItem("CourseDelta", JSON.stringify(delta));
+                    }
+                }
             },
 
             handleAddEvent: function(event) {
@@ -347,6 +447,7 @@ define(['jquery', 'underscore', 'gettext', 'js/views/baseview', 'common/js/compo
                     category = $target.data('category');
                 event.preventDefault();
                 XBlockViewUtils.addXBlock($target).done(function(locator) {
+                    self.handleUpdateDeltaCount(category, $target.data('default-name'), locator, $target.data('parent'));
                     self.onChildAdded(locator, category, event);
                 });
             }

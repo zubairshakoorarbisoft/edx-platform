@@ -47,6 +47,7 @@ from openedx.features.course_experience import (
 from openedx.features.course_experience.urls import COURSE_HOME_VIEW_NAME
 from openedx.features.course_experience.views.course_sock import CourseSockFragmentView
 from openedx.features.course_experience.utils import get_course_outline_block_tree
+from openedx.features.edly.models import ChatlyWidget
 from openedx.features.enterprise_support.api import data_sharing_consent_required
 from common.djangoapps.student.models import CourseEnrollment
 from common.djangoapps.util.views import ensure_valid_course_key
@@ -425,8 +426,18 @@ class CoursewareIndex(View):
             (settings.FEATURES.get('ENABLE_COURSEWARE_SEARCH_FOR_COURSE_STAFF') and self.is_staff)
         )
         staff_access = self.is_staff
-
+        chatly_widget = ChatlyWidget.objects.filter(
+            course_key=six.text_type(self.course.id)
+        )
+        is_enable = False
+        bot_key = ''
+        if chatly_widget.exists():
+            is_enable = chatly_widget.first().is_enable
+            bot_key = chatly_widget.first().bot_key
+        
         courseware_context = {
+            'bot_key':bot_key, 
+            'is_enable': is_enable,
             'csrf': csrf(self.request)['csrf_token'],
             'course': self.course,
             'course_url': course_url,
