@@ -2,251 +2,240 @@ html {
   -webkit-text-size-adjust: 100%; /* 2 */
 }
 
-h1 {
-  font-size: 2em;
-  margin: 0.67em 0;
+@font-face {
+    font-family: DiodrumArabicFont;
+    src: url(../fonts/Diodrum/DiodrumArabic-Bold.ttf);
+    src: url(../fonts/Diodrum/DiodrumArabic-Extralight.ttf);
+    src: url(../fonts/Diodrum/DiodrumArabic-Light.ttf);
+    src: url(../fonts/Diodrum/DiodrumArabic-Medium.ttf);
+    src: url(../fonts/Diodrum/DiodrumArabic-Medium.ttf);
+    src: url(../fonts/Diodrum/DiodrumArabic-Regular.ttf);
+    src: url(../fonts/Diodrum/DiodrumArabic-Semibold.ttf);
+    src: url(../fonts/Diodrum/DiodrumArabic-Thin.ttf);
 }
-
-a {
-  background-color: transparent;
+:root {
+    --primary-color: #32b994;
+    --secondary-color: #1c355e;
+    --orange-color: #ea6851;
 }
-
-b,
-strong {
-  font-weight: 500;
-}
-
-img {
-  border-style: none;
-  max-width: 100%;
-  height: auto;
-}
-
-.hidden,
-[hidden] {
-  display: none;
-}
-
-.text-primary {
-  color: $success;
-}
-
-.text-secondary {
-  color: $secondary;
-}
-
-
-.certificate-wrapper {
-  background: url(../images/certificate-bg.png)  no-repeat;
-  background-size: 100% 100%;
-  padding: 174px 11.9% 179px;
-  color: $primary;
-  font-weight: 500;
-  margin: 0 auto;
-  line-height: 1.15;
-
-  @include media-breakpoint-down(sm) {
-    padding: 100px 11.9%;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-}
-
-.certificate-wrapper * {
-  box-sizing: border-box;
-}
-
-.certificate-header {
-  overflow: hidden;
-  padding: 0 0 66px;
-
-  @include media-breakpoint-down(sm) {
-    padding: 0;
-  }
-
-  img {
-    vertical-align: middle;
-
-    @include media-breakpoint-down(sm) {
-      width: 120px;
-    }
-
-    @include media-breakpoint-down(xs) {
-      display: block;
-      margin: 0 auto 10px;
-    }
-
-    &.sdaia-academy-logo {
-      @include margin-right(19px);
-
-      @include media-breakpoint-down(sm) {
-        width: 150px;
-      }
-
-      @include media-breakpoint-down(xs) {
-        @include margin-right(auto);
-      }
-    }
-  }
-}
-
-.certificate-header-col {
-  float: right;
-  padding: 0 12px 0 0;
-
-  @include media-breakpoint-down(sm) {
-    float: none;
-    padding: 0 0 10px;
-    text-align: center;
-  }
-
-  &:first-child {
-    float: left;
-    padding: 2px 0 0 115px;
-
-    @include media-breakpoint-down(md) {
-      padding: 2px 0 0 47px;
-    }
-
-    @include media-breakpoint-down(sm) {
-      float: none;
-      padding: 0 0 10px;
-      text-align: center;
-    }
-  }
-}
-
-.certificate-heading {
-  padding: 0 0 33px;
-
-  @include media-breakpoint-down(sm) {
-    padding: 0;
-  }
-
-  h1 {
-    font-size: 71px;
-    margin: 0 0 17px;
-
-    @include media-breakpoint-down(sm) {
-      font-size: 40px;
-    }
-  }
-
-  .subtitle {
-    display: block;
-    font-size: 27px;
-    margin: 0 0 30px;
-
-    @include media-breakpoint-down(sm) {
-      font-size: 22px;
-      margin: 0 0 15px;
-    }
-
-    @include media-breakpoint-down(xs) {
-      font-size: 18px;
-    }
-  }
-}
-
-.certificate-body { text-align: center; }
-
-.certificate-main {
-  overflow: hidden;
-
-  p,
-  h2 {
-    margin: 0 0 30px;
-    font-size: 38px;
-    font-weight: 500;
-
-    @include media-breakpoint-down(sm) {
-      margin: 0 0 15px;
-      font-size: 20px;
-    }
-
-    @include media-breakpoint-down(xs) {
-      margin: 0 0 10px;
-      font-size: 18px;
-    }
-  }
-
-  .sub-title,
-  .main-title {
-    margin: 0 0 34px;
-
-    @include media-breakpoint-down(sm) {
-      margin: 0 0 20px;
-    }
-  }
-
-  .limited-text {
-    max-width: 900px;
-    margin: 0 auto 97px;
-    text-align: right;
-
-    @include media-breakpoint-down(sm) {
-      margin: 0 0 40px;
-    }
-
-    @include media-breakpoint-down(xs) {
-      margin: 0 0 20px;
-    }
-
-    .text-secondary {
-      margin: 0 13px;
-
-      @include media-breakpoint-down(sm) {
-        margin: 0 6px;
-      }
-    }
-  }
-}
-
-@media print {
-  body {
+* {
     margin: 0;
-  }
-
-  .certificate-header-col {
-
-    &:first-child {
-      padding-left: 100px;
-    }
-  }
-
-  .certificate-header {
-    padding: 0 0 40px;
-  }
-
-  .certificate-heading {
     padding: 0;
+}
+.orange-color {
+    color: var(--orange-color);
+}
+.black-color {
+    color: var(--secondary-color);
+}
+.flex-small {
+    display: flex;
+    flex-shrink: 0;
+    gap: 3px;
+}
+.text-align{
+  text-align: right;
+}
+.diodrumFontFamily{
+  font-family: DiodrumArabicFont;
+}
+.certificateWrapper {
+    background: url(../images/certificate-bg.png) no-repeat;
+    padding: 130px 12% 150px;
+    background-size: 100% 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
 
-    h1 {
-      font-size: 50px;
+    .sdaia-academy-logo {
+        width: 240px;
     }
-  }
-
-  .certificate-main {
-
-    p,
-    h2 {
-      margin: 0 0 25px;
-      font-size: 30px;
-      font-weight: 500;
+    .sdaia-logo {
+        width: 190px;
+    }
+  
+    &__bodywraper {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+    }
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
     }
 
-    .main-title {
-      margin: 0 0 25px;
+    &__mainTitleWrap {
+        text-align: center;
+        color: var(--primary-color);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 45px;
+    }
+    &__titleAr {
+        font-weight: 100;
+    }
+    &__title {
+        font-weight: bold;
     }
 
-    .limited-text {
-      margin: 0 auto 50px;
+    &__subTitleWrap {
+        display: flex;
+        justify-content: space-between;
+        font-size: 22px;
+        color: var(--secondary-color);
+        font-weight: bold;
+        flex-direction: column;
     }
-  }
+    &__subTitleBody,
+    &__personWrap,
+    &__innerDetailWrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    &__personWrap,
+    &__innerDetailWrap {
+        color: var(--orange-color);
+        font-weight: 700;
+    }
+    &__innerDetailWrap {
+        font-size: 18px;
+    }
+    &__topWrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+    }
+    &__list {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        font-size: 20px;
+        color: var(--secondary-color);
+    }
+    &__listWraper {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
 
-  .certificate-wrapper {
-    padding: 120px 11.9%;
-  }
+    &__valueListWrap {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    @media only screen and (max-width: 1200px) {
+        gap: 20px;
+        .sdaia-academy-logo {
+            width: 200px;
+        }
+        .sdaia-logo {
+            width: 160px;
+        }
+
+        &__list {
+            font-size: 18px;
+        }
+
+        &__mainTitleWrap {
+            gap: 15px;
+            font-size: 25px;
+        }
+        &__bodywraper {
+            gap: 50px;
+        }
+        &__subTitleWrap {
+            font-size: 18px;
+        }
+    }
+
+    @media only screen and (max-width: 992px) {
+        padding: 100px 11%;
+        .sdaia-academy-logo {
+            width: 1700px;
+        }
+        .sdaia-logo {
+            width: 150px;
+        }
+        &__topWrapper {
+            gap: 30px;
+        }
+        &__bodywraper {
+            gap: 20px;
+        }
+    }
+
+    @media only screen and (max-width: 768px) {
+        padding: 70px 11%;
+        &__topWrapper {
+            gap: 20px;
+        }
+        .sdaia-academy-logo {
+            width: 150px;
+        }
+        .sdaia-logo {
+            width: 120px;
+        }
+
+        &__list {
+            font-size: 14px;
+        }
+
+        &__mainTitleWrap {
+            gap: 10px;
+            font-size: 20px;
+        }
+        &__bodywraper {
+            gap: 30px;
+        }
+        &__subTitleWrap,
+        &__innerDetailWrap {
+            font-size: 15px;
+        }
+    }
+
+    @media only screen and (max-width: 556px) {
+        padding: 60px 13%;
+        gap: 15px;
+
+        .sdaia-academy-logo {
+            width: 100px;
+        }
+        .sdaia-logo {
+            width: 80px;
+        }
+        &__bodywraper,
+        &__topWrapper {
+            gap: 10px;
+        }
+
+        &__mainTitleWrap {
+            gap: 5px;
+            font-size: 18px;
+        }
+        &__listWraper {
+            gap: 15px;
+        }
+        &__subTitleWrap,
+        &__list,
+        &__innerDetailWrap {
+            font-size: 12px;
+        }
+    }
+    &__list{
+      gap: 5px;
+    }
+}
+
+[dir="rtl"] {
+    .certificateWrapper {
+      .text-align{
+        text-align: left;
+      }
+    }
 }
