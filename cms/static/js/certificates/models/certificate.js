@@ -19,6 +19,8 @@ function(_, Backbone, BackboneRelational, BackboneAssociations, gettext, CoffeeS
             // Metadata fields currently displayed in web forms
             course_title: '',
 
+            arabic_course_title: '',
+
             // Metadata fields not currently displayed in web forms
             name: 'Name of the certificate',
             description: 'Description of the certificate',
@@ -75,6 +77,12 @@ function(_, Backbone, BackboneRelational, BackboneAssociations, gettext, CoffeeS
             if (!attrs.name.trim()) {
                 return {
                     message: gettext('Certificate name is required.'),
+                    attributes: {name: true}
+                };
+            }
+            if (!attrs.arabic_course_title.trim()) {
+                return {
+                    message: gettext('Arabic name is require for generating Certificate'),
                     attributes: {name: true}
                 };
             }

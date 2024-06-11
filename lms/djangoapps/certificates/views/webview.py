@@ -114,7 +114,6 @@ def _update_certificate_context(context, course, course_overview, user_certifica
         uuid=user_certificate.verify_uuid,
         suffix=context.get('certificate_verify_url_suffix')
     )
-
     # We prefer a CourseOverview for this function because it validates and corrects certificate_available_date
     # and certificates_display_behavior values. However, not all certificates are guaranteed to have a CourseOverview
     # associated with them, so we fall back on the course in that case. This shouldn't cause a problem because courses
@@ -125,7 +124,9 @@ def _update_certificate_context(context, course, course_overview, user_certifica
         date = display_date_for_certificate(course, user_certificate)
     # Translators:  The format of the date includes the full name of the month
     date = strftime_localized(date, "%B %-d, %Y")
-    context['certificate_date_issued'] = convert_date_to_arabic(date)
+    context['certificate_date_issued'] = date
+    # SDAIA: Adding Date in Arabic
+    context['arabic_certificate_date_issued'] = convert_date_to_arabic(date)
 
     # Translators:  This text represents the verification of the certificate
     context['document_meta_description'] = _('This is a valid {platform_name} certificate for {user_name}, '
@@ -249,11 +250,18 @@ def _update_course_context(request, context, course, platform_name, course_overv
     Updates context dictionary with course info.
     """
     effort = course_overview and course_overview.effort or '8'
-    context['course_duration'] = convert_date_to_arabic(effort)
+    context['course_duration'] = effort
     context['full_course_image_url'] = request.build_absolute_uri(course_image_url(course))
     course_title_from_cert = context['certificate_data'].get('course_title', '')
     accomplishment_copy_course_name = course_title_from_cert if course_title_from_cert else course.display_name
     context['accomplishment_copy_course_name'] = accomplishment_copy_course_name
+    
+    # SDAIA: Adding Arabic name in the certificate context
+    context['arabic_course_duration'] = convert_date_to_arabic(effort)
+    arabic_course_title_from_cert = context['certificate_data'].get('arabic_course_title', '')
+    accomplishment_copy_arabic_course_name = arabic_course_title_from_cert if arabic_course_title_from_cert else course.display_name
+    context['accomplishment_copy_arabic_course_name'] = accomplishment_copy_arabic_course_name
+    
     course_number = course.display_coursenumber if course.display_coursenumber else course.number
     context['course_number'] = course_number
     context['idv_enabled_for_certificates'] = settings.FEATURES.get('ENABLE_CERTIFICATES_IDV_REQUIREMENT')
@@ -326,6 +334,7 @@ def _update_context_with_user_info(context, user, user_certificate):
     context['accomplishment_user_id'] = user.id
     context['accomplishment_copy_name'] = user_fullname
     context['accomplishment_copy_username'] = user.username
+    context['accomplishment_copy_name_arabic'] = user.profile.arabic_name if user.profile.arabic_name else user_fullname
 
     context['accomplishment_more_title'] = _("More Information About {user_name}'s Certificate:").format(
         user_name=user_fullname
@@ -603,7 +612,8 @@ def render_html_view(request, course_id, certificate=None):  # pylint: disable=t
         certificate_language,
         course_key
     )
-
+    # import pdb; pdb.set_trace();
+    
     # Generate the certificate context in the correct language, then render the template.
     with translation.override(certificate_language):
         context = {'user_language': user_language}
@@ -642,6 +652,8 @@ def render_html_view(request, course_id, certificate=None):  # pylint: disable=t
 
         # Append/Override the existing view context values with any course-specific static values from Advanced Settings
         context.update(course.cert_html_view_overrides)
+
+        # import pdb; pdb.set_trace();
 
         # Track certificate view events
         _track_certificate_events(request, course, user, user_certificate)
