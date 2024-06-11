@@ -432,6 +432,7 @@ class UserProfile(models.Model):
     # This is not visible to other users, but could introduce holes later
     user = models.OneToOneField(User, unique=True, db_index=True, related_name='profile', on_delete=models.CASCADE)
     name = models.CharField(blank=True, max_length=255, db_index=True)
+    arabic_name = models.CharField(blank=True, max_length=255, db_index=True)
 
     # How meta field works: meta will only store those fields which are available in extended_profile configuration,
     # so in order to store a field in meta, it must be available in extended_profile configuration.
