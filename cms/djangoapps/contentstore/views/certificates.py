@@ -225,7 +225,8 @@ class CertificateManager:
             "description": certificate_data['description'],
             "is_active": certificate_data['is_active'],
             "version": CERTIFICATE_SCHEMA_VERSION,
-            "signatories": certificate_data['signatories']
+            "signatories": certificate_data['signatories'],
+            "arabic_course_title": certificate_data['arabic_course_title']
         }
 
         # Some keys are not required, such as the title override...

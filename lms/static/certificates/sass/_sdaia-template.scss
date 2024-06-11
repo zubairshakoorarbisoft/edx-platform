@@ -3,27 +3,63 @@ html {
 }
 
 @font-face {
-    font-family: DiodrumArabicFont;
-    src: url(../fonts/Diodrum/DiodrumArabic-Bold.ttf);
-    src: url(../fonts/Diodrum/DiodrumArabic-Extralight.ttf);
-    src: url(../fonts/Diodrum/DiodrumArabic-Light.ttf);
-    src: url(../fonts/Diodrum/DiodrumArabic-Medium.ttf);
-    src: url(../fonts/Diodrum/DiodrumArabic-Medium.ttf);
-    src: url(../fonts/Diodrum/DiodrumArabic-Regular.ttf);
-    src: url(../fonts/Diodrum/DiodrumArabic-Semibold.ttf);
-    src: url(../fonts/Diodrum/DiodrumArabic-Thin.ttf);
+    font-family: 'Diodrum';
+    font-weight: 200;
+    src: url('#{$font-path}/Diodrum/DiodrumArabic-Extralight.ttf');
+    src:
+        url('#{$font-path}/Diodrum/DiodrumArabic-Extralight.ttf') format('truetype');
 }
+
+@font-face {
+    font-family: 'Diodrum';
+    font-weight: 300;
+    src: url('#{$font-path}/Diodrum/DiodrumArabic-Light.ttf');
+    src:
+        url('#{$font-path}/Diodrum/DiodrumArabic-Light.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Diodrum';
+    font-weight: 400;
+    src: url('#{$font-path}/Diodrum/DiodrumArabic-Regular.ttf');
+    src:
+        url('#{$font-path}/Diodrum/DiodrumArabic-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Diodrum';
+    font-weight: 500;
+    src: url('#{$font-path}/Diodrum/DiodrumArabic-Medium.ttf');
+    src:
+        url('#{$font-path}/Diodrum/DiodrumArabic-Medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Diodrum';
+    font-weight: 600;
+    src: url('#{$font-path}/Diodrum/DiodrumArabic-Semibold.ttf');
+    src:
+        url('#{$font-path}/Diodrum/DiodrumArabic-Semibold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Diodrum';
+    font-weight: 700;
+    src: url('#{$font-path}/Diodrum/DiodrumArabic-Bold.ttf');
+    src:
+        url('#{$font-path}/Diodrum/DiodrumArabic-Bold.ttf') format('truetype');
+}
+
 :root {
     --primary-color: #32b994;
     --secondary-color: #1c355e;
-    --orange-color: #ea6851;
 }
 * {
     margin: 0;
     padding: 0;
 }
-.orange-color {
-    color: var(--orange-color);
+.primary-color {
+    color: var(--primary-color);
 }
 .black-color {
     color: var(--secondary-color);
@@ -31,13 +67,17 @@ html {
 .flex-small {
     display: flex;
     flex-shrink: 0;
-    gap: 3px;
+    gap: 4px;
 }
 .text-align{
   text-align: right;
 }
 .diodrumFontFamily{
-  font-family: DiodrumArabicFont;
+  font-family: Diodrum;
+  font-weight: 500;
+}
+.stronger{
+    font-weight: 700;
 }
 .certificateWrapper {
     background: url(../images/certificate-bg.png) no-repeat;
@@ -60,7 +100,7 @@ html {
         margin: 0 auto;
         display: flex;
         flex-direction: column;
-        gap: 50px;
+        gap: 30px;
     }
     &__header {
         display: flex;
@@ -73,7 +113,6 @@ html {
         color: var(--primary-color);
         display: flex;
         flex-direction: column;
-        gap: 5px;
         font-size: 45px;
     }
     &__titleAr {
@@ -91,17 +130,15 @@ html {
         font-weight: bold;
         flex-direction: column;
     }
+    &__personName {
+        font-size: 22px;
+    }
     &__subTitleBody,
     &__personWrap,
     &__innerDetailWrap {
         display: flex;
         justify-content: space-between;
         gap: 10px;
-    }
-    &__personWrap,
-    &__innerDetailWrap {
-        color: var(--orange-color);
-        font-weight: 700;
     }
     &__innerDetailWrap {
         font-size: 18px;
@@ -121,13 +158,11 @@ html {
     &__listWraper {
         display: flex;
         flex-direction: column;
-        gap: 25px;
     }
 
     &__valueListWrap {
         display: flex;
         flex-direction: column;
-        gap: 10px;
     }
     @media only screen and (max-width: 1200px) {
         gap: 20px;
@@ -143,14 +178,16 @@ html {
         }
 
         &__mainTitleWrap {
-            gap: 15px;
             font-size: 25px;
         }
         &__bodywraper {
-            gap: 50px;
+            gap: 25px;
         }
         &__subTitleWrap {
             font-size: 18px;
+        }
+        &__personName {
+            font-size: 20px;
         }
     }
 
@@ -187,11 +224,10 @@ html {
         }
 
         &__mainTitleWrap {
-            gap: 10px;
             font-size: 20px;
         }
         &__bodywraper {
-            gap: 30px;
+            gap: 20px;
         }
         &__subTitleWrap,
         &__innerDetailWrap {
@@ -215,20 +251,19 @@ html {
         }
 
         &__mainTitleWrap {
-            gap: 5px;
             font-size: 18px;
-        }
-        &__listWraper {
-            gap: 15px;
         }
         &__subTitleWrap,
         &__list,
         &__innerDetailWrap {
             font-size: 12px;
         }
-    }
-    &__list{
-      gap: 5px;
+        &__list{
+            gap: 5px;
+          }
+        &__personName {
+            font-size: 18px;
+        }
     }
 }
 
