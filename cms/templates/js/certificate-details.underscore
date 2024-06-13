@@ -15,10 +15,10 @@
      <% if (showDetails) { %>
          <section class="certificate-settings course-details">
              <header>
-               <h2 class="title title-2"><%- gettext("Certificate Details") %></h2>
+               <h2 class="title"><%- gettext("Certificate Details") %></h2>
              </header>
              <div class='certificate-info-section'>
-                 <div class='course-title-section pull-left'>
+                 <div class='course-title-section'>
                     <p class="actual-course-title">
                             <span class="certificate-label"><%- gettext('Course Title') %>: </span>
                             <span class="certificate-value"><%- course.get('name') %></span>
@@ -37,7 +37,7 @@
                     <% } %>
                  </div>
 
-                <div class='course-number-section pull-left'>
+                <div class='course-number-section'>
                     <p class="actual-course-number">
                             <span class="certificate-label"><b><%- gettext('Course Number') %>: </b> </span>
                             <span class="certificate-value"><%- course.get('num') %></span>

@@ -20,7 +20,7 @@
                 <span id="certificate-description-<%- uniqueId %>-tip" class="tip tip-stacked"><%- gettext("Description of the certificate") %></span>
             </div>
             <header>
-              <h2 class="title title-2"><%- gettext("Certificate Details") %></h2>
+              <h2 class="title"><%- gettext("Certificate Details") %></h2>
             </header>
             <div class="actual-course-title">
                 <span class="actual-course-title"><%- gettext("Course Title") %>: </span>
