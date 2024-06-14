@@ -68,6 +68,7 @@
 
   .certificate-info-section {
     overflow: auto;
+    display: flex;
 
     .course-title-section,
     .course-number-section {
@@ -154,13 +155,29 @@
 
         position: absolute;
         top: $baseline;
-        right: $baseline;
         opacity: 0;
+
+        @include rtl {
+          left: $baseline;
+        }
+  
+        // CASE: left to right layout
+        @include ltr {
+          right: $baseline;
+        }
 
         .action {
           display: inline-block;
           vertical-align: middle;
-          margin-right: ($baseline/4);
+
+          @include rtl {
+            margin-left: ($baseline/4);
+          }
+    
+          // CASE: left to right layout
+          @include ltr {
+            margin-right: ($baseline/4);
+          }
 
           .edit {
             @extend %ui-btn-non-blue;
@@ -419,8 +436,17 @@
         }
 
         .wrapper-delete-button {
-          float: right;
-          padding: ($baseline/4) ($baseline/2);
+          // CASE: right to left layout
+          @include rtl {
+            float: left;
+            padding: ($baseline/2) ($baseline/4);
+          }
+    
+          // CASE: left to right layout
+          @include ltr {
+            float: right;
+            padding: ($baseline/4) ($baseline/2);
+          }
 
           .is-disabled {
             color: $gray-l3;
