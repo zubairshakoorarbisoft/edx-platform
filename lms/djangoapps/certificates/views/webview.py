@@ -123,7 +123,7 @@ def _update_certificate_context(context, course, course_overview, user_certifica
     else:
         date = display_date_for_certificate(course, user_certificate)
     # Translators:  The format of the date includes the full name of the month
-    date = strftime_localized(date, "%B %-d, %Y")
+    date = date.strftime("%B %-d, %Y")
     context['certificate_date_issued'] = date
     # SDAIA: Adding Date in Arabic
     context['arabic_certificate_date_issued'] = convert_date_to_arabic(date)
