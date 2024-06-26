@@ -32,7 +32,7 @@ define([
         let StatusCheck = function(){
             $.ajax({
                 type: 'GET',
-                url: `/api/edly_panel/v1/integrate/chatly/`,
+                url: `/api/integrate/chatly/`,
                 data: {
                     course_key: coursekey,
                 },

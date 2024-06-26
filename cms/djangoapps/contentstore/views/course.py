@@ -304,7 +304,7 @@ def course_handler(request, course_key_string=None):
                 if task_status and task_status.state == UserTaskStatus.SUCCEEDED:
                     try:
                         tarball = course_import_export_storage.open(artifact.file.name)
-                        return send_chatly_export_request_and_return_response(request, course_key_string, task_status, artifact, tarball)
+                        return send_chatly_export_request_and_return_response(request, course_key_string, artifact, tarball)
                     except UserTaskArtifact.DoesNotExist:
                         return JsonResponse({'error': 'Failed to sync course data at the moment'}, status=400)
 
