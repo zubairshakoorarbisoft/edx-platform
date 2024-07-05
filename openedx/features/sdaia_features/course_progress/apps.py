@@ -11,11 +11,11 @@ class CourseProgressConfig(AppConfig):
     name = "openedx.features.sdaia_features.course_progress"
 
     plugin_app = {
-        "url_config": {
-            "lms.djangoapp": {
-                "namespace": "course_progress",
-                "regex": r"^sdaia",
-                "relative_path": "urls",
+        PluginURLs.CONFIG: {
+            ProjectType.LMS: {
+                PluginURLs.NAMESPACE: "course_progress",
+                PluginURLs.REGEX: r"^sdaia",
+                PluginURLs.RELATIVE_PATH: "urls",
             }
         },
         PluginSettings.CONFIG: {

@@ -24,6 +24,18 @@ log = logging.getLogger(__name__)
 
 @can_disable_rate_limit
 class UserWatchHoursAPIView(APIView):
+    """
+    APIView to get the total watch hours for a user.
+
+    **Example Requests**
+        GET /sdaia/api/v1/user_watch_hours
+
+        It return watch_time in hours
+        Response: {
+            "watch_time": 0.00043390860160191856
+        }
+    """
+
     authentication_classes = (
         JwtAuthentication,
         BearerAuthenticationAllowInactiveUser,
