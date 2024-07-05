@@ -1169,3 +1169,67 @@ class UsersCourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
             response.append(user_progress)
 
         return self.get_paginated_response(response)
+
+
+@can_disable_rate_limit
+class UserWatchTime(APIView, ApiKeyPermissionMixIn):
+    authentication_classes = (
+        JwtAuthentication,
+        BearerAuthenticationAllowInactiveUser,
+        EnrollmentCrossDomainSessionAuth,
+    )
+    permission_classes = (ApiKeyHeaderPermissionIsAuthenticated,)
+
+    def sql_format(template, *args, **kwargs):
+        args = [sql_escape_string(arg).decode() for arg in args]
+        kwargs = {
+            key: sql_escape_string(value).decode() for key, value in kwargs.items()
+        }
+        return template.format(*args, **kwargs)
+
+    @method_decorator(ensure_csrf_cookie_cross_domain)
+    def get(self, request):
+        """
+        Gets a list of all course enrollments for a user.
+        """
+        user_id = request.user.id
+        clickhouse_uri = (
+            f"http://openedx:fIgKZcXnVKWNaLCaJhgN@"
+            f"cairn-clickhouse:8123/?database=openedx"
+        )
+        query = sql_format(
+            f"SELECT SUM(duration) `Watch time` FROM `openedx`.`video_view_segments` WHERE user_id={user_id} LIMIT 50000;"
+        )
+        try:
+            response = requests.get(clickhouse_uri, data=query.encode("utf8"))
+            watch_time = float(response.content.decode().strip()) / 60
+            return Response(status=status.HTTP_200_OK, data={"watch_time": watch_time})
+        except Exception as e:
+            log.error(
+                f"Unable to fetch watch for user {user_id} due to this exception: {str(e)}"
+            )
+            raise HTTPException(status_code=500, detail=str(e))
+
+
+
+clickhouse_uri = (
+    f"http://openedx:fIgKZcXnVKWNaLCaJhgN@"
+    f"cairn-clickhouse:8123/?database=openedx"
+)
+def sql_format(template, *args, **kwargs):
+    args = [sql_escape_string(arg).decode() for arg in args]
+    kwargs = {
+        key: sql_escape_string(value).decode() for key, value in kwargs.items()
+    }
+    return template.format(*args, **kwargs)
+
+query = sql_format(
+    f"SELECT COUNT(*) FROM `openedx`.`video_view_segments`;"
+)
+response = requests.get(clickhouse_uri, params={'query': query})#data=query.encode("utf8"))
+response = response.content.decode()
+response
+
+float(response.strip())
+watch_time = float(response.content.decode().strip()) / 60
+watch_time
