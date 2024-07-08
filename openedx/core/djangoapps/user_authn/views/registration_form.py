@@ -192,7 +192,6 @@ class AccountCreationForm(forms.Form):
 
         error_message_dict = {
             "level_of_education": _("A level of education is required"),
-            "gender": _("Your gender is required"),
             "year_of_birth": _("Your year of birth is required"),
             "mailing_address": _("Your mailing address is required"),
             "goals": _("A description of your goals is required"),
@@ -201,6 +200,7 @@ class AccountCreationForm(forms.Form):
             "phone_number": _("Your phone number is required"),
             "date_of_birth": _("Your date of birth is required"),
             "gender": _("Your gender is required"),
+            "arabic_name": _("A arabic name is required"),
         }
         for field_name, field_value in extra_fields.items():
             if field_name not in self.fields:
@@ -362,6 +362,7 @@ class RegistrationFormFactory:
             "employment_status",
             "work_experience_level",
             "job_title",
+            "arabic_name",
         ]
 
         if settings.ENABLE_COPPA_COMPLIANCE and 'year_of_birth' in self.EXTRA_FIELDS:
@@ -1354,6 +1355,31 @@ class RegistrationFormFactory:
             },
         )
 
+    def _add_arabic_name_field(self, form_desc, required=True):
+        """Add a arabic name field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        # Translators: This label appears above a field on the registration form
+        # meant to hold the user's arabic name.
+        name_label = _("Arabic Name")
+
+        # Translators: These instructions appear on the registration form, immediately
+        # below a field meant to hold the user's arabic name.
+        name_instructions = _("This name will be used on any certificates that you earn.")
+
+        form_desc.add_field(
+            "arabic_name",
+            label=name_label,
+            instructions=name_instructions,
+            restrictions={
+                "max_length": accounts.NAME_MAX_LENGTH,
+            },
+            required=required
+        )
+    
     def _apply_third_party_auth_overrides(self, request, form_desc):
         """Modify the registration form if the user has authenticated with a third-party provider.
         If a user has successfully authenticated with a third-party provider,
