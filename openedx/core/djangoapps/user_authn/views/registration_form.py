@@ -192,7 +192,6 @@ class AccountCreationForm(forms.Form):
 
         error_message_dict = {
             "level_of_education": _("A level of education is required"),
-            "gender": _("Your gender is required"),
             "year_of_birth": _("Your year of birth is required"),
             "mailing_address": _("Your mailing address is required"),
             "goals": _("A description of your goals is required"),
@@ -201,6 +200,7 @@ class AccountCreationForm(forms.Form):
             "phone_number": _("Your phone number is required"),
             "date_of_birth": _("Your date of birth is required"),
             "gender": _("Your gender is required"),
+            "arabic_name": _("A arabic name is required"),
         }
         for field_name, field_value in extra_fields.items():
             if field_name not in self.fields:
