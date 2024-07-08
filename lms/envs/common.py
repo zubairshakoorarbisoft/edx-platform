@@ -4152,7 +4152,7 @@ ACCOUNT_VISIBILITY_CONFIGURATION["bulk_shareable_fields"] = (
         'employment_status',
         'work_experience_level',
         'job_title',
-
+        'arabic_name',
         # Not an actual field, but used to signal whether badges should be public.
         'accomplishments_shared',
     ]

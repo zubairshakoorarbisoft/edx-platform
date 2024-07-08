@@ -180,6 +180,7 @@ class UserReadOnlySerializer(serializers.Serializer):  # lint-amnesty, pylint: d
             "employment_status": None,
             "work_experience_level": None,
             "job_title": None,
+            "arabic_name": None,
         }
 
         if user_profile:
@@ -218,6 +219,7 @@ class UserReadOnlySerializer(serializers.Serializer):  # lint-amnesty, pylint: d
                     "employment_status": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.employment_status),
                     "work_experience_level": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.work_experience_level),
                     "job_title": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.job_title),
+                    "arabic_name": AccountLegacyProfileSerializer.convert_empty_to_None(user_profile.arabic_name),
                 }
             )
 
@@ -308,7 +310,7 @@ class AccountLegacyProfileSerializer(serializers.HyperlinkedModelSerializer, Rea
             "name", "gender", "goals", "year_of_birth", "level_of_education", "country", "state", "social_links",
             "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies",
             "phone_number", "city", "date_of_birth", "region", "city", "address_line", "english_language_level",
-            "employment_status", "work_experience_level", "job_title"
+            "employment_status", "work_experience_level", "job_title", "arabic_name",
         )
         # Currently no read-only field, but keep this so view code doesn't need to know.
         read_only_fields = ()
