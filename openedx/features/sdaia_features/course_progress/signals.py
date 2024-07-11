@@ -77,7 +77,6 @@ def send_course_completion_email(sender, user, course_id, **kwargs):  # pylint: 
     send_user_course_completion_email.delay(user.id, str(course_id))
 
 
-
 @receiver(REGISTER_USER)
 def update_account_preference(sender, user, registration, **kwargs):
     """
