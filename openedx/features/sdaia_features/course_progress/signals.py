@@ -8,7 +8,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User  # lint-amnesty, pylint: disable=imported-auth-user
 from django.contrib.sites.models import Site
+from django.conf import settings
 
+from openedx.core.djangoapps.user_api.preferences import api as preferences_api
+from openedx.core.djangoapps.lang_pref import LANGUAGE_KEY
+from openedx.core.djangoapps.user_authn.views.register import REGISTER_USER
 from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED
 from openedx.core.lib.celery.task_utils import emulate_http_request
 from openedx.features.sdaia_features.course_progress.models import CourseCompletionEmailHistory
@@ -41,7 +45,7 @@ def send_course_progress_milestones_achievement_emails(**kwargs):
     try:
         course_completion_percentages_for_emails = [int(entry.strip()) for entry in course_completion_percentages_for_emails]
     except Exception as e:
-        log.info(f"invalid course_completion_percentages_for_emails for course {str(course_key)}")
+        logger.info(f"invalid course_completion_percentages_for_emails for course {str(course_key)}")
         return
 
     user_id = instance.user_id
@@ -71,3 +75,12 @@ def send_course_completion_email(sender, user, course_id, **kwargs):  # pylint: 
     """
     logger.info(f"\n\n\n inside send_course_completion_email \n\n\n")
     send_user_course_completion_email.delay(user.id, str(course_id))
+
+
+@receiver(REGISTER_USER)
+def update_account_preference(sender, user, registration, **kwargs):
+    """
+    SDAIA: Update the user preference language to "SDAIA_DEFAULT_LANGUAGE_CODE" on a account creation
+    """
+    if not preferences_api.get_user_preference(user, LANGUAGE_KEY) == settings.SDAIA_DEFAULT_LANGUAGE_CODE:
+        preferences_api.set_user_preference(user, LANGUAGE_KEY, settings.SDAIA_DEFAULT_LANGUAGE_CODE)
