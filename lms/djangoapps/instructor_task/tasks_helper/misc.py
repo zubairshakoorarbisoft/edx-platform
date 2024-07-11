@@ -163,7 +163,7 @@ def _get_csv_file_content(csv_file):
         content = csv_file
 
     if isinstance(content, bytes):
-        csv_content = content.decode('utf-8')
+        csv_content = content.decode('utf-8-sig')
     else:
         csv_content = content
 
