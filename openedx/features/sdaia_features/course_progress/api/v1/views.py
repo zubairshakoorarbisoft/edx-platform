@@ -19,14 +19,11 @@ from common.djangoapps.student.roles import (
     UserBasedRole,
 )
 from common.djangoapps.util.disable_rate_limit import can_disable_rate_limit
-from lms.djangoapps.program_enrollments.rest_api.v1.views import (
-    UserProgramReadOnlyAccessView,
-)
-from openedx.core.djangoapps.catalog.utils import get_programs, get_programs_by_type
 from openedx.core.djangoapps.cors_csrf.decorators import ensure_csrf_cookie_cross_domain
 from openedx.core.djangoapps.enrollments.errors import CourseEnrollmentError
 from openedx.core.djangoapps.enrollments.data import get_course_enrollments
 from openedx.core.djangoapps.enrollments.views import EnrollmentCrossDomainSessionAuth
+from openedx.core.djangoapps.programs.utils import ProgramProgressMeter
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 from openedx.core.lib.api.permissions import ApiKeyHeaderPermissionIsAuthenticated
 
@@ -81,30 +78,9 @@ class UserStatsAPIView(APIView):
             raise HTTPException(status_code=500, detail=str(e))
 
         ############ PROGRAMS COUNT ############
-        programs = []
-        requested_program_type = "masters"
-        if user.is_staff:
-            programs = get_programs_by_type(request.site, requested_program_type)
-        else:
-            program_dict = {}
-            # Check if the user is a course staff of any course which is a part of a program.
-            programs_user_is_staff_for = (
-                UserProgramReadOnlyAccessView().get_programs_user_is_course_staff_for(
-                    user, requested_program_type
-                )
-            )
-            for staff_program in programs_user_is_staff_for:
-                program_dict.setdefault(staff_program["uuid"], staff_program)
-
-            # Now get the program enrollments for user purely as a learner add to the list
-            enrolled_programs = (
-                UserProgramReadOnlyAccessView()._get_enrolled_programs_from_model(user)
-            )
-            for learner_program in enrolled_programs:
-                program_dict.setdefault(learner_program["uuid"], learner_program)
-
-            programs = list(program_dict.values())
-        enrolled_programs = len(programs)
+        meter = ProgramProgressMeter(request.site, user, mobile_only=False)
+        engaged_programs = meter.engaged_programs
+        no_of_programs = len(meter.engaged_programs)
 
         ############ COURSES COUNT ############
         username = user.username
@@ -124,6 +100,6 @@ class UserStatsAPIView(APIView):
             data={
                 "watch_hours": watch_time,
                 "enrolled_courses": enrolled_courses,
-                "enrolled_programs": enrolled_programs,
+                "enrolled_programs": no_of_programs,
             },
         )
