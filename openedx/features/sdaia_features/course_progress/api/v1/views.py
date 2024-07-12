@@ -127,3 +127,4 @@ class UserStatsAPIView(APIView):
                 "enrolled_programs": enrolled_programs,
             },
         )
+
