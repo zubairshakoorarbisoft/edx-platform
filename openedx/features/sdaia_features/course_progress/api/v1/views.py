@@ -118,10 +118,25 @@ class UserStatsAPIView(APIView):
                 },
             )
 
+        log.info(f'\n\n debugging start \n\n')
+        site = request.site
+        log.info(f'\n\n site: {site} \n\n')
+        course_enrollments = list(get_course_enrollments(user.username))
+        course_enrollments.sort(key=lambda x: x['created'], reverse=True)
+        from openedx.core.djangoapps.programs.utils import ProgramProgressMeter
+        meter = ProgramProgressMeter(site, user, enrollments=course_enrollments)
+
+        inverted_programs = meter.invert_programs()
+        log.info(f"\n\n\n meter.invert_programs() {inverted_programs}\n\n")
+        engaged_programs = meter.engaged_programs()
+        log.info(f"\n\n\n meter.engaged_programs() {engaged_programs}\n\n")
+
         ############ Response ############
         return Response(
             status=status.HTTP_200_OK,
             data={
+                "inverted_programs": inverted_programs,
+                "engaged_programs": engaged_programs,
                 "watch_hours": watch_time,
                 "enrolled_courses": enrolled_courses,
                 "enrolled_programs": enrolled_programs,
