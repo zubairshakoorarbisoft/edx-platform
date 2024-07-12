@@ -160,14 +160,14 @@ class ProgramProgressMeter:
         self.mobile_only = mobile_only
 
         self.enrollments = enrollments or list(CourseEnrollment.enrollments_for_user(self.user))
-        self.enrollments.sort(key=lambda e: e.created, reverse=True)
+        self.enrollments.sort(key=lambda e: e["created"], reverse=True)
 
         self.enrolled_run_modes = {}
         self.course_run_ids = []
         for enrollment in self.enrollments:
             # enrollment.course_id is really a CourseKey (╯ಠ_ಠ）╯︵ ┻━┻
-            enrollment_id = str(enrollment.course_id)
-            mode = enrollment.mode
+            enrollment_id = str(enrollment["course_id"])
+            mode = enrollment["mode"]
             if mode == CourseMode.NO_ID_PROFESSIONAL_MODE:
                 mode = CourseMode.PROFESSIONAL
             self.enrolled_run_modes[enrollment_id] = mode
