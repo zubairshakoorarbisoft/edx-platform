@@ -110,7 +110,7 @@ class UserStatsAPIView(APIView):
         user_certificates = get_user_certificates(username)
 
         ############ USER BADGES ############
-        user_badges = BadgeAssertion.objects.values(
+        user_badges = BadgeAssertion.objects.filter(user=user).values(
             "image_url",
             "assertion_url",
             "created",
