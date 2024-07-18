@@ -122,8 +122,25 @@ class UserStatsAPIView(APIView):
             criteria=F("badge_class__criteria"),
             image=F("badge_class__image"),
         )
+        transformed_user_badges = []
         for badge in user_badges:
-            badge["course_id"] = str(badge["course_id"])
+            badge_image = badge["image"]
+            transformed_user_badges.append(
+                {
+                    "image_url": badge["image_url"],
+                    "assertion_url": badge["assertion_url"],
+                    "created": badge["created"],
+                    "badge_class": {
+                        "slug": badge["slug"],
+                        "issuing_component": badge["issuing_component"],
+                        "display_name": badge["display_name"],
+                        "course_id": str(badge["course_id"]),
+                        "description": badge["description"],
+                        "criteria": badge["criteria"],
+                        "image_url": f"{settings.LMS_ROOT_URL}{settings.MEDIA_URL}{badge_image}",
+                    },
+                }
+            )
 
         ############ USER SCORE ############
         leaderboard = LeaderboardEntry.objects.filter(user=user)
@@ -138,7 +155,7 @@ class UserStatsAPIView(APIView):
                 "enrolled_programs": no_of_programs,
                 "score": score,
                 "user_certificates": user_certificates,
-                "user_badges": user_badges,
+                "user_badges": transformed_user_badges,
             },
         )
 
