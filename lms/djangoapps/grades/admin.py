@@ -12,7 +12,7 @@ from lms.djangoapps.grades.config.models import (
     CoursePersistentGradesFlag,
     PersistentGradesEnabledFlag
 )
-
+from lms.djangoapps.grades.models import PersistentSubsectionGrade
 
 class CoursePersistentGradesAdmin(KeyedConfigurationModelAdmin):
     """
@@ -28,6 +28,12 @@ class CoursePersistentGradesAdmin(KeyedConfigurationModelAdmin):
         }),
     )
 
+
+class PersistentSubsectionGradeAdmin(admin.ModelAdmin):
+    search_fields = ['user_id', 'course_id']
+
+
+admin.site.register(PersistentSubsectionGrade, PersistentSubsectionGradeAdmin)
 admin.site.register(CoursePersistentGradesFlag, CoursePersistentGradesAdmin)
 admin.site.register(PersistentGradesEnabledFlag, ConfigurationModelAdmin)
 admin.site.register(ComputeGradesSetting, ConfigurationModelAdmin)
