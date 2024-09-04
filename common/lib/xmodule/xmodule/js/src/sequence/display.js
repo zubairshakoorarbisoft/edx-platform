@@ -7,7 +7,6 @@
     this.Sequence = (function() {
         function Sequence(element) {
             var self = this;
-
             this.removeBookmarkIconFromActiveNavItem = function(event) {
                 return Sequence.prototype.removeBookmarkIconFromActiveNavItem.apply(self, [event]);
             };
@@ -428,7 +427,8 @@
                     usage_key: usageKey
                 }, function(data) {
                     if (data.complete === true) {
-                        completionIndicators.removeClass('is-hidden');
+                        completionIndicators.removeClass('is-hidden fa-regular')
+                        completionIndicators.addClass('fa')
                     }
                 });
             }
