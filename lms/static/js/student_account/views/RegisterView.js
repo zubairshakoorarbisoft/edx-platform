@@ -441,10 +441,11 @@
 
                 togglePassword: function(event) {
                     event.preventDefault();
-                    var passwordField = document.querySelector("#register-password")
-                    var newType = passwordField.getAttribute("type") === "password" ? "text" : "password"
-                    passwordField.setAttribute("type", newType);
-                    $(event.target).toggleClass("fa-eye fa-eye-slash");
+                    var parentElement = event.target.parentElement;
+                    var siblingInput = parentElement.querySelector('input');
+                    var newType = siblingInput.getAttribute("type") === "password" ? "text" : "password";
+                    siblingInput.setAttribute("type", newType);
+                    $(target).toggleClass("fa-eye fa-eye-slash");
                 },
 
                 saveSuccess: function() {
