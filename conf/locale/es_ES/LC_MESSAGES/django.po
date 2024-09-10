@@ -14734,6 +14734,10 @@ msgid "View this course as:"
 msgstr "Ver este curso como:"
 
 #: lms/templates/preview_menu.html
+msgid "View in Studio"
+msgstr "Ver en estudio"
+
+#: lms/templates/preview_menu.html
 msgid "Learner"
 msgstr "Estudiante"
 
@@ -17300,6 +17304,34 @@ msgstr "Ver evaluación en Studio"
 #: lms/templates/courseware/progress.html
 msgid "Course Progress for '{username}' ({email})"
 msgstr "Progreso en el curso para el alumno '{username}' ({email})"
+
+#: lms/templates/courseware/progress.html
+msgid "Overall Progress"
+msgstr "Progreso general"
+
+#: lms/templates/courseware/progress.html
+msgid "Graded Course Progress"
+msgstr "Progreso del curso calificado"
+
+#: lms/templates/courseware/progress.html
+msgid "TOTAL COURSE PROGRESS"
+msgstr "PROGRESO TOTAL DEL CURSO"
+
+#: lms/templates/courseware/progress.html
+msgid "Problems"
+msgstr "Problemas"
+
+#: lms/templates/courseware/progress.html
+msgid "Videos"
+msgstr "Vídeos"
+
+#: lms/templates/courseware/progress.html
+msgid "Readings"
+msgstr "Lecturas"
+
+#: lms/templates/courseware/progress.html
+msgid "Others"
+msgstr "Otros"
 
 #: lms/templates/courseware/progress.html
 msgid "View Certificate"
@@ -28822,3 +28854,41 @@ msgstr ""
 
 #~ msgid "Thumbnail"
 #~ msgstr "Miniatura"
+
+#: lms/templates/pagination.html themes/adroit/lms/templates/pagination.html
+#: themes/adroit/lms/templates/seq_module.html
+#: themes/gestalt/lms/templates/dashboard.html
+#: themes/gestalt/lms/templates/pagination.html
+#: themes/gestalt/lms/templates/seq_module.html
+#: themes/st-lutherx/lms/templates/pagination.html
+#: themes/st-lutherx/lms/templates/seq_module.html
+#: themes/st-normanx/lms/templates/pagination.html
+#: themes/st-normanx/lms/templates/seq_module.html
+msgid "Previous"
+msgstr "Anterior"
+
+#: lms/templates/pagination.html themes/adroit/lms/templates/pagination.html
+#: themes/adroit/lms/templates/seq_module.html
+#: themes/gestalt/lms/templates/pagination.html
+#: themes/gestalt/lms/templates/seq_module.html
+#: themes/st-lutherx/lms/templates/pagination.html
+#: themes/st-lutherx/lms/templates/seq_module.html
+#: themes/st-normanx/lms/templates/pagination.html
+#: themes/st-normanx/lms/templates/seq_module.html
+msgid "Next"
+msgstr "Siguiente"
+
+#: openedx/features/course_experience/templates/course_experience/course-home-fragment.html
+#: themes/adroit/lms/templates/courseware/accordion.html
+#: themes/gestalt/lms/templates/courseware/accordion.html
+#: themes/st-lutherx/lms/templates/courseware/accordion.html
+#: themes/st-normanx/lms/templates/courseware/accordion.html
+msgid "Overview"
+msgstr "Resumen"
+
+#: templates/timed_exam/entrance.html:4
+#, python-format
+msgid ""
+"\n"
+"    %(exam_name)s is a Timed Exam (%(total_time)s)\n"
+msgstr "\n    %(exam_name)s es un examen cronometrado (%(total_time)s)\n"

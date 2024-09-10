@@ -8068,23 +8068,22 @@ msgstr "Marcar examen como completado"
 
 #: lms/templates/courseware/proctored-exam-status.underscore
 msgid "You are taking \"{exam_link}\" as {exam_type}. "
-msgstr "You are taking \"{exam_link}\" as {exam_type}. "
+msgstr "Estás realizando \"{exam_link}\" as {exam_type}. "
 
 #: lms/templates/courseware/proctored-exam-status.underscore
 msgid "a timed exam"
-msgstr "un examen cronometrado"
+msgstr "un examen con tiempo"
 
 #: lms/templates/courseware/proctored-exam-status.underscore
 msgid "The timer on the right shows the time remaining in the exam."
-msgstr ""
-"El temporizador de la derecha muestra el tiempo restante en el examen."
+msgstr "El reloj de la derecha muestra el tiempo restante del examen."
 
 #: lms/templates/courseware/proctored-exam-status.underscore
 msgid ""
 "To receive credit for problems, you must select \"Submit\" for each problem "
 "before you select \"End My Exam\"."
 msgstr ""
-"Para recibir reconocimiento por problemas, debe seleccionar \"Enviar\" para "
+"Para recibir puntaje por tus respuestas, debes seleccionar \"Enviar\" para "
 "cada problema antes de seleccionar \"Finalizar mi examen\"."
 
 #: lms/templates/courseware/proctored-exam-status.underscore
