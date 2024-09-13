@@ -76,6 +76,9 @@ def perform_request(method, url, data_or_params=None, raw=False,
     )
 
     # For the better logging
+    response_to_log_and_compare = (
+        response.json() if response.content else response.content
+    )
     log.info(
         """
         ======> FORUM <======
@@ -87,7 +90,13 @@ def perform_request(method, url, data_or_params=None, raw=False,
         response: {response}
 
         ======> END <======
-        """.format(method=method, url=url, params=params, data=data, response=response.json())
+        """.format(
+            method=method,
+            url=url,
+            params=params,
+            data=data,
+            response=response_to_log_and_compare,
+        )
     )
 
     if method == "get":
@@ -100,12 +109,17 @@ def perform_request(method, url, data_or_params=None, raw=False,
             headers=headers,
             timeout=config.connection_timeout,
         )
+        forum_v1_response_to_log_and_compare = (
+            forum_v1_response.json()
+            if forum_v1_response.content
+            else forum_v1_response.content
+        )
         log.info(f"requested forum proxey url: {url}")
         log.info(f"requested forum v1 url: {forum_v1_url}")
-        if forum_v1_response.json() != response.json():
+        if forum_v1_response_to_log_and_compare != response_to_log_and_compare:
             log.error(
                 f"Forum v2 difference, for endpoint {forum_v1_url} with params={params}. \
-                    Expected: {forum_v1_response.json()}. Got: {response.json()}."
+                    Expected: {forum_v1_response_to_log_and_compare}. Got: {response_to_log_and_compare}."
             )
 
     metric_tags.append(f'status_code:{response.status_code}')
