@@ -254,6 +254,16 @@ class AccountCreationForm(forms.Form):
             )
         return email
 
+    def clean_confirm_password(self):
+        """Enforce password confirmation policy (if applicable)"""
+        confirm_password = self.cleaned_data["confirm_password"]
+        if (
+                "password" in self.cleaned_data and
+                self.cleaned_data["password"] != confirm_password
+        ):
+            raise ValidationError(_("The passwords must match."))
+        return confirm_password
+
     def clean_year_of_birth(self):
         """
         Parse year_of_birth to an integer, but just use None instead of raising
@@ -317,6 +327,7 @@ class RegistrationFormFactory(object):
         "profession",
         "specialty",
         "phone_number",
+        "confirm_password",
     ]
 
     def _is_field_visible(self, field_name):
@@ -451,7 +462,7 @@ class RegistrationFormFactory(object):
         """
         # Translators: This label appears above a field on the registration form
         # meant to hold the user's email address.
-        email_label = _(u"Email")
+        email_label = _(u"Email*")
 
         # Translators: These instructions appear on the registration form, immediately
         # below a field meant to hold the user's email address.
@@ -478,7 +489,7 @@ class RegistrationFormFactory(object):
         """
         # Translators: This label appears above a field on the registration form
         # meant to confirm the user's email address.
-        email_label = _(u"Confirm Email")
+        email_label = _(u"Confirm Email*")
 
         error_msg = accounts.REQUIRED_FIELD_CONFIRM_EMAIL_MSG
 
@@ -501,7 +512,7 @@ class RegistrationFormFactory(object):
         """
         # Translators: This label appears above a field on the registration form
         # meant to hold the user's full name.
-        name_label = _(u"Full Name")
+        name_label = _(u"Full Name*")
 
         # Translators: These instructions appear on the registration form, immediately
         # below a field meant to hold the user's full name.
@@ -526,7 +537,7 @@ class RegistrationFormFactory(object):
         """
         # Translators: This label appears above a field on the registration form
         # meant to hold the user's public username.
-        username_label = _(u"Public Username")
+        username_label = _(u"Public Username*")
 
         username_instructions = _(
             # Translators: These instructions appear on the registration form, immediately
@@ -554,7 +565,7 @@ class RegistrationFormFactory(object):
         """
         # Translators: This label appears above a field on the registration form
         # meant to hold the user's password.
-        password_label = _(u"Password")
+        password_label = _(u"Password*")
 
         form_desc.add_field(
             "password",
@@ -562,6 +573,29 @@ class RegistrationFormFactory(object):
             field_type="password",
             instructions=password_validators_instruction_texts(),
             restrictions=password_validators_restrictions(),
+            required=required
+        )
+
+    def _add_confirm_password_field(self, form_desc, required=True):
+        """Add a confirm password field to a form description.
+        Arguments:
+            form_desc: A form description
+        Keyword Arguments:
+            required (bool): Whether this field is required; defaults to True
+        """
+        confirm_password_label = _(u"Confirm Password*")
+
+        error_msg = _(u"Confirm your password.")
+
+        form_desc.add_field(
+            "confirm_password",
+            label=confirm_password_label,
+            field_type="password",
+            instructions=password_validators_instruction_texts(),
+            restrictions=password_validators_restrictions(),
+            error_messages={
+                "required": error_msg
+            },
             required=required
         )
 

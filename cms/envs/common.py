@@ -2378,6 +2378,7 @@ SYSLOG_SERVER = ''
 FEEDBACK_SUBMISSION_EMAIL = ''
 REGISTRATION_EXTRA_FIELDS = {
     'confirm_email': 'hidden',
+    'confirm_password': 'hidden',
     'level_of_education': 'optional',
     'gender': 'optional',
     'year_of_birth': 'optional',
