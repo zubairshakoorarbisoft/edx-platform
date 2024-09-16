@@ -208,11 +208,3 @@ def _url_for_flag_abuse_thread(thread_id):
 
 def _url_for_unflag_abuse_thread(thread_id):
     return f"{settings.PREFIX}/threads/{thread_id}/abuse_unflag"
-
-
-def _url_for_pin_thread(thread_id):
-    return f"{settings.PREFIX}/threads/{thread_id}/pin"
-
-
-def _url_for_un_pin_thread(thread_id):
-    return f"{settings.PREFIX}/threads/{thread_id}/unpin"
