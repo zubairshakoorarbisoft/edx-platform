@@ -134,6 +134,14 @@ class ContentLibraryFilterSerializer(BaseFilterSerializer):
     type = serializers.ChoiceField(choices=LIBRARY_TYPES, default=None, required=False)
 
 
+class CollectionMetadataSerializer(serializers.Serializer):
+    """
+    Serializer for CollectionMetadata
+    """
+    key = serializers.CharField()
+    title = serializers.CharField()
+
+
 class LibraryXBlockMetadataSerializer(serializers.Serializer):
     """
     Serializer for LibraryXBlockMetadata
@@ -148,12 +156,20 @@ class LibraryXBlockMetadataSerializer(serializers.Serializer):
 
     block_type = serializers.CharField(source="usage_key.block_type")
     display_name = serializers.CharField(read_only=True)
+    last_published = serializers.DateTimeField(format=DATETIME_FORMAT, read_only=True)
+    published_by = serializers.CharField(read_only=True)
+    last_draft_created = serializers.DateTimeField(format=DATETIME_FORMAT, read_only=True)
+    last_draft_created_by = serializers.CharField(read_only=True)
     has_unpublished_changes = serializers.BooleanField(read_only=True)
+    created = serializers.DateTimeField(format=DATETIME_FORMAT, read_only=True)
+    modified = serializers.DateTimeField(format=DATETIME_FORMAT, read_only=True)
 
     # When creating a new XBlock in a library, the slug becomes the ID part of
     # the definition key and usage key:
     slug = serializers.CharField(write_only=True)
     tags_count = serializers.IntegerField(read_only=True)
+
+    collections = CollectionMetadataSerializer(many=True, required=False)
 
 
 class LibraryXBlockTypeSerializer(serializers.Serializer):
@@ -201,6 +217,7 @@ class LibraryXBlockOlxSerializer(serializers.Serializer):
     Serializer for representing an XBlock's OLX
     """
     olx = serializers.CharField()
+    version_num = serializers.IntegerField(read_only=True, required=False)
 
 
 class LibraryXBlockStaticFileSerializer(serializers.Serializer):
@@ -299,3 +316,11 @@ class ContentLibraryCollectionComponentsUpdateSerializer(serializers.Serializer)
     """
 
     usage_keys = serializers.ListField(child=UsageKeyV2Serializer(), allow_empty=False)
+
+
+class ContentLibraryComponentCollectionsUpdateSerializer(serializers.Serializer):
+    """
+    Serializer for adding/removing Collections to/from a Component.
+    """
+
+    collection_keys = serializers.ListField(child=serializers.CharField(), allow_empty=True)
