@@ -32,8 +32,3 @@ ACTIVATION_EMAIL = 'activation_email'
 # DEFAULT COURSE IMAGE
 DEFAULT_COURSE_IMAGE = "images_course_image.jpg"
 DEFAULT_COURSE_IMAGE_PATH = 'images/images_course_image.jpg'
-DEFAULT_QA_PROMPT = """Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-{context}
-Question: {question}
-Helpful Answer:"""

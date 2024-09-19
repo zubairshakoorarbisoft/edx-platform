@@ -5,7 +5,6 @@ Django Admin pages for Edly.
 from django.contrib import admin
 
 from openedx.features.edly.models import (
-    ChatlyWidget,
     EdlyMultiSiteAccess,
     EdlyOrganization,
     EdlySubOrganization,
@@ -81,14 +80,6 @@ class EdlyMultisiteAccessAdmin(admin.ModelAdmin):
         return obj.user.email
 
 
-class ChatlyWidgetAdmin(admin.ModelAdmin):
-    """Admin class for ChatlyWidget model."""
-
-    list_display = ('id', 'course_key', 'bot_id', 'sync_status', 'is_enable')
-    list_filter = ('is_enable', 'sync_status')
-    search_fields = ('course_key', 'is_enable')
-
-admin.site.register(ChatlyWidget, ChatlyWidgetAdmin)
 admin.site.register(StudentCourseProgress, StudentCourseProgressAdmin)
 admin.site.register(EdlyOrganization, EdlyOrganizationAdmin)
 admin.site.register(EdlySubOrganization, EdlySubOrganizationAdmin)
