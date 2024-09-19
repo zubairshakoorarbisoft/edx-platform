@@ -813,6 +813,6 @@ def create_user_unsubscribe_url(email, site):
     )
 
     if not url.startswith('https://'):
-            url = 'https://' + url
+        url = 'https://' + url
 
     return url
