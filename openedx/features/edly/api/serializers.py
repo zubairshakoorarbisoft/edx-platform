@@ -9,6 +9,7 @@ from rest_framework import serializers
 
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.features.edly.models import EdlyMultiSiteAccess
+from openedx.features.edly.models import EdlyMultiSiteAccess
 from openedx.features.edly.utils import get_marketing_link
 LOGGER = logging.getLogger(__name__)
 
