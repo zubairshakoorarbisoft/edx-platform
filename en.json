@@ -1,0 +1,14 @@
+{
+        "suggest": {
+                "text": "khowajk",
+                "body_suggestions": {
+                        "phrase": {
+                                "field": "body",
+                                "size": 5
+                        }
+                },
+                "title_suggestions": {
+                        "phrase": {"field": "title"}
+                }
+        }
+}

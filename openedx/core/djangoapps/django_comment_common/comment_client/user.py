@@ -3,7 +3,7 @@
 
 
 from . import models, settings, utils
-
+from forum import api as forum_api
 
 class User(models.Model):
 
@@ -148,28 +148,30 @@ class User(models.Model):
             retrieve_params['course_id'] = str(self.course_id)
         if self.attributes.get('group_id'):
             retrieve_params['group_id'] = self.group_id
-        try:
-            response = utils.perform_request(
-                'get',
-                url,
-                retrieve_params,
-                metric_action='model.retrieve',
-                metric_tags=self._metric_tags,
-            )
-        except utils.CommentClientRequestError as e:
-            if e.status_code == 404:
-                # attempt to gracefully recover from a previous failure
-                # to sync this user to the comments service.
-                self.save()
-                response = utils.perform_request(
-                    'get',
-                    url,
-                    retrieve_params,
-                    metric_action='model.retrieve',
-                    metric_tags=self._metric_tags,
-                )
-            else:
-                raise
+        # try:
+        #     response = utils.perform_request(
+        #         'get',
+        #         url,
+        #         retrieve_params,
+        #         metric_action='model.retrieve',
+        #         metric_tags=self._metric_tags,
+        #     )
+        # except utils.CommentClientRequestError as e:
+        #     if e.status_code == 404:
+        #         # attempt to gracefully recover from a previous failure
+        #         # to sync this user to the comments service.
+        #         self.save()
+        #         response = utils.perform_request(
+        #             'get',
+        #             url,
+        #             retrieve_params,
+        #             metric_action='model.retrieve',
+        #             metric_tags=self._metric_tags,
+        #         )
+        #     else:
+        #         raise
+        response = forum_api.get_user(self.attributes["id"], retrieve_params)
+        
         self._update_from_response(response)
 
     def retire(self, retired_username):
