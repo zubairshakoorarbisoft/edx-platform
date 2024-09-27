@@ -8,7 +8,6 @@ from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
 import jwt
-import requests
 import waffle
 from cryptography.fernet import Fernet
 from django.conf import settings
@@ -700,7 +699,7 @@ def get_username_and_name_by_email(email):
     user = get_user_model().objects.filter(email=email)
     if not user.exists():
         return {}
-
+    
     user = user.first()
     userProfile = UserProfile.objects.filter(user=user)
     if userProfile.exists():
@@ -713,13 +712,13 @@ def create_super_user_multisite_access(request, user, groups_names):
     edly_sub_org = get_edly_sub_org_from_request(request)
     sub_org = EdlySubOrganization.objects.filter(edly_organization=edly_sub_org.edly_organization)
     groups = Group.objects.filter(name__in=groups_names)
-
+    
     for org in sub_org:
         edly_access_user, created = EdlyMultiSiteAccess.objects.get_or_create(
             user=user,
             sub_org=org
         )
-
+        
         if created:
             for new_group in groups:
                 edly_access_user.groups.add(new_group)
@@ -781,14 +780,14 @@ def create_user_unsubscribe_url(email, site):
     """
     if not site:
         return None
-
+    
     try:
         edly_sub_org = site.edly_sub_org_for_lms
     except EdlySubOrganization.DoesNotExist:
         edly_sub_org = site.edly_sub_org_for_studio
 
     panel_backend_url = site.configuration.site_values.get('PANEL_NOTIFICATIONS_BASE_URL')
-
+    
     if not panel_backend_url:
         return None
 
@@ -817,44 +816,3 @@ def create_user_unsubscribe_url(email, site):
         url = 'https://' + url
 
     return url
-
-
-def obtain_token_from_chatly():
-    """Obtain chatly token using client credentials."""
-    if any(
-        domain in settings.CHATLY_BACKEND_ORIGIN.lower()
-        for domain in ["http://", "https://"]
-    ):
-        access_token_api_response = requests.post(
-            settings.CHATLY_BACKEND_ORIGIN + "/oauth2/token/",
-            data={
-                "client_id": settings.CHATLY_CLIENT_ID,
-                "client_secret": settings.CHATLY_CLIENT_SECRET,
-                "grant_type": "client_credentials",
-                "token_type": "jwt",
-            },
-            timeout=60,
-        )
-        try:
-            return access_token_api_response.json()["access_token"]
-        except KeyError:
-            return ""
-
-    return ""
-
-
-def get_integration_status_from_chatly(email, org, access_token):
-    """Method to check if chatly is integrated for given email and org combination by hitting chatly api."""
-    if any(
-        domain in settings.CHATLY_BACKEND_ORIGIN.lower()
-        for domain in ["http://", "https://"]
-    ):
-        response = requests.get(
-            url=settings.CHATLY_BACKEND_ORIGIN + "/api/edly/integrate/",
-            headers={"Authorization": "{0} {1}".format("Bearer", access_token)},
-            data={"email": email, "org": org},
-        )
-        if response.status_code == 200:
-            return True
-
-    return False

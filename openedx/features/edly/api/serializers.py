@@ -8,7 +8,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-from openedx.features.edly.models import ChatlyWidget, EdlyMultiSiteAccess
+from openedx.features.edly.models import EdlyMultiSiteAccess
 from openedx.features.edly.utils import get_marketing_link
 LOGGER = logging.getLogger(__name__)
 
@@ -95,10 +95,3 @@ class MutiSiteAccessSerializer(serializers.ModelSerializer):
         """
         model = EdlyMultiSiteAccess
         fields = ['id', 'name', 'slug', 'panel_base_url', 'user_panel_role']
-
-
-class ChatlyWidgetSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ChatlyWidget
-        fields = '__all__'

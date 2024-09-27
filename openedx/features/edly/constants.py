@@ -32,22 +32,3 @@ ACTIVATION_EMAIL = 'activation_email'
 # DEFAULT COURSE IMAGE
 DEFAULT_COURSE_IMAGE = "images_course_image.jpg"
 DEFAULT_COURSE_IMAGE_PATH = 'images/images_course_image.jpg'
-DEFAULT_QA_PROMPT = """Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-{context}
-Question: {question}
-Helpful Answer:"""
-
-CHATLY_COOKIE_NAME = "chatly_token"
-COURSE_SIZE_LIMIT = 50 * 1024 * 1024
-CHATLY_IMPORT_ERROR_MESSAGES = {
-    "The folder course/vertical is missing in uploaded zip": (
-        "The course has either no data for syncing or changes are not published"
-    ),
-    "The folder course/sequential is missing in uploaded zip": (
-        "The course has either no data for syncing or changes are not published"
-    ),
-    "The folder course/html is missing in uploaded zip": (
-        "The course has either no data for syncing or changes are not published"
-    ),
-}

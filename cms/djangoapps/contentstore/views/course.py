@@ -35,7 +35,6 @@ from opaque_keys.edx.locator import BlockUsageLocator
 from six import text_type
 from six.moves import filter
 
-from cms.djangoapps.contentstore.views.import_export import export_output_handler, _latest_task_status
 from cms.djangoapps.course_creators.views import add_user_with_status_unrequested, get_course_creator_status
 from openedx.features.edly.utils import add_default_image_to_course_assets
 from cms.djangoapps.models.settings.course_grading import CourseGradingModel
@@ -57,12 +56,8 @@ from openedx.features.content_type_gating.models import ContentTypeGatingConfig
 from openedx.features.content_type_gating.partitions import CONTENT_TYPE_GATING_SCHEME
 from openedx.features.course_experience.waffle import ENABLE_COURSE_ABOUT_SIDEBAR_HTML
 from openedx.features.course_experience.waffle import waffle as course_experience_waffle
-from openedx.features.edly.constants import CHATLY_COOKIE_NAME
 from openedx.features.edly.models import EdlySubOrganization
-from openedx.features.edly.utils import filter_courses_based_on_org, get_edly_sub_org_from_request, toggle_lti_user_parameters
-from openedx.features.edly.chatly_helpers import (
-    get_chatly_integrate_status, get_chatly_payload, get_chatly_token_from_cookie, get_context_data, save_course_outline, send_chatly_export_request_and_return_response
-)
+from openedx.features.edly.utils import filter_courses_based_on_org, toggle_lti_user_parameters
 from openedx.features.edly.validators import is_courses_limit_reached_for_plan
 from common.djangoapps.student import auth
 from common.djangoapps.student.auth import has_course_author_access, has_studio_read_access, has_studio_write_access
@@ -98,8 +93,6 @@ from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import DuplicateCourseError, ItemNotFoundError
 from xmodule.partitions.partitions import UserPartition
 from xmodule.tabs import CourseTab, CourseTabList, InvalidTabsException
-from ..storage import course_import_export_storage
-from user_tasks.models import UserTaskArtifact, UserTaskStatus
 
 from ..course_group_config import (
     COHORT_SCHEME,
@@ -261,28 +254,6 @@ def _dismiss_notification(request, course_action_state_id):
     return JsonResponse({'success': True})
 
 
-def _sync_course_with_chatly(request, course_key_string):
-    """
-    Separate method to sync course data with chatly.
-    """
-    course_key = CourseKey.from_string(course_key_string)
-    course_module = get_course_and_check_access(course_key, request.user, depth=1)
-    course_outline = _course_outline_json(request, course_module)
-    save_course_outline(course_key_string, course_outline)
-    task_status = _latest_task_status(request, course_key_string, export_output_handler)
-    artifact = UserTaskArtifact.objects.get(status=task_status, name="Output")
-    if task_status and task_status.state == UserTaskStatus.SUCCEEDED:
-        try:
-            tarball = course_import_export_storage.open(artifact.file.name)
-            return send_chatly_export_request_and_return_response(
-                request, course_key_string, artifact, tarball
-            )
-        except UserTaskArtifact.DoesNotExist:
-            return JsonResponse(
-                {"error": "Failed to sync course data at the moment"}, status=400
-            )
-
-
 @login_required
 def course_handler(request, course_key_string=None):
     """
@@ -315,11 +286,7 @@ def course_handler(request, course_key_string=None):
                     course_module = get_course_and_check_access(course_key, request.user, depth=None)
                     return JsonResponse(_course_outline_json(request, course_module))
             elif request.method == 'POST':  # not sure if this is only post. If one will have ids, it goes after access
-                if request.POST.get('export_course') != 'true':
-                    return _create_or_rerun_course(request)
-
-                return _sync_course_with_chatly(request, course_key_string)
-
+                return _create_or_rerun_course(request)
             elif not has_studio_write_access(request.user, CourseKey.from_string(course_key_string)):
                 raise PermissionDenied()
             elif request.method == 'PUT':
@@ -658,25 +625,16 @@ def course_listing(request):
     site_config = configuration_helpers.get_current_site_configuration()
     tracking_api_url = f"{site_config.get_value('PANEL_NOTIFICATIONS_BASE_URL')}/api/v1/tracking_events/"
     frontent_redirect_url = ''
-    frontend_url = [url for url in settings.CORS_ORIGIN_WHITELIST if 'apps' in url]
+    frontend_url = [url for url in settings.CORS_ORIGIN_WHITELIST if 'apps' in url]   
     if len(frontend_url):
         frontent_redirect_url = '{}/panel/settings/billing'.format(frontend_url[0])
-
-    eval_string, chatly_token = get_chatly_token_from_cookie(request)
-    chatly_integrated = get_chatly_integrate_status(request, chatly_token)
-    show_chatly_integration = (
-        site_config.site_values["DJANGO_SETTINGS_OVERRIDE"]
-        .get("CHATLY", {})
-        .get("show_chatly_integration", True)
-    )
-
+    
     try:
         destination_course_id = DESTINATION_COURSE_ID_PATTERN.format(org[0])
-
     except Exception:
         destination_course_id = "dummy"
 
-    response = render_to_response(u'index.html', {
+    return render_to_response(u'index.html', {
         u'default_course_id': destination_course_id,
         u'tracking_api_url': tracking_api_url,
         u'courses': active_courses,
@@ -695,17 +653,8 @@ def course_listing(request):
         u'allow_course_reruns': settings.FEATURES.get(u'ALLOW_COURSE_RERUNS', True),
         u'optimization_enabled': optimization_enabled,
         u'is_course_limit_reached':is_courses_limit_reached_for_plan(),
-        u'frontend_redirect_url':frontent_redirect_url,
-        u'org': org,
-        u'sub_org': get_edly_sub_org_from_request(request).slug,
-        u'chatly_token': chatly_token,
-        u'is_chatly_integrated': chatly_integrated,
-        u'show_chatly_integration': show_chatly_integration,
-        u'logo': site_config.site_values.get("BRANDING", {}).get("logo", ""),
+        u'frontend_redirect_url':frontent_redirect_url
     })
-
-    eval(eval_string)
-    return response
 
 
 def _get_rerun_link_for_item(course_key):
@@ -825,7 +774,6 @@ def course_index(request, course_key):
             'course_authoring_microfrontend_url': course_authoring_microfrontend_url,
             'advance_settings_url': reverse_course_url('advanced_settings_handler', course_module.id),
             'proctoring_errors': proctoring_errors,
-            **get_chatly_payload(request, course_key, course_structure)
         })
 
 
