@@ -523,6 +523,7 @@ class PasswordResetConfirmWrapper(PasswordResetConfirmView):
     def dispatch(self, *args, **kwargs):
         self.uidb36 = kwargs.get('uidb36')
         self.token = kwargs.get('token')
+        self.is_new_user = kwargs.get('method', None) == 'new_password'
         self.uidb64 = _uidb36_to_uidb64(self.uidb36)
 
         # User can not get this link unless account recovery feature is enabled.
@@ -553,6 +554,9 @@ class PasswordResetConfirmWrapper(PasswordResetConfirmView):
                 if response_was_successful and not self.user.is_active:
                     self.user.is_active = True
                     self.user.save()
+
+                response.context_data['is_new_user'] = self.is_new_user
+
             return response
 
 
