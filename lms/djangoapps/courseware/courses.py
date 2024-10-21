@@ -59,6 +59,7 @@ from openedx.core.lib.api.view_utils import LazySequence
 from openedx.features.course_duration_limits.access import AuditExpiredError
 from openedx.features.course_experience import RELATIVE_DATES_FLAG
 from openedx.features.course_experience.utils import is_block_structure_complete_for_assignments
+from openedx.features.edly.utils import is_course_org_same_as_site_org
 from common.djangoapps.static_replace import replace_static_urls
 from lms.djangoapps.survey.utils import SurveyRequiredAccessError, check_survey_required_and_unanswered
 from common.djangoapps.util.date_utils import strftime_localized
@@ -126,6 +127,10 @@ def get_course_with_access(user, action, course_key, depth=0, check_if_enrolled=
       these special cases could not only be handled inside has_access, but could
       be plugged in as additional callback checks for different actions.
     """
+    request = get_current_request()
+    if not is_course_org_same_as_site_org(request.site, course_key):
+        raise Http404(u"Course not found: {}.".format(six.text_type(course_key)))
+    
     course = get_course_by_id(course_key, depth)
     check_course_access_with_redirect(course, user, action, check_if_enrolled, check_survey_complete, check_if_authenticated)
     return course

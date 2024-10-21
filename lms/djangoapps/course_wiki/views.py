@@ -5,8 +5,10 @@ This file contains view functions for wrapping the django-wiki.
 
 import logging
 import re
+import six
 
 from django.conf import settings
+from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
@@ -18,6 +20,7 @@ from lms.djangoapps.courseware.courses import get_course_by_id
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangolib.markup import Text
 from openedx.features.enterprise_support.api import data_sharing_consent_required
+from openedx.features.edly.utils import is_course_org_same_as_site_org
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +41,11 @@ def course_wiki_redirect(request, course_id, wiki_path=""):
     as it's home page. A course's wiki must be an article on the root (for
     example, "/6.002x") to keep things simple.
     """
-    course = get_course_by_id(CourseKey.from_string(course_id))
+    course_key = CourseKey.from_string(course_id)
+    if not is_course_org_same_as_site_org(request.site, course_key):
+        raise Http404(u"Course not found: {}.".format(six.text_type(course_key)))
+
+    course = get_course_by_id(course_key)
     course_slug = course_wiki_slug(course)
 
     valid_slug = True
