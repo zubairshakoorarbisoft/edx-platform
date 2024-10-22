@@ -22,7 +22,7 @@ from django.utils.translation import ugettext_lazy as _
 from edx_ace import ace
 from edx_ace.recipient import Recipient
 from student.message_types import CertificateGeneration
-from student.models import CourseAccessRole
+from student.models import CourseAccessRole, CourseEnrollment
 from student.roles import CourseInstructorRole, CourseStaffRole, GlobalCourseCreatorRole, GlobalStaff, UserBasedRole
 from util.organizations_helpers import get_organizations
 from xmodule.modulestore.django import modulestore
@@ -869,3 +869,29 @@ def generate_password(length=12, min_digits=1, min_lowercase=1, min_uppercase=1,
     random.shuffle(password)
 
     return ''.join(password)
+
+
+def get_program_course_run_ids(program):
+    """
+    Returns a list of course run ids for a program.
+    """
+    course_run_ids = []
+    for course in program.get('courses', []):
+        for course_run in course.get('course_runs', []):
+            course_run_ids.append(course_run['key'])
+
+    return course_run_ids
+
+
+def get_enrolled_learners_count(course_run_ids):
+    """
+    Returns the number of enrolled learners for the given course runs.
+    """
+    staff_users = CourseAccessRole.objects.filter(
+        course_id__in=course_run_ids).values_list('user', flat=True).distinct()
+
+    enrolled_learners_count = CourseEnrollment.objects.filter(
+        course_id__in=course_run_ids, is_active=True
+    ).exclude(user__in=staff_users).values('user').distinct().count()
+
+    return enrolled_learners_count
