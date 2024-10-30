@@ -51,7 +51,7 @@ from openedx.core.djangoapps.user_api.accounts.api import (
 )
 from openedx.core.djangoapps.user_api.preferences import api as preferences_api
 from openedx.core.djangoapps.user_authn.cookies import set_logged_in_cookies
-from openedx.core.djangoapps.user_authn.utils import generate_password, is_registration_api_v1
+from openedx.core.djangoapps.user_authn.utils import is_registration_api_v1
 from openedx.core.djangoapps.user_authn.views.registration_form import (
     AccountCreationForm,
     RegistrationFormFactory,
@@ -67,6 +67,7 @@ from openedx.features.edly.utils import (
     create_user_unsubscribe_url,
     has_not_unsubscribe_user_email,
     is_config_enabled,
+    generate_password,
     get_edly_sub_org_from_request,
     get_username_and_name_by_email
 )
@@ -184,6 +185,7 @@ def create_account_with_params(request, params):
 
     if is_third_party_auth_enabled and (pipeline.running(request) or third_party_auth_credentials_in_api):
         params["password"] = generate_password()
+        params["confirm_password"] = params["password"]
 
     # in case user is registering via third party (Google, Facebook) and pipeline has expired, show appropriate
     # error message

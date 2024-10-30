@@ -5,6 +5,8 @@ import json
 import logging
 from functools import partial
 from datetime import datetime
+import random
+import string
 from urllib.parse import urljoin, urlparse
 
 import jwt
@@ -40,6 +42,7 @@ from openedx.features.edly.constants import ESSENTIALS, DEFAULT_COURSE_IMAGE, DE
 from openedx.features.edly.context_processor import Colour
 from openedx.features.edly.models import EdlyMultiSiteAccess, EdlySubOrganization
 from common.djangoapps.student.models import UserProfile
+from common.djangoapps.util.password_policy_validators import SPECIAL_CHARACTERS, COMMON_SYMBOLS
 
 LOGGER = logging.getLogger(__name__)
 
@@ -816,3 +819,53 @@ def create_user_unsubscribe_url(email, site):
         url = 'https://' + url
 
     return url
+
+
+def generate_password(length=12, min_digits=1, min_lowercase=1, min_uppercase=1, min_symbols=1, min_special=1):
+    """Generate a password that meets the configured password policy."""
+    if length < 8:
+        raise ValueError("Password must be at least 8 characters long.")
+
+    # Retrieve password validator settings from Django settings
+    password_validators = getattr(settings, 'AUTH_PASSWORD_VALIDATORS', [])
+    for validator in password_validators:
+        validator_name = validator.get('NAME')
+        validator_options = validator.get('OPTIONS', {})
+        if validator_name == 'django.contrib.auth.password_validation.MinimumLengthValidator':
+            length = max(validator_options.get('min_length', length), length)
+        elif validator_name == 'util.password_policy_validators.NumericValidator':
+            min_digits = validator_options.get('min_numeric', 1)
+        elif validator_name == 'util.password_policy_validators.UppercaseValidator':
+            min_uppercase = validator_options.get('min_upper', 1)
+        elif validator_name == 'util.password_policy_validators.LowercaseValidator':
+            min_lowercase = validator_options.get('min_lower', 1)
+        elif validator_name == 'util.password_policy_validators.SpecialCharactersValidator':
+            min_special = validator_options.get('min_special', 1)
+        elif validator_name == 'util.password_policy_validators.SymbolValidator':
+            min_symbols = validator_options.get('min_symbol', 1)
+
+    digits = string.digits
+    uppercase = string.ascii_uppercase
+    lowercase = string.ascii_lowercase
+    symbols = COMMON_SYMBOLS
+    special = SPECIAL_CHARACTERS
+
+    total_required = min_digits + min_lowercase + min_uppercase + min_symbols + min_special
+    if length < total_required:
+        raise ValueError("Password length is too short for the specified requirements.")
+
+    password = []
+
+    password.extend(random.choice(digits) for _ in range(min_digits))
+    password.extend(random.choice(uppercase) for _ in range(min_uppercase))
+    password.extend(random.choice(lowercase) for _ in range(min_lowercase))
+    password.extend(random.choice(symbols) for _ in range(min_symbols))
+    password.extend(random.choice(special) for _ in range(min_special))
+
+    remaining_length = length - len(password)
+    all_characters = digits + uppercase + lowercase + symbols
+    password.extend(random.choices(all_characters, k=remaining_length))
+
+    random.shuffle(password)
+
+    return ''.join(password)

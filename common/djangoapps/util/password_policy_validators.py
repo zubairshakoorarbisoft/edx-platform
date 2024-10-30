@@ -21,6 +21,8 @@ log = logging.getLogger(__name__)
 # characters. The point of this restriction is to restrict the login page password field to prevent
 # any sort of attacks involving sending massive passwords.
 DEFAULT_MAX_PASSWORD_LENGTH = 5000
+SPECIAL_CHARACTERS = "!@#$%^&*"
+COMMON_SYMBOLS = "$+<=>^`|~"
 
 
 def create_validator_config(name, options={}):
@@ -496,7 +498,7 @@ class SpecialCharactersValidator(object):
         self.min_symbol = min_symbol
 
     def validate(self, password, user=None):
-        if _validate_condition(password, lambda c: c in '!@#$%^&*', self.min_symbol):
+        if _validate_condition(password, lambda c: c in SPECIAL_CHARACTERS, self.min_symbol):
             return
         raise ValidationError(
             ungettext(

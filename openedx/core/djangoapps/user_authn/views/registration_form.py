@@ -1164,6 +1164,18 @@ class RegistrationFormFactory(object):
                         instructions="",
                         restrictions={}
                     )
+
+                    # Hide the confirm password field
+                    form_desc.override_field_properties(
+                        "confirm_password",
+                        default="",
+                        field_type="hidden",
+                        required=False,
+                        label="",
+                        instructions="",
+                        restrictions={}
+                    )
+
                     # used to identify that request is running third party social auth
                     form_desc.add_field(
                         "social_auth_provider",

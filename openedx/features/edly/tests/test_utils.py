@@ -1,6 +1,7 @@
 """
 Tests for Edly Utils Functions.
 """
+import string
 from urllib.parse import urljoin
 import json
 import jwt
@@ -35,6 +36,7 @@ from openedx.features.edly.utils import (
     decode_edly_user_info_cookie,
     edly_panel_user_has_edly_org_access,
     encode_edly_user_info_cookie,
+    generate_password,
     get_edly_sub_org_from_cookie,
     get_edx_org_from_cookie,
     get_marketing_link,
@@ -47,6 +49,7 @@ from openedx.features.edly.utils import (
     filter_courses_based_on_org,
     get_current_site_invalid_certificate_context,
 )
+from common.djangoapps.util.password_policy_validators import SPECIAL_CHARACTERS
 from organizations.tests.factories import OrganizationFactory
 from student import auth
 from student.roles import (
@@ -97,6 +100,28 @@ class UtilsTests(SharedModuleStoreTestCase):
         }
         self.course = CourseOverviewFactory()
         RequestCache.clear_all_namespaces()
+        self.AUTH_PASSWORD_VALIDATORS = [
+            {
+                'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+                'OPTIONS': {'min_length': 8}
+            },
+            {
+                'NAME': 'util.password_policy_validators.LowercaseValidator',
+                'OPTIONS': {'min_lower': 1}
+            },
+            {
+                'NAME': 'util.password_policy_validators.UppercaseValidator',
+                'OPTIONS': {'min_upper': 1}
+            },
+            {
+                'NAME': 'util.password_policy_validators.NumericValidator',
+                'OPTIONS': {'min_numeric': 1}
+            },
+            {
+                'NAME': 'util.password_policy_validators.SpecialCharactersValidator',
+                'OPTIONS': {'min_symbol': 1}
+            }
+        ]
 
     def _get_stub_session(self, expire_at_browser_close=False, max_age=604800):
         return MagicMock(
@@ -611,3 +636,26 @@ class UtilsTests(SharedModuleStoreTestCase):
         )
         course_id = CourseKey.from_string('course-v1:edX+Test+Test_Course')
         assert not is_course_org_same_as_site_org(self.request.site, course_id)
+
+    def test_generate_password_meets_validators(self):
+        password = generate_password(length=12)
+
+        self.assertGreaterEqual(len(password), 8)
+        self.assertLessEqual(len(password), 75)
+        self.assertTrue(any(c.islower() for c in password))
+        self.assertTrue(any(c.isupper() for c in password))
+        self.assertTrue(any(c.isdigit() for c in password))
+        self.assertTrue(any(c in SPECIAL_CHARACTERS for c in password))
+
+    def test_generate_password_with_minimum_requirements(self):
+        password = generate_password(length=16, min_digits=2, min_lowercase=3, min_uppercase=2, min_symbols=2)
+
+        self.assertEqual(len(password), 16)
+        self.assertGreaterEqual(sum(c.isdigit() for c in password), 2)
+        self.assertGreaterEqual(sum(c.islower() for c in password), 3)
+        self.assertGreaterEqual(sum(c.isupper() for c in password), 2)
+        self.assertGreaterEqual(sum(c in string.punctuation for c in password), 2)
+
+    def test_min_length_validation(self):
+        with self.assertRaises(ValueError):
+            generate_password(length=7)
