@@ -19,6 +19,7 @@ from common.djangoapps.student.models import CourseEnrollment
 from common.djangoapps.student.roles import CourseInstructorRole, CourseStaffRole, LibraryUserRole
 from common.djangoapps.util.json_request import JsonResponse, expect_json
 from xmodule.modulestore.django import modulestore
+from openedx.features.edly.utils import is_course_org_same_as_site_org
 
 __all__ = ['request_course_creator', 'course_team_handler']
 
@@ -77,6 +78,9 @@ def _manage_users(request, course_key):
     # check that logged in user has permissions to this item
     user_perms = get_user_permissions(request.user, course_key)
     if not user_perms & STUDIO_VIEW_USERS:
+        raise PermissionDenied()
+    site = request.site
+    if not is_course_org_same_as_site_org(site, course_key, is_studio=True):
         raise PermissionDenied()
 
     course_module = modulestore().get_course(course_key)

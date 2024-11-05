@@ -28,6 +28,7 @@ from common.djangoapps.student.auth import (
     has_studio_read_access,
     has_studio_write_access
 )
+from openedx.features.edly.utils import is_course_org_same_as_site_org
 from common.djangoapps.student.roles import CourseInstructorRole, CourseStaffRole, LibraryUserRole
 from common.djangoapps.util.json_request import JsonResponse, JsonResponseBadRequest, expect_json
 from xmodule.modulestore import ModuleStoreEnum
@@ -273,6 +274,9 @@ def manage_library_users(request, library_key_string):
         raise Http404  # This is not a library
     user_perms = get_user_permissions(request.user, library_key)
     if not user_perms & STUDIO_VIEW_USERS:
+        raise PermissionDenied()
+    site = request.site
+    if not is_course_org_same_as_site_org(site, library_key, is_studio=True):
         raise PermissionDenied()
     library = modulestore().get_library(library_key)
     if library is None:

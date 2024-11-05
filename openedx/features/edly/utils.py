@@ -519,12 +519,15 @@ def get_marketing_link(marketing_urls, name):
         return ''
 
 
-def is_course_org_same_as_site_org(site, course_id):
+def is_course_org_same_as_site_org(site, course_id, is_studio=False):
     """
     Check if the course organization matches with the site organization.
     """
     try:
-        edly_sub_org = EdlySubOrganization.objects.get(lms_site=site)
+        if is_studio:
+            edly_sub_org = EdlySubOrganization.objects.get(studio_site=site)
+        else:
+            edly_sub_org = EdlySubOrganization.objects.get(lms_site=site)
     except EdlySubOrganization.DoesNotExist:
         LOGGER.info('No Edly sub organization found for site %s', site)
         return False
