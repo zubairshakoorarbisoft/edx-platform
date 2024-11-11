@@ -413,6 +413,17 @@ def get_password_validation_error(password, username=None, email=None):
     """
     return _validate(_validate_password, errors.AccountPasswordInvalid, password, username, email)
 
+def get_confirm_password_validation_error(confirm_password, password):
+    """Get the built-in validation error message for when
+    the confirm password is invalid in some way.
+
+    :param confirm_password: The proposed confirm password (unicode).
+    :param password: The password to match (unicode).
+    :return: Validation error message.
+
+    """
+    return _validate(_validate_confirm_password, errors.AccountPasswordInvalid, confirm_password, password)
+
 
 def get_country_validation_error(country):
     """Get the built-in validation error message for when
@@ -580,6 +591,17 @@ def _validate_password(password, username=None, email=None):
         raise errors.AccountPasswordInvalid(text_type(invalid_password_err))
     except ValidationError as validation_err:
         raise errors.AccountPasswordInvalid(' '.join(validation_err.messages))
+
+def _validate_confirm_password(confirm_password, password):
+    """Validate the confirm password field.
+
+    :param confirm_password: The proposed confirm password. (unicode)
+    :param password: The password to match. (unicode)
+    :return: None
+
+    """
+    if not confirm_password or confirm_password != password:
+        raise errors.AccountPasswordInvalid(accounts.REQUIRED_FIELD_CONFIRM_PASSWORD_MSG)
 
 
 def _validate_country(country):

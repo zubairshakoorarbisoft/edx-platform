@@ -36,7 +36,8 @@
                     'confirm_email',
                     'country',
                     'honor_code',
-                    'terms_of_service'
+                    'terms_of_service',
+                    'confirm_password'
                 ],
                 formType: 'register',
                 formStatusTpl: formStatusTpl,
