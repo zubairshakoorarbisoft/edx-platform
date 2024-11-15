@@ -32,6 +32,7 @@ from openedx.core.djangoapps.user_api.accounts import (
     EMAIL_MIN_LENGTH,
     NAME_MAX_LENGTH,
     REQUIRED_FIELD_CONFIRM_EMAIL_MSG,
+    REQUIRED_FIELD_CONFIRM_PASSWORD_MSG,
     USERNAME_BAD_LENGTH_MSG,
     USERNAME_CONFLICT_MSG,
     USERNAME_INVALID_CHARS_ASCII,
@@ -2386,6 +2387,20 @@ class RegistrationValidationViewTests(test_utils.ApiTestCase):
         self.assertValidationDecision(
             {"username": "somephrase", "password": "somephrase"},
             {"username": "", "password": u"The password is too similar to the username."}
+        )
+    
+    def test_confirm_password_matches_password(self):
+        password = 'password123'
+        self.assertValidationDecision(
+            {'password': password, 'confirm_password': password},
+            {'password': '', 'confirm_password': ''}
+        )
+
+    @ddt.data('', 'password123')
+    def test_confirm_password_doesnt_equal_password(self, confirm_password):
+        self.assertValidationDecision(
+            {'password': 'password321', 'confirm_password': confirm_password},
+            {'password': '', 'confirm_password': six.text_type(REQUIRED_FIELD_CONFIRM_PASSWORD_MSG)}
         )
 
     @override_settings(

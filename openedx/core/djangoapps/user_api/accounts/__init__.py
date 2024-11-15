@@ -85,6 +85,7 @@ PASSWORD_BAD_TYPE_MSG = u"Password must be a string."
 # into the required field or enter it incorrectly.
 REQUIRED_FIELD_NAME_MSG = _(u"Enter your full name.")
 REQUIRED_FIELD_CONFIRM_EMAIL_MSG = _(u"The email addresses do not match.")
+REQUIRED_FIELD_CONFIRM_PASSWORD_MSG = _(u"The passwords do not match.")
 REQUIRED_FIELD_COUNTRY_MSG = _(u"Select your country or region of residence.")
 REQUIRED_FIELD_PROFESSION_SELECT_MSG = _(u"Select your profession.")
 REQUIRED_FIELD_SPECIALTY_SELECT_MSG = _(u"Select your specialty.")

@@ -46,6 +46,7 @@ from openedx.core.djangoapps.user_api.accounts.api import (
     get_email_validation_error,
     get_name_validation_error,
     get_password_validation_error,
+    get_confirm_password_validation_error,
     get_username_existence_validation_error,
     get_username_validation_error
 )
@@ -709,6 +710,9 @@ class RegistrationValidationView(APIView):
             "password":
                 A handler to check the validity of passwords; a compatibility
                 decision with the username is made if it exists in the input.
+            "confirm_password":
+                A handler to check whether the confirmation password field matches
+                the password field.
             "country":
                 A handler to check whether the validity of country fields.
     """
@@ -766,6 +770,13 @@ class RegistrationValidationView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
         return get_password_validation_error(password, username, email)
+    
+    def confirm_password_handler(self, request):
+        if request.data.get('social_auth_provider') is not None:
+            return ""
+        password = request.data.get('password')
+        confirm_password = request.data.get('confirm_password')
+        return get_confirm_password_validation_error(confirm_password, password)
 
     def country_handler(self, request):
         country = request.data.get('country')
@@ -777,6 +788,7 @@ class RegistrationValidationView(APIView):
         "email": email_handler,
         "confirm_email": confirm_email_handler,
         "password": password_handler,
+        "confirm_password": confirm_password_handler,
         "country": country_handler
     }
 
@@ -795,6 +807,7 @@ class RegistrationValidationView(APIView):
             "email": "mslm@gmail.com",
             "confirm_email": "mslm@gmail.com",
             "password": "password123",
+            "confirm_password": "password123",
             "country": "PK"
         }
         ```
