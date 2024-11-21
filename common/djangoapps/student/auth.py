@@ -11,8 +11,7 @@ from crum import get_current_request
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from opaque_keys.edx.locator import LibraryLocator
-
-from openedx.features.edly.utils import get_edly_sub_org_from_request
+from openedx.features.edly.utils import get_edly_sub_org_from_request, is_course_org_same_as_site_org
 from common.djangoapps.student.roles import (
     CourseBetaTesterRole,
     CourseCreatorRole,
@@ -118,6 +117,10 @@ def has_studio_write_access(user, course_key):
     :param user:
     :param course_key: a CourseKey
     """
+    request = get_current_request()
+    if not is_course_org_same_as_site_org(request.site, course_key, is_studio=True):
+        return False
+
     return bool(STUDIO_EDIT_CONTENT & get_user_permissions(user, course_key))
 
 
@@ -136,6 +139,10 @@ def has_studio_read_access(user, course_key):
     There is currently no such thing as read-only course access in studio, but
     there is read-only access to content libraries.
     """
+    request = get_current_request()
+    if not is_course_org_same_as_site_org(request.site, course_key, is_studio=True):
+        return False
+
     return bool(STUDIO_VIEW_CONTENT & get_user_permissions(user, course_key))
 
 
