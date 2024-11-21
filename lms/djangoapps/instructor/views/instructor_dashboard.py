@@ -53,6 +53,7 @@ from openedx.core.djangoapps.verified_track_content.models import VerifiedTrackC
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.core.lib.url_utils import quote_slashes
 from openedx.core.lib.xblock_utils import wrap_xblock
+from openedx.features.edly.utils import is_course_org_same_as_site_org
 from common.djangoapps.student.models import CourseEnrollment
 from common.djangoapps.student.roles import (
     CourseFinanceAdminRole, CourseInstructorRole,
@@ -112,6 +113,9 @@ def instructor_dashboard_2(request, course_id):
         log.error(u"Unable to find course with course key %s while loading the Instructor Dashboard.", course_id)
         return HttpResponseServerError()
 
+    if not is_course_org_same_as_site_org(request.site, course_key):
+        raise Http404(u"Course not found: {}.".format(six.text_type(course_key)))
+    
     course = get_course_by_id(course_key, depth=0)
 
     access = {
