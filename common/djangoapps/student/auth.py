@@ -118,7 +118,9 @@ def has_studio_write_access(user, course_key):
     :param course_key: a CourseKey
     """
     request = get_current_request()
-    if not is_course_org_same_as_site_org(request.site, course_key, is_studio=True):
+    site = getattr(request, 'site', None)
+
+    if course_key and site and not is_course_org_same_as_site_org(site, course_key, is_studio=True):
         return False
 
     return bool(STUDIO_EDIT_CONTENT & get_user_permissions(user, course_key))
@@ -140,7 +142,9 @@ def has_studio_read_access(user, course_key):
     there is read-only access to content libraries.
     """
     request = get_current_request()
-    if not is_course_org_same_as_site_org(request.site, course_key, is_studio=True):
+    site = getattr(request, 'site', None)
+
+    if course_key and site and not is_course_org_same_as_site_org(site, course_key, is_studio=True):
         return False
 
     return bool(STUDIO_VIEW_CONTENT & get_user_permissions(user, course_key))
