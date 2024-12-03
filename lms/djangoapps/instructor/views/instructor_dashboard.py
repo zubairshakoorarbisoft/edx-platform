@@ -113,7 +113,8 @@ def instructor_dashboard_2(request, course_id):
         log.error(u"Unable to find course with course key %s while loading the Instructor Dashboard.", course_id)
         return HttpResponseServerError()
 
-    if not is_course_org_same_as_site_org(request.site, course_key):
+    site = getattr(request, 'site', None)
+    if course_key and site and not is_course_org_same_as_site_org(site, course_key):
         raise Http404(u"Course not found: {}.".format(six.text_type(course_key)))
     
     course = get_course_by_id(course_key, depth=0)

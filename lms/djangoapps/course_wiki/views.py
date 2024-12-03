@@ -42,7 +42,8 @@ def course_wiki_redirect(request, course_id, wiki_path=""):
     example, "/6.002x") to keep things simple.
     """
     course_key = CourseKey.from_string(course_id)
-    if not is_course_org_same_as_site_org(request.site, course_key):
+    site = getattr(request, 'site', None)
+    if course_key and site and not is_course_org_same_as_site_org(site, course_key):
         raise Http404(u"Course not found: {}.".format(six.text_type(course_key)))
 
     course = get_course_by_id(course_key)

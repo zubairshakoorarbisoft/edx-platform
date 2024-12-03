@@ -120,7 +120,7 @@ def has_studio_write_access(user, course_key):
     request = get_current_request()
     site = getattr(request, 'site', None)
 
-    if course_key and site and not is_course_org_same_as_site_org(site, course_key, is_studio=True):
+    if course_key and site and not is_course_org_same_as_site_org(site, course_key):
         return False
 
     return bool(STUDIO_EDIT_CONTENT & get_user_permissions(user, course_key))
@@ -144,7 +144,7 @@ def has_studio_read_access(user, course_key):
     request = get_current_request()
     site = getattr(request, 'site', None)
 
-    if course_key and site and not is_course_org_same_as_site_org(site, course_key, is_studio=True):
+    if course_key and site and not is_course_org_same_as_site_org(site, course_key):
         return False
 
     return bool(STUDIO_VIEW_CONTENT & get_user_permissions(user, course_key))

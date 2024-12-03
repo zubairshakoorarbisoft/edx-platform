@@ -276,7 +276,7 @@ def manage_library_users(request, library_key_string):
     if not user_perms & STUDIO_VIEW_USERS:
         raise PermissionDenied()
     site = request.site
-    if not is_course_org_same_as_site_org(site, library_key, is_studio=True):
+    if not is_course_org_same_as_site_org(site, library_key):
         raise PermissionDenied()
     library = modulestore().get_library(library_key)
     if library is None:
