@@ -80,7 +80,7 @@ def _manage_users(request, course_key):
     if not user_perms & STUDIO_VIEW_USERS:
         raise PermissionDenied()
     site = request.site
-    if not is_course_org_same_as_site_org(site, course_key, is_studio=True):
+    if not is_course_org_same_as_site_org(site, course_key):
         raise PermissionDenied()
 
     course_module = modulestore().get_course(course_key)
