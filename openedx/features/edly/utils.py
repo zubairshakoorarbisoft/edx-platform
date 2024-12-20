@@ -220,10 +220,19 @@ def get_edly_sub_org_from_request(request):
     Returns:
         EdlySubOrg: edly_sub_org object
     """
+    site = getattr(request, 'site', None)
+    if not site:
+        LOGGER.info('Request %s has no site', request)
+        return None
     try:
-        edly_sub_org = request.site.edly_sub_org_for_lms
+        edly_sub_org = EdlySubOrganization.objects.get(
+            Q(lms_site=site) |
+            Q(studio_site=site) |
+            Q(preview_site=site)
+        )
     except EdlySubOrganization.DoesNotExist:
-        edly_sub_org = request.site.edly_sub_org_for_studio
+        LOGGER.info('No Edly sub organization found for site %s', site)
+        return None
 
     return edly_sub_org
 
