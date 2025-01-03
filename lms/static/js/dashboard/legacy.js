@@ -85,9 +85,14 @@
          }
 
          function setDialogAttributes(isPaidCourse, certNameLong,
-                                        courseNumber, courseName, enrollmentMode, showRefundOption, courseKey) {
+                                        courseNumber, courseName, enrollmentMode, showRefundOption, courseKey, userHasPaid) {
              var diagAttr = {};
-
+             if (userHasPaid) {
+              diagAttr["data-track-info"] = gettext(
+                "You cannot unenroll from the purchased course " + "{courseName} ({courseNumber})"
+              );
+              return diagAttr;
+             }
              if (isPaidCourse) {
                  if (showRefundOption) {
                      diagAttr['data-refund-info'] = gettext('You will be refunded the amount you paid.');
@@ -138,19 +143,21 @@
                  enrollmentMode = $(event.target).data('course-enrollment-mode'),
                  courseNumber = $(event.target).data('course-number'),
                  courseName = $(event.target).data('course-name'),
-                 courseRefundUrl = $(event.target).data('course-refund-url'),
+                 coursePaymentUrl = $(event.target).data('course-payment-url'),
                  courseKey = $(event.target).data('course-id'),
                  dialogMessageAttr;
 
              var request = $.ajax({
-                 url: courseRefundUrl,
+                 url: coursePaymentUrl,
                  method: 'GET',
                  dataType: 'json'
              });
              request.success(function(data, textStatus, xhr) {
+                 const userHasPaid = data.status === "paid";
+                 $('#unenroll_form .submit-button').css('display',userHasPaid ? 'none' : 'inline-block');
                  if (xhr.status === 200) {
                      dialogMessageAttr = setDialogAttributes(isPaidCourse, certNameLong,
-                                    courseNumber, courseName, enrollmentMode, data.course_refundable_status, courseKey);
+                                    courseNumber, courseName, enrollmentMode, false, courseKey, userHasPaid);
 
                      $('#track-info').empty();
                      $('#refund-info').empty();
