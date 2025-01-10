@@ -46,7 +46,6 @@ from common.djangoapps.student.models import UserProfile
 from common.djangoapps.util.password_policy_validators import SPECIAL_CHARACTERS, COMMON_SYMBOLS
 
 LOGGER = logging.getLogger(__name__)
-MIXPANEL = Mixpanel(settings.MIXPANEL_PROJECT_TOKEN)
 
 
 def is_edly_sub_org_active(edly_sub_org):
@@ -942,6 +941,33 @@ def build_mixpanel_user_properties(user, edly_sub_org):
     }
 
 
+def handle_mixpanel_event(user, sub_org, mixpanel_action):
+    """
+    Wrapper function to handle Mixpanel user events.
+
+    Args:
+    - user: The requesting user to be track.
+    - sub_org: The sub_org of the requesting user.  
+    - mixpanel_action: The Mixpanel method to call (`people_set` or `people_set_once`).
+    
+    This function handles initialization, exception handling, and logging.
+    """
+    try:
+        user_email = user.email
+        properties = build_mixpanel_user_properties(user, sub_org)
+        MIXPANEL = Mixpanel(settings.MIXPANEL_PROJECT_TOKEN)
+        getattr(MIXPANEL, mixpanel_action)(user_email, properties)
+
+    except ConnectionError as e:
+        LOGGER.error(f"Mixpanel connection error while processing {user_email}: {e}")
+    except TimeoutError as e:
+        LOGGER.error(f"Mixpanel timeout error while processing {user_email}: {e}")
+    except KeyError as e:
+        LOGGER.error(f"Missing data while processing {user_email}: {e}")
+    except Exception as e:
+        LOGGER.error(f"Mixpanel Failure for {user_email}: {e}")
+
+
 def register_authenticated_user_on_mixpanel(request):
     """
     Registers the user if authenticated and not already registered.
@@ -950,11 +976,11 @@ def register_authenticated_user_on_mixpanel(request):
         return
 
     edly_sub_org = get_edly_sub_org_from_request(request)
-    MIXPANEL.people_set_once(request.user.email, build_mixpanel_user_properties(request.user, edly_sub_org))
+    handle_mixpanel_event(request.user, edly_sub_org, 'people_set_once')
 
 
 def register_new_user_on_mixpanel(user, edly_sub_org):
     """
     Register new user on mixpanel.
     """
-    MIXPANEL.people_set(user.email, build_mixpanel_user_properties(user, edly_sub_org))
+    handle_mixpanel_event(user, edly_sub_org, 'people_set')
