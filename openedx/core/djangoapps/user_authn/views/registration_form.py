@@ -259,6 +259,7 @@ class AccountCreationForm(forms.Form):
         confirm_password = self.cleaned_data["confirm_password"]
         if (
                 "password" in self.cleaned_data and
+                "confirm_password" in self.data and
                 self.cleaned_data["password"] != confirm_password
         ):
             raise ValidationError(_("The passwords must match."))
