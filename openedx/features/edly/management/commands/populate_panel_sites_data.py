@@ -3,7 +3,7 @@ Edly's management command to populate dummy data for provided sites on given dat
 """
 from datetime import datetime, timedelta
 import logging
-from random import randint, sample
+from random import randint, sample, choice
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -14,9 +14,11 @@ from django.core.management import BaseCommand, CommandError
 from edly_panel_app.api.v1.constants import REGISTRATION_FIELDS_VALUES  # pylint: disable=no-name-in-module
 from edly_panel_app.api.v1.helpers import _register_user  # pylint: disable=no-name-in-module
 from edly_panel_app.models import EdlyUserActivity
-from figures.models import SiteDailyMetrics, SiteMonthlyMetrics
+from figures.models import SiteDailyMetrics, SiteMonthlyMetrics, CourseDailyMetrics
+from figures.sites import get_courses_for_site
 
 from openedx.features.edly.models import EdlyMultiSiteAccess
+from lms.djangoapps.grades.models import PersistentCourseGrade
 from openedx.core.djangoapps.django_comment_common.models import assign_default_role
 from openedx.core.djangoapps.django_comment_common.utils import seed_permissions_roles
 from student.helpers import AccountValidationError
@@ -29,6 +31,32 @@ from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import DuplicateCourseError
 
 logger = logging.getLogger(__name__)
+
+first_names = [
+    'john', 'emily', 'michael', 'sarah', 'david', 'lisa', 'james', 'emma', 'robert', 'olivia', 
+    'william', 'sophia', 'joseph', 'ava', 'daniel', 'isabella', 'matthew', 'mia', 'andrew', 
+    'charlotte', 'christopher', 'amelia', 'joshua', 'harper', 'ryan', 'evelyn', 'ethan', 'abigail', 
+    'tyler', 'madison', 'brandon', 'ella', 'nicholas', 'grace', 'nathan', 'chloe', 'logan', 'zoey', 
+    'gabriel', 'lily', 'justin', 'hannah', 'lucas', 'addison', 'jack', 'riley', 'aaron', 'layla', 
+    'christian', 'elena', 'sam', 'aubrey', 'connor', 'stella', 'hunter', 'aurora', 'ian', 'penelope', 
+    'carter', 'skylar', 'jordan', 'elena', 'mason', 'nova', 'luke', 'zoe', 'dylan', 'scarlett', 'cameron', 
+    'aria', 'xavier', 'madison', 'isaac', 'brooklyn', 'adam', 'claire', 'jason', 'nora', 'owen', 'lucy', 
+    'julian', 'aurora', 'leo', 'savannah', 'miles', 'hazel', 'oscar', 'violet', 'ezra', 'aurora', 'jose', 
+    'stella', 'calvin', 'luna', 'roman'
+]
+
+last_names = [
+    'smith', 'jones', 'brown', 'davis', 'wilson', 'taylor', 'anderson', 'thomas', 'jackson', 
+    'white', 'harris', 'martin', 'thompson', 'garcia', 'martinez', 'robinson', 'clark', 'rodriguez', 
+    'lewis', 'lee', 'walker', 'hall', 'allen', 'young', 'hernandez', 'king', 'wright', 'lopez', 
+    'hill', 'scott', 'green', 'adams', 'baker', 'gonzalez', 'nelson', 'carter', 'mitchell', 'perez', 
+    'roberts', 'turner', 'phillips', 'campbell', 'parker', 'evans', 'edwards', 'collins', 'stewart', 
+    'sanchez', 'morris', 'rogers', 'reed', 'cook', 'morgan', 'bell', 'murphy', 'bailey', 'rivera', 
+    'cooper', 'richardson', 'cox', 'howard', 'ward', 'torres', 'peterson', 'gray', 'ramirez', 'james', 
+    'watson', 'brooks', 'kelly', 'sanders', 'price', 'bennett', 'wood', 'barnes', 'ross', 'henderson', 
+    'coleman', 'jenkins', 'perry', 'powell', 'long', 'patterson', 'hughes', 'flores', 'washington', 
+    'butler', 'simmons', 'foster', 'gonzales', 'bryant', 'alexander', 'russell', 'griffin', 'diaz'
+]
 
 
 class Command(BaseCommand):
@@ -51,26 +79,29 @@ class Command(BaseCommand):
             default=datetime.today().strftime('%m/%Y'),
             help='The month and year of the data to populate.'
         )
+    
+    def get_site_user_count(self, sub_org):
+        """return the number of user for a given site."""
+        return EdlyMultiSiteAccess.objects.filter(sub_org=sub_org).count()
 
-    def get_dummy_users(self, date_for):
+    def get_dummy_users(self):
         """
         Return random number of dummy users to register.
         """
-        formatted_date = date_for.strftime('%m_%Y')
         dummy_users = []
-        users_count = randint(10, 30)
-        password = 'edx'
-        user_prefix = 'dummy_user'
+        users_count = randint(50, 70)
+        password = 'edx@123.aA'
         REGISTRATION_FIELDS_VALUES.pop('username')
         REGISTRATION_FIELDS_VALUES.pop('name')
         REGISTRATION_FIELDS_VALUES.pop('password')
         REGISTRATION_FIELDS_VALUES.pop('email')
         REGISTRATION_FIELDS_VALUES.pop('confirm_email')
         for index in range(1, users_count):
+            username = '{}_{}'.format(choice(first_names), choice(last_names))
             dummy_users.append(dict(
-                username='{}_{}_{}'.format(user_prefix, index, formatted_date),
-                email='{}_{}_{}@example.com'.format(user_prefix, index, formatted_date),
-                name='{} {}_{}'.format(user_prefix, index, formatted_date),
+                username='{}'.format(username),
+                email='{}@example.com'.format(username),
+                name='{}'.format(username),
                 password=password,
                 **REGISTRATION_FIELDS_VALUES,
             ))
@@ -81,13 +112,24 @@ class Command(BaseCommand):
         """
         Return random number of dummy courses to create.
         """
-        course_name_prefix = 'Demo Course'
-        course_count = randint(10, 20)
+        course_name_prefix = [
+            'Test Demo Course', 'Demo Course with Edly SaaS', 'Intro to Demo Course', 'Demo Course for Beginners',
+            'Advanced Demo Course', 'Complete Guide to Demo Course', 'Demo Course: Getting Started', 
+            'Exploring Demo Course Features', 'Mastering Demo Course Techniques', 'Demo Course: From Beginner to Pro',
+            'Demo Course for SaaS Enthusiasts', 'Next-Level Demo Course', 'Demo Course: A Comprehensive Overview',
+            'Demo Course for Edly Users', 'Hands-on Demo Course', 'Live Demo Course', 'Demo Course for Educational Platforms',
+            'Learn with Demo Course', 'Interactive Demo Course', 'Practical Demo Course'
+        ]
+        course_count = randint(5, 8)
         courses = []
         month_for = populate_date.month
         year_for = populate_date.year
         for course in range(1, course_count):
-            course_name = ('{} {} {}/{}').format(course_name_prefix, course, month_for, year_for)
+            course_name = ('{} {} {}/{}').format(
+                course_name_prefix[randint(0,19)],
+                course, month_for,
+                year_for
+            )
             course_number = ('DC_{}_{}{}').format(course_count, month_for, year_for)
             course_run = '{}_{}'.format(month_for, year_for)
             courses.append(
@@ -125,6 +167,7 @@ class Command(BaseCommand):
         fields.update({
             'language': getattr(settings, 'DEFAULT_COURSE_LANGUAGE', 'en'),
             'cert_html_view_enabled': True,
+            'start': datetime(2023, 1, 1),
         })
 
         with modulestore().default_store(store):
@@ -135,9 +178,13 @@ class Command(BaseCommand):
                 user.id,
                 fields=fields,
             )
+        
+        try: 
+            self.add_instructor(new_course.id, user, user)
+            self.initialize_permissions(new_course.id, user)
+        except Exception as err:
+            logger.exception('Unable to add course instructor/permission: {}'.format(str(err)))
 
-        self.add_instructor(new_course.id, user, user)
-        self.initialize_permissions(new_course.id, user)
         return new_course
 
     def create_new_course(self, user, org, number, run, fields):
@@ -168,6 +215,7 @@ class Command(BaseCommand):
 
         dates = []
         dummy_dates = sample(dummy_dates, number_of_dates)
+        dummy_dates.append(start_date)
         for _date in dummy_dates:
             dates.append(dict(
                 date_for=_date,
@@ -199,14 +247,23 @@ class Command(BaseCommand):
                     tos_required=False,
                     skip_email=True,
                 )
-            except (AccountValidationError, ValidationError):
+            except (AccountValidationError, ValidationError) as err:
                 logger.info('Failure registering user: {}'.format(user['username']))
+                logger.info('Failure in user registration: {}'.format(err))
+                pass
+            except Exception as err:
+                logger.exception('Failure registering user: {}'.format(user['username']))
                 pass
 
-    def create_dummy_courses(self, edx_org, courses, user):
+    def create_dummy_courses(self, edx_org, courses):
         """
         Creates dummy courses in module store for given edx organization.
         """
+        course_access_role = CourseAccessRole.objects.filter(org=edx_org, role= 'global_course_creator')
+        if not course_access_role.exists():
+            return []
+
+        user = course_access_role.first().user
         new_courses = []
         for course in courses:
             try:
@@ -224,6 +281,8 @@ class Command(BaseCommand):
                 )
                 new_courses.append(new_course)
             except DuplicateCourseError:
+                pass
+            except Exception as err:
                 pass
 
         return new_courses
@@ -245,18 +304,87 @@ class Command(BaseCommand):
                 except Exception:  # pylint: disable=broad-except
                     logger.exception('Unable to add edly_user_activity')
 
-    def enroll_dummy_users_in_courses(self, courses, users):
+    def create_course_daily_matric(self, courses, sites, dates):
+        """Generate courses daily matrix."""
+        for site in sites: 
+            today = datetime.today()
+            course_id = get_courses_for_site(site)
+            random_courses = sample(list(course_id), min(len(course_id), 20))
+            courses = [{'id': id} for id in random_courses]
+
+            for course_id in courses:
+                try:
+                    rec = dict(
+                        site=site
+                    )
+                    rec['date_for'] = today
+                    rec['enrollment_count'] = randint(10,50)
+                    rec['active_learners_today'] = randint(10,50)
+                    rec['active_learners_this_month'] = randint(10,50)
+                    rec['average_progress'] = round(randint(1,100)/100, 2)
+                    rec['average_days_to_complete'] = randint(1,30)
+                    rec['num_learners_completed'] = randint(10,50)
+                    sdm, _ = CourseDailyMetrics.objects.get_or_create(
+                        date_for=rec['date_for'],
+                        site_id=rec['site'].id,
+                        course_id = str(course_id['id']),
+                        defaults=rec,
+                    )
+                    sdm.save()
+                except Exception as err:
+                    logger.info('Error populating Course Daily Metrics: {}'.format(err))
+
+    def enroll_dummy_users_in_courses(self, courses, users, site):
         """
         Enrolls users in courses.
         """
+        if not len(courses):
+            course_id = get_courses_for_site(site)
+            courses = [{'id': id} for id in course_id[:8]]
+        
+        if not len(users):
+            edly_sub_org = getattr(site, 'edly_sub_org_for_lms', None)
+            user_ids = EdlyMultiSiteAccess.objects.filter(
+                sub_org=edly_sub_org, groups__name=settings.EDLY_PANEL_RESTRICTED_USERS_GROUP
+            ).values_list('user', flat=True)
+            users = get_user_model().objects.filter(id__in=user_ids)
+
+        num_to_sample = min(len(users), 10)
+        users = sample(list(users), num_to_sample)
         for course in courses:
             for user in users:
-                logger.info('Enrolling user {} in course {}'.format(user.username, course.id))
-                CourseEnrollment.enroll(user, course.id)
+                try:
+                    course_id = getattr(course, 'id') if getattr(course, 'id', None) else str(course['id'])
+                    logger.info('Enrolling user {} in course {}'.format(user.username, course_id))
+                    CourseEnrollment.enroll(user, course_id)
+                    percent_grade  = randint(50, 100)
+                    self.params = {
+                        'user_id': user.id,
+                        'course_id': getattr(course, 'id'),
+                        'percent_grade': percent_grade,
+                        'passed': True if percent_grade > 50 else False
+                    }
+                    grade = PersistentCourseGrade.update_or_create(**self.params)
+                    grade.passed_timestamp = datetime.strptime(datetime.today(), '%d-%m-%Y').date()
+                    grade.save()
+                except Exception as err:
+                    logger.info('Enrolling user failed with Error: {}'.format(err))
+
 
     def create_staff_users(self, org, users):
+        staff_users_count = CourseAccessRole.objects.filter(
+            org=org
+        ).count()
+        
+        if staff_users_count > 50: 
+            return 
+
+        to_pick = 5
+        if len(users) < to_pick:
+            to_pick = len(users)
+
         indices = list(range(len(users)))
-        indices = sample(indices, 5)
+        indices = sample(indices, to_pick)
         for index in indices:
             CourseAccessRole.objects.get_or_create(
                 user=users[index],
@@ -280,10 +408,9 @@ class Command(BaseCommand):
                 )
             )
 
-        sites = Site.objects.filter(domain__in=sites_list)
+        sites = list(Site.objects.filter(domain__in=sites_list))
         dates = self.get_dummy_metrics(populate_date)
-        dummy_users = self.get_dummy_users(populate_date)
-        sdm = SiteDailyMetrics.objects.filter()
+        dummy_users = self.get_dummy_users()
 
         edly_sub_orgs = []
         for site in sites:
@@ -291,8 +418,10 @@ class Command(BaseCommand):
             if not edly_sub_org:
                 continue
 
+            logger.info('Starting adding data for site: {}'.format(site))
             edly_sub_orgs.append(edly_sub_org)
-            self.register_dummy_users(site, dummy_users)
+            if self.get_site_user_count(edly_sub_org) < 220:
+                self.register_dummy_users(site, dummy_users)
 
             logger.info('Saving Site Monthly Metrics')
             smm, _ = SiteMonthlyMetrics.objects.get_or_create(
@@ -313,19 +442,23 @@ class Command(BaseCommand):
 
         edx_organizations = []
         for edly_sub_org in edly_sub_orgs:
-            edx_orgs = edly_sub_org.edx_organizations.all().values()
-            edx_organizations.extend([org['short_name']for org in edx_orgs])
+            edx_organizations.extend([edly_sub_org.edx_organizations.all().first().short_name])
 
         user_objects = get_user_model().objects.filter(username__in=[user['username']for user in dummy_users])
+        logger.info('Adding dummy user activities')
         self.add_dummy_edly_activities(user_objects, edly_sub_orgs, populate_date)
 
         new_courses = []
-        for edx_org in edx_organizations:
-            courses = self.get_dummy_courses(edx_org, populate_date)
-            new_courses.extend(self.create_dummy_courses(edx_org, courses, user_objects[0]))
+        for edx_org,site in zip(edx_organizations, sites):
+            if len(get_courses_for_site(site)) < 25: 
+                courses = self.get_dummy_courses(edx_org, populate_date)
+                new_courses.extend(self.create_dummy_courses(edx_org, courses))
 
-        self.enroll_dummy_users_in_courses(new_courses, user_objects)
-        edx_org = edx_organizations[0] if edx_organizations else 'edly'
-        self.create_staff_users(edx_org, user_objects)
+        for site in sites:
+            self.create_course_daily_matric(courses, sites, dates)
+            self.enroll_dummy_users_in_courses(new_courses, user_objects, site)
+
+        for edx_org in edx_organizations:
+            self.create_staff_users(edx_org, user_objects)
 
         logger.info('All sites data has been populated.')
