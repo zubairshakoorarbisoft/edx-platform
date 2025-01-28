@@ -24,11 +24,11 @@ ${block_content | n, decode.utf8}
 %  endif
 %  if not disable_staff_debug_info:
 <div class="wrap-instructor-info">
-  <a class="instructor-info-action" href="#${element_id}_debug" rel="leanModal" id="${element_id}_trig">${_("Staff Debug Info")}</a>
+  <a class="instructor-info-action purple-bg" href="#${element_id}_debug" rel="leanModal" id="${element_id}_trig">${_("Staff Debug Info")}</a>
 
   %  if settings.FEATURES.get('ENABLE_STUDENT_HISTORY_VIEW') and \
     location.block_type == 'problem':
-    <a class="instructor-info-action" href="#${element_id}_history" rel="leanModal" id="${element_id}_history_trig">${_("Submission history")}</a>
+    <a class="instructor-info-action purple-bg" href="#${element_id}_history" rel="leanModal" id="${element_id}_history_trig">${_("Submission history")}</a>
   %  endif
 </div>
 %  endif

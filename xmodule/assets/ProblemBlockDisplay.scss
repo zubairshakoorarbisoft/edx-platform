@@ -1,3 +1,31 @@
 .xmodule_display.xmodule_ProblemBlock {
-  @import "capa/display.scss";
+    @import "capa/display.scss";
 }
+
+.purple-bg {
+    background-color: #4600c7 !important;
+}
+
+.purple-color {
+    color: #4600c7 !important;
+}
+.border-purple-color {
+    border-color: #4600c7 !important;
+}
+.purple-bg {
+    background-color: #4600c7 !important;
+}
+.purple-bg.transparent-bg {
+    background-color: transparent !important;
+}
+.dark-black-color {
+    color: #111827 !important;
+}
+.wrap-instructor-info {
+    .instructor-info-action {
+        &.purple-bg {
+            background-color: #4600c7 !important;
+        }
+    }
+}
+
