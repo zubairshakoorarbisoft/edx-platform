@@ -304,35 +304,34 @@ class Command(BaseCommand):
                 except Exception:  # pylint: disable=broad-except
                     logger.exception('Unable to add edly_user_activity')
 
-    def create_course_daily_matric(self, courses, sites, dates):
+    def create_course_daily_matric(self, site, dates):
         """Generate courses daily matrix."""
-        for site in sites: 
-            today = datetime.today()
-            course_id = get_courses_for_site(site)
-            random_courses = sample(list(course_id), min(len(course_id), 20))
-            courses = [{'id': id} for id in random_courses]
+        today = datetime.today()
+        course_id = get_courses_for_site(site)
+        random_courses = sample(list(course_id), min(len(course_id), 20))
+        courses = [{'id': id} for id in random_courses]
 
-            for course_id in courses:
-                try:
-                    rec = dict(
-                        site=site
-                    )
-                    rec['date_for'] = today
-                    rec['enrollment_count'] = randint(10,50)
-                    rec['active_learners_today'] = randint(10,50)
-                    rec['active_learners_this_month'] = randint(10,50)
-                    rec['average_progress'] = round(randint(1,100)/100, 2)
-                    rec['average_days_to_complete'] = randint(1,30)
-                    rec['num_learners_completed'] = randint(10,50)
-                    sdm, _ = CourseDailyMetrics.objects.get_or_create(
-                        date_for=rec['date_for'],
-                        site_id=rec['site'].id,
-                        course_id = str(course_id['id']),
-                        defaults=rec,
-                    )
-                    sdm.save()
-                except Exception as err:
-                    logger.info('Error populating Course Daily Metrics: {}'.format(err))
+        for course_id in courses:
+            try:
+                rec = dict(
+                    site=site
+                )
+                rec['date_for'] = today
+                rec['enrollment_count'] = randint(10,50)
+                rec['active_learners_today'] = randint(10,50)
+                rec['active_learners_this_month'] = randint(10,50)
+                rec['average_progress'] = round(randint(1,100)/100, 2)
+                rec['average_days_to_complete'] = randint(1,30)
+                rec['num_learners_completed'] = randint(10,50)
+                sdm, _ = CourseDailyMetrics.objects.get_or_create(
+                    date_for=rec['date_for'],
+                    site_id=rec['site'].id,
+                    course_id = str(course_id['id']),
+                    defaults=rec,
+                )
+                sdm.save()
+            except Exception as err:
+                logger.info('Error populating Course Daily Metrics: {}'.format(err))
 
     def enroll_dummy_users_in_courses(self, courses, users, site):
         """
@@ -455,7 +454,7 @@ class Command(BaseCommand):
                 new_courses.extend(self.create_dummy_courses(edx_org, courses))
 
         for site in sites:
-            self.create_course_daily_matric(courses, sites, dates)
+            self.create_course_daily_matric(site, dates)
             self.enroll_dummy_users_in_courses(new_courses, user_objects, site)
 
         for edx_org in edx_organizations:
