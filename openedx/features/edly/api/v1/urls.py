@@ -1,7 +1,10 @@
+from django.conf import settings
+from django.urls import re_path
 from rest_framework import routers
 
 from openedx.features.edly.api.v1.views.course_enrollments import EdlyCourseEnrollmentViewSet
 from openedx.features.edly.api.v1.views.enrollment_count import EdlyProgramEnrollmentCountViewSet
+from openedx.features.edly.api.v1.views.gradebook import GradebookAPI
 from openedx.features.edly.api.v1.views.user_mutisites import MultisitesViewset
 from openedx.features.edly.api.v1.views.user_paid_for_course import UserPaidForCourseViewSet
 from openedx.features.edly.api.v1.views.user_sites import UserSitesViewSet
@@ -29,3 +32,11 @@ router.register(
 )
 
 urlpatterns = router.urls
+
+urlpatterns += [
+    re_path(
+        rf'^gradebook/{settings.COURSE_ID_PATTERN}/$',
+        GradebookAPI.as_view(),
+        name='course_gradebook'
+    ),
+]
