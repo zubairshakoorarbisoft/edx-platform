@@ -27,12 +27,13 @@ export function CourseOrLibraryListing(props) {
     const can_archive = props.can_archive;
 
     const sendTracking = () => {
-        const url = props.tracking_api_url;
+        const url = window.location.origin + props.tracking_api_url;
         const requestData = { event_data: { has_viewed_course: "true" } };
         fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                'X-CSRFToken': $.cookie('csrftoken')
             },
             body: JSON.stringify(requestData),
         });

@@ -621,9 +621,7 @@ def course_listing(request):
     split_archived = settings.FEATURES.get(u'ENABLE_SEPARATE_ARCHIVED_COURSES', False)
     active_courses, archived_courses = _process_courses_list(courses_iter, in_process_course_actions, split_archived)
     in_process_course_actions = [format_in_process_course_view(uca) for uca in in_process_course_actions]
-
-    site_config = configuration_helpers.get_current_site_configuration()
-    tracking_api_url = f"{site_config.get_value('PANEL_NOTIFICATIONS_BASE_URL')}/api/v1/tracking_events/"
+    tracking_api_url = reverse('edly_panel_api:v1:tracking_events')
     frontent_redirect_url = ''
     frontend_url = [url for url in settings.CORS_ORIGIN_WHITELIST if 'apps' in url]   
     if len(frontend_url):

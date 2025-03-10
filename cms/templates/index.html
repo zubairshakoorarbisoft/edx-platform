@@ -619,12 +619,13 @@ from openedx.core.djangolib.js_utils import (
     })(window, document, "clarity", "script","${settings.CLARITY_PROJECT_ID}");
 
     function sendTracking(data) {
-        const url = "${tracking_api_url}";
+        const url = window.location.origin + "${tracking_api_url}";
         requestData = { event_data: data }
         fetch(url, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': $.cookie('csrftoken')
             },
             body: JSON.stringify(requestData)
         })
