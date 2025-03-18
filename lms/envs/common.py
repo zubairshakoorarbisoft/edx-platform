@@ -66,6 +66,7 @@ from openedx.features.edly.constants import (
     STAFF_USERS,
     TRIAL,
     WP_ADMIN_USERS,
+    SUBSCRIPTION_CANCELLED
 )
 from lms.djangoapps.lms_xblock.mixin import LmsBlockMixin
 
@@ -4419,6 +4420,16 @@ PLAN_FEATURES = {
         PANEL_ADMINS: 99999999,
     },
     LEGACY: {
+        ADDITIONAL_USER_PRICE: 0,
+        MONTHLY_ACTIVE_USERS: 99999999,
+        NUMBER_OF_REGISTERED_USERS: 99999999,
+        NUMBER_OF_COURSES: 99999999,
+        STAFF_USERS: 99999999,
+        WP_ADMIN_USERS: 99999999,
+        COURSE_AUTHORS: 99999999,
+        PANEL_ADMINS: 99999999,
+    },
+    SUBSCRIPTION_CANCELLED: {
         ADDITIONAL_USER_PRICE: 0,
         MONTHLY_ACTIVE_USERS: 99999999,
         NUMBER_OF_REGISTERED_USERS: 99999999,
