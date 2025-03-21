@@ -245,43 +245,25 @@ class Thread(models.Model):
         voteable._update_from_response(response)
 
     def pin(self, user, thread_id):
-        course_key = utils.get_course_key(self.attributes.get("course_id"))
-        if is_forum_v2_enabled(course_key):
-            response = forum_api.pin_thread(
-                user_id=user.id,
-                thread_id=thread_id,
-                course_id=str(course_key)
-            )
-        else:
-            url = _url_for_pin_thread(thread_id)
-            params = {'user_id': user.id}
-            response = utils.perform_request(
-                'put',
-                url,
-                params,
-                metric_tags=self._metric_tags,
-                metric_action='thread.pin'
-            )
+        course_id = self.attributes.get("course_id")
+        if not course_id:
+            _, course_id = is_forum_v2_enabled_for_thread(thread_id)
+        response = forum_api.pin_thread(
+            user_id=user.id,
+            thread_id=thread_id,
+            course_id=course_id
+        )
         self._update_from_response(response)
 
     def un_pin(self, user, thread_id):
-        course_key = utils.get_course_key(self.attributes.get("course_id"))
-        if is_forum_v2_enabled(course_key):
-            response = forum_api.unpin_thread(
-                user_id=user.id,
-                thread_id=thread_id,
-                course_id=str(course_key)
-            )
-        else:
-            url = _url_for_un_pin_thread(thread_id)
-            params = {'user_id': user.id}
-            response = utils.perform_request(
-                'put',
-                url,
-                params,
-                metric_tags=self._metric_tags,
-                metric_action='thread.unpin'
-            )
+        course_id = self.attributes.get("course_id")
+        if not course_id:
+            _, course_id = is_forum_v2_enabled_for_thread(thread_id)
+        response = forum_api.unpin_thread(
+            user_id=user.id,
+            thread_id=thread_id,
+            course_id=course_id
+        )
         self._update_from_response(response)
 
 
