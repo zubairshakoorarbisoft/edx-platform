@@ -10,6 +10,7 @@ EDLY_SAAS = 'edly_saas'
 LEGACY = 'legacy'
 TRIAL_EXPIRED = 'trial expired'
 DEACTIVATED = 'deactivated'
+SUBSCRIPTION_CANCELLED = 'subscription_cancelled'
 
 # FEATURE FLAGS
 ADDITIONAL_USER_PRICE = 'additional_user_price'

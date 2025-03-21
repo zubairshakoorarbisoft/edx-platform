@@ -627,7 +627,7 @@ def course_listing(request):
     frontent_redirect_url = ''
     frontend_url = [url for url in settings.CORS_ORIGIN_WHITELIST if 'apps' in url]   
     if len(frontend_url):
-        frontent_redirect_url = '{}/panel/settings/billing'.format(frontend_url[0])
+        frontent_redirect_url = '{}/panel/billing'.format(frontend_url[0])
     
     try:
         destination_course_id = DESTINATION_COURSE_ID_PATTERN.format(org[0])
