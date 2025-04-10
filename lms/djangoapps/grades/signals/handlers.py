@@ -239,7 +239,6 @@ def enqueue_subsection_update(sender, **kwargs):  # pylint: disable=unused-argum
             force_update_subsections=kwargs.get('force_update_subsections', False),
         ),
         countdown=RECALCULATE_GRADE_DELAY_SECONDS,
-        task_id=f"grade_recalc_{kwargs['user_id']}_{kwargs['course_id']}",
     )
 
 
