@@ -40,6 +40,7 @@ def send_response_notifications(thread_id, course_key_str, user_id, comment_id, 
     course_key = CourseKey.from_string(course_key_str)
     if not ENABLE_NOTIFICATIONS.is_enabled(course_key):
         return
+    import pdb; pdb.set_trace()
     thread = Thread(id=thread_id).retrieve()
     user = User.objects.get(id=user_id)
     course = get_course_with_access(user, 'load', course_key, check_if_enrolled=True)
